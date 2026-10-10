@@ -195,7 +195,7 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                     )
                 }
                 if (isGrid) {
-                    items(state.episodes.chunked(3)) { rowEpisodes ->
+                    items(state.episodes.chunked(state.gridColumns)) { rowEpisodes ->
                         Row(
                             modifier =
                                 Modifier.fillMaxWidth()
@@ -210,7 +210,9 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                                     modifier = Modifier.weight(1f),
                                 )
                             }
-                            repeat(3 - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
+                            repeat(state.gridColumns - rowEpisodes.size) {
+                                Spacer(Modifier.weight(1f))
+                            }
                         }
                     }
                 } else {

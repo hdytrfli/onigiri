@@ -39,7 +39,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                     listOf(
                         PreferenceSwitch(
                             nameStringResource = R.string.offline_mode,
-                            descriptionStringRes = R.string.offline_mode_summary,
                             iconDrawableId = R.drawable.ic_server_off,
                             supportedDeviceTypes = listOf(DeviceType.PHONE),
                             onClick = {
@@ -165,6 +164,15 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         appPreferences.contentSpacing,
                                                     options = R.array.content_spacing_options,
                                                     optionValues = R.array.content_spacing_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.season_grid_columns,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.seasonGridColumns,
+                                                    options = R.array.season_grid_columns,
+                                                    optionValues = R.array.season_grid_columns,
                                                 ),
                                             ),
                                     ),
@@ -996,6 +1004,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                 return@launch
             }
 
+            val isRootLevel = indexes.isEmpty() || indexes.contains(R.string.title_settings)
+
             var preferences = topLevelPreferences
 
             // Show preferences based on the name of the parent
@@ -1104,8 +1114,63 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                     }
                     .filter { it.preferences.isNotEmpty() }
 
+            if (isRootLevel) {
+                preferences = groupTopLevel(preferences)
+            }
+
             _state.emit(_state.value.copy(preferenceGroups = preferences))
         }
+    }
+
+    /**
+     * Groups the flat root-level entries into context sections (General, Playback, Server, Storage,
+     * Network) so the main settings page reads as clear groups instead of a list of separate cards.
+     */
+    private fun groupTopLevel(groups: List<PreferenceGroup>): List<PreferenceGroup> {
+        fun headerFor(group: PreferenceGroup): Int? {
+            val preference = group.preferences.firstOrNull()
+            return when {
+                preference is PreferenceSwitch -> R.string.settings_group_general
+                preference !is PreferenceCategory -> null
+                preference.nameStringResource == R.string.settings_category_language ||
+                    preference.nameStringResource == R.string.settings_category_interface ->
+                    R.string.settings_group_general
+                preference.nameStringResource == R.string.settings_category_player ->
+                    R.string.settings_group_playback
+                preference.nameStringResource == R.string.users ||
+                    preference.nameStringResource == R.string.settings_category_servers ->
+                    R.string.settings_group_server
+                preference.nameStringResource == R.string.title_download ||
+                    preference.nameStringResource == R.string.settings_category_cache ->
+                    R.string.settings_group_storage
+                preference.nameStringResource == R.string.settings_category_network ->
+                    R.string.settings_group_network
+                else -> null
+            }
+        }
+
+        val result = mutableListOf<PreferenceGroup>()
+        val indexByHeader = mutableMapOf<Int, Int>()
+        for (group in groups) {
+            val header = headerFor(group)
+            if (header == null) {
+                result.add(group)
+                continue
+            }
+            val existingIndex = indexByHeader[header]
+            if (existingIndex == null) {
+                indexByHeader[header] = result.size
+                result.add(
+                    PreferenceGroup(nameStringResource = header, preferences = group.preferences)
+                )
+            } else {
+                result[existingIndex] =
+                    result[existingIndex].copy(
+                        preferences = result[existingIndex].preferences + group.preferences
+                    )
+            }
+        }
+        return result
     }
 
     fun onAction(action: SettingsAction) {

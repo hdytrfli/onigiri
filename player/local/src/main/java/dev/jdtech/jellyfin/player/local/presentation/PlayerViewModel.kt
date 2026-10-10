@@ -81,6 +81,7 @@ constructor(
         val currentChapters: List<PlayerChapter>,
         val fileLoaded: Boolean,
         val currentItemLogo: String? = null,
+        val currentItemOverview: String? = null,
     )
 
     private var items: MutableList<PlayerItem> = mutableListOf()
@@ -378,6 +379,7 @@ constructor(
                             it.copy(
                                 currentItemTitle = itemTitle,
                                 currentItemLogo = item.logoUri,
+                                currentItemOverview = item.overview,
                                 currentSegment = null,
                                 currentChapters = item.chapters,
                                 fileLoaded = false,

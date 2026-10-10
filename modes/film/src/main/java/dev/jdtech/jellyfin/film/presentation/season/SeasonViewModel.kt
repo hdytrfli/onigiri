@@ -36,8 +36,15 @@ constructor(
                         fields = listOf(ItemFields.OVERVIEW),
                     )
                 val viewMode = appPreferences.getValue(appPreferences.seasonViewMode)
+                val gridColumns =
+                    appPreferences.getValue(appPreferences.seasonGridColumns).toIntOrNull() ?: 3
                 _state.emit(
-                    _state.value.copy(season = season, episodes = episodes, viewMode = viewMode)
+                    _state.value.copy(
+                        season = season,
+                        episodes = episodes,
+                        viewMode = viewMode,
+                        gridColumns = gridColumns,
+                    )
                 )
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))

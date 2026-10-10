@@ -151,6 +151,12 @@
         <item>1.25</item>
         <item>1.5</item>
     </string-array>
+    <string-array name="season_grid_columns">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
     <string-array name="media_segments_type">
         <item>@string/media_segments_type_intro</item>
         <item>@string/media_segments_type_outro</item>

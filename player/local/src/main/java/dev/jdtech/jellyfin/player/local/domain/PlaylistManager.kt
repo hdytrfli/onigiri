@@ -263,6 +263,7 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
             chapters = chapters.toPlayerChapters(),
             trickplayInfo = trickplayInfo,
             logoUri = (if (this is FindroidEpisode) images.showLogo else images.logo)?.toString(),
+            overview = overview,
         )
     }
 

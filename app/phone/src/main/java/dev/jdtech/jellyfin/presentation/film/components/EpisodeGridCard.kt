@@ -45,7 +45,7 @@ fun EpisodeGridCard(episode: FindroidEpisode, onClick: () -> Unit, modifier: Mod
             text = episode.name,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }

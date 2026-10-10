@@ -132,6 +132,8 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
+        val videoDescriptionTextView =
+            binding.playerView.findViewById<TextView>(R.id.video_description)
 
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
@@ -161,6 +163,11 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             videoNameTextView.text = currentItemTitle
+
+                            // Description
+                            videoDescriptionTextView.text = currentItemOverview
+                            videoDescriptionTextView.isVisible =
+                                !currentItemOverview.isNullOrBlank()
 
                             // Media segment
                             currentSegment?.let { segment ->

@@ -5,6 +5,11 @@
     <string name="settings_preferred_subtitle_language">Preferred subtitle language</string>
     <string name="settings_category_servers">Servers</string>
     <string name="settings_category_player">Player</string>
+    <string name="settings_group_general">General</string>
+    <string name="settings_group_playback">Playback</string>
+    <string name="settings_group_server">Server</string>
+    <string name="settings_group_storage">Storage</string>
+    <string name="settings_group_network">Network</string>
     <string name="settings_category_download">Downloads</string>
     <string name="settings_category_appearance">Appearance</string>
     <string name="settings_category_interface">Interface</string>
@@ -74,6 +79,7 @@
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="content_spacing">Content spacing</string>
+    <string name="season_grid_columns">Grid columns</string>
     <string name="mb">MB</string>
     <string name="ms">ms</string>
     <string name="seconds">s</string>

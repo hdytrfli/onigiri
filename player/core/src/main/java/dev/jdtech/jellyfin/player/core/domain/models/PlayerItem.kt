@@ -18,4 +18,5 @@ data class PlayerItem(
     val chapters: List<PlayerChapter> = emptyList(),
     val trickplayInfo: TrickplayInfo? = null,
     val logoUri: String? = null,
+    val overview: String? = null,
 ) : Parcelable
