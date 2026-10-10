@@ -11,6 +11,7 @@ data class FindroidSeason(
     override val name: String,
     val seriesId: UUID,
     val seriesName: String,
+    val productionYear: Int? = null,
     override val originalTitle: String?,
     override val overview: String,
     override val sources: List<FindroidSource>,
@@ -43,6 +44,7 @@ fun BaseItemDto.toFindroidSeason(jellyfinRepository: JellyfinRepository): Findro
         episodes = emptyList(),
         seriesId = seriesId!!,
         seriesName = seriesName.orEmpty(),
+        productionYear = productionYear,
         images = toFindroidImages(jellyfinRepository),
     )
 }

@@ -35,7 +35,6 @@ constructor(
                         seasonId = seasonId,
                         fields = listOf(ItemFields.OVERVIEW),
                     )
-                val viewMode = appPreferences.getValue(appPreferences.seasonViewMode)
                 val gridColumnsPortrait =
                     appPreferences.getValue(appPreferences.seasonGridColumnsPortrait).toIntOrNull()
                         ?: 3
@@ -46,7 +45,6 @@ constructor(
                     _state.value.copy(
                         season = season,
                         episodes = episodes,
-                        viewMode = viewMode,
                         gridColumnsPortrait = gridColumnsPortrait,
                         gridColumnsLandscape = gridColumnsLandscape,
                     )
@@ -82,11 +80,6 @@ constructor(
                     repository.unmarkAsFavorite(seasonId)
                     loadSeason(seasonId)
                 }
-            }
-            is SeasonAction.ToggleViewMode -> {
-                val newMode = if (_state.value.viewMode == "grid") "list" else "grid"
-                appPreferences.setValue(appPreferences.seasonViewMode, newMode)
-                _state.value = _state.value.copy(viewMode = newMode)
             }
             else -> Unit
         }

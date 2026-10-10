@@ -95,7 +95,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.dynamicColors),
                     appPreferences.observe(appPreferences.offlineMode),
                     interfacePrefs,
-                ) { flags, dynamicColors, offlineMode, interfacePrefs ->
+                    appPreferences.observe(appPreferences.naiveTitleOverlay),
+                ) { flags, dynamicColors, offlineMode, interfacePrefs, naiveTitleOverlay ->
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -106,6 +107,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         backdropPortraitRatio = interfacePrefs.first.toFloatOrNull() ?: 1.5f,
                         backdropLandscapeRatio = interfacePrefs.second.toFloatOrNull() ?: 2f,
                         contentSpacingScale = interfacePrefs.third.toFloatOrNull() ?: 1f,
+                        naiveTitleOverlay = naiveTitleOverlay,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -129,4 +131,5 @@ data class MainState(
     val backdropPortraitRatio: Float = 1.5f,
     val backdropLandscapeRatio: Float = 2f,
     val contentSpacingScale: Float = 1f,
+    val naiveTitleOverlay: Boolean = false,
 )

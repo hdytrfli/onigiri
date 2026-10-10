@@ -19,8 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,31 +27,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.PlayerActivity
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.EpisodeCard
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
-import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
+import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -106,8 +99,6 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
 
     val lazyListState = rememberLazyListState()
 
-    val isGrid = state.viewMode == "grid"
-
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val gridColumns = if (isLandscape) state.gridColumnsLandscape else state.gridColumnsPortrait
 
@@ -127,38 +118,36 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                         item = season,
                         lazyListState = lazyListState,
                         content = {
-                            Row(
+                            Column(
                                 modifier =
                                     Modifier.align(Alignment.BottomStart)
-                                        .padding(start = paddingStart, end = paddingEnd),
-                                verticalAlignment = Alignment.Bottom,
+                                        .padding(start = paddingStart, end = paddingEnd)
                             ) {
-                                ItemPoster(
-                                    item = season,
-                                    direction = Direction.VERTICAL,
-                                    modifier =
-                                        Modifier.width(120.dp).clip(MaterialTheme.shapes.small),
+                                ItemTitle(
+                                    title = season.seriesName,
+                                    logoUri = season.images.showLogo,
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    logoHeight = 40.dp,
                                 )
-                                Spacer(Modifier.width(MaterialTheme.spacings.medium))
-                                Column(modifier = Modifier) {
-                                    ItemTitle(
-                                        title = season.seriesName,
-                                        logoUri = season.images.showLogo,
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        logoHeight = 40.dp,
-                                    )
-                                    Text(
-                                        text = season.name,
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 3,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                    )
-                                }
+                                Text(
+                                    text = season.name,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
                             }
                         },
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.default.div(2) * spacingScale))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
+                    season.productionYear?.let { year ->
+                        Text(
+                            text = year.toString(),
+                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
+                    }
                     ItemButtonsBar(
                         item = season,
                         onPlayClick = { startFromBeginning ->
@@ -183,48 +172,32 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                         modifier =
                             Modifier.padding(start = paddingStart, end = paddingEnd).fillMaxWidth(),
                         canPlay = state.episodes.isNotEmpty(),
-                        trailingContent = {
-                            FilledTonalIconButton(
-                                onClick = { onAction(SeasonAction.ToggleViewMode) }
-                            ) {
-                                Icon(
-                                    painter =
-                                        painterResource(
-                                            if (isGrid) CoreR.drawable.ic_view_list
-                                            else CoreR.drawable.ic_view_grid
-                                        ),
-                                    contentDescription = null,
-                                )
-                            }
-                        },
                     )
-                }
-                if (isGrid) {
-                    items(state.episodes.chunked(gridColumns)) { rowEpisodes ->
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(start = paddingStart, end = paddingEnd),
-                            horizontalArrangement =
-                                Arrangement.spacedBy(MaterialTheme.spacings.small * spacingScale),
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    if (season.overview.isNotBlank()) {
+                        Column(
+                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd)
                         ) {
-                            rowEpisodes.forEach { episode ->
-                                EpisodeGridCard(
-                                    episode = episode,
-                                    onClick = { onAction(SeasonAction.NavigateToItem(episode)) },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                            repeat(gridColumns - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
+                            OverviewText(text = season.overview, maxCollapsedLines = 3)
                         }
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
-                } else {
-                    items(items = state.episodes, key = { episode -> episode.id }) { episode ->
-                        EpisodeCard(
-                            episode = episode,
-                            onClick = { onAction(SeasonAction.NavigateToItem(episode)) },
-                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
-                        )
+                }
+                items(state.episodes.chunked(gridColumns)) { rowEpisodes ->
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth().padding(start = paddingStart, end = paddingEnd),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(MaterialTheme.spacings.small * spacingScale),
+                    ) {
+                        rowEpisodes.forEach { episode ->
+                            EpisodeGridCard(
+                                episode = episode,
+                                onClick = { onAction(SeasonAction.NavigateToItem(episode)) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        repeat(gridColumns - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
             }

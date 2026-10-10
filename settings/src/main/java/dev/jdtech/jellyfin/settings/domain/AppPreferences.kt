@@ -26,10 +26,10 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val displayExtraInfo = Preference("pref_display_extra_info", false)
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2")
-    val seasonViewMode = Preference("pref_season_view_mode", "list")
     val seasonGridColumnsPortrait = Preference("pref_season_grid_columns_portrait", "3")
     val seasonGridColumnsLandscape = Preference("pref_season_grid_columns_landscape", "4")
     val contentSpacing = Preference("pref_content_spacing", "1.25")
+    val naiveTitleOverlay = Preference("pref_naive_title_overlay", false)
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")

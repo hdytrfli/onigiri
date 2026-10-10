@@ -79,7 +79,8 @@
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="content_spacing">Content spacing</string>
-    <string name="season_grid_columns">Grid columns</string>
+    <string name="naive_title_overlay">Naive title overlay</string>
+    <string name="naive_title_overlay_summary">Apply a white overlay to title images. May look wrong for some titles.</string>
     <string name="season_grid_columns_portrait">Grid columns (portrait)</string>
     <string name="season_grid_columns_landscape">Grid columns (landscape)</string>
     <string name="mb">MB</string>

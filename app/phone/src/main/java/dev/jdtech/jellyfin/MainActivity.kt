@@ -13,6 +13,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
                                 landscape = state.backdropLandscapeRatio,
                             ),
                         LocalContentSpacingScale provides state.contentSpacingScale,
+                        LocalNaiveTitleOverlay provides state.naiveTitleOverlay,
                     ) {
                         NavigationRoot(
                             hasServers = state.hasServers,

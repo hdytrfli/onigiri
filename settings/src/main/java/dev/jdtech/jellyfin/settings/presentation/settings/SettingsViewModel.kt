@@ -183,6 +183,15 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     options = R.array.season_grid_columns,
                                                     optionValues = R.array.season_grid_columns,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.naive_title_overlay,
+                                                    descriptionStringRes =
+                                                        R.string.naive_title_overlay_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.naiveTitleOverlay,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
