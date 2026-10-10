@@ -61,7 +61,12 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                             .getEpisodes(
                                 seriesId = itemId,
                                 seasonId = season.id,
-                                fields = listOf(ItemFields.CHAPTERS, ItemFields.TRICKPLAY),
+                                fields =
+                                    listOf(
+                                        ItemFields.CHAPTERS,
+                                        ItemFields.TRICKPLAY,
+                                        ItemFields.OVERVIEW,
+                                    ),
                             )
                             .filter { !it.missing }
 
@@ -81,7 +86,12 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                             .getEpisodes(
                                 seriesId = season.seriesId,
                                 seasonId = season.id,
-                                fields = listOf(ItemFields.CHAPTERS, ItemFields.TRICKPLAY),
+                                fields =
+                                    listOf(
+                                        ItemFields.CHAPTERS,
+                                        ItemFields.TRICKPLAY,
+                                        ItemFields.OVERVIEW,
+                                    ),
                             )
                             .filter { !it.missing }
 
@@ -102,7 +112,12 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                             .getEpisodes(
                                 seriesId = episode.seriesId,
                                 seasonId = episode.seasonId,
-                                fields = listOf(ItemFields.CHAPTERS, ItemFields.TRICKPLAY),
+                                fields =
+                                    listOf(
+                                        ItemFields.CHAPTERS,
+                                        ItemFields.TRICKPLAY,
+                                        ItemFields.OVERVIEW,
+                                    ),
                             )
                             .filter { !it.missing }
 
