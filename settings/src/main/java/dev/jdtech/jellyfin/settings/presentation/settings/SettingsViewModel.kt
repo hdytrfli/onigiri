@@ -313,6 +313,204 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                     )
                                                             ),
                                                             PreferenceGroup(
+                                                                preferences =
+                                                                    listOf(
+                                                                        PreferenceCategory(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .mpv_subtitles,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .mpv_subtitles_summary,
+                                                                            iconDrawableId =
+                                                                                R.drawable
+                                                                                    .ic_closed_caption,
+                                                                            onClick = {
+                                                                                viewModelScope
+                                                                                    .launch {
+                                                                                        eventsChannel
+                                                                                            .send(
+                                                                                                SettingsEvent
+                                                                                                    .NavigateToSettings(
+                                                                                                        listOf(
+                                                                                                            R.string
+                                                                                                                .settings_category_player,
+                                                                                                            R.string
+                                                                                                                .mpv_options,
+                                                                                                            it
+                                                                                                                .nameStringResource,
+                                                                                                        )
+                                                                                                    )
+                                                                                            )
+                                                                                    }
+                                                                            },
+                                                                            nestedPreferenceGroups =
+                                                                                listOf(
+                                                                                    PreferenceGroup(
+                                                                                        nameStringResource =
+                                                                                            R.string
+                                                                                                .mpv_sub_group_text,
+                                                                                        preferences =
+                                                                                            listOf(
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_font_size,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubFontSize,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_font_size,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_font_size,
+                                                                                                ),
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_color,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubColor,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_colors,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_colors_values,
+                                                                                                ),
+                                                                                                PreferenceSwitch(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_bold,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubBold,
+                                                                                                ),
+                                                                                                PreferenceSwitch(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_italic,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubItalic,
+                                                                                                ),
+                                                                                            ),
+                                                                                    ),
+                                                                                    PreferenceGroup(
+                                                                                        nameStringResource =
+                                                                                            R.string
+                                                                                                .mpv_sub_group_outline,
+                                                                                        preferences =
+                                                                                            listOf(
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_border_size,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubBorderSize,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_border_size,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_border_size,
+                                                                                                ),
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_border_color,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubBorderColor,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_colors,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_colors_values,
+                                                                                                ),
+                                                                                            ),
+                                                                                    ),
+                                                                                    PreferenceGroup(
+                                                                                        nameStringResource =
+                                                                                            R.string
+                                                                                                .mpv_sub_group_background,
+                                                                                        preferences =
+                                                                                            listOf(
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_back_color,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubBackColor,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_colors,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_colors_values,
+                                                                                                ),
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_back_opacity,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubBackOpacity,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_back_opacity,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_back_opacity_values,
+                                                                                                ),
+                                                                                            ),
+                                                                                    ),
+                                                                                    PreferenceGroup(
+                                                                                        nameStringResource =
+                                                                                            R.string
+                                                                                                .mpv_sub_group_position,
+                                                                                        preferences =
+                                                                                            listOf(
+                                                                                                PreferenceSelect(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_pos,
+                                                                                                    descriptionStringRes =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_pos_summary,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubPosition,
+                                                                                                    options =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_pos,
+                                                                                                    optionValues =
+                                                                                                        R.array
+                                                                                                            .mpv_sub_pos,
+                                                                                                ),
+                                                                                                PreferenceSwitch(
+                                                                                                    nameStringResource =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_use_margins,
+                                                                                                    descriptionStringRes =
+                                                                                                        R.string
+                                                                                                            .pref_player_mpv_sub_use_margins_summary,
+                                                                                                    backendPreference =
+                                                                                                        appPreferences
+                                                                                                            .playerMpvSubUseMargins,
+                                                                                                ),
+                                                                                            ),
+                                                                                    ),
+                                                                                ),
+                                                                        ),
+                                                                    )
+                                                            ),
+                                                            PreferenceGroup(
                                                                 nameStringResource =
                                                                     R.string.advanced,
                                                                 preferences =
@@ -799,6 +997,21 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
 
     fun loadPreferences(indexes: List<Int> = emptyList(), deviceType: DeviceType) {
         viewModelScope.launch {
+            val isMpvBackend =
+                appPreferences.getValue(appPreferences.playerBackend) == "mpv"
+
+            // Hide the whole mpv section (and its subtitle page) unless mpv is
+            // the active player backend.
+            if (!isMpvBackend &&
+                (
+                    indexes.contains(R.string.mpv_options) ||
+                        indexes.contains(R.string.mpv_subtitles)
+                    )
+            ) {
+                _state.emit(_state.value.copy(preferenceGroups = emptyList()))
+                return@launch
+            }
+
             var preferences = topLevelPreferences
 
             // Show preferences based on the name of the parent
@@ -825,6 +1038,15 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                             preferences =
                                 preferenceGroup.preferences
                                     .filter { it.supportedDeviceTypes.contains(deviceType) }
+                                    .filter {
+                                        if (!isMpvBackend && it is PreferenceCategory) {
+                                            it.nameStringResource != R.string.mpv_options &&
+                                                it.nameStringResource !=
+                                                R.string.mpv_subtitles
+                                        } else {
+                                            true
+                                        }
+                                    }
                                     .map { preference ->
                                         when (preference) {
                                             is PreferenceSwitch -> {

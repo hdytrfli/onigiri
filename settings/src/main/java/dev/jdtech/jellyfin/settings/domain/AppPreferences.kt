@@ -35,6 +35,19 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerMpvVo = Preference("pref_player_mpv_vo", "gpu-next")
     val playerMpvAo = Preference("pref_player_mpv_ao", "aaudio")
 
+    // Player - mpv subtitles (applied as mpv sub-* options at playback start)
+    val playerMpvSubFontSize = Preference("pref_player_mpv_sub_font_size", "38")
+    val playerMpvSubColor = Preference("pref_player_mpv_sub_color", "#FFFFFFFF")
+    val playerMpvSubPosition = Preference("pref_player_mpv_sub_pos", "100")
+    val playerMpvSubUseMargins = Preference("pref_player_mpv_sub_use_margins", false)
+    val playerMpvSubBold = Preference("pref_player_mpv_sub_bold", false)
+    val playerMpvSubItalic = Preference("pref_player_mpv_sub_italic", false)
+    val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "3")
+    val playerMpvSubBorderColor =
+        Preference("pref_player_mpv_sub_border_color", "#FF000000")
+    val playerMpvSubBackColor = Preference("pref_player_mpv_sub_back_color", "#FF000000")
+    val playerMpvSubBackOpacity = Preference("pref_player_mpv_sub_back_opacity", "255")
+
     // Player - gestures
     val playerGestures = Preference("pref_player_gestures", true)
     val playerGesturesVB = Preference("pref_player_gestures_vb", true)

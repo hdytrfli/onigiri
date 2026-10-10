@@ -154,6 +154,10 @@ constructor(
                         .build()
                 }
                 "mpv" -> {
+                    val subOptions =
+                        dev.jdtech.jellyfin.settings.domain.MpvSubtitleOptions.buildOptions(
+                            appPreferences
+                        )
                     MPVPlayer.Builder(application)
                         .setAudioAttributes(audioAttributes, true)
                         .setTrackSelectionParameters(trackSelector.parameters)
@@ -167,6 +171,15 @@ constructor(
                         .setVideoOutput(appPreferences.getValue(appPreferences.playerMpvVo))
                         .setAudioOutput(appPreferences.getValue(appPreferences.playerMpvAo))
                         .setHwDec(appPreferences.getValue(appPreferences.playerMpvHwdec))
+                        .setSubFontSize(subOptions.getValue("sub-font-size"))
+                        .setSubColor(subOptions.getValue("sub-color"))
+                        .setSubPos(subOptions.getValue("sub-pos"))
+                        .setSubUseMargins(subOptions.getValue("sub-use-margins"))
+                        .setSubBold(subOptions.getValue("sub-bold"))
+                        .setSubItalic(subOptions.getValue("sub-italic"))
+                        .setSubBorderSize(subOptions.getValue("sub-outline-size"))
+                        .setSubBorderColor(subOptions.getValue("sub-outline-color"))
+                        .setSubBackColor(subOptions.getValue("sub-back-color"))
                         .build()
                 }
 

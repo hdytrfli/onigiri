@@ -57,6 +57,15 @@ class MPVPlayer(
     videoOutput: String = "gpu-next",
     audioOutput: String = "aaudio",
     hwDec: String = "mediacodec",
+    private val subFontSize: String = "38",
+    private val subColor: String = "#FFFFFFFF",
+    private val subPos: String = "100",
+    private val subUseMargins: String = "no",
+    private val subBold: String = "no",
+    private val subItalic: String = "no",
+    private val subBorderSize: String = "3",
+    private val subBorderColor: String = "#FF000000",
+    private val subBackColor: String = "#FF000000",
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
     private val audioManager: AudioManager by lazy { context.getSystemService()!! }
@@ -77,6 +86,15 @@ class MPVPlayer(
         videoOutput = builder.videoOutput,
         audioOutput = builder.audioOutput,
         hwDec = builder.hwDec,
+        subFontSize = builder.subFontSize,
+        subColor = builder.subColor,
+        subPos = builder.subPos,
+        subUseMargins = builder.subUseMargins,
+        subBold = builder.subBold,
+        subItalic = builder.subItalic,
+        subBorderSize = builder.subBorderSize,
+        subBorderColor = builder.subBorderColor,
+        subBackColor = builder.subBackColor,
     )
 
     class Builder(val context: Context) {
@@ -107,6 +125,33 @@ class MPVPlayer(
         var hwDec: String = "mediacodec"
             private set
 
+        var subFontSize: String = "38"
+            private set
+
+        var subColor: String = "#FFFFFFFF"
+            private set
+
+        var subPos: String = "100"
+            private set
+
+        var subUseMargins: String = "no"
+            private set
+
+        var subBold: String = "no"
+            private set
+
+        var subItalic: String = "no"
+            private set
+
+        var subBorderSize: String = "3"
+            private set
+
+        var subBorderColor: String = "#FF000000"
+            private set
+
+        var subBackColor: String = "#FF000000"
+            private set
+
         fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) =
             apply {
                 this.audioAttributes = audioAttributes
@@ -135,6 +180,28 @@ class MPVPlayer(
         fun setAudioOutput(audioOutput: String) = apply { this.audioOutput = audioOutput }
 
         fun setHwDec(hwDec: String) = apply { this.hwDec = hwDec }
+
+        fun setSubFontSize(subFontSize: String) = apply { this.subFontSize = subFontSize }
+
+        fun setSubColor(subColor: String) = apply { this.subColor = subColor }
+
+        fun setSubPos(subPos: String) = apply { this.subPos = subPos }
+
+        fun setSubUseMargins(subUseMargins: String) =
+            apply { this.subUseMargins = subUseMargins }
+
+        fun setSubBold(subBold: String) = apply { this.subBold = subBold }
+
+        fun setSubItalic(subItalic: String) = apply { this.subItalic = subItalic }
+
+        fun setSubBorderSize(subBorderSize: String) =
+            apply { this.subBorderSize = subBorderSize }
+
+        fun setSubBorderColor(subBorderColor: String) =
+            apply { this.subBorderColor = subBorderColor }
+
+        fun setSubBackColor(subBackColor: String) =
+            apply { this.subBackColor = subBackColor }
 
         fun build() = MPVPlayer(this)
     }
@@ -176,7 +243,16 @@ class MPVPlayer(
 
         // Subs
         mpvLib.setOptionString("sub-scale-with-window", "yes")
-        mpvLib.setOptionString("sub-use-margins", "no")
+        mpvLib.setOptionString("sub-font-size", subFontSize)
+        mpvLib.setOptionString("sub-color", subColor)
+        mpvLib.setOptionString("sub-pos", subPos)
+        mpvLib.setOptionString("sub-use-margins", subUseMargins)
+        mpvLib.setOptionString("sub-ass-force-margins", subUseMargins)
+        mpvLib.setOptionString("sub-bold", subBold)
+        mpvLib.setOptionString("sub-italic", subItalic)
+        mpvLib.setOptionString("sub-outline-size", subBorderSize)
+        mpvLib.setOptionString("sub-outline-color", subBorderColor)
+        mpvLib.setOptionString("sub-back-color", subBackColor)
 
         // Language
         // Split on "-" and use last part because media3 does some weird mapping
@@ -1493,8 +1569,8 @@ class MPVPlayer(
             mpvLib.setOptionString("sub-ass-force-margins", "yes")
         } else {
             mpvLib.setOptionString("panscan", "0")
-            mpvLib.setOptionString("sub-use-margins", "no")
-            mpvLib.setOptionString("sub-ass-force-margins", "no")
+            mpvLib.setOptionString("sub-use-margins", subUseMargins)
+            mpvLib.setOptionString("sub-ass-force-margins", subUseMargins)
         }
     }
 

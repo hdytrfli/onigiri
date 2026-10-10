@@ -28,6 +28,93 @@
         <item>opensles</item>
         <item>aaudio</item>
     </string-array>
+    <string-array name="mpv_sub_font_size">
+        <item>20</item>
+        <item>24</item>
+        <item>28</item>
+        <item>32</item>
+        <item>36</item>
+        <item>38</item>
+        <item>42</item>
+        <item>46</item>
+        <item>48</item>
+        <item>52</item>
+        <item>55</item>
+        <item>60</item>
+        <item>64</item>
+        <item>68</item>
+        <item>72</item>
+        <item>80</item>
+    </string-array>
+    <string-array name="mpv_sub_colors">
+        <item>White</item>
+        <item>Yellow</item>
+        <item>Black</item>
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Gray</item>
+        <item>Orange</item>
+    </string-array>
+    <string-array name="mpv_sub_colors_values">
+        <item>#FFFFFFFF</item>
+        <item>#FFFFFF00</item>
+        <item>#FF000000</item>
+        <item>#FFFF0000</item>
+        <item>#FF00FF00</item>
+        <item>#FF0000FF</item>
+        <item>#FF808080</item>
+        <item>#FFFFA500</item>
+    </string-array>
+    <string-array name="mpv_sub_pos">
+        <item>0</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
+        <item>70</item>
+        <item>80</item>
+        <item>90</item>
+        <item>100</item>
+        <item>110</item>
+        <item>120</item>
+    </string-array>
+    <string-array name="mpv_sub_border_size">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="mpv_sub_back_opacity">
+        <item>0%</item>
+        <item>10%</item>
+        <item>20%</item>
+        <item>30%</item>
+        <item>40%</item>
+        <item>50%</item>
+        <item>60%</item>
+        <item>70%</item>
+        <item>80%</item>
+        <item>90%</item>
+        <item>100%</item>
+    </string-array>
+    <string-array name="mpv_sub_back_opacity_values">
+        <item>0</item>
+        <item>26</item>
+        <item>51</item>
+        <item>77</item>
+        <item>102</item>
+        <item>128</item>
+        <item>153</item>
+        <item>179</item>
+        <item>204</item>
+        <item>230</item>
+        <item>255</item>
+    </string-array>
     <string-array name="media_segments_auto_skip">
         <item>@string/media_segments_auto_skip_pip</item>
         <item>@string/media_segments_auto_skip_always</item>
