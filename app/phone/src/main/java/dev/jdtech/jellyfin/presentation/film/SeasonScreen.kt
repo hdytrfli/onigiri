@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,6 +107,9 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
     val lazyListState = rememberLazyListState()
 
     val isGrid = state.viewMode == "grid"
+
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val gridColumns = if (isLandscape) state.gridColumnsLandscape else state.gridColumnsPortrait
 
     val spacingScale = LocalContentSpacingScale.current
 
@@ -195,13 +200,13 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                     )
                 }
                 if (isGrid) {
-                    items(state.episodes.chunked(state.gridColumns)) { rowEpisodes ->
+                    items(state.episodes.chunked(gridColumns)) { rowEpisodes ->
                         Row(
                             modifier =
                                 Modifier.fillMaxWidth()
                                     .padding(start = paddingStart, end = paddingEnd),
                             horizontalArrangement =
-                                Arrangement.spacedBy(MaterialTheme.spacings.default * spacingScale),
+                                Arrangement.spacedBy(MaterialTheme.spacings.small * spacingScale),
                         ) {
                             rowEpisodes.forEach { episode ->
                                 EpisodeGridCard(
@@ -210,9 +215,7 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                                     modifier = Modifier.weight(1f),
                                 )
                             }
-                            repeat(state.gridColumns - rowEpisodes.size) {
-                                Spacer(Modifier.weight(1f))
-                            }
+                            repeat(gridColumns - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
                         }
                     }
                 } else {

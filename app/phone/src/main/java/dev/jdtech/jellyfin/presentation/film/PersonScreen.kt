@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -207,9 +208,9 @@ private fun PersonImage(person: FindroidPerson, modifier: Modifier = Modifier) {
         contentScale = ContentScale.Crop,
         modifier =
             modifier
-                .height(320.dp)
-                .aspectRatio(0.66f)
-                .clip(MaterialTheme.shapes.extraLarge)
+                .height(200.dp)
+                .aspectRatio(1f)
+                .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainer),
     )
 }

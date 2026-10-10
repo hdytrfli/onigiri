@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.isDownloaded
@@ -42,7 +44,7 @@ fun EpisodeGridCard(episode: FindroidEpisode, onClick: () -> Unit, modifier: Mod
         }
         Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
         Text(
-            text = episode.name,
+            text = stringResource(CoreR.string.episode_name, episode.indexNumber, episode.name),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium,

@@ -80,6 +80,8 @@
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="content_spacing">Content spacing</string>
     <string name="season_grid_columns">Grid columns</string>
+    <string name="season_grid_columns_portrait">Grid columns (portrait)</string>
+    <string name="season_grid_columns_landscape">Grid columns (landscape)</string>
     <string name="mb">MB</string>
     <string name="ms">ms</string>
     <string name="seconds">s</string>

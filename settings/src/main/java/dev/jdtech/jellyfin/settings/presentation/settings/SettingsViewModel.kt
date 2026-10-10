@@ -167,10 +167,19 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.season_grid_columns,
+                                                        R.string.season_grid_columns_portrait,
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
-                                                        appPreferences.seasonGridColumns,
+                                                        appPreferences.seasonGridColumnsPortrait,
+                                                    options = R.array.season_grid_columns,
+                                                    optionValues = R.array.season_grid_columns,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.season_grid_columns_landscape,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.seasonGridColumnsLandscape,
                                                     options = R.array.season_grid_columns,
                                                     optionValues = R.array.season_grid_columns,
                                                 ),
