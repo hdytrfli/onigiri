@@ -132,6 +132,8 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
+        // Cap the logo to 30% of the screen width (half of the description's 60% width).
+        videoLogoImageView.maxWidth = (resources.displayMetrics.widthPixels * 0.3f).toInt()
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
 

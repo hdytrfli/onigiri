@@ -29,7 +29,7 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 @Composable
 fun PersonItem(person: FindroidItemPerson, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.width(88.dp).clickable(onClick = onClick),
+        modifier = modifier.width(104.dp).clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AsyncImage(
