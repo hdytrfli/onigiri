@@ -50,6 +50,7 @@ import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
+import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -135,11 +136,12 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                                 )
                                 Spacer(Modifier.width(MaterialTheme.spacings.medium))
                                 Column(modifier = Modifier) {
-                                    Text(
-                                        text = season.seriesName,
-                                        overflow = TextOverflow.Ellipsis,
+                                    ItemTitle(
+                                        title = season.seriesName,
+                                        logoUri = season.images.showLogo,
                                         maxLines = 1,
                                         style = MaterialTheme.typography.bodyLarge,
+                                        logoHeight = 40.dp,
                                     )
                                     Text(
                                         text = season.name,
@@ -199,7 +201,7 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                                 Modifier.fillMaxWidth()
                                     .padding(start = paddingStart, end = paddingEnd),
                             horizontalArrangement =
-                                Arrangement.spacedBy(MaterialTheme.spacings.small),
+                                Arrangement.spacedBy(MaterialTheme.spacings.default * spacingScale),
                         ) {
                             rowEpisodes.forEach { episode ->
                                 EpisodeGridCard(

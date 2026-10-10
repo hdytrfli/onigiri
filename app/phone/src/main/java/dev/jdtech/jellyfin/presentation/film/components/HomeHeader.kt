@@ -39,7 +39,6 @@ fun HomeHeader(
     serverName: String,
     isLoading: Boolean,
     isError: Boolean,
-    onServerClick: () -> Unit,
     onErrorClick: () -> Unit,
     onRetryClick: () -> Unit,
     onSearchClick: () -> Unit,
@@ -53,7 +52,6 @@ fun HomeHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Surface(
-            onClick = onServerClick,
             modifier = Modifier.fillMaxHeight().weight(1f, fill = false),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -176,7 +174,6 @@ private fun HomeHeaderLoadingPreview() {
             serverName = "Jellyfin",
             isLoading = true,
             isError = false,
-            onServerClick = {},
             onErrorClick = {},
             onRetryClick = {},
             onSearchClick = {},
@@ -193,7 +190,6 @@ private fun HomeHeaderErrorPreview() {
             serverName = "Jellyfin",
             isLoading = false,
             isError = true,
-            onServerClick = {},
             onErrorClick = {},
             onRetryClick = {},
             onSearchClick = {},

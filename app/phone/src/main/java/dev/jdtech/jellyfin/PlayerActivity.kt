@@ -33,6 +33,7 @@ import androidx.media3.common.C
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
+import coil3.load
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
@@ -130,6 +131,7 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
+        val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
 
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
@@ -142,10 +144,22 @@ class PlayerActivity : BasePlayerActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    var lastLogo: String? = null
                     viewModel.uiState.collect { uiState ->
                         Timber.d("$uiState")
                         uiState.apply {
-                            // Title
+                            // Title (logo image when available, else text)
+                            if (currentItemLogo != lastLogo) {
+                                lastLogo = currentItemLogo
+                                if (currentItemLogo != null) {
+                                    videoNameTextView.isVisible = false
+                                    videoLogoImageView.isVisible = true
+                                    videoLogoImageView.load(currentItemLogo)
+                                } else {
+                                    videoNameTextView.isVisible = true
+                                    videoLogoImageView.isVisible = false
+                                }
+                            }
                             videoNameTextView.text = currentItemTitle
 
                             // Media segment

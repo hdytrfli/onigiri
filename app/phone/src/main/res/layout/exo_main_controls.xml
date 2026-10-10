@@ -46,6 +46,17 @@
                 android:textColor="@android:color/white"
                 tools:text="The Dawn of Despair" />
 
+            <ImageView
+                android:id="@+id/video_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="16dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart"
+                android:visibility="gone"
+                tools:ignore="ContentDescription" />
+
         </LinearLayout>
 
         <LinearLayout

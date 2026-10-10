@@ -256,8 +256,8 @@ private fun EpisodeScreenLayout(
                     Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     if (state.displayExtraInfo && state.videoMetadata != null) {
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     OverviewText(text = episode.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     if (state.director != null || state.writers.isNotEmpty()) {

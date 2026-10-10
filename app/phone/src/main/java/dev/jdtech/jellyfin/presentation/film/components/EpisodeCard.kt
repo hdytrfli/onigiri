@@ -38,7 +38,7 @@ fun EpisodeCard(episode: FindroidEpisode, onClick: () -> Unit, modifier: Modifie
     Row(
         modifier =
             modifier
-                .height(96.dp)
+                .height(112.dp)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)

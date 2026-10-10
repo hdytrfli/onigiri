@@ -50,6 +50,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
+import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
@@ -156,11 +157,9 @@ private fun MovieScreenLayout(
                                 Modifier.align(Alignment.BottomStart)
                                     .padding(start = paddingStart, end = paddingEnd)
                         ) {
-                            Text(
-                                text = movie.name,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 3,
-                                style = MaterialTheme.typography.headlineMedium,
+                            ItemTitle(
+                                title = movie.name,
+                                logoUri = movie.images.logo,
                             )
                             movie.originalTitle?.let { originalTitle ->
                                 if (originalTitle != movie.name) {
@@ -252,8 +251,8 @@ private fun MovieScreenLayout(
                     Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     if (state.displayExtraInfo && state.videoMetadata != null) {
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     OverviewText(text = movie.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     InfoText(

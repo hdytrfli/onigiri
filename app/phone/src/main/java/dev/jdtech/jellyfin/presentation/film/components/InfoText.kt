@@ -2,11 +2,8 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +15,6 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InfoText(
     genres: List<String>,
@@ -27,30 +23,22 @@ fun InfoText(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
         if (genres.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            ) {
-                genres.forEach { genre -> AssistChip(onClick = {}, label = { Text(genre) }) }
-            }
+            InfoRow(label = stringResource(CoreR.string.genres), value = genres.joinToString(", "))
         }
         director?.let { person ->
-            CrewRow(
-                label = stringResource(CoreR.string.director),
-                names = listOf(person.name),
-            )
+            InfoRow(label = stringResource(CoreR.string.director), value = person.name)
         }
         if (writers.isNotEmpty()) {
-            CrewRow(
+            InfoRow(
                 label = stringResource(CoreR.string.writers),
-                names = writers.map { it.name },
+                value = writers.joinToString(", ") { it.name },
             )
         }
     }
 }
 
 @Composable
-private fun CrewRow(label: String, names: List<String>) {
+private fun InfoRow(label: String, value: String) {
     Row(verticalAlignment = Alignment.Top) {
         Text(
             text = label,
@@ -59,7 +47,7 @@ private fun CrewRow(label: String, names: List<String>) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = names.joinToString(", "),
+            text = value,
             style = MaterialTheme.typography.bodyMedium,
         )
     }

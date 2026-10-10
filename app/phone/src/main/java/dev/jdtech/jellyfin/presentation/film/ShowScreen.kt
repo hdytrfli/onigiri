@@ -54,6 +54,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
+import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -132,11 +133,9 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                 Modifier.align(Alignment.BottomStart)
                                     .padding(start = paddingStart, end = paddingEnd)
                         ) {
-                            Text(
-                                text = show.name,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 3,
-                                style = MaterialTheme.typography.headlineMedium,
+                            ItemTitle(
+                                title = show.name,
+                                logoUri = show.images.logo,
                             )
                             show.originalTitle?.let { originalTitle ->
                                 if (originalTitle != show.name) {
@@ -213,7 +212,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                         canPlay = state.seasons.isNotEmpty(),
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     OverviewText(text = show.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     InfoText(

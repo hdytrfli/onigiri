@@ -10,13 +10,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -41,11 +38,9 @@ import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
-import dev.jdtech.jellyfin.presentation.film.components.ServerSelectionBottomSheet
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -79,7 +74,6 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
-    val scope = rememberCoroutineScope()
     val safePadding = rememberSafePadding(handleStartInsets = false)
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
@@ -92,8 +86,6 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
     val contentPaddingTop = safePadding.top + 88.dp
 
     var showErrorDialog by rememberSaveable { mutableStateOf(false) }
-    val showServerSelectionSheetState = rememberModalBottomSheetState()
-    var showServerSelectionBottomSheet by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize().semantics { isTraversalGroup = true }) {
         PullToRefreshBox(isRefreshing = false, onRefresh = { onAction(HomeAction.OnRetryClick) }) {
@@ -151,35 +143,12 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
         serverName = state.server?.name ?: "",
         isLoading = state.isLoading,
         isError = state.error != null,
-        onServerClick = { showServerSelectionBottomSheet = true },
         onErrorClick = { showErrorDialog = true },
         onRetryClick = { onAction(HomeAction.OnRetryClick) },
         onSearchClick = { onAction(HomeAction.OnSearchClick) },
         onUserClick = { onAction(HomeAction.OnSettingsClick) },
         modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
     )
-
-    if (showServerSelectionBottomSheet) {
-        ServerSelectionBottomSheet(
-            currentServerId = state.server?.id ?: "",
-            onUpdate = {
-                onAction(HomeAction.OnRetryClick)
-                scope
-                    .launch { showServerSelectionSheetState.hide() }
-                    .invokeOnCompletion {
-                        if (!showServerSelectionSheetState.isVisible) {
-                            showServerSelectionBottomSheet = false
-                        }
-                    }
-            },
-            onManage = {
-                onAction(HomeAction.OnManageServers)
-                scope.launch { showServerSelectionSheetState.hide() }
-            },
-            onDismissRequest = { showServerSelectionBottomSheet = false },
-            sheetState = showServerSelectionSheetState,
-        )
-    }
 }
 
 @PreviewScreenSizes

@@ -80,6 +80,7 @@ constructor(
         val currentTrickplay: Trickplay?,
         val currentChapters: List<PlayerChapter>,
         val fileLoaded: Boolean,
+        val currentItemLogo: String? = null,
     )
 
     private var items: MutableList<PlayerItem> = mutableListOf()
@@ -376,6 +377,7 @@ constructor(
                         _uiState.update {
                             it.copy(
                                 currentItemTitle = itemTitle,
+                                currentItemLogo = item.logoUri,
                                 currentSegment = null,
                                 currentChapters = item.chapters,
                                 fileLoaded = false,
