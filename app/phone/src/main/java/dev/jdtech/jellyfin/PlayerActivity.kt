@@ -7,6 +7,8 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.media.AudioManager
 import android.os.Build
@@ -132,8 +134,15 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
-        // The player is landscape-only; cap the logo to 50% of the screen width.
-        videoLogoImageView.maxWidth = (resources.displayMetrics.widthPixels * 0.5f).toInt()
+        // The player is landscape-only; cap the logo to 35% of the screen width.
+        videoLogoImageView.maxWidth = (resources.displayMetrics.widthPixels * 0.35f).toInt()
+        // Apply the naive white overlay when enabled.
+        videoLogoImageView.colorFilter =
+            if (appPreferences.getValue(appPreferences.naiveTitleOverlay)) {
+                PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+            } else {
+                null
+            }
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
 
