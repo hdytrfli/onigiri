@@ -49,6 +49,7 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
@@ -256,6 +257,14 @@ private fun EpisodeScreenLayout(
                     }
                     OverviewText(text = episode.overview)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    if (state.director != null || state.writers.isNotEmpty()) {
+                        InfoText(
+                            genres = emptyList(),
+                            director = state.director,
+                            writers = state.writers,
+                        )
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    }
                 }
                 if (state.actors.isNotEmpty()) {
                     ActorsRow(
