@@ -73,6 +73,7 @@
     <string name="backdrop">Backdrop</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
+    <string name="content_spacing">Content spacing</string>
     <string name="mb">MB</string>
     <string name="ms">ms</string>
     <string name="seconds">s</string>

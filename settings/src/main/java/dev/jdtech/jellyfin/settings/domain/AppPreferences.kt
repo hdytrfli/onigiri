@@ -27,6 +27,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2")
     val seasonViewMode = Preference("pref_season_view_mode", "list")
+    val contentSpacing = Preference("pref_content_spacing", "1.25")
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")

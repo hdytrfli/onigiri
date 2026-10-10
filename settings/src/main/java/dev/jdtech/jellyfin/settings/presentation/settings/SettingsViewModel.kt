@@ -158,6 +158,14 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     backendPreference =
                                                         appPreferences.dynamicColors,
                                                 ),
+                                                PreferenceSelect(
+                                                    nameStringResource = R.string.content_spacing,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.contentSpacing,
+                                                    options = R.array.content_spacing_options,
+                                                    optionValues = R.array.content_spacing_values,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(

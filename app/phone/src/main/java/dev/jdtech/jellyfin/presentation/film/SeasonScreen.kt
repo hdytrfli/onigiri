@@ -52,6 +52,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import java.util.UUID
@@ -104,13 +105,16 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
 
     val isGrid = state.viewMode == "grid"
 
+    val spacingScale = LocalContentSpacingScale.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.season?.let { season ->
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 state = lazyListState,
                 contentPadding = PaddingValues(bottom = paddingBottom),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+                verticalArrangement =
+                    Arrangement.spacedBy(MaterialTheme.spacings.default * spacingScale),
             ) {
                 item {
                     ItemHeader(
@@ -147,7 +151,7 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                             }
                         },
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.default.div(2)))
+                    Spacer(Modifier.height(MaterialTheme.spacings.default.div(2) * spacingScale))
                     ItemButtonsBar(
                         item = season,
                         onPlayClick = { startFromBeginning ->

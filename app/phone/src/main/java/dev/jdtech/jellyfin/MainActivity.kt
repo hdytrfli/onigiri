@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
                                 portrait = state.backdropPortraitRatio,
                                 landscape = state.backdropLandscapeRatio,
                             ),
+                        LocalContentSpacingScale provides state.contentSpacingScale,
                     ) {
                         NavigationRoot(
                             hasServers = state.hasServers,

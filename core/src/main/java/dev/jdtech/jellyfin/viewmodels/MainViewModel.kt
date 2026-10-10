@@ -81,13 +81,21 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     }
                 }
 
+            val interfacePrefs =
+                combine(
+                    appPreferences.observe(appPreferences.backdropPortraitRatio),
+                    appPreferences.observe(appPreferences.backdropLandscapeRatio),
+                    appPreferences.observe(appPreferences.contentSpacing),
+                ) { portraitRatio, landscapeRatio, contentSpacing ->
+                    Triple(portraitRatio, landscapeRatio, contentSpacing)
+                }
+
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.dynamicColors),
                     appPreferences.observe(appPreferences.offlineMode),
-                    appPreferences.observe(appPreferences.backdropPortraitRatio),
-                    appPreferences.observe(appPreferences.backdropLandscapeRatio),
-                ) { flags, dynamicColors, offlineMode, portraitRatio, landscapeRatio ->
+                    interfacePrefs,
+                ) { flags, dynamicColors, offlineMode, interfacePrefs ->
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -95,8 +103,9 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
                         isOfflineMode = offlineMode,
-                        backdropPortraitRatio = portraitRatio.toFloatOrNull() ?: 1.5f,
-                        backdropLandscapeRatio = landscapeRatio.toFloatOrNull() ?: 2f,
+                        backdropPortraitRatio = interfacePrefs.first.toFloatOrNull() ?: 1.5f,
+                        backdropLandscapeRatio = interfacePrefs.second.toFloatOrNull() ?: 2f,
+                        contentSpacingScale = interfacePrefs.third.toFloatOrNull() ?: 1f,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -119,4 +128,5 @@ data class MainState(
     val isOfflineMode: Boolean = false,
     val backdropPortraitRatio: Float = 1.5f,
     val backdropLandscapeRatio: Float = 2f,
+    val contentSpacingScale: Float = 1f,
 )

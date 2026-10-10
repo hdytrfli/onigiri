@@ -56,6 +56,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -140,6 +141,8 @@ private fun EpisodeScreenLayout(
 
     val scrollState = rememberScrollState()
 
+    val spacingScale = LocalContentSpacingScale.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.episode?.let { episode ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
@@ -180,7 +183,7 @@ private fun EpisodeScreenLayout(
                     },
                 )
                 Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
@@ -215,10 +218,10 @@ private fun EpisodeScreenLayout(
                             }
                         }
                     }
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     state.videoMetadata?.let { videoMetadata ->
                         VideoMetadataBar(videoMetadata)
-                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                        Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     }
                     ItemButtonsBar(
                         item = episode,
@@ -250,20 +253,20 @@ private fun EpisodeScreenLayout(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     if (state.displayExtraInfo && state.videoMetadata != null) {
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                     OverviewText(text = episode.overview, maxCollapsedLines = 3)
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     if (state.director != null || state.writers.isNotEmpty()) {
                         InfoText(
                             genres = emptyList(),
                             director = state.director,
                             writers = state.writers,
                         )
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                 }
                 if (state.actors.isNotEmpty()) {

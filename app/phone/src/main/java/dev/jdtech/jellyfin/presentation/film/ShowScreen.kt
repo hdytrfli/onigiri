@@ -57,6 +57,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.utils.getShowDateString
@@ -117,6 +118,8 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
 
     val scrollState = rememberScrollState()
 
+    val spacingScale = LocalContentSpacingScale.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.show?.let { show ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
@@ -149,7 +152,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                     },
                 )
                 Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
@@ -185,7 +188,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                             }
                         }
                     }
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     ItemButtonsBar(
                         item = show,
                         onPlayClick = { startFromBeginning ->
@@ -210,21 +213,21 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                         canPlay = state.seasons.isNotEmpty(),
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     OverviewText(text = show.overview, maxCollapsedLines = 3)
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     InfoText(
                         genres = show.genres,
                         director = state.director,
                         writers = state.writers,
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     state.nextUp?.let { nextUp ->
                         Text(
                             text = stringResource(CoreR.string.next_up),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                        Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                         Column(
                             modifier =
                                 Modifier.widthIn(max = 420.dp)
@@ -248,7 +251,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                 }
 
@@ -258,7 +261,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                             text = stringResource(CoreR.string.seasons),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                        Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     }
                     LazyRow(
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
@@ -273,7 +276,7 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                             )
                         }
                     }
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                 }
 
                 if (state.actors.isNotEmpty()) {

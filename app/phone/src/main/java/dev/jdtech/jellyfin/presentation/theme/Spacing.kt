@@ -8,3 +8,6 @@ val MaterialTheme.spacings
     get() = Spacings
 
 val LocalSpacings = compositionLocalOf { MaterialTheme.spacings }
+
+/** Multiplier applied to content spacing in detail screens. */
+val LocalContentSpacingScale = compositionLocalOf { 1f }

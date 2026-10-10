@@ -54,6 +54,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -141,6 +142,8 @@ private fun MovieScreenLayout(
 
     val scrollState = rememberScrollState()
 
+    val spacingScale = LocalContentSpacingScale.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.movie?.let { movie ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
@@ -173,7 +176,7 @@ private fun MovieScreenLayout(
                     },
                 )
                 Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
@@ -211,10 +214,10 @@ private fun MovieScreenLayout(
                             }
                         }
                     }
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     state.videoMetadata?.let { videoMetadata ->
                         VideoMetadataBar(videoMetadata)
-                        Spacer(Modifier.height(MaterialTheme.spacings.small))
+                        Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     }
                     ItemButtonsBar(
                         item = movie,
@@ -246,19 +249,19 @@ private fun MovieScreenLayout(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
+                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     if (state.displayExtraInfo && state.videoMetadata != null) {
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                     OverviewText(text = movie.overview, maxCollapsedLines = 3)
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     InfoText(
                         genres = movie.genres,
                         director = state.director,
                         writers = state.writers,
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                 }
                 if (state.actors.isNotEmpty()) {
                     ActorsRow(
