@@ -1,0 +1,3 @@
+# Always use LF line endings for the Gradle wrapper script so it runs
+# inside Linux containers as well as on Windows.
+gradlew text eol=lf
