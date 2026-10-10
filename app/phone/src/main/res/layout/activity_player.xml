@@ -147,7 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:gravity="center"
-            android:textSize="14sp"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
             android:textColor="@android:color/white" />
 
         <ImageView
