@@ -57,9 +57,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerGesturesBrightnessRemember = Preference("pref_player_brightness_remember", false)
     val playerGesturesStartMaximized = Preference("pref_player_start_maximized", false)
 
-    // Player - gesture overlay
-    val playerOverlayTextSize = Preference("pref_player_overlay_text_size", "16")
-
     // Player - seeking
     val playerSeekBackInc = Preference("pref_player_seek_back_inc", 5_000L)
     val playerSeekForwardInc = Preference("pref_player_seek_forward_inc", 15_000L)

@@ -141,9 +141,10 @@ class PlayerGestureHelper(
             if (it.isPlaying) {
                 lastPlaybackSpeed = it.playbackParameters.speed
                 it.setPlaybackSpeed(playbackSpeedIncrease)
-                activity.binding.gestureSpeedText.text =
+                activity.binding.progressScrubberTrickplay.visibility = View.GONE
+                activity.binding.progressScrubberText.text =
                     playerView.context.getString(R.string.player_controls_fast_forward)
-                activity.binding.gestureSpeedLayout.visibility = View.VISIBLE
+                activity.binding.progressScrubberLayout.visibility = View.VISIBLE
             }
         }
     }
@@ -459,11 +460,12 @@ class PlayerGestureHelper(
      * Applies the configured overlay text size to the fast-forward and seek indicator texts so both
      * share the same placement and size.
      */
+    /**
+     * Fixes the shared fast-forward/seek indicator text size so both states
+     * share the same placement and size.
+     */
     private fun applyOverlayTextSize() {
-        val overlayText = appPreferences.getValue(appPreferences.playerOverlayTextSize)
-        val sizeSp = overlayText.toFloatOrNull() ?: 16f
-        activity.binding.gestureSpeedText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
-        activity.binding.progressScrubberText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        activity.binding.progressScrubberText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
     }
 
     fun updateZoomMode(enabled: Boolean) {
@@ -513,7 +515,7 @@ class PlayerGestureHelper(
         ) {
             playerView.player?.setPlaybackSpeed(lastPlaybackSpeed)
             lastPlaybackSpeed = 0f
-            activity.binding.gestureSpeedLayout.visibility = View.GONE
+            activity.binding.progressScrubberLayout.visibility = View.GONE
         }
     }
 

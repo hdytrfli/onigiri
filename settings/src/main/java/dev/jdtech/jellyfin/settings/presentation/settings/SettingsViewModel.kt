@@ -527,20 +527,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         appPreferences.playerGestures,
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                 ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.pref_player_overlay_text_size,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_overlay_text_size_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.playerOverlayTextSize,
-                                                    options = R.array.overlay_text_size,
-                                                    optionValues = R.array.overlay_text_size,
-                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.player_gestures_vb,
