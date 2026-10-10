@@ -7,6 +7,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.FilledTonalIconButton
@@ -52,6 +53,7 @@ fun ItemButtonsBar(
     modifier: Modifier = Modifier,
     downloaderState: DownloaderState? = null,
     canPlay: Boolean = true,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
@@ -180,6 +182,7 @@ fun ItemButtonsBar(
                         }
                     }
                 }
+                trailingContent?.invoke(this)
             }
             if (downloaderState != null) {
                 AnimatedVisibility(downloaderState.isDownloading) {

@@ -38,7 +38,7 @@ fun EpisodeCard(episode: FindroidEpisode, onClick: () -> Unit, modifier: Modifie
     Row(
         modifier =
             modifier
-                .height(84.dp)
+                .height(96.dp)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
@@ -74,7 +74,7 @@ fun EpisodeCard(episode: FindroidEpisode, onClick: () -> Unit, modifier: Modifie
                 Text(
                     text = episode.overview,
                     modifier = Modifier.alpha(0.7f),
-                    maxLines = 5,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodySmall,
                 )

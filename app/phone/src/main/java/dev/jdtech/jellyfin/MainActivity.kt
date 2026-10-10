@@ -10,6 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 
@@ -27,7 +29,14 @@ class MainActivity : AppCompatActivity() {
 
             FindroidTheme(dynamicColor = state.isDynamicColors) {
                 if (!state.isLoading) {
-                    CompositionLocalProvider(LocalOfflineMode provides state.isOfflineMode) {
+                    CompositionLocalProvider(
+                        LocalOfflineMode provides state.isOfflineMode,
+                        LocalBackdropRatios provides
+                            BackdropRatios(
+                                portrait = state.backdropPortraitRatio,
+                                landscape = state.backdropLandscapeRatio,
+                            ),
+                    ) {
                         NavigationRoot(
                             hasServers = state.hasServers,
                             hasCurrentServer = state.hasCurrentServer,

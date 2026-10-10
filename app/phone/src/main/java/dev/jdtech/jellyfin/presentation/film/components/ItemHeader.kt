@@ -29,6 +29,7 @@ import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.parallaxLayoutModifier
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
@@ -124,6 +125,7 @@ private fun ItemHeaderBase(
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
     val safePadding = rememberSafePadding()
+    val backdropRatios = LocalBackdropRatios.current
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     val logoUri =
@@ -135,8 +137,8 @@ private fun ItemHeaderBase(
     Box(
         modifier =
             Modifier.fillMaxWidth()
-                // Square backdrop in portrait, half-height (2:1) in landscape.
-                .aspectRatio(if (isLandscape) 2f else 1f)
+                // Aspect ratio (width / height), configured in Interface settings.
+                .aspectRatio(if (isLandscape) backdropRatios.landscape else backdropRatios.portrait)
                 .clipToBounds()
     ) {
         backdropImage()

@@ -123,6 +123,22 @@
         <item>pip</item>
         <item>always</item>
     </string-array>
+    <string-array name="backdrop_ratios">
+        <item>1:1</item>
+        <item>4:3</item>
+        <item>3:2</item>
+        <item>16:9</item>
+        <item>2:1</item>
+        <item>21:9</item>
+    </string-array>
+    <string-array name="backdrop_ratios_values">
+        <item>1</item>
+        <item>1.3333334</item>
+        <item>1.5</item>
+        <item>1.7777778</item>
+        <item>2</item>
+        <item>2.3333333</item>
+    </string-array>
     <string-array name="media_segments_type">
         <item>@string/media_segments_type_intro</item>
         <item>@string/media_segments_type_outro</item>

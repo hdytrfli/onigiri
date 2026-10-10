@@ -85,7 +85,9 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     setupFlags,
                     appPreferences.observe(appPreferences.dynamicColors),
                     appPreferences.observe(appPreferences.offlineMode),
-                ) { flags, dynamicColors, offlineMode ->
+                    appPreferences.observe(appPreferences.backdropPortraitRatio),
+                    appPreferences.observe(appPreferences.backdropLandscapeRatio),
+                ) { flags, dynamicColors, offlineMode, portraitRatio, landscapeRatio ->
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -93,6 +95,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
                         isOfflineMode = offlineMode,
+                        backdropPortraitRatio = portraitRatio.toFloatOrNull() ?: 1.5f,
+                        backdropLandscapeRatio = landscapeRatio.toFloatOrNull() ?: 2f,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -113,4 +117,6 @@ data class MainState(
     val hasCurrentServer: Boolean = false,
     val hasCurrentUser: Boolean = false,
     val isOfflineMode: Boolean = false,
+    val backdropPortraitRatio: Float = 1.5f,
+    val backdropLandscapeRatio: Float = 2f,
 )

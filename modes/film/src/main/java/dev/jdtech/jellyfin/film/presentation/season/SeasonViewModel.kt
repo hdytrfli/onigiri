@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,8 +13,12 @@ import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ItemFields
 
 @HiltViewModel
-class SeasonViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class SeasonViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val appPreferences: AppPreferences,
+) : ViewModel() {
     private val _state = MutableStateFlow(SeasonState())
     val state = _state.asStateFlow()
 
@@ -30,7 +35,10 @@ class SeasonViewModel @Inject constructor(private val repository: JellyfinReposi
                         seasonId = seasonId,
                         fields = listOf(ItemFields.OVERVIEW),
                     )
-                _state.emit(_state.value.copy(season = season, episodes = episodes))
+                val viewMode = appPreferences.getValue(appPreferences.seasonViewMode)
+                _state.emit(
+                    _state.value.copy(season = season, episodes = episodes, viewMode = viewMode)
+                )
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
             }
@@ -62,6 +70,11 @@ class SeasonViewModel @Inject constructor(private val repository: JellyfinReposi
                     repository.unmarkAsFavorite(seasonId)
                     loadSeason(seasonId)
                 }
+            }
+            is SeasonAction.ToggleViewMode -> {
+                val newMode = if (_state.value.viewMode == "grid") "list" else "grid"
+                appPreferences.setValue(appPreferences.seasonViewMode, newMode)
+                _state.value = _state.value.copy(viewMode = newMode)
             }
             else -> Unit
         }

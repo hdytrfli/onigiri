@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,12 +31,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.PlayerActivity
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
@@ -42,6 +46,7 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeCard
+import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
@@ -96,6 +101,8 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
 
     val lazyListState = rememberLazyListState()
+
+    val isGrid = state.viewMode == "grid"
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.season?.let { season ->
@@ -165,14 +172,49 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                         modifier =
                             Modifier.padding(start = paddingStart, end = paddingEnd).fillMaxWidth(),
                         canPlay = state.episodes.isNotEmpty(),
+                        trailingContent = {
+                            FilledTonalIconButton(
+                                onClick = { onAction(SeasonAction.ToggleViewMode) }
+                            ) {
+                                Icon(
+                                    painter =
+                                        painterResource(
+                                            if (isGrid) CoreR.drawable.ic_view_list
+                                            else CoreR.drawable.ic_view_grid
+                                        ),
+                                    contentDescription = null,
+                                )
+                            }
+                        },
                     )
                 }
-                items(items = state.episodes, key = { episode -> episode.id }) { episode ->
-                    EpisodeCard(
-                        episode = episode,
-                        onClick = { onAction(SeasonAction.NavigateToItem(episode)) },
-                        modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
-                    )
+                if (isGrid) {
+                    items(state.episodes.chunked(3)) { rowEpisodes ->
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(start = paddingStart, end = paddingEnd),
+                            horizontalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacings.small),
+                        ) {
+                            rowEpisodes.forEach { episode ->
+                                EpisodeGridCard(
+                                    episode = episode,
+                                    onClick = { onAction(SeasonAction.NavigateToItem(episode)) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(3 - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
+                        }
+                    }
+                } else {
+                    items(items = state.episodes, key = { episode -> episode.id }) { episode ->
+                        EpisodeCard(
+                            episode = episode,
+                            onClick = { onAction(SeasonAction.NavigateToItem(episode)) },
+                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
+                        )
+                    }
                 }
             }
         } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }

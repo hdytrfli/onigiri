@@ -161,6 +161,30 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                             ),
                                     ),
                                     PreferenceGroup(
+                                        nameStringResource = R.string.backdrop,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.backdrop_portrait_ratio,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.backdropPortraitRatio,
+                                                    options = R.array.backdrop_ratios,
+                                                    optionValues = R.array.backdrop_ratios_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.backdrop_landscape_ratio,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.backdropLandscapeRatio,
+                                                    options = R.array.backdrop_ratios,
+                                                    optionValues = R.array.backdrop_ratios_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
                                         nameStringResource = R.string.home,
                                         preferences =
                                             listOf(

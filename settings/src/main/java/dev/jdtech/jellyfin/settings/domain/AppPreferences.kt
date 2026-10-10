@@ -24,6 +24,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val homeNextUp = Preference<Boolean>("home_next_up", true)
     val homeLatest = Preference<Boolean>("home_latest", true)
     val displayExtraInfo = Preference("pref_display_extra_info", false)
+    val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
+    val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2")
+    val seasonViewMode = Preference("pref_season_view_mode", "list")
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
