@@ -127,8 +127,6 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                                     title = season.seriesName,
                                     logoUri = season.images.showLogo,
                                     maxLines = 1,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    logoHeight = 40.dp,
                                 )
                                 Text(
                                     text = season.name,

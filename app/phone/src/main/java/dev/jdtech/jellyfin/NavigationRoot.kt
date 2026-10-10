@@ -441,7 +441,15 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<FavoritesRoute> {
         FavoritesScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onSearchClick =
+                dropUnlessResumed {
+                    searchExpanded.value = true
+                    navigator.navigate(MediaRoute)
+                },
+            onSettingsClick =
+                dropUnlessResumed {
+                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
+                },
         )
     }
     entry<MovieRoute> { key ->

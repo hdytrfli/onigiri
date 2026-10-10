@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 data class CollectionState(
     val collection: FindroidBoxSet? = null,
     val items: List<FindroidItem> = emptyList(),
+    val serverName: String? = null,
     val sections: List<CollectionSection> = emptyList(),
     val isLoading: Boolean = false,
     val error: Exception? = null,

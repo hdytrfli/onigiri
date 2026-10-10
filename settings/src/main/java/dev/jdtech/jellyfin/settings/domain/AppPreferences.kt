@@ -30,9 +30,14 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val seasonGridColumnsLandscape = Preference("pref_season_grid_columns_landscape", "4")
     val contentSpacing = Preference("pref_content_spacing", "1.25")
     val naiveTitleOverlay = Preference("pref_naive_title_overlay", false)
+    val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
+    val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.35")
+    val titlePlayerWidth = Preference("pref_title_player_width", "0.25")
+    val titleImageRatio = Preference("pref_title_image_ratio", "2")
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
+    val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
     // Player - mpv

@@ -157,6 +157,38 @@
         <item>4</item>
         <item>5</item>
     </string-array>
+    <string-array name="title_width_options">
+        <item>40%</item>
+        <item>50%</item>
+        <item>60%</item>
+        <item>70%</item>
+        <item>80%</item>
+        <item>90%</item>
+        <item>100%</item>
+    </string-array>
+    <string-array name="title_width_values">
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="title_ratio_options">
+        <item>16:9</item>
+        <item>2:1</item>
+        <item>3:2</item>
+        <item>4:3</item>
+        <item>1:1</item>
+    </string-array>
+    <string-array name="title_ratio_values">
+        <item>1.7777778</item>
+        <item>2</item>
+        <item>1.5</item>
+        <item>1.3333334</item>
+        <item>1</item>
+    </string-array>
     <string-array name="media_segments_type">
         <item>@string/media_segments_type_intro</item>
         <item>@string/media_segments_type_outro</item>

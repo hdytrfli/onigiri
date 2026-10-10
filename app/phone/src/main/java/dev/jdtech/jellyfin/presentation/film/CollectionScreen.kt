@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -30,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -47,6 +49,8 @@ import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.FindroidMovie
+import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.Direction
@@ -94,6 +98,26 @@ private fun CollectionDetailLayout(state: CollectionState, onAction: (Collection
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
     val scrollState = rememberScrollState()
 
+    // First and last release year across the collection items.
+    val yearRange =
+        remember(state.items) {
+            val years =
+                state.items.mapNotNull { item ->
+                    when (item) {
+                        is FindroidMovie -> item.productionYear
+                        is FindroidShow -> item.productionYear
+                        else -> null
+                    }
+                }
+            if (years.isEmpty()) {
+                null
+            } else {
+                val min = years.min()
+                val max = years.max()
+                if (min == max) "$min" else "$min - $max"
+            }
+        }
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.collection?.let { collection ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
@@ -112,10 +136,18 @@ private fun CollectionDetailLayout(state: CollectionState, onAction: (Collection
                 )
                 Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
                     Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    Text(
-                        text = stringResource(CoreR.string.items_count, state.items.size),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        Text(
+                            text = stringResource(CoreR.string.items_count, state.items.size),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        yearRange?.let { range ->
+                            Text(text = range, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
                     if (collection.overview.isNotBlank()) {
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                         OverviewText(text = collection.overview, maxCollapsedLines = 3)

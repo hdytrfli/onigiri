@@ -134,8 +134,14 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
-        // The player is landscape-only; cap the logo to 35% of the screen width.
-        videoLogoImageView.maxWidth = (resources.displayMetrics.widthPixels * 0.35f).toInt()
+        // Title logo sizing from settings (player width fraction and max width:height ratio).
+        val playerWidthFraction =
+            appPreferences.getValue(appPreferences.titlePlayerWidth).toFloatOrNull() ?: 0.25f
+        val logoMaxWidth = (resources.displayMetrics.widthPixels * playerWidthFraction).toInt()
+        val logoRatio =
+            appPreferences.getValue(appPreferences.titleImageRatio).toFloatOrNull() ?: 2f
+        videoLogoImageView.maxWidth = logoMaxWidth
+        videoLogoImageView.maxHeight = (logoMaxWidth / logoRatio).toInt()
         // Apply the naive white overlay when enabled.
         videoLogoImageView.colorFilter =
             if (appPreferences.getValue(appPreferences.naiveTitleOverlay)) {

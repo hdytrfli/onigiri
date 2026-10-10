@@ -90,13 +90,23 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     Triple(portraitRatio, landscapeRatio, contentSpacing)
                 }
 
+            val titlePrefs =
+                combine(
+                    appPreferences.observe(appPreferences.titlePortraitWidth),
+                    appPreferences.observe(appPreferences.titleLandscapeWidth),
+                    appPreferences.observe(appPreferences.titleImageRatio),
+                    appPreferences.observe(appPreferences.naiveTitleOverlay),
+                ) { portraitWidth, landscapeWidth, ratio, naive ->
+                    TitlePrefs(portraitWidth, landscapeWidth, ratio, naive)
+                }
+
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.dynamicColors),
                     appPreferences.observe(appPreferences.offlineMode),
                     interfacePrefs,
-                    appPreferences.observe(appPreferences.naiveTitleOverlay),
-                ) { flags, dynamicColors, offlineMode, interfacePrefs, naiveTitleOverlay ->
+                    titlePrefs,
+                ) { flags, dynamicColors, offlineMode, interfacePrefs, titlePrefs ->
                     MainState(
                         isLoading = false,
                         isDynamicColors = dynamicColors,
@@ -107,7 +117,10 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         backdropPortraitRatio = interfacePrefs.first.toFloatOrNull() ?: 1.5f,
                         backdropLandscapeRatio = interfacePrefs.second.toFloatOrNull() ?: 2f,
                         contentSpacingScale = interfacePrefs.third.toFloatOrNull() ?: 1f,
-                        naiveTitleOverlay = naiveTitleOverlay,
+                        titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
+                        titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.35f,
+                        titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
+                        naiveTitleOverlay = titlePrefs.naive,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -118,6 +131,13 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val hasServers: Boolean,
         val hasCurrentServer: Boolean,
         val hasCurrentUser: Boolean,
+    )
+
+    private data class TitlePrefs(
+        val portraitWidth: String,
+        val landscapeWidth: String,
+        val ratio: String,
+        val naive: Boolean,
     )
 }
 
@@ -131,5 +151,8 @@ data class MainState(
     val backdropPortraitRatio: Float = 1.5f,
     val backdropLandscapeRatio: Float = 2f,
     val contentSpacingScale: Float = 1f,
+    val titlePortraitWidth: Float = 0.7f,
+    val titleLandscapeWidth: Float = 0.35f,
+    val titleImageRatio: Float = 2f,
     val naiveTitleOverlay: Boolean = false,
 )

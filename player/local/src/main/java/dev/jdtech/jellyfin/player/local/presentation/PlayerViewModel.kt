@@ -13,6 +13,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -102,9 +103,13 @@ constructor(
 
     var playbackSpeed: Float = 1f
 
+    var alwaysPlaySubtitles: Boolean = false
+
     var isInPictureInPictureMode: Boolean = false
 
     init {
+        alwaysPlaySubtitles = appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles)
+
         segmentsSkipButton = appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButton)
         segmentsSkipButtonTypes =
             appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButtonType)
@@ -132,6 +137,8 @@ constructor(
                 .setPreferredTextLanguage(
                     appPreferences.getValue(appPreferences.preferredSubtitleLanguage)
                 )
+                .setSelectUndeterminedTextLanguage(alwaysPlaySubtitles)
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
         )
 
         val playerBackend = appPreferences.getValue(appPreferences.playerBackend)
@@ -183,6 +190,7 @@ constructor(
                         .setSubBorderColor(subOptions.getValue("sub-outline-color"))
                         .setSubBackColor(subOptions.getValue("sub-back-color"))
                         .setSubBorderStyle(subOptions.getValue("sub-border-style"))
+                        .setAlwaysPlaySubtitles(alwaysPlaySubtitles)
                         .build()
                 }
 
@@ -447,6 +455,25 @@ constructor(
                 player.seekToNextMediaItem()
                 player.play()
             }
+        }
+    }
+
+    override fun onTracksChanged(tracks: Tracks) {
+        if (!alwaysPlaySubtitles) return
+        val hasSelectedText =
+            tracks.groups.any { group -> group.type == C.TRACK_TYPE_TEXT && group.isSelected }
+        if (hasSelectedText) return
+        val textGroup =
+            tracks.groups.firstOrNull { group ->
+                group.type == C.TRACK_TYPE_TEXT && group.isSupported
+            }
+        if (textGroup != null) {
+            player.trackSelectionParameters =
+                player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                    .setOverrideForType(TrackSelectionOverride(textGroup.mediaTrackGroup, 0))
+                    .build()
         }
     }
 

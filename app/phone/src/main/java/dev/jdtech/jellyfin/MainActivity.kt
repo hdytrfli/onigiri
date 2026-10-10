@@ -15,6 +15,8 @@ import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
+import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 
 @AndroidEntryPoint
@@ -40,6 +42,12 @@ class MainActivity : AppCompatActivity() {
                             ),
                         LocalContentSpacingScale provides state.contentSpacingScale,
                         LocalNaiveTitleOverlay provides state.naiveTitleOverlay,
+                        LocalTitleImageConfig provides
+                            TitleImageConfig(
+                                portraitWidth = state.titlePortraitWidth,
+                                landscapeWidth = state.titleLandscapeWidth,
+                                ratio = state.titleImageRatio,
+                            ),
                     ) {
                         NavigationRoot(
                             hasServers = state.hasServers,

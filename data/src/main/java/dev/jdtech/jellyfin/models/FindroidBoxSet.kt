@@ -25,6 +25,7 @@ fun BaseItemDto.toFindroidBoxSet(jellyfinRepository: JellyfinRepository): Findro
     return FindroidBoxSet(
         id = id,
         name = name.orEmpty(),
+        overview = overview.orEmpty(),
         images = toFindroidImages(jellyfinRepository),
     )
 }

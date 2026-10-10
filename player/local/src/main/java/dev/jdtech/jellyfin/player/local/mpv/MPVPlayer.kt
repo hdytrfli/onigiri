@@ -67,6 +67,7 @@ class MPVPlayer(
     private val subBorderColor: String = "#FF000000",
     private val subBackColor: String = "#FF000000",
     private val subBorderStyle: String = "background-box",
+    private val alwaysPlaySubtitles: Boolean = false,
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
     private val audioManager: AudioManager by lazy { context.getSystemService()!! }
@@ -97,6 +98,7 @@ class MPVPlayer(
         subBorderColor = builder.subBorderColor,
         subBackColor = builder.subBackColor,
         subBorderStyle = builder.subBorderStyle,
+        alwaysPlaySubtitles = builder.alwaysPlaySubtitles,
     )
 
     class Builder(val context: Context) {
@@ -157,6 +159,9 @@ class MPVPlayer(
         var subBorderStyle: String = "background-box"
             private set
 
+        var alwaysPlaySubtitles: Boolean = false
+            private set
+
         fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) =
             apply {
                 this.audioAttributes = audioAttributes
@@ -210,6 +215,10 @@ class MPVPlayer(
             this.subBorderStyle = subBorderStyle
         }
 
+        fun setAlwaysPlaySubtitles(alwaysPlaySubtitles: Boolean) = apply {
+            this.alwaysPlaySubtitles = alwaysPlaySubtitles
+        }
+
         fun build() = MPVPlayer(this)
     }
 
@@ -261,6 +270,10 @@ class MPVPlayer(
         mpvLib.setOptionString("sub-outline-color", subBorderColor)
         mpvLib.setOptionString("sub-back-color", subBackColor)
         mpvLib.setOptionString("sub-border-style", subBorderStyle)
+        if (alwaysPlaySubtitles) {
+            mpvLib.setOptionString("sub-auto", "all")
+            mpvLib.setOptionString("sid", "auto")
+        }
 
         // Language
         // Split on "-" and use last part because media3 does some weird mapping

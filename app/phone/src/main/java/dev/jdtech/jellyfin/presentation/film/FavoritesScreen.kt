@@ -1,62 +1,117 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
-import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
-import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.models.UiText
+import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
+import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
+import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 @Composable
 fun FavoritesScreen(
     onItemClick: (item: FindroidItem) -> Unit,
-    navigateBack: () -> Unit,
+    onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadItems() }
 
-    CollectionScreenLayout(
-        collectionName = stringResource(CoreR.string.title_favorite),
+    FavoritesScreenLayout(
         state = state,
-        onAction = { action ->
-            when (action) {
-                is CollectionAction.OnItemClick -> onItemClick(action.item)
-                is CollectionAction.OnBackClick -> navigateBack()
-            }
-        },
+        onItemClick = onItemClick,
+        onSearchClick = onSearchClick,
+        onSettingsClick = onSettingsClick,
+        onRetryClick = { viewModel.loadItems() },
     )
+}
+
+@Composable
+private fun FavoritesScreenLayout(
+    state: CollectionState,
+    onItemClick: (item: FindroidItem) -> Unit,
+    onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onRetryClick: () -> Unit,
+) {
+    val safePadding = rememberSafePadding(handleStartInsets = false)
+
+    val paddingStart = safePadding.start + MaterialTheme.spacings.default
+    val paddingTop = safePadding.top + MaterialTheme.spacings.small
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+
+    val contentPaddingTop = safePadding.top + 88.dp
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = GridCellsAdaptiveWithMinColumns(minSize = 160.dp, minColumns = 2),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding =
+                PaddingValues(
+                    start = paddingStart,
+                    top = contentPaddingTop,
+                    end = paddingEnd,
+                    bottom = paddingBottom,
+                ),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+        ) {
+            items(state.items, key = { it.id }) { item ->
+                ItemCard(
+                    item = item,
+                    direction = Direction.VERTICAL,
+                    onClick = { onItemClick(item) },
+                    modifier = Modifier.animateItem(),
+                )
+            }
+        }
+
+        HomeHeader(
+            serverName = state.serverName ?: "",
+            isLoading = state.isLoading,
+            isError = state.error != null,
+            onErrorClick = {},
+            onRetryClick = onRetryClick,
+            onSearchClick = onSearchClick,
+            onUserClick = onSettingsClick,
+            modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
+        )
+    }
 }
 
 @PreviewScreenSizes
 @Composable
-private fun CollectionScreenLayoutPreview() {
+private fun FavoritesScreenLayoutPreview() {
     FindroidTheme {
-        CollectionScreenLayout(
-            collectionName = "Favorites",
-            state =
-                CollectionState(
-                    sections =
-                        listOf(
-                            CollectionSection(
-                                id = 0,
-                                name = UiText.StringResource(CoreR.string.title_favorite),
-                                items = dummyMovies,
-                            )
-                        )
-                ),
-            onAction = {},
+        FavoritesScreenLayout(
+            state = CollectionState(items = dummyMovies, serverName = "Jellyfin"),
+            onItemClick = {},
+            onSearchClick = {},
+            onSettingsClick = {},
+            onRetryClick = {},
         )
     }
 }

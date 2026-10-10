@@ -183,15 +183,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     options = R.array.season_grid_columns,
                                                     optionValues = R.array.season_grid_columns,
                                                 ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.naive_title_overlay,
-                                                    descriptionStringRes =
-                                                        R.string.naive_title_overlay_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.naiveTitleOverlay,
-                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
@@ -215,6 +206,56 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         appPreferences.backdropLandscapeRatio,
                                                     options = R.array.backdrop_ratios,
                                                     optionValues = R.array.backdrop_ratios_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.title_image,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.title_portrait_width,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.titlePortraitWidth,
+                                                    options = R.array.title_width_options,
+                                                    optionValues = R.array.title_width_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.title_landscape_width,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.titleLandscapeWidth,
+                                                    options = R.array.title_width_options,
+                                                    optionValues = R.array.title_width_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.title_player_width,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.titlePlayerWidth,
+                                                    options = R.array.title_width_options,
+                                                    optionValues = R.array.title_width_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource = R.string.title_image_ratio,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.titleImageRatio,
+                                                    options = R.array.title_ratio_options,
+                                                    optionValues = R.array.title_ratio_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.naive_title_overlay,
+                                                    descriptionStringRes =
+                                                        R.string.naive_title_overlay_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.naiveTitleOverlay,
                                                 ),
                                             ),
                                     ),
@@ -287,6 +328,14 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         appPreferences.playerBackend,
                                                     options = R.array.player_backends,
                                                     optionValues = R.array.player_backends,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.always_play_subtitles,
+                                                    descriptionStringRes =
+                                                        R.string.always_play_subtitles_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerAlwaysPlaySubtitles,
                                                 ),
                                                 PreferenceCategory(
                                                     nameStringResource = R.string.mpv_options,

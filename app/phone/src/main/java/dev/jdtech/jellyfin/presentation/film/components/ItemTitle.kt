@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
+import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 
 /**
  * Shows the item's title logo image when available, falling back to plain text otherwise.
@@ -39,10 +40,13 @@ fun ItemTitle(
     if (logoUri != null) {
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val widthFraction = if (isLandscape) 0.35f else 0.7f
+        val titleConfig = LocalTitleImageConfig.current
+        val widthFraction =
+            if (isLandscape) titleConfig.landscapeWidth else titleConfig.portraitWidth
         val maxWidth = (configuration.screenWidthDp * widthFraction).dp
+        val ratioHeight = if (titleConfig.ratio > 0f) maxWidth / titleConfig.ratio else maxWidth
         val maxHeight =
-            if (logoHeight == Dp.Unspecified) maxWidth / 2 else minOf(logoHeight, maxWidth / 2)
+            if (logoHeight == Dp.Unspecified) ratioHeight else minOf(logoHeight, ratioHeight)
         val naiveOverlay = LocalNaiveTitleOverlay.current
         AsyncImage(
             model = logoUri,
