@@ -997,17 +997,14 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
 
     fun loadPreferences(indexes: List<Int> = emptyList(), deviceType: DeviceType) {
         viewModelScope.launch {
-            val isMpvBackend =
-                appPreferences.getValue(appPreferences.playerBackend) == "mpv"
+            val isMpvBackend = appPreferences.getValue(appPreferences.playerBackend) == "mpv"
 
             // Hide the whole mpv section (and its subtitle page) unless mpv is
             // the active player backend.
-            if (!isMpvBackend &&
-                (
-                    indexes.contains(R.string.mpv_options) ||
-                        indexes.contains(R.string.mpv_subtitles)
-                    )
-            ) {
+            val isHiddenMpvDestination =
+                indexes.contains(R.string.mpv_options) ||
+                    indexes.contains(R.string.mpv_subtitles)
+            if (!isMpvBackend && isHiddenMpvDestination) {
                 _state.emit(_state.value.copy(preferenceGroups = emptyList()))
                 return@launch
             }
@@ -1041,8 +1038,7 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                     .filter {
                                         if (!isMpvBackend && it is PreferenceCategory) {
                                             it.nameStringResource != R.string.mpv_options &&
-                                                it.nameStringResource !=
-                                                R.string.mpv_subtitles
+                                                it.nameStringResource != R.string.mpv_subtitles
                                         } else {
                                             true
                                         }

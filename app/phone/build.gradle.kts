@@ -62,7 +62,13 @@ android {
             isEnable = !isBuildingBundle
 
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            // Optionally restrict to a single ABI, e.g. -PtargetAbi=arm64-v8a
+            val targetAbi = project.findProperty("targetAbi") as String?
+            if (targetAbi != null) {
+                include(targetAbi)
+            } else {
+                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            }
         }
     }
 

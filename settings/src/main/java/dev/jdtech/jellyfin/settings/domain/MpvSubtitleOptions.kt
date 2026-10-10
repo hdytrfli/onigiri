@@ -29,6 +29,11 @@ object MpvSubtitleOptions {
     /** Raw option values for `MPVLib.setOptionString`. */
     fun buildOptions(appPreferences: AppPreferences): Map<String, String> {
         val useMargins = yesNo(appPreferences.getValue(appPreferences.playerMpvSubUseMargins))
+        val backColor =
+            backColorWithAlpha(
+                appPreferences.getValue(appPreferences.playerMpvSubBackColor),
+                appPreferences.getValue(appPreferences.playerMpvSubBackOpacity),
+            )
         return mapOf(
             "sub-font-size" to appPreferences.getValue(appPreferences.playerMpvSubFontSize),
             "sub-color" to appPreferences.getValue(appPreferences.playerMpvSubColor),
@@ -37,15 +42,9 @@ object MpvSubtitleOptions {
             "sub-ass-force-margins" to useMargins,
             "sub-bold" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubBold)),
             "sub-italic" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubItalic)),
-            "sub-outline-size" to
-                appPreferences.getValue(appPreferences.playerMpvSubBorderSize),
-            "sub-outline-color" to
-                appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
-            "sub-back-color" to
-                backColorWithAlpha(
-                    appPreferences.getValue(appPreferences.playerMpvSubBackColor),
-                    appPreferences.getValue(appPreferences.playerMpvSubBackOpacity),
-                ),
+            "sub-outline-size" to appPreferences.getValue(appPreferences.playerMpvSubBorderSize),
+            "sub-outline-color" to appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
+            "sub-back-color" to backColor,
         )
     }
 }
