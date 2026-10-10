@@ -255,7 +255,7 @@ private fun EpisodeScreenLayout(
                         ExtraInfoText(videoMetadata = state.videoMetadata!!)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     }
-                    OverviewText(text = episode.overview)
+                    OverviewText(text = episode.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     if (state.director != null || state.writers.isNotEmpty()) {
                         InfoText(

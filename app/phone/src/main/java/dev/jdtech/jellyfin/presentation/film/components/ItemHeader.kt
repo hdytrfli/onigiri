@@ -1,10 +1,12 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -27,6 +30,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.parallaxLayoutModifier
+import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 @Composable
 fun ItemHeader(
@@ -119,6 +123,8 @@ private fun ItemHeaderBase(
     content: @Composable (BoxScope.() -> Unit) = {},
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
+    val safePadding = rememberSafePadding()
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     val logoUri =
         when (item) {
@@ -126,7 +132,13 @@ private fun ItemHeaderBase(
             else -> item.images.logo
         }
 
-    Box(modifier = Modifier.height(288.dp).clipToBounds()) {
+    Box(
+        modifier =
+            Modifier.fillMaxWidth()
+                // Square backdrop in portrait, half-height (2:1) in landscape.
+                .aspectRatio(if (isLandscape) 2f else 1f)
+                .clipToBounds()
+    ) {
         backdropImage()
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawRect(Color.Black.copy(alpha = 0.1f))
@@ -138,7 +150,14 @@ private fun ItemHeaderBase(
                     )
             )
         }
-        content()
+        // Inset the content from the top so taller headers never run under the top bar.
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(top = safePadding.top + MaterialTheme.spacings.default)
+        ) {
+            content()
+        }
         if (showLogo) {
             AsyncImage(
                 model = logoUri,
