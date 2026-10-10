@@ -30,6 +30,7 @@ import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.isControlsLocked
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
 import dev.jdtech.jellyfin.player.core.domain.models.Trickplay
+import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import kotlin.math.abs
@@ -134,13 +135,13 @@ class PlayerGestureHelper(
             },
         )
 
-    @SuppressLint("SetTextI18n")
     private fun enableSpeedIncrease() {
         playerView.player?.let {
             if (it.isPlaying) {
                 lastPlaybackSpeed = it.playbackParameters.speed
                 it.setPlaybackSpeed(playbackSpeedIncrease)
-                activity.binding.gestureSpeedText.text = playbackSpeedIncrease.toString() + "x"
+                activity.binding.gestureSpeedText.text =
+                    playerView.context.getString(R.string.player_controls_fast_forward)
                 activity.binding.gestureSpeedLayout.visibility = View.VISIBLE
             }
         }
