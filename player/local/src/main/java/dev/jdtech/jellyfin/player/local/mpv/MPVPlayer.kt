@@ -57,13 +57,13 @@ class MPVPlayer(
     videoOutput: String = "gpu-next",
     audioOutput: String = "aaudio",
     hwDec: String = "mediacodec",
-    private val subFontSize: String = "38",
+    private val subFontSize: String = "28",
     private val subColor: String = "#FFFFFFFF",
     private val subPos: String = "100",
-    private val subUseMargins: String = "no",
+    private val subUseMargins: String = "yes",
     private val subBold: String = "no",
     private val subItalic: String = "no",
-    private val subBorderSize: String = "3",
+    private val subBorderSize: String = "0",
     private val subBorderColor: String = "#FF000000",
     private val subBackColor: String = "#FF000000",
     private val subBorderStyle: String = "background-box",
@@ -127,7 +127,7 @@ class MPVPlayer(
         var hwDec: String = "mediacodec"
             private set
 
-        var subFontSize: String = "38"
+        var subFontSize: String = "28"
             private set
 
         var subColor: String = "#FFFFFFFF"
@@ -136,7 +136,7 @@ class MPVPlayer(
         var subPos: String = "100"
             private set
 
-        var subUseMargins: String = "no"
+        var subUseMargins: String = "yes"
             private set
 
         var subBold: String = "no"
@@ -145,7 +145,7 @@ class MPVPlayer(
         var subItalic: String = "no"
             private set
 
-        var subBorderSize: String = "3"
+        var subBorderSize: String = "0"
             private set
 
         var subBorderColor: String = "#FF000000"
