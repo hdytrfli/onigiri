@@ -2,8 +2,8 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,8 +18,11 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
 /**
- * Shows the item's title logo image when available, falling back to plain text otherwise. The logo
- * width is capped relative to the parent width (35% landscape, 60% portrait).
+ * Shows the item's title logo image when available, falling back to plain text otherwise.
+ *
+ * The logo uses its intrinsic (auto) width, capped to a reserved area of 70% of the screen width in
+ * portrait and 35% in landscape, with a 2:1 (width:height) maximum ratio. [logoHeight] can tighten
+ * the height further for inline uses.
  */
 @Composable
 fun ItemTitle(
@@ -28,18 +31,21 @@ fun ItemTitle(
     modifier: Modifier = Modifier,
     maxLines: Int = 3,
     style: TextStyle = MaterialTheme.typography.headlineMedium,
-    logoHeight: Dp = 72.dp,
+    logoHeight: Dp = Dp.Unspecified,
 ) {
     if (logoUri != null) {
-        val isLandscape =
-            LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val widthFraction = if (isLandscape) 0.35f else 0.6f
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val widthFraction = if (isLandscape) 0.35f else 0.7f
+        val maxWidth = (configuration.screenWidthDp * widthFraction).dp
+        val maxHeight =
+            if (logoHeight == Dp.Unspecified) maxWidth / 2 else minOf(logoHeight, maxWidth / 2)
         AsyncImage(
             model = logoUri,
             contentDescription = title,
             contentScale = ContentScale.Fit,
             alignment = Alignment.CenterStart,
-            modifier = modifier.fillMaxWidth(widthFraction).height(logoHeight),
+            modifier = modifier.widthIn(max = maxWidth).heightIn(max = maxHeight),
         )
     } else {
         Text(
