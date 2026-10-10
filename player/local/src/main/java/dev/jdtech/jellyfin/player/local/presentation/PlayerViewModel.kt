@@ -180,6 +180,7 @@ constructor(
                         .setSubBorderSize(subOptions.getValue("sub-outline-size"))
                         .setSubBorderColor(subOptions.getValue("sub-outline-color"))
                         .setSubBackColor(subOptions.getValue("sub-back-color"))
+                        .setSubBorderStyle(subOptions.getValue("sub-border-style"))
                         .build()
                 }
 

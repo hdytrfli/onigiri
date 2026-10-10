@@ -66,6 +66,7 @@ class MPVPlayer(
     private val subBorderSize: String = "3",
     private val subBorderColor: String = "#FF000000",
     private val subBackColor: String = "#FF000000",
+    private val subBorderStyle: String = "background-box",
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
     private val audioManager: AudioManager by lazy { context.getSystemService()!! }
@@ -95,6 +96,7 @@ class MPVPlayer(
         subBorderSize = builder.subBorderSize,
         subBorderColor = builder.subBorderColor,
         subBackColor = builder.subBackColor,
+        subBorderStyle = builder.subBorderStyle,
     )
 
     class Builder(val context: Context) {
@@ -152,6 +154,9 @@ class MPVPlayer(
         var subBackColor: String = "#FF000000"
             private set
 
+        var subBorderStyle: String = "background-box"
+            private set
+
         fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) =
             apply {
                 this.audioAttributes = audioAttributes
@@ -187,21 +192,23 @@ class MPVPlayer(
 
         fun setSubPos(subPos: String) = apply { this.subPos = subPos }
 
-        fun setSubUseMargins(subUseMargins: String) =
-            apply { this.subUseMargins = subUseMargins }
+        fun setSubUseMargins(subUseMargins: String) = apply { this.subUseMargins = subUseMargins }
 
         fun setSubBold(subBold: String) = apply { this.subBold = subBold }
 
         fun setSubItalic(subItalic: String) = apply { this.subItalic = subItalic }
 
-        fun setSubBorderSize(subBorderSize: String) =
-            apply { this.subBorderSize = subBorderSize }
+        fun setSubBorderSize(subBorderSize: String) = apply { this.subBorderSize = subBorderSize }
 
-        fun setSubBorderColor(subBorderColor: String) =
-            apply { this.subBorderColor = subBorderColor }
+        fun setSubBorderColor(subBorderColor: String) = apply {
+            this.subBorderColor = subBorderColor
+        }
 
-        fun setSubBackColor(subBackColor: String) =
-            apply { this.subBackColor = subBackColor }
+        fun setSubBackColor(subBackColor: String) = apply { this.subBackColor = subBackColor }
+
+        fun setSubBorderStyle(subBorderStyle: String) = apply {
+            this.subBorderStyle = subBorderStyle
+        }
 
         fun build() = MPVPlayer(this)
     }
@@ -253,6 +260,7 @@ class MPVPlayer(
         mpvLib.setOptionString("sub-outline-size", subBorderSize)
         mpvLib.setOptionString("sub-outline-color", subBorderColor)
         mpvLib.setOptionString("sub-back-color", subBackColor)
+        mpvLib.setOptionString("sub-border-style", subBorderStyle)
 
         // Language
         // Split on "-" and use last part because media3 does some weird mapping

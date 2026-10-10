@@ -7,6 +7,7 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.TypedValue
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -454,6 +455,17 @@ class PlayerGestureHelper(
             )
             .apply { isQuickScaleEnabled = false }
 
+    /**
+     * Applies the configured overlay text size to the fast-forward and seek indicator texts so both
+     * share the same placement and size.
+     */
+    private fun applyOverlayTextSize() {
+        val overlayText = appPreferences.getValue(appPreferences.playerOverlayTextSize)
+        val sizeSp = overlayText.toFloatOrNull() ?: 16f
+        activity.binding.gestureSpeedText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+        activity.binding.progressScrubberText.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+    }
+
     fun updateZoomMode(enabled: Boolean) {
         if (playerView.player is MPVPlayer) {
             (playerView.player as MPVPlayer).updateZoomMode(enabled)
@@ -581,6 +593,8 @@ class PlayerGestureHelper(
         }
 
         updateZoomMode(appPreferences.getValue(appPreferences.playerGesturesStartMaximized))
+
+        applyOverlayTextSize()
 
         @Suppress("ClickableViewAccessibility")
         playerView.setOnTouchListener { _, event ->

@@ -70,9 +70,7 @@ constructor(
     }
 
     private suspend fun getActors(people: List<FindroidItemPerson>): List<FindroidItemPerson> {
-        return withContext(Dispatchers.Default) {
-            people.filter { it.type == PersonKind.ACTOR }
-        }
+        return withContext(Dispatchers.Default) { people.filter { it.type == PersonKind.ACTOR } }
     }
 
     private suspend fun getDirector(people: List<FindroidItemPerson>): FindroidItemPerson? {
@@ -82,9 +80,7 @@ constructor(
     }
 
     private suspend fun getWriters(people: List<FindroidItemPerson>): List<FindroidItemPerson> {
-        return withContext(Dispatchers.Default) {
-            people.filter { it.type == PersonKind.WRITER }
-        }
+        return withContext(Dispatchers.Default) { people.filter { it.type == PersonKind.WRITER } }
     }
 
     fun onAction(action: EpisodeAction) {

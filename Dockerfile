@@ -5,7 +5,10 @@
 # local validation builds; CI remains the source of truth.
 # Build:  docker build -t findroid-build .
 # Run:    docker run --rm -v "$PWD:/work" -v findroid-gradle:/root/.gradle \
-#             -w /work findroid-build ./gradlew :app:phone:assembleLibreDebug -PtargetAbi=arm64-v8a
+#             -v findroid-android:/root/.android -w /work findroid-build \
+#             ./gradlew :app:phone:assembleLibreDebug -PtargetAbi=arm64-v8a
+# The findroid-android volume persists the container's debug keystore, so all
+# local builds share one signature and install as updates (app data kept).
 FROM eclipse-temurin:17-jdk-noble
 
 ENV ANDROID_HOME=/opt/android-sdk

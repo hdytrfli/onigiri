@@ -3,15 +3,14 @@ package dev.jdtech.jellyfin.settings.domain
 /**
  * Builds mpv `sub-*` options from [AppPreferences].
  *
- * Applied at playback start in `MPVPlayer` (like `hwdec`/`vo`/`ao`). Manual
- * `mpv.conf` entries still take precedence for advanced overrides.
+ * Applied at playback start in `MPVPlayer` (like `hwdec`/`vo`/`ao`). Manual `mpv.conf` entries
+ * still take precedence for advanced overrides.
  */
 object MpvSubtitleOptions {
     fun yesNo(value: Boolean): String = if (value) "yes" else "no"
 
     /**
-     * Combine an `#RRGGBB` or `#AARRGGBB` color with a 0-255 opacity into mpv
-     * `#AARRGGBB` format.
+     * Combine an `#RRGGBB` or `#AARRGGBB` color with a 0-255 opacity into mpv `#AARRGGBB` format.
      */
     fun backColorWithAlpha(rgbHex: String, opacity: String): String {
         val alphaInt = opacity.toIntOrNull()?.coerceIn(0, 255) ?: return rgbHex
@@ -45,6 +44,7 @@ object MpvSubtitleOptions {
             "sub-outline-size" to appPreferences.getValue(appPreferences.playerMpvSubBorderSize),
             "sub-outline-color" to appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
             "sub-back-color" to backColor,
+            "sub-border-style" to "background-box",
         )
     }
 }

@@ -131,9 +131,10 @@
     <LinearLayout
         android:id="@+id/gesture_speed_layout"
         android:layout_width="wrap_content"
-        android:layout_height="64dp"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_margin="16dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="64dp"
+        android:padding="10dp"
         android:background="@drawable/overlay_background"
         android:clickable="false"
         android:gravity="center_vertical"
@@ -145,10 +146,10 @@
             android:id="@+id/gesture_speed_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="6dp"
             android:gravity="center"
-            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            tools:text="Fast forward" />
 
         <ImageView
             android:id="@+id/gesture_speed_image"

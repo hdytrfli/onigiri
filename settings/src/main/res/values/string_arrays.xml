@@ -115,6 +115,14 @@
         <item>230</item>
         <item>255</item>
     </string-array>
+    <string-array name="overlay_text_size">
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>24</item>
+    </string-array>
     <string-array name="media_segments_auto_skip">
         <item>@string/media_segments_auto_skip_pip</item>
         <item>@string/media_segments_auto_skip_always</item>
