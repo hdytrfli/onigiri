@@ -66,7 +66,7 @@ import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 
-private val TOP_LEVEL_ROUTES = setOf(HomeRoute, MediaRoute, DownloadsRoute)
+private val TOP_LEVEL_ROUTES = setOf(HomeRoute, MediaRoute, FavoritesRoute, DownloadsRoute)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
 
 data class TabBarItem(
@@ -91,6 +91,13 @@ val downloadsTab =
         title = CoreR.string.title_download,
         icon = CoreR.drawable.ic_download,
         route = DownloadsRoute,
+    )
+
+val favoritesTab =
+    TabBarItem(
+        title = CoreR.string.title_favorite,
+        icon = CoreR.drawable.ic_heart,
+        route = FavoritesRoute,
     )
 
 @Composable
@@ -179,8 +186,8 @@ private fun MainNavigation(
 ) {
     val navigationItems =
         when (isOfflineMode) {
-            false -> listOf(homeTab, mediaTab, downloadsTab)
-            true -> listOf(homeTab, downloadsTab)
+            false -> listOf(homeTab, mediaTab, favoritesTab, downloadsTab)
+            true -> listOf(homeTab, favoritesTab, downloadsTab)
         }
     val tabRoutes = navigationItems.map { it.route }
 
@@ -395,7 +402,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<MediaRoute> {
         MediaScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onFavoritesClick = dropUnlessResumed { navigator.navigate(FavoritesRoute) },
+            onSettingsClick =
+                dropUnlessResumed {
+                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
+                },
             searchExpanded = searchExpanded.value,
             onSearchExpand = { searchExpanded.value = it },
         )
