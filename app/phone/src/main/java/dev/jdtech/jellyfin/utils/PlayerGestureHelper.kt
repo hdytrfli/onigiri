@@ -457,12 +457,8 @@ class PlayerGestureHelper(
             .apply { isQuickScaleEnabled = false }
 
     /**
-     * Applies the configured overlay text size to the fast-forward and seek indicator texts so both
-     * share the same placement and size.
-     */
-    /**
-     * Fixes the shared fast-forward/seek indicator text size so both states
-     * share the same placement and size.
+     * Fixes the shared fast-forward/seek indicator text size so both states share the same
+     * placement and size.
      */
     private fun applyOverlayTextSize() {
         activity.binding.progressScrubberText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)

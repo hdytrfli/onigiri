@@ -36,6 +36,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject lateinit var debugAutoLogin: DebugAutoLogin
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
@@ -44,6 +46,7 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+            debugAutoLogin.run()
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {

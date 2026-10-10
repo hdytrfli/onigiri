@@ -103,6 +103,18 @@
         <item>100%</item>
     </string-array>
     <string-array name="mpv_sub_back_opacity_values">
+        <item>0</item>
+        <item>26</item>
+        <item>51</item>
+        <item>77</item>
+        <item>102</item>
+        <item>128</item>
+        <item>153</item>
+        <item>179</item>
+        <item>204</item>
+        <item>230</item>
+        <item>255</item>
+    </string-array>
     <string-array name="media_segments_auto_skip">
         <item>@string/media_segments_auto_skip_pip</item>
         <item>@string/media_segments_auto_skip_always</item>

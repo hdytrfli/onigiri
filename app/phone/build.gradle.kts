@@ -25,6 +25,24 @@ android {
         versionName = Versions.APP_NAME
 
         testInstrumentationRunner = "dev.jdtech.jellyfin.HiltTestRunner"
+
+        // Debug-only auto-login (values come from gradle.properties). Used to skip
+        // manual server/user setup on repeat local test builds.
+        buildConfigField(
+            "String",
+            "DEBUG_AUTO_LOGIN_URL",
+            "\"${providers.gradleProperty("findroid.debugAutoLoginUrl").orNull ?: ""}\"",
+        )
+        buildConfigField(
+            "String",
+            "DEBUG_AUTO_LOGIN_USERNAME",
+            "\"${providers.gradleProperty("findroid.debugAutoLoginUsername").orNull ?: ""}\"",
+        )
+        buildConfigField(
+            "String",
+            "DEBUG_AUTO_LOGIN_PASSWORD",
+            "\"${providers.gradleProperty("findroid.debugAutoLoginPassword").orNull ?: ""}\"",
+        )
     }
 
     buildTypes {
