@@ -40,6 +40,8 @@ android {
         register("staging") {
             initWith(getByName("release"))
             applicationIdSuffix = ".staging"
+            // Sign staging with the debug keystore so it installs locally.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
