@@ -4,19 +4,20 @@
 # docker-output/ with a timestamp.
 #
 # Usage:
-#   ./build.sh                          # debug, arm64-v8a
-#   BUILD_TYPE=staging ./build.sh       # staging (signed with the debug keystore)
+#   ./build.sh                          # staging, arm64-v8a
+#   BUILD_TYPE=debug ./build.sh         # debug
 #   TARGET_ABI=armeabi-v7a ./build.sh
 #
-# Build types: debug (app id .debug), staging (app id .staging, minified),
-# release (app id dev.jdtech.jellyfin, minified, unsigned).
+# Build types: staging (default; app id .staging, minified, signed with the
+# debug keystore), debug (app id .debug), release (app id dev.jdtech.jellyfin,
+# minified, unsigned).
 #
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE="${FINDOID_BUILD_IMAGE:-findroid-build}"
 ABI="${TARGET_ABI:-arm64-v8a}"
-BUILD_TYPE="${BUILD_TYPE:-debug}"
+BUILD_TYPE="${BUILD_TYPE:-staging}"
 OUTPUT_DIR="$REPO_DIR/docker-output"
 
 # Capitalise the build type for the Gradle task name (debug -> Debug).
