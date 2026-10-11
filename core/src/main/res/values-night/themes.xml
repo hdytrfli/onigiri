@@ -5,7 +5,6 @@
         <item name="colorOnPrimary">@color/on_primary_dark</item>
         <item name="colorPrimaryContainer">@color/primary_container_dark</item>
         <item name="colorOnPrimaryContainer">@color/on_primary_container_dark</item>
-
         <!-- Secondary -->
         <item name="colorSecondary">@color/secondary_dark</item>
         <item name="colorOnSecondary">@color/on_secondary_dark</item>

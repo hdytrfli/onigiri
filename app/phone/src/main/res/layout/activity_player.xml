@@ -154,4 +154,53 @@
         android:alpha="0"
         android:src="@drawable/transparent_circle"
         tools:ignore="ContentDescription" />
+
+    <FrameLayout
+        android:id="@+id/player_options_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <View
+            android:id="@+id/player_options_scrim"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#99000000" />
+
+        <LinearLayout
+            android:id="@+id/player_options_panel"
+            android:layout_width="360dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="?attr/colorSurface"
+            android:elevation="8dp"
+            android:orientation="vertical"
+            android:paddingTop="16dp">
+
+            <TextView
+                android:id="@+id/player_options_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="8dp"
+                android:text="@string/player_controls_options"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/player_options_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ListView
+                android:id="@+id/player_options_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:dividerHeight="0dp" />
+        </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

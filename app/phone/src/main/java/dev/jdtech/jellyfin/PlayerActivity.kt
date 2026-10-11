@@ -24,6 +24,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ListView
 import android.widget.Space
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -31,16 +32,19 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.media3.common.C
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import coil3.load
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
-import dev.jdtech.jellyfin.presentation.player.PlayerMenuDialogFragment
+import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
+import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
@@ -52,6 +56,9 @@ import timber.log.Timber
 
 var isControlsLocked: Boolean = false
 var isVolumeBrightnessLocked: Boolean = false
+
+private val playerSpeeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
+private val playerSpeedTexts = listOf("0.5x", "0.75x", "1x", "1.25x", "1.5x", "1.75x", "2x")
 
 @AndroidEntryPoint
 class PlayerActivity : BasePlayerActivity() {
@@ -318,8 +325,43 @@ class PlayerActivity : BasePlayerActivity() {
             pipSpace.isVisible = false
         }
 
+        val optionsOverlay = findViewById<FrameLayout>(R.id.player_options_overlay)
+        val optionsScrim = findViewById<View>(R.id.player_options_scrim)
+        val optionsPanel = findViewById<View>(R.id.player_options_panel)
+        val optionsTabs = findViewById<TabLayout>(R.id.player_options_tabs)
+        val optionsList = findViewById<ListView>(R.id.player_options_list)
+
+        val menuAdapter =
+            PlayerMenuAdapter(this) { position ->
+                when (optionsTabs.selectedTabPosition) {
+                    0 -> viewModel.switchToTrack(C.TRACK_TYPE_AUDIO, position - 1)
+                    1 -> viewModel.switchToTrack(C.TRACK_TYPE_TEXT, position - 1)
+                    else -> viewModel.selectSpeed(playerSpeeds[position])
+                }
+                hideOptionsSheet(optionsOverlay, optionsPanel, optionsScrim)
+            }
+        optionsList.adapter = menuAdapter
+        optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_audio))
+        optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_subtitles))
+        optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_speed))
+        optionsTabs.addOnTabSelectedListener(
+            object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    menuAdapter.submit(optionsItems(tab.position))
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab) = Unit
+
+                override fun onTabReselected(tab: TabLayout.Tab) = Unit
+            }
+        )
+        optionsScrim.setOnClickListener {
+            hideOptionsSheet(optionsOverlay, optionsPanel, optionsScrim)
+        }
+
         playerMenuButton.setOnClickListener {
-            PlayerMenuDialogFragment(viewModel).show(supportFragmentManager, "playermenudialog")
+            menuAdapter.submit(optionsItems(optionsTabs.selectedTabPosition))
+            showOptionsSheet(optionsOverlay, optionsPanel, optionsScrim)
         }
 
         val exoPlayerControlView = findViewById<FrameLayout>(R.id.player_controls)
@@ -466,6 +508,65 @@ class PlayerActivity : BasePlayerActivity() {
         try {
             enterPictureInPictureMode(pipParams())
         } catch (_: IllegalArgumentException) {}
+    }
+
+    private fun optionsItems(tab: Int): List<PlayerMenuItem> =
+        when (tab) {
+            0 -> trackItems(C.TRACK_TYPE_AUDIO)
+            1 -> trackItems(C.TRACK_TYPE_TEXT)
+            else ->
+                playerSpeeds.mapIndexed { index, speed ->
+                    PlayerMenuItem(
+                        title = playerSpeedTexts[index],
+                        subtitle = null,
+                        selected = speed == viewModel.playbackSpeed,
+                    )
+                }
+        }
+
+    private fun trackItems(type: @C.TrackType Int): List<PlayerMenuItem> {
+        val groups =
+            viewModel.player.currentTracks.groups.filter { it.type == type && it.isSupported }
+
+        val items = mutableListOf<PlayerMenuItem>()
+        items.add(
+            PlayerMenuItem(
+                title = getString(CoreR.string.none),
+                subtitle = null,
+                selected = groups.none { it.isSelected },
+            )
+        )
+        groups.forEachIndexed { index, group ->
+            val format = group.mediaTrackGroup.getFormat(0)
+            items.add(
+                PlayerMenuItem(
+                    title = format.label ?: format.language ?: "Track ${index + 1}",
+                    subtitle = format.codecs,
+                    selected = group.isSelected,
+                )
+            )
+        }
+        return items
+    }
+
+    private fun showOptionsSheet(overlay: View, panel: View, scrim: View) {
+        overlay.visibility = View.VISIBLE
+        panel.post {
+            panel.translationX = panel.width.toFloat()
+            panel.animate().translationX(0f).setDuration(200L).start()
+        }
+        scrim.alpha = 0f
+        scrim.animate().alpha(1f).setDuration(200L).start()
+    }
+
+    private fun hideOptionsSheet(overlay: View, panel: View, scrim: View) {
+        panel
+            .animate()
+            .translationX(panel.width.toFloat())
+            .setDuration(200L)
+            .withEndAction { overlay.visibility = View.GONE }
+            .start()
+        scrim.animate().alpha(0f).setDuration(200L).start()
     }
 
     override fun onPictureInPictureModeChanged(
