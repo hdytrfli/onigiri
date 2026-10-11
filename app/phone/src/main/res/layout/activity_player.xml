@@ -178,22 +178,12 @@
             android:orientation="vertical"
             android:paddingTop="16dp">
 
-            <TextView
-                android:id="@+id/player_options_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingBottom="8dp"
-                android:text="@string/player_controls_options"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/player_options_tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                app:tabGravity="fill"
+                app:tabMode="fixed" />
 
             <ListView
                 android:id="@+id/player_options_list"

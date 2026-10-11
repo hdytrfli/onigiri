@@ -8,7 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
  */
 data class TitleImageConfig(
     val portraitWidth: Float = 0.7f,
-    val landscapeWidth: Float = 0.35f,
+    val landscapeWidth: Float = 0.3f,
     val ratio: Float = 2f,
 )
 

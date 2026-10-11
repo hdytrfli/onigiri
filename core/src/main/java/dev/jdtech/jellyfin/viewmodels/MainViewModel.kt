@@ -118,11 +118,11 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         backdropPortraitRatio =
                             interfacePrefs.portraitRatio.toFloatOrNull() ?: 1.5f,
                         backdropLandscapeRatio =
-                            interfacePrefs.landscapeRatio.toFloatOrNull() ?: 2f,
+                            interfacePrefs.landscapeRatio.toFloatOrNull() ?: 2.3333333f,
                         contentSpacingScale = interfacePrefs.contentSpacing.toFloatOrNull() ?: 1f,
                         confirmExit = interfacePrefs.confirmExit,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
-                        titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.35f,
+                        titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
                         naiveTitleOverlay = titlePrefs.naive,
                     )
@@ -160,10 +160,10 @@ data class MainState(
     val hasCurrentUser: Boolean = false,
     val isOfflineMode: Boolean = false,
     val backdropPortraitRatio: Float = 1.5f,
-    val backdropLandscapeRatio: Float = 2f,
+    val backdropLandscapeRatio: Float = 2.3333333f,
     val contentSpacingScale: Float = 1f,
     val titlePortraitWidth: Float = 0.7f,
-    val titleLandscapeWidth: Float = 0.35f,
+    val titleLandscapeWidth: Float = 0.3f,
     val titleImageRatio: Float = 2f,
     val naiveTitleOverlay: Boolean = false,
     val confirmExit: Boolean = false,

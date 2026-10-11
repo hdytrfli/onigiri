@@ -143,7 +143,7 @@ class PlayerActivity : BasePlayerActivity() {
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
         // Title logo sizing from settings (player width fraction and max width:height ratio).
         val playerWidthFraction =
-            appPreferences.getValue(appPreferences.titlePlayerWidth).toFloatOrNull() ?: 0.25f
+            appPreferences.getValue(appPreferences.titlePlayerWidth).toFloatOrNull() ?: 0.2f
         val logoMaxWidth = (resources.displayMetrics.widthPixels * playerWidthFraction).toInt()
         val logoRatio =
             appPreferences.getValue(appPreferences.titleImageRatio).toFloatOrNull() ?: 2f
@@ -372,8 +372,8 @@ class PlayerActivity : BasePlayerActivity() {
         gestureLockButton.setOnClickListener {
             isVolumeBrightnessLocked = !isVolumeBrightnessLocked
             gestureLockButton.setImageResource(
-                if (isVolumeBrightnessLocked) CoreR.drawable.ic_lock_open
-                else CoreR.drawable.ic_lock
+                if (isVolumeBrightnessLocked) CoreR.drawable.ic_circle_off
+                else CoreR.drawable.ic_circle
             )
         }
 
@@ -390,7 +390,7 @@ class PlayerActivity : BasePlayerActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             isControlsLocked = false
             isVolumeBrightnessLocked = false
-            gestureLockButton.setImageResource(CoreR.drawable.ic_lock)
+            gestureLockButton.setImageResource(CoreR.drawable.ic_circle)
         }
 
         pipButton.setOnClickListener { pictureInPicture() }

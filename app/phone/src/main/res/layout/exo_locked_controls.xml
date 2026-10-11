@@ -17,7 +17,7 @@
         android:contentDescription="@string/select_playback_speed"
         android:padding="16dp"
         android:layout_margin="8dp"
-        android:src="@drawable/ic_lock_keyhole_open"
+        android:src="@drawable/ic_lock_open"
         app:tint="@android:color/white" />
 
 </FrameLayout>
