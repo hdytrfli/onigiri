@@ -109,6 +109,9 @@ class PlayerGestureHelper(
                 override fun onDoubleTap(e: MotionEvent): Boolean {
                     // Disables double tap gestures if view is locked
                     if (isControlsLocked) return false
+                    // Disables double tap gestures when the option is off
+                    if (!appPreferences.getValue(appPreferences.playerGesturesDoubleTap))
+                        return false
 
                     val viewWidth = playerView.measuredWidth
                     val areaWidth = viewWidth / 5 // Divide the view into 5 parts: 2:1:2

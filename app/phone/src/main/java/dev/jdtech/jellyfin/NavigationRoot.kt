@@ -304,6 +304,7 @@ private fun MainNavigation(
                                 contentDescription = stringResource(item.title),
                             )
                         },
+                        modifier = Modifier.padding(vertical = 8.dp),
                         enabled = item.enabled,
                         label = { Text(text = stringResource(item.title)) },
                     )

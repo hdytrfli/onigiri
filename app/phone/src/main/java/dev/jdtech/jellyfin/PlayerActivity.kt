@@ -170,6 +170,7 @@ class PlayerActivity : BasePlayerActivity() {
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
+        val gestureLockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_gesture_lock)
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
 
         lifecycleScope.launch {
@@ -367,18 +368,20 @@ class PlayerActivity : BasePlayerActivity() {
         val exoPlayerControlView = findViewById<FrameLayout>(R.id.player_controls)
         val lockedLayout = findViewById<FrameLayout>(R.id.locked_player_view)
 
+        gestureLockButton.isVisible = appPreferences.getValue(appPreferences.playerGesturesVB)
+        gestureLockButton.setOnClickListener {
+            isVolumeBrightnessLocked = !isVolumeBrightnessLocked
+            gestureLockButton.setImageResource(
+                if (isVolumeBrightnessLocked) CoreR.drawable.ic_lock_open
+                else CoreR.drawable.ic_lock
+            )
+        }
+
         lockButton.setOnClickListener {
-            if (!isVolumeBrightnessLocked) {
-                // First press: lock the volume and brightness gestures only.
-                isVolumeBrightnessLocked = true
-                lockButton.setImageResource(CoreR.drawable.ic_lock_gestures)
-            } else {
-                // Second press: full lock (previous behaviour).
-                exoPlayerControlView.visibility = View.GONE
-                lockedLayout.visibility = View.VISIBLE
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
-                isControlsLocked = true
-            }
+            exoPlayerControlView.visibility = View.GONE
+            lockedLayout.visibility = View.VISIBLE
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+            isControlsLocked = true
         }
 
         unlockButton.setOnClickListener {
@@ -387,7 +390,7 @@ class PlayerActivity : BasePlayerActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             isControlsLocked = false
             isVolumeBrightnessLocked = false
-            lockButton.setImageResource(CoreR.drawable.ic_lock)
+            gestureLockButton.setImageResource(CoreR.drawable.ic_lock)
         }
 
         pipButton.setOnClickListener { pictureInPicture() }

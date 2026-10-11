@@ -170,10 +170,10 @@
 
         <LinearLayout
             android:id="@+id/player_options_panel"
-            android:layout_width="360dp"
+            android:layout_width="400dp"
             android:layout_height="match_parent"
             android:layout_gravity="end"
-            android:background="?attr/colorSurface"
+            android:background="@drawable/player_options_panel_background"
             android:elevation="8dp"
             android:orientation="vertical"
             android:paddingTop="16dp">

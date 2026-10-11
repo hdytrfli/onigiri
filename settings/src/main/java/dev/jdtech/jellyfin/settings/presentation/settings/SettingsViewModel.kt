@@ -702,6 +702,17 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
+                                                        R.string.player_gestures_double_tap,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_double_tap_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.playerGestures),
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesDoubleTap,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
                                                         R.string.player_gestures_zoom,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_zoom_summary,
