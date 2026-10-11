@@ -427,6 +427,7 @@ class MPVPlayer(
 
     // MPV Custom
     private var isPlayerReady: Boolean = false
+    private var isReleased: Boolean = false
     private var isSeekable: Boolean = false
     private var currentMediaItemIndex: Int = 0
     private var currentPositionMs: Long? = null
@@ -1211,6 +1212,7 @@ class MPVPlayer(
      * player must not be used after calling this method.
      */
     override fun release() {
+        isReleased = true
         if (handleAudioFocus) {
             AudioManagerCompat.abandonAudioFocusRequest(audioManager, audioFocusRequest)
         }
@@ -1626,6 +1628,7 @@ class MPVPlayer(
              * @param holder The SurfaceHolder whose surface is being created.
              */
             override fun surfaceCreated(holder: SurfaceHolder) {
+                if (isReleased) return
                 mpvLib.attachSurface(holder.surface)
                 mpvLib.setOptionString("force-window", "yes")
                 mpvLib.setOptionString("vo", videoOutput)
@@ -1647,6 +1650,7 @@ class MPVPlayer(
                 width: Int,
                 height: Int,
             ) {
+                if (isReleased) return
                 mpvLib.setPropertyString("android-surface-size", "${width}x$height")
             }
 
@@ -1659,6 +1663,7 @@ class MPVPlayer(
              * @param holder The SurfaceHolder whose surface is being destroyed.
              */
             override fun surfaceDestroyed(holder: SurfaceHolder) {
+                if (isReleased) return
                 mpvLib.setOptionString("vo", "null")
                 mpvLib.setOptionString("force-window", "no")
                 mpvLib.detachSurface()
