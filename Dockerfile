@@ -1,12 +1,9 @@
 # Local Docker build environment for Findroid (matches CI: Temurin JDK 17).
-# NOTE: the public SDK repository does not publish platforms;android-37 yet
-# (CI gets it preinstalled on the runner image), so this image aliases a copy
-# of android-36 as android-37. The app targets SDK 36, so this is fine for
-# local validation builds; CI remains the source of truth.
+# platforms;android-37 is only published on the canary channel, so it is
+# installed explicitly here (otherwise AGP re-downloads it into the throwaway
+# container on every build).
 # Build:  docker build -t findroid-build .
-# Run:    docker run --rm -v "$PWD:/work" -v findroid-gradle:/root/.gradle \
-#             -v findroid-android:/root/.android -w /work findroid-build \
-#             ./gradlew :app:phone:assembleLibreDebug -PtargetAbi=arm64-v8a
+# Run:    bash build.sh
 # The findroid-android volume persists the container's debug keystore, so all
 # local builds share one signature and install as updates (app data kept).
 FROM eclipse-temurin:17-jdk-noble
@@ -24,7 +21,6 @@ RUN mkdir -p $ANDROID_HOME/cmdline-tools \
     && rm /tmp/cmdtools.zip \
     && yes | sdkmanager --licenses \
     && sdkmanager "platform-tools" "platforms;android-36" "build-tools;37.0.0" \
-    && cp -r $ANDROID_HOME/platforms/android-36 $ANDROID_HOME/platforms/android-37 \
-    && sed -i 's/android-36/android-37/g' $ANDROID_HOME/platforms/android-37/package.xml
+    && sdkmanager --channel=3 "platforms;android-37.0"
 
 WORKDIR /work
