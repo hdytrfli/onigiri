@@ -134,11 +134,6 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
-        binding.playerView
-            .findViewById<dev.jdtech.jellyfin.ui.WavyTimeBar>(R.id.exo_progress)
-            ?.let { timeBar ->
-                timeBar.wavyEnabled = appPreferences.getValue(appPreferences.playerWavyProgress)
-            }
         // Title logo sizing from settings (player width fraction and max width:height ratio).
         val playerWidthFraction =
             appPreferences.getValue(appPreferences.titlePlayerWidth).toFloatOrNull() ?: 0.25f

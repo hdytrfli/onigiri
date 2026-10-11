@@ -228,8 +228,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.titleLandscapeWidth,
-                                                    options = R.array.title_width_options,
-                                                    optionValues = R.array.title_width_values,
+                                                    options = R.array.title_width_options_low,
+                                                    optionValues = R.array.title_width_values_low,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
@@ -237,8 +237,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.titlePlayerWidth,
-                                                    options = R.array.title_width_options,
-                                                    optionValues = R.array.title_width_values,
+                                                    options = R.array.title_width_options_low,
+                                                    optionValues = R.array.title_width_values_low,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.title_image_ratio,
@@ -256,14 +256,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.naiveTitleOverlay,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.wavy_progress_bar,
-                                                    descriptionStringRes =
-                                                        R.string.wavy_progress_bar_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.playerWavyProgress,
                                                 ),
                                             ),
                                     ),

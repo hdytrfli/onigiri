@@ -38,7 +38,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
-    val playerWavyProgress = Preference("pref_player_wavy_progress", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
     // Player - mpv

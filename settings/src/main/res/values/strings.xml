@@ -122,8 +122,6 @@
     <string name="pref_player_backend">Player backend</string>
     <string name="always_play_subtitles">Always play subtitles</string>
     <string name="always_play_subtitles_summary">Show subtitles automatically when available</string>
-    <string name="wavy_progress_bar">Wavy progress bar</string>
-    <string name="wavy_progress_bar_summary">Use a wavy style for the player progress bar</string>
     <string name="player_options">Player options</string>
     <string name="mpv_options">mpv options</string>
     <string name="mpv_options_summary">Hardware decoding, outputs and subtitle style for the mpv player</string>

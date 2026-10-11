@@ -175,6 +175,30 @@
         <item>0.9</item>
         <item>1</item>
     </string-array>
+    <string-array name="title_width_options_low">
+        <item>10%</item>
+        <item>20%</item>
+        <item>30%</item>
+        <item>40%</item>
+        <item>50%</item>
+        <item>60%</item>
+        <item>70%</item>
+        <item>80%</item>
+        <item>90%</item>
+        <item>100%</item>
+    </string-array>
+    <string-array name="title_width_values_low">
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1</item>
+    </string-array>
     <string-array name="title_ratio_options">
         <item>16:9</item>
         <item>2:1</item>
