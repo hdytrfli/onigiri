@@ -4,40 +4,37 @@ import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -84,6 +81,7 @@ import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
+import kotlinx.coroutines.launch
 
 private val TOP_LEVEL_ROUTES = setOf(HomeRoute, MediaRoute, FavoritesRoute, DownloadsRoute)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
@@ -125,7 +123,6 @@ fun NavigationRoot(
     hasCurrentServer: Boolean,
     hasCurrentUser: Boolean,
     confirmExit: Boolean = false,
-    navigationAnimation: Boolean = true,
 ) {
     val setupComplete = hasServers && hasCurrentServer && hasCurrentUser
 
@@ -183,7 +180,6 @@ fun NavigationRoot(
             isOfflineMode = LocalOfflineMode.current,
             searchExpanded = searchExpanded,
             confirmExit = confirmExit,
-            navigationAnimation = navigationAnimation,
         )
     } else {
         SetupNavigation(
@@ -207,38 +203,11 @@ private fun MainNavigation(
     isOfflineMode: Boolean,
     searchExpanded: MutableState<Boolean>,
     confirmExit: Boolean,
-    navigationAnimation: Boolean,
 ) {
     val context = LocalContext.current
-    var showExitDialog by remember { mutableStateOf(false) }
-
-    // Confirm before exiting from the start route's root.
-    val atExitRoot =
-        navigationState.currentBackStack().size <= 1 &&
-            navigationState.topLevelRoute == navigationState.startRoute
-    BackHandler(enabled = confirmExit && atExitRoot) { showExitDialog = true }
-    if (showExitDialog) {
-        AlertDialog(
-            onDismissRequest = { showExitDialog = false },
-            title = { Text(stringResource(SettingsR.string.confirm_exit_dialog_title)) },
-            text = { Text(stringResource(SettingsR.string.confirm_exit_dialog_text)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showExitDialog = false
-                        (context as? Activity)?.finish()
-                    }
-                ) {
-                    Text(stringResource(SettingsR.string.exit))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showExitDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
-            },
-        )
-    }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var exitPending by remember { mutableStateOf(false) }
 
     val navigationItems =
         when (isOfflineMode) {
@@ -251,6 +220,25 @@ private fun MainNavigation(
     val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
     val showBottomBar = atTabRoot && topLevelRoute in tabRoutes && !searchExpanded.value
 
+    // Press back twice to exit from the start route's root.
+    val atExitRoot =
+        navigationState.currentBackStack().size <= 1 &&
+            navigationState.topLevelRoute == navigationState.startRoute
+    BackHandler(enabled = confirmExit && atExitRoot) {
+        if (exitPending) {
+            (context as? Activity)?.finish()
+        } else {
+            exitPending = true
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = context.getString(SettingsR.string.back_again_to_close),
+                    duration = SnackbarDuration.Short,
+                )
+                exitPending = false
+            }
+        }
+    }
+
     // The search bar belongs to the Media tab: collapse it when the active top level route
     // changes away from Media (e.g. via the home button on a detail screen) so that the bottom
     // bar is shown again.
@@ -260,11 +248,29 @@ private fun MainNavigation(
         }
     }
 
+    val navigationSuiteScaffoldState = rememberNavigationSuiteScaffoldState()
+
+    LaunchedEffect(showBottomBar) {
+        if (showBottomBar) {
+            navigationSuiteScaffoldState.show()
+        } else {
+            navigationSuiteScaffoldState.hide()
+        }
+    }
+
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val useRail =
-        windowAdaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(
-            WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
-        )
+    val customNavSuiteType =
+        with(windowAdaptiveInfo) {
+            if (
+                windowSizeClass.isWidthAtLeastBreakpoint(
+                    WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+                )
+            ) {
+                NavigationSuiteType.NavigationRail
+            } else {
+                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(this)
+            }
+        }
 
     val entryProvider = entryProvider {
         mainEntries(
@@ -277,91 +283,45 @@ private fun MainNavigation(
         )
     }
 
-    val contentTransform =
-        if (navigationAnimation) {
-            GLOBAL_TRANSITION_SPEC
-        } else {
-            EnterTransition.None togetherWith ExitTransition.None
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                navigationItems.forEach { item ->
+                    item(
+                        selected = topLevelRoute == item.route,
+                        onClick = {
+                            if (item.route == MediaRoute && topLevelRoute == MediaRoute) {
+                                searchExpanded.value = true
+                            }
 
-    val navDisplay: @Composable (Modifier) -> Unit = { modifier ->
-        NavDisplay(
-            entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
-            onBack = { navigator.goBack() },
-            modifier = modifier,
-            transitionSpec = { contentTransform },
-            popTransitionSpec = { contentTransform },
-            predictivePopTransitionSpec = { _ -> contentTransform },
+                            navigator.navigate(item.route)
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(item.icon),
+                                contentDescription = stringResource(item.title),
+                            )
+                        },
+                        enabled = item.enabled,
+                        label = { Text(text = stringResource(item.title)) },
+                    )
+                }
+            },
+            layoutType = customNavSuiteType,
+            state = navigationSuiteScaffoldState,
+        ) {
+            NavDisplay(
+                entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
+                onBack = { navigator.goBack() },
+                transitionSpec = { GLOBAL_TRANSITION_SPEC },
+                popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
+                predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
+            )
+        }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
         )
-    }
-
-    val onTabClick: (NavKey) -> Unit = { route ->
-        if (route == MediaRoute && topLevelRoute == MediaRoute) {
-            searchExpanded.value = true
-        }
-        navigator.navigate(route)
-    }
-
-    if (useRail) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(
-                visible = showBottomBar,
-                enter =
-                    if (navigationAnimation) slideInHorizontally(initialOffsetX = { -it })
-                    else EnterTransition.None,
-                exit =
-                    if (navigationAnimation) slideOutHorizontally(targetOffsetX = { -it })
-                    else ExitTransition.None,
-            ) {
-                NavigationRail {
-                    navigationItems.forEach { item ->
-                        NavigationRailItem(
-                            selected = topLevelRoute == item.route,
-                            onClick = { onTabClick(item.route) },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(item.icon),
-                                    contentDescription = stringResource(item.title),
-                                )
-                            },
-                            label = { Text(text = stringResource(item.title)) },
-                            enabled = item.enabled,
-                        )
-                    }
-                }
-            }
-            navDisplay(Modifier.weight(1f))
-        }
-    } else {
-        Column(modifier = Modifier.fillMaxSize()) {
-            navDisplay(Modifier.weight(1f))
-            AnimatedVisibility(
-                visible = showBottomBar,
-                enter =
-                    if (navigationAnimation) slideInVertically(initialOffsetY = { it })
-                    else EnterTransition.None,
-                exit =
-                    if (navigationAnimation) slideOutVertically(targetOffsetY = { it })
-                    else ExitTransition.None,
-            ) {
-                NavigationBar {
-                    navigationItems.forEach { item ->
-                        NavigationBarItem(
-                            selected = topLevelRoute == item.route,
-                            onClick = { onTabClick(item.route) },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(item.icon),
-                                    contentDescription = stringResource(item.title),
-                                )
-                            },
-                            label = { Text(text = stringResource(item.title)) },
-                            enabled = item.enabled,
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 

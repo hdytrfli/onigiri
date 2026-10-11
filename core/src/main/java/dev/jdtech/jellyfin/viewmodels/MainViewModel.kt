@@ -87,16 +87,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.backdropLandscapeRatio),
                     appPreferences.observe(appPreferences.contentSpacing),
                     appPreferences.observe(appPreferences.confirmExit),
-                    appPreferences.observe(appPreferences.navigationAnimation),
-                ) { portraitRatio, landscapeRatio, contentSpacing, confirmExit, navigationAnimation
-                    ->
-                    InterfacePrefs(
-                        portraitRatio,
-                        landscapeRatio,
-                        contentSpacing,
-                        confirmExit,
-                        navigationAnimation,
-                    )
+                ) { portraitRatio, landscapeRatio, contentSpacing, confirmExit ->
+                    InterfacePrefs(portraitRatio, landscapeRatio, contentSpacing, confirmExit)
                 }
 
             val titlePrefs =
@@ -129,7 +121,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                             interfacePrefs.landscapeRatio.toFloatOrNull() ?: 2f,
                         contentSpacingScale = interfacePrefs.contentSpacing.toFloatOrNull() ?: 1f,
                         confirmExit = interfacePrefs.confirmExit,
-                        navigationAnimation = interfacePrefs.navigationAnimation,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.35f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
@@ -158,7 +149,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val landscapeRatio: String,
         val contentSpacing: String,
         val confirmExit: Boolean,
-        val navigationAnimation: Boolean,
     )
 }
 
@@ -177,5 +167,4 @@ data class MainState(
     val titleImageRatio: Float = 2f,
     val naiveTitleOverlay: Boolean = false,
     val confirmExit: Boolean = false,
-    val navigationAnimation: Boolean = true,
 )

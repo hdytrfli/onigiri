@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
                             hasCurrentServer = state.hasCurrentServer,
                             hasCurrentUser = state.hasCurrentUser,
                             confirmExit = state.confirmExit,
-                            navigationAnimation = state.navigationAnimation,
                         )
                     }
                 }

@@ -171,15 +171,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     options = R.array.content_spacing_options,
                                                     optionValues = R.array.content_spacing_values,
                                                 ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.navigation_animation,
-                                                    descriptionStringRes =
-                                                        R.string.navigation_animation_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.navigationAnimation,
-                                                ),
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.season_grid_columns_portrait,

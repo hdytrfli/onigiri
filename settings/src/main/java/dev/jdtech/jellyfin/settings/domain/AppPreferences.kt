@@ -29,7 +29,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val seasonGridColumnsPortrait = Preference("pref_season_grid_columns_portrait", "3")
     val seasonGridColumnsLandscape = Preference("pref_season_grid_columns_landscape", "4")
     val contentSpacing = Preference("pref_content_spacing", "1.25")
-    val navigationAnimation = Preference("pref_navigation_animation", true)
     val naiveTitleOverlay = Preference("pref_naive_title_overlay", false)
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.35")

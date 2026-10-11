@@ -67,10 +67,8 @@
     <string name="picture_in_picture_gesture_summary">Use home button or gesture to enter picture-in-picture while the video is playing</string>
     <string name="offline_mode">Offline Mode</string>
     <string name="confirm_exit">Confirm exit</string>
-    <string name="confirm_exit_summary">Ask for confirmation before closing the app</string>
-    <string name="confirm_exit_dialog_title">Exit app?</string>
-    <string name="confirm_exit_dialog_text">Are you sure you want to exit?</string>
-    <string name="exit">Exit</string>
+    <string name="confirm_exit_summary">Press back twice on the home screen to close the app</string>
+    <string name="back_again_to_close">Press back again to close</string>
     <string name="offline_mode_summary">Watch movies and series without a connection to the server</string>
     <string name="theme">Theme</string>
     <string name="theme_system">Follow system</string>
@@ -84,8 +82,6 @@
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="content_spacing">Content spacing</string>
-    <string name="navigation_animation">Navigation animation</string>
-    <string name="navigation_animation_summary">Animate screen transitions and the navigation bar</string>
     <string name="naive_title_overlay">Naive title overlay</string>
     <string name="naive_title_overlay_summary">Apply a white overlay to title images. May look wrong for some titles.</string>
     <string name="title_image">Title image</string>
