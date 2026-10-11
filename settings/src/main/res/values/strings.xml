@@ -151,4 +151,10 @@
     <string name="advanced">Advanced</string>
     <string name="discard_changes_dialog_title">Discard changes?</string>
     <string name="discard_changes_dialog_text">You have unsaved changes.</string>
+    <string name="player_time_display">Time display</string>
+    <string name="pref_player_time_show_completion">Show estimated finish time</string>
+    <string name="pref_player_time_show_completion_summary">Show the estimated clock time when the video will finish</string>
+    <string name="pref_player_time_format">Time format</string>
+    <string name="pref_player_time_show_remaining">Show remaining time</string>
+    <string name="pref_player_time_show_remaining_summary">Show the remaining time instead of the total duration</string>
 </resources>

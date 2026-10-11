@@ -313,23 +313,27 @@ private fun MainNavigation(
             layoutType = customNavSuiteType,
             state = navigationSuiteScaffoldState,
         ) {
-            NavDisplay(
-                entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
-                onBack = { navigator.goBack() },
-                transitionSpec = { GLOBAL_TRANSITION_SPEC },
-                popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
-                predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
-            )
-        }
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
-        ) { data ->
-            Snackbar(
-                snackbarData = data,
-                containerColor = Color.Black.copy(alpha = 0.3f),
-                contentColor = Color.White,
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                NavDisplay(
+                    entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
+                    onBack = { navigator.goBack() },
+                    transitionSpec = { GLOBAL_TRANSITION_SPEC },
+                    popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
+                    predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
+                )
+                // Keep the snackbar above the bottom navigation bar, otherwise its
+                // translucent background reveals the (light) navigation bar behind it.
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
+                ) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = Color.Black.copy(alpha = 0.7f),
+                        contentColor = Color.White,
+                    )
+                }
+            }
         }
     }
 }

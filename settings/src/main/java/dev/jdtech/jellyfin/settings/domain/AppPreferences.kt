@@ -40,6 +40,11 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
+    // Player - time display
+    val playerTimeShowCompletion = Preference("pref_player_time_show_completion", true)
+    val playerTimeFormat = Preference("pref_player_time_format", "24")
+    val playerTimeShowRemaining = Preference("pref_player_time_show_remaining", false)
+
     // Player - mpv
     val playerMpv = Preference("pref_player_mpv", false)
     val playerMpvHwdec = Preference("pref_player_mpv_hwdec", "mediacodec")

@@ -50,8 +50,12 @@ import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.max
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -75,6 +79,7 @@ class PlayerActivity : BasePlayerActivity() {
     private var skipButtonTimeoutExpired: Boolean = true
 
     private lateinit var skipSegmentButton: Button
+    private lateinit var playerTimeRight: TextView
 
     private val isPipSupported by lazy {
         // Check if device has PiP feature
@@ -170,17 +175,26 @@ class PlayerActivity : BasePlayerActivity() {
 
         val playerMenuButton = binding.playerView.findViewById<ImageButton>(R.id.btn_player_menu)
         val btnEpisodes = binding.playerView.findViewById<ImageButton>(R.id.btn_episodes)
+        playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
         val gestureLockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_gesture_lock)
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
 
+        // Sheets are 30% of the screen width, but never narrower than 400dp.
+        val sheetWidth =
+            max(
+                (resources.displayMetrics.widthPixels * 0.30f).toInt(),
+                (400 * resources.displayMetrics.density).toInt(),
+            )
+
         // Episodes sheet
         val episodesOverlay = findViewById<FrameLayout>(R.id.player_episodes_overlay)
         val episodesScrim = findViewById<View>(R.id.player_episodes_scrim)
         val episodesPanel = findViewById<View>(R.id.player_episodes_panel)
         val episodesList = findViewById<ListView>(R.id.player_episodes_list)
+        episodesPanel.layoutParams = episodesPanel.layoutParams.apply { width = sheetWidth }
 
         val episodeAdapter =
             PlayerEpisodeAdapter(this) { episode ->
@@ -331,6 +345,13 @@ class PlayerActivity : BasePlayerActivity() {
                     }
                 }
 
+                launch {
+                    while (true) {
+                        updatePlayerTimeRight()
+                        delay(1000L)
+                    }
+                }
+
                 if (
                     appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButton) ||
                         appPreferences.getValue(appPreferences.playerMediaSegmentsAutoSkip)
@@ -369,6 +390,7 @@ class PlayerActivity : BasePlayerActivity() {
         val optionsOverlay = findViewById<FrameLayout>(R.id.player_options_overlay)
         val optionsScrim = findViewById<View>(R.id.player_options_scrim)
         val optionsPanel = findViewById<View>(R.id.player_options_panel)
+        optionsPanel.layoutParams = optionsPanel.layoutParams.apply { width = sheetWidth }
         val optionsTabs = findViewById<TabLayout>(R.id.player_options_tabs)
         val optionsList = findViewById<ListView>(R.id.player_options_list)
 
@@ -610,6 +632,50 @@ class PlayerActivity : BasePlayerActivity() {
             .withEndAction { overlay.visibility = View.GONE }
             .start()
         scrim.animate().alpha(0f).setDuration(200L).start()
+    }
+
+    private fun updatePlayerTimeRight() {
+        val duration = viewModel.player.duration
+        if (duration <= 0 || duration == C.TIME_UNSET) {
+            playerTimeRight.text = ""
+            return
+        }
+
+        val position = viewModel.player.currentPosition
+        val remaining = (duration - position).coerceAtLeast(0)
+
+        val lengthText =
+            if (appPreferences.getValue(appPreferences.playerTimeShowRemaining)) {
+                "-${formatPlayerTime(remaining)}"
+            } else {
+                formatPlayerTime(duration)
+            }
+
+        playerTimeRight.text =
+            if (appPreferences.getValue(appPreferences.playerTimeShowCompletion)) {
+                val finishAt = System.currentTimeMillis() + remaining
+                "$lengthText - ${formatClockTime(finishAt)}"
+            } else {
+                lengthText
+            }
+    }
+
+    private fun formatPlayerTime(timeMs: Long): String {
+        val totalSeconds = (timeMs / 1000).coerceAtLeast(0)
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return if (hours > 0) {
+            String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format(Locale.US, "%02d:%02d", minutes, seconds)
+        }
+    }
+
+    private fun formatClockTime(timeMs: Long): String {
+        val use24Hour = appPreferences.getValue(appPreferences.playerTimeFormat) == "24"
+        val pattern = if (use24Hour) "HH:mm" else "h:mm a"
+        return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(timeMs))
     }
 
     override fun onPictureInPictureModeChanged(

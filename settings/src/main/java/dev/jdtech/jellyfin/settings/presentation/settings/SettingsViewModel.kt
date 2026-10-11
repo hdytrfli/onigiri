@@ -669,6 +669,44 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                             ),
                                     ),
                                     PreferenceGroup(
+                                        nameStringResource = R.string.player_time_display,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.pref_player_time_show_completion,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_time_show_completion_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerTimeShowCompletion,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_time_format,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerTimeShowCompletion
+                                                        ),
+                                                    hideWhenDisabled = true,
+                                                    backendPreference =
+                                                        appPreferences.playerTimeFormat,
+                                                    options = R.array.player_time_format,
+                                                    optionValues =
+                                                        R.array.player_time_format_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.pref_player_time_show_remaining,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_time_show_remaining_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerTimeShowRemaining,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
                                         nameStringResource = R.string.gestures,
                                         preferences =
                                             listOf(
