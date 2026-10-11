@@ -257,6 +257,14 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     backendPreference =
                                                         appPreferences.naiveTitleOverlay,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.wavy_progress_bar,
+                                                    descriptionStringRes =
+                                                        R.string.wavy_progress_bar_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerWavyProgress,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
