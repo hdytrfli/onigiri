@@ -55,6 +55,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerMpvSubItalic = Preference("pref_player_mpv_sub_italic", false)
     val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "3")
     val playerMpvSubBorderColor = Preference("pref_player_mpv_sub_border_color", "#FF000000")
+    val playerMpvSubBorderOpacity = Preference("pref_player_mpv_sub_border_opacity", "255")
     val playerMpvSubAssOverride = Preference("pref_player_mpv_sub_ass_override", "scale")
     val playerMpvSubBorderEnabled = Preference("pref_player_mpv_sub_border_enabled", true)
     val playerMpvSubBorderStyle = Preference("pref_player_mpv_sub_border_style", "opaque-box")

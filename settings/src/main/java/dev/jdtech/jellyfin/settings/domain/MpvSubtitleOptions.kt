@@ -12,6 +12,22 @@ package dev.jdtech.jellyfin.settings.domain
 object MpvSubtitleOptions {
     fun yesNo(value: Boolean): String = if (value) "yes" else "no"
 
+    /**
+     * Combine an `#RRGGBB` or `#AARRGGBB` color with a 0-255 opacity into mpv `#AARRGGBB` format.
+     */
+    fun colorWithAlpha(rgbHex: String, opacity: String): String {
+        val alphaInt = opacity.toIntOrNull()?.coerceIn(0, 255) ?: return rgbHex
+        val clean = rgbHex.removePrefix("#")
+        val rrggbb =
+            when (clean.length) {
+                6 -> clean
+                8 -> clean.substring(2)
+                else -> return rgbHex
+            }
+        val alphaHex = alphaInt.toString(16).padStart(2, '0').uppercase()
+        return "#$alphaHex$rrggbb"
+    }
+
     /** Raw option values for `MPVLib.setOptionString`. */
     fun buildOptions(appPreferences: AppPreferences): Map<String, String> {
         val useMargins = yesNo(appPreferences.getValue(appPreferences.playerMpvSubUseMargins))
@@ -22,6 +38,11 @@ object MpvSubtitleOptions {
             } else {
                 "0"
             }
+        val borderColor =
+            colorWithAlpha(
+                appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
+                appPreferences.getValue(appPreferences.playerMpvSubBorderOpacity),
+            )
         return mapOf(
             "sub-font-size" to appPreferences.getValue(appPreferences.playerMpvSubFontSize),
             "sub-color" to appPreferences.getValue(appPreferences.playerMpvSubColor),
@@ -31,7 +52,7 @@ object MpvSubtitleOptions {
             "sub-bold" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubBold)),
             "sub-italic" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubItalic)),
             "sub-outline-size" to borderSize,
-            "sub-outline-color" to appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
+            "sub-outline-color" to borderColor,
             "sub-back-color" to "#00000000",
             "sub-shadow-offset" to "0",
             "sub-border-style" to appPreferences.getValue(appPreferences.playerMpvSubBorderStyle),

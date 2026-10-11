@@ -541,10 +541,24 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                     R.string.mpv_sub_group_outline,
                                                                 preferences =
                                                                     listOf(
+                                                                        PreferenceSwitch(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_enabled,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubBorderEnabled,
+                                                                        ),
                                                                         PreferenceSelect(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_style,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBorderEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubBorderStyle,
@@ -554,14 +568,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             optionValues =
                                                                                 R.array
                                                                                     .mpv_sub_border_style_values,
-                                                                        ),
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_enabled,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBorderEnabled,
                                                                         ),
                                                                         PreferenceSelect(
                                                                             nameStringResource =
@@ -602,6 +608,26 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             optionValues =
                                                                                 R.array
                                                                                     .mpv_sub_colors_values,
+                                                                        ),
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_opacity,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBorderEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubBorderOpacity,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_sub_border_opacity,
+                                                                            optionValues =
+                                                                                R.array
+                                                                                    .mpv_sub_border_opacity_values,
                                                                         ),
                                                                     ),
                                                             ),

@@ -326,7 +326,7 @@ private fun MainNavigation(
         ) { data ->
             Snackbar(
                 snackbarData = data,
-                containerColor = Color.Black,
+                containerColor = Color.Black.copy(alpha = 0.3f),
                 contentColor = Color.White,
             )
         }

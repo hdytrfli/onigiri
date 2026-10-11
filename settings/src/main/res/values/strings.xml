@@ -138,6 +138,7 @@
     <string name="pref_player_mpv_sub_italic">Italic</string>
     <string name="pref_player_mpv_sub_border_size">Border size</string>
     <string name="pref_player_mpv_sub_border_color">Border color</string>
+    <string name="pref_player_mpv_sub_border_opacity">Border opacity</string>
     <string name="pref_player_mpv_sub_border_enabled">Border</string>
     <string name="pref_player_mpv_sub_border_style">Border style</string>
     <string name="pref_player_mpv_sub_ass_override">ASS style override</string>
