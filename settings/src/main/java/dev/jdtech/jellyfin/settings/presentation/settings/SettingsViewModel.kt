@@ -50,7 +50,7 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                         ),
                         PreferenceSwitch(
                             nameStringResource = R.string.confirm_exit,
-                            descriptionStringRes = R.string.confirm_exit_summary,
+                            iconDrawableId = R.drawable.ic_exit,
                             supportedDeviceTypes = listOf(DeviceType.PHONE),
                             backendPreference = appPreferences.confirmExit,
                         ),
@@ -541,6 +541,20 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                     R.string.mpv_sub_group_outline,
                                                                 preferences =
                                                                     listOf(
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_style,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubBorderStyle,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_sub_border_style,
+                                                                            optionValues =
+                                                                                R.array
+                                                                                    .mpv_sub_border_style_values,
+                                                                        ),
                                                                         PreferenceSwitch(
                                                                             nameStringResource =
                                                                                 R.string
@@ -588,82 +602,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             optionValues =
                                                                                 R.array
                                                                                     .mpv_sub_colors_values,
-                                                                        ),
-                                                                    ),
-                                                            ),
-                                                            PreferenceGroup(
-                                                                nameStringResource =
-                                                                    R.string
-                                                                        .mpv_sub_group_background,
-                                                                preferences =
-                                                                    listOf(
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_background_enabled,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBackgroundEnabled,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_back_color,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBackgroundEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBackColor,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_colors,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_colors_values,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_back_opacity,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBackgroundEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBackOpacity,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_back_opacity,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_back_opacity_values,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_background_padding,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBackgroundEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBackgroundPadding,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_background_padding,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_background_padding,
                                                                         ),
                                                                     ),
                                                             ),

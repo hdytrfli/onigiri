@@ -5,41 +5,17 @@ package dev.jdtech.jellyfin.settings.domain
  *
  * Applied at playback start in `MPVPlayer` (like `hwdec`/`vo`/`ao`). Manual `mpv.conf` entries
  * still take precedence for advanced overrides.
+ *
+ * The subtitle box is controlled by the border settings: with `sub-border-style=opaque-box` the
+ * border colour/size draw a box tightly around each line of text (the "background").
  */
 object MpvSubtitleOptions {
     fun yesNo(value: Boolean): String = if (value) "yes" else "no"
-
-    /**
-     * Combine an `#RRGGBB` or `#AARRGGBB` color with a 0-255 opacity into mpv `#AARRGGBB` format.
-     */
-    fun backColorWithAlpha(rgbHex: String, opacity: String): String {
-        val alphaInt = opacity.toIntOrNull()?.coerceIn(0, 255) ?: return rgbHex
-        val clean = rgbHex.removePrefix("#")
-        val rrggbb =
-            when (clean.length) {
-                6 -> clean
-                8 -> clean.substring(2)
-                else -> return rgbHex
-            }
-        val alphaHex = alphaInt.toString(16).padStart(2, '0').uppercase()
-        return "#$alphaHex$rrggbb"
-    }
 
     /** Raw option values for `MPVLib.setOptionString`. */
     fun buildOptions(appPreferences: AppPreferences): Map<String, String> {
         val useMargins = yesNo(appPreferences.getValue(appPreferences.playerMpvSubUseMargins))
         val borderEnabled = appPreferences.getValue(appPreferences.playerMpvSubBorderEnabled)
-        val backgroundEnabled =
-            appPreferences.getValue(appPreferences.playerMpvSubBackgroundEnabled)
-        val backColor =
-            if (backgroundEnabled) {
-                backColorWithAlpha(
-                    appPreferences.getValue(appPreferences.playerMpvSubBackColor),
-                    appPreferences.getValue(appPreferences.playerMpvSubBackOpacity),
-                )
-            } else {
-                "#00000000"
-            }
         val borderSize =
             if (borderEnabled) {
                 appPreferences.getValue(appPreferences.playerMpvSubBorderSize)
@@ -56,10 +32,9 @@ object MpvSubtitleOptions {
             "sub-italic" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubItalic)),
             "sub-outline-size" to borderSize,
             "sub-outline-color" to appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
-            "sub-back-color" to backColor,
-            "sub-border-style" to "background-box",
-            "sub-shadow-offset" to
-                appPreferences.getValue(appPreferences.playerMpvSubBackgroundPadding),
+            "sub-back-color" to "#00000000",
+            "sub-shadow-offset" to "0",
+            "sub-border-style" to appPreferences.getValue(appPreferences.playerMpvSubBorderStyle),
             "sub-ass-override" to appPreferences.getValue(appPreferences.playerMpvSubAssOverride),
         )
     }

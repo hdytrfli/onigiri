@@ -89,43 +89,6 @@
         <item>4</item>
         <item>5</item>
     </string-array>
-    <string-array name="mpv_sub_back_opacity">
-        <item>0%</item>
-        <item>10%</item>
-        <item>20%</item>
-        <item>30%</item>
-        <item>40%</item>
-        <item>50%</item>
-        <item>60%</item>
-        <item>70%</item>
-        <item>80%</item>
-        <item>90%</item>
-        <item>100%</item>
-    </string-array>
-    <string-array name="mpv_sub_back_opacity_values">
-        <item>0</item>
-        <item>26</item>
-        <item>51</item>
-        <item>77</item>
-        <item>102</item>
-        <item>128</item>
-        <item>153</item>
-        <item>179</item>
-        <item>204</item>
-        <item>230</item>
-        <item>255</item>
-    </string-array>
-    <string-array name="mpv_sub_background_padding">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>8</item>
-        <item>10</item>
-    </string-array>
     <string-array name="mpv_sub_ass_override">
         <item>No</item>
         <item>Yes</item>
@@ -139,6 +102,14 @@
         <item>scale</item>
         <item>force</item>
         <item>strip</item>
+    </string-array>
+    <string-array name="mpv_sub_border_style">
+        <item>Outline and shadow</item>
+        <item>Opaque box (per line)</item>
+    </string-array>
+    <string-array name="mpv_sub_border_style_values">
+        <item>outline-and-shadow</item>
+        <item>opaque-box</item>
     </string-array>
     <string-array name="media_segments_auto_skip">
         <item>@string/media_segments_auto_skip_pip</item>

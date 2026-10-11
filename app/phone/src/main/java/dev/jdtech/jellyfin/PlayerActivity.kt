@@ -152,6 +152,13 @@ class PlayerActivity : BasePlayerActivity() {
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
 
+        // Tap the description to expand/collapse it.
+        var descriptionExpanded = false
+        videoDescriptionTextView.setOnClickListener {
+            descriptionExpanded = !descriptionExpanded
+            videoDescriptionTextView.maxLines = if (descriptionExpanded) Int.MAX_VALUE else 2
+        }
+
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
         val speedButton = binding.playerView.findViewById<ImageButton>(R.id.btn_speed)
@@ -164,6 +171,7 @@ class PlayerActivity : BasePlayerActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     var lastLogo: String? = null
+                    var lastOverview: String? = null
                     viewModel.uiState.collect { uiState ->
                         Timber.d("$uiState")
                         uiState.apply {
@@ -182,6 +190,11 @@ class PlayerActivity : BasePlayerActivity() {
                             videoNameTextView.text = currentItemTitle
 
                             // Description
+                            if (currentItemOverview != lastOverview) {
+                                lastOverview = currentItemOverview
+                                descriptionExpanded = false
+                                videoDescriptionTextView.maxLines = 2
+                            }
                             videoDescriptionTextView.text = currentItemOverview
                             videoDescriptionTextView.isVisible =
                                 !currentItemOverview.isNullOrBlank()

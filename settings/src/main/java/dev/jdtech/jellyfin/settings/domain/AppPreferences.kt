@@ -53,14 +53,11 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerMpvSubUseMargins = Preference("pref_player_mpv_sub_use_margins", true)
     val playerMpvSubBold = Preference("pref_player_mpv_sub_bold", false)
     val playerMpvSubItalic = Preference("pref_player_mpv_sub_italic", false)
-    val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "0")
+    val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "3")
     val playerMpvSubBorderColor = Preference("pref_player_mpv_sub_border_color", "#FF000000")
-    val playerMpvSubBackColor = Preference("pref_player_mpv_sub_back_color", "#FF000000")
-    val playerMpvSubBackOpacity = Preference("pref_player_mpv_sub_back_opacity", "179")
     val playerMpvSubAssOverride = Preference("pref_player_mpv_sub_ass_override", "scale")
-    val playerMpvSubBackgroundPadding = Preference("pref_player_mpv_sub_background_padding", "0")
-    val playerMpvSubBorderEnabled = Preference("pref_player_mpv_sub_border_enabled", false)
-    val playerMpvSubBackgroundEnabled = Preference("pref_player_mpv_sub_background_enabled", true)
+    val playerMpvSubBorderEnabled = Preference("pref_player_mpv_sub_border_enabled", true)
+    val playerMpvSubBorderStyle = Preference("pref_player_mpv_sub_border_style", "opaque-box")
 
     // Player - gestures
     val playerGestures = Preference("pref_player_gestures", true)
