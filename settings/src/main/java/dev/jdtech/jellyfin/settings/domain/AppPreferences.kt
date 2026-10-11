@@ -41,8 +41,12 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
     // Player - time display
-    val playerTimeShowCompletion = Preference("pref_player_time_show_completion", true)
+    val playerTimeDisplay = Preference("pref_player_time_display", "duration")
     val playerTimeFormat = Preference("pref_player_time_format", "24")
+    val playerTimeRemainingStyle = Preference("pref_player_time_remaining_style", "clock")
+
+    // Derived flags, only used to conditionally show the two selects above.
+    val playerTimeShowFinish = Preference("pref_player_time_show_finish", false)
     val playerTimeShowRemaining = Preference("pref_player_time_show_remaining", false)
 
     // Player - mpv

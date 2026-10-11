@@ -672,22 +672,30 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                         nameStringResource = R.string.player_time_display,
                                         preferences =
                                             listOf(
-                                                PreferenceSwitch(
+                                                PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.pref_player_time_show_completion,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_time_show_completion_summary,
+                                                        R.string.pref_player_time_display,
                                                     backendPreference =
-                                                        appPreferences.playerTimeShowCompletion,
+                                                        appPreferences.playerTimeDisplay,
+                                                    onUpdate = { value ->
+                                                        appPreferences.setValue(
+                                                            appPreferences.playerTimeShowFinish,
+                                                            value == "finish",
+                                                        )
+                                                        appPreferences.setValue(
+                                                            appPreferences.playerTimeShowRemaining,
+                                                            value == "remaining",
+                                                        )
+                                                    },
+                                                    options = R.array.player_time_display_options,
+                                                    optionValues =
+                                                        R.array.player_time_display_values,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.pref_player_time_format,
                                                     dependencies =
-                                                        listOf(
-                                                            appPreferences.playerTimeShowCompletion
-                                                        ),
+                                                        listOf(appPreferences.playerTimeShowFinish),
                                                     hideWhenDisabled = true,
                                                     backendPreference =
                                                         appPreferences.playerTimeFormat,
@@ -695,14 +703,20 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     optionValues =
                                                         R.array.player_time_format_values,
                                                 ),
-                                                PreferenceSwitch(
+                                                PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.pref_player_time_show_remaining,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_time_show_remaining_summary,
+                                                        R.string.pref_player_time_remaining_style,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerTimeShowRemaining
+                                                        ),
+                                                    hideWhenDisabled = true,
                                                     backendPreference =
-                                                        appPreferences.playerTimeShowRemaining,
+                                                        appPreferences.playerTimeRemainingStyle,
+                                                    options =
+                                                        R.array.player_time_remaining_style_options,
+                                                    optionValues =
+                                                        R.array.player_time_remaining_style_values,
                                                 ),
                                             ),
                                     ),
@@ -737,17 +751,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesSeek,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_double_tap,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_double_tap_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesDoubleTap,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
@@ -795,6 +798,17 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesStartMaximized,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_gestures_double_tap,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_double_tap_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.playerGestures),
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesDoubleTap,
                                                 ),
                                             ),
                                     ),

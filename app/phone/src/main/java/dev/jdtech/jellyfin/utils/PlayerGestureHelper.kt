@@ -278,8 +278,7 @@ class PlayerGestureHelper(
                             val newPos = (currentPos + difference).coerceIn(0, vidDuration)
 
                             activity.binding.progressScrubberLayout.visibility = View.VISIBLE
-                            activity.binding.progressScrubberText.text =
-                                "${longToTimestamp(difference)} [${longToTimestamp(newPos, true)}]"
+                            activity.binding.progressScrubberText.text = longToTimestamp(difference)
                             swipeGestureValueTrackerProgress = newPos
 
                             if (

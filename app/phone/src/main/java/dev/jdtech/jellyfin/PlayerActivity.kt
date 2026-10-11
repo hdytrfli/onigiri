@@ -215,6 +215,7 @@ class PlayerActivity : BasePlayerActivity() {
                     var lastLogo: String? = null
                     var lastOverview: String? = null
                     var lastEpisodes: List<FindroidEpisode> = emptyList()
+                    var lastEpisodeId: UUID? = null
                     viewModel.uiState.collect { uiState ->
                         Timber.d("$uiState")
                         uiState.apply {
@@ -307,9 +308,13 @@ class PlayerActivity : BasePlayerActivity() {
 
                             // Episodes
                             btnEpisodes.isVisible = currentSeasonEpisodes.isNotEmpty()
-                            if (currentSeasonEpisodes != lastEpisodes) {
+                            if (
+                                currentSeasonEpisodes != lastEpisodes ||
+                                    currentEpisodeId != lastEpisodeId
+                            ) {
                                 lastEpisodes = currentSeasonEpisodes
-                                episodeAdapter.submit(currentSeasonEpisodes)
+                                lastEpisodeId = currentEpisodeId
+                                episodeAdapter.submit(currentSeasonEpisodes, currentEpisodeId)
                             }
                         }
                     }
@@ -644,20 +649,34 @@ class PlayerActivity : BasePlayerActivity() {
         val position = viewModel.player.currentPosition
         val remaining = (duration - position).coerceAtLeast(0)
 
-        val lengthText =
-            if (appPreferences.getValue(appPreferences.playerTimeShowRemaining)) {
-                "-${formatPlayerTime(remaining)}"
-            } else {
-                formatPlayerTime(duration)
-            }
-
         playerTimeRight.text =
-            if (appPreferences.getValue(appPreferences.playerTimeShowCompletion)) {
-                val finishAt = System.currentTimeMillis() + remaining
-                "$lengthText - ${formatClockTime(finishAt)}"
-            } else {
-                lengthText
+            when (appPreferences.getValue(appPreferences.playerTimeDisplay)) {
+                "remaining" ->
+                    if (
+                        appPreferences.getValue(appPreferences.playerTimeRemainingStyle) == "human"
+                    ) {
+                        formatRemainingHuman(remaining)
+                    } else {
+                        "-${formatPlayerTime(remaining)}"
+                    }
+                "finish" -> formatClockTime(System.currentTimeMillis() + remaining)
+                else -> formatPlayerTime(duration)
             }
+    }
+
+    private fun formatRemainingHuman(remainingMs: Long): String {
+        val totalMinutes = ((remainingMs + 59_999) / 60_000).coerceAtLeast(0)
+        return if (totalMinutes >= 60) {
+            val hours = totalMinutes / 60
+            val minutes = totalMinutes % 60
+            if (minutes == 0L) {
+                getString(R.string.player_time_left_hours, hours)
+            } else {
+                getString(R.string.player_time_left_hours_minutes, hours, minutes)
+            }
+        } else {
+            getString(R.string.player_time_left_minutes, totalMinutes)
+        }
     }
 
     private fun formatPlayerTime(timeMs: Long): String {

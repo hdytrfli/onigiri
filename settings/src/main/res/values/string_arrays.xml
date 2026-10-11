@@ -259,4 +259,22 @@
         <item>24</item>
         <item>12</item>
     </string-array>
+    <string-array name="player_time_display_options">
+        <item>Remaining time</item>
+        <item>End time</item>
+        <item>Full duration</item>
+    </string-array>
+    <string-array name="player_time_display_values">
+        <item>remaining</item>
+        <item>finish</item>
+        <item>duration</item>
+    </string-array>
+    <string-array name="player_time_remaining_style_options">
+        <item>Clock</item>
+        <item>Human-readable</item>
+    </string-array>
+    <string-array name="player_time_remaining_style_values">
+        <item>clock</item>
+        <item>human</item>
+    </string-array>
 </resources>

@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.player
 
 import android.content.Context
+import android.graphics.Typeface
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import coil3.load
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import java.util.UUID
 
 /** A single episode row in the player episodes sheet. */
 class PlayerEpisodeAdapter(
@@ -19,10 +21,12 @@ class PlayerEpisodeAdapter(
     private val onClick: (FindroidEpisode) -> Unit,
 ) : BaseAdapter() {
     private val items = mutableListOf<FindroidEpisode>()
+    private var currentEpisodeId: UUID? = null
 
-    fun submit(newItems: List<FindroidEpisode>) {
+    fun submit(newItems: List<FindroidEpisode>, currentId: UUID?) {
         items.clear()
         items.addAll(newItems)
+        currentEpisodeId = currentId
         notifyDataSetChanged()
     }
 
@@ -38,9 +42,15 @@ class PlayerEpisodeAdapter(
                 ?: LayoutInflater.from(context).inflate(R.layout.item_player_episode, parent, false)
 
         val episode = items[position]
+        val isCurrent = episode.id == currentEpisodeId
 
-        view.findViewById<TextView>(R.id.episode_title).text =
+        view.findViewById<View>(R.id.episode_current_indicator).visibility =
+            if (isCurrent) View.VISIBLE else View.INVISIBLE
+
+        val titleView = view.findViewById<TextView>(R.id.episode_title)
+        titleView.text =
             context.getString(CoreR.string.episode_name, episode.indexNumber, episode.name)
+        titleView.setTypeface(null, if (isCurrent) Typeface.BOLD else Typeface.NORMAL)
 
         val overviewView = view.findViewById<TextView>(R.id.episode_overview)
         if (episode.overview.isBlank()) {
