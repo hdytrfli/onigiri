@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.presentation.player
 
 import android.content.Context
-import android.graphics.Typeface
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -44,13 +43,12 @@ class PlayerEpisodeAdapter(
         val episode = items[position]
         val isCurrent = episode.id == currentEpisodeId
 
-        view.findViewById<View>(R.id.episode_current_indicator).visibility =
-            if (isCurrent) View.VISIBLE else View.INVISIBLE
+        view.findViewById<ImageView>(R.id.episode_current_play).visibility =
+            if (isCurrent) View.VISIBLE else View.GONE
 
         val titleView = view.findViewById<TextView>(R.id.episode_title)
         titleView.text =
             context.getString(CoreR.string.episode_name, episode.indexNumber, episode.name)
-        titleView.setTypeface(null, if (isCurrent) Typeface.BOLD else Typeface.NORMAL)
 
         val overviewView = view.findViewById<TextView>(R.id.episode_overview)
         if (episode.overview.isBlank()) {

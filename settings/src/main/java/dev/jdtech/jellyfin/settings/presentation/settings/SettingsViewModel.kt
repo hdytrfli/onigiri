@@ -682,10 +682,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                             appPreferences.playerTimeShowFinish,
                                                             value == "finish",
                                                         )
-                                                        appPreferences.setValue(
-                                                            appPreferences.playerTimeShowRemaining,
-                                                            value == "remaining",
-                                                        )
                                                     },
                                                     options = R.array.player_time_display_options,
                                                     optionValues =
@@ -693,30 +689,16 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.pref_player_time_format,
+                                                        R.string.pref_player_time_end_format,
                                                     dependencies =
                                                         listOf(appPreferences.playerTimeShowFinish),
                                                     hideWhenDisabled = true,
                                                     backendPreference =
-                                                        appPreferences.playerTimeFormat,
-                                                    options = R.array.player_time_format,
-                                                    optionValues =
-                                                        R.array.player_time_format_values,
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.pref_player_time_remaining_style,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences.playerTimeShowRemaining
-                                                        ),
-                                                    hideWhenDisabled = true,
-                                                    backendPreference =
-                                                        appPreferences.playerTimeRemainingStyle,
+                                                        appPreferences.playerTimeEndFormat,
                                                     options =
-                                                        R.array.player_time_remaining_style_options,
+                                                        R.array.player_time_end_format_options,
                                                     optionValues =
-                                                        R.array.player_time_remaining_style_values,
+                                                        R.array.player_time_end_format_values,
                                                 ),
                                             ),
                                     ),

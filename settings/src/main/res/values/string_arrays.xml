@@ -251,30 +251,22 @@
         <item>COMMERCIAL</item>
         <item>UNKNOWN</item>
     </string-array>
-    <string-array name="player_time_format">
-        <item>24-hour</item>
-        <item>12-hour</item>
-    </string-array>
-    <string-array name="player_time_format_values">
-        <item>24</item>
-        <item>12</item>
-    </string-array>
     <string-array name="player_time_display_options">
-        <item>Remaining time</item>
-        <item>End time</item>
         <item>Full duration</item>
+        <item>End time</item>
     </string-array>
     <string-array name="player_time_display_values">
-        <item>remaining</item>
-        <item>finish</item>
         <item>duration</item>
+        <item>finish</item>
     </string-array>
-    <string-array name="player_time_remaining_style_options">
-        <item>Clock</item>
+    <string-array name="player_time_end_format_options">
+        <item>24-hour</item>
+        <item>12-hour</item>
         <item>Human-readable</item>
     </string-array>
-    <string-array name="player_time_remaining_style_values">
-        <item>clock</item>
+    <string-array name="player_time_end_format_values">
+        <item>24</item>
+        <item>12</item>
         <item>human</item>
     </string-array>
 </resources>

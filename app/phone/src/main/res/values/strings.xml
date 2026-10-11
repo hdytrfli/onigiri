@@ -6,7 +6,6 @@
     <string name="player_menu_tab_audio">Audio</string>
     <string name="player_menu_tab_subtitles">Subtitles</string>
     <string name="player_menu_tab_speed">Speed</string>
-    <string name="player_time_left_minutes">%1$d mins left</string>
-    <string name="player_time_left_hours_minutes">%1$d hr %2$d mins left</string>
-    <string name="player_time_left_hours">%1$d hrs left</string>
+    <string name="player_time_finished_at">finished at %1$s</string>
+    <string name="player_time_finished_in">finished in %1$d mins</string>
 </resources>

@@ -650,33 +650,26 @@ class PlayerActivity : BasePlayerActivity() {
         val remaining = (duration - position).coerceAtLeast(0)
 
         playerTimeRight.text =
-            when (appPreferences.getValue(appPreferences.playerTimeDisplay)) {
-                "remaining" ->
-                    if (
-                        appPreferences.getValue(appPreferences.playerTimeRemainingStyle) == "human"
-                    ) {
-                        formatRemainingHuman(remaining)
-                    } else {
-                        "-${formatPlayerTime(remaining)}"
+            if (appPreferences.getValue(appPreferences.playerTimeDisplay) == "finish") {
+                when (appPreferences.getValue(appPreferences.playerTimeEndFormat)) {
+                    "24" ->
+                        getString(
+                            R.string.player_time_finished_at,
+                            formatClockTime(System.currentTimeMillis() + remaining, true),
+                        )
+                    "12" ->
+                        getString(
+                            R.string.player_time_finished_at,
+                            formatClockTime(System.currentTimeMillis() + remaining, false),
+                        )
+                    else -> {
+                        val totalMinutes = ((remaining + 59_999) / 60_000).coerceAtLeast(0)
+                        getString(R.string.player_time_finished_in, totalMinutes)
                     }
-                "finish" -> formatClockTime(System.currentTimeMillis() + remaining)
-                else -> formatPlayerTime(duration)
-            }
-    }
-
-    private fun formatRemainingHuman(remainingMs: Long): String {
-        val totalMinutes = ((remainingMs + 59_999) / 60_000).coerceAtLeast(0)
-        return if (totalMinutes >= 60) {
-            val hours = totalMinutes / 60
-            val minutes = totalMinutes % 60
-            if (minutes == 0L) {
-                getString(R.string.player_time_left_hours, hours)
+                }
             } else {
-                getString(R.string.player_time_left_hours_minutes, hours, minutes)
+                formatPlayerTime(duration)
             }
-        } else {
-            getString(R.string.player_time_left_minutes, totalMinutes)
-        }
     }
 
     private fun formatPlayerTime(timeMs: Long): String {
@@ -691,9 +684,8 @@ class PlayerActivity : BasePlayerActivity() {
         }
     }
 
-    private fun formatClockTime(timeMs: Long): String {
-        val use24Hour = appPreferences.getValue(appPreferences.playerTimeFormat) == "24"
-        val pattern = if (use24Hour) "HH:mm" else "h:mm a"
+    private fun formatClockTime(timeMs: Long, use24Hour: Boolean): String {
+        val pattern = if (use24Hour) "HH:mm" else "h:mma"
         return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(timeMs))
     }
 
