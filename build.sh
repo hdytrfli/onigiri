@@ -24,7 +24,7 @@ docker run --rm \
     -v findroid-android:/root/.android \
     -w /work \
     "$IMAGE" \
-    ./gradlew ktfmtFormat ktfmtCheck :app:phone:assembleLibreDebug -PtargetAbi="$ABI" "$@"
+    ./gradlew ktfmtFormat :app:phone:assembleLibreDebug -PtargetAbi="$ABI" "$@"
 
 APK_SRC="$REPO_DIR/app/phone/build/outputs/apk/libre/debug/phone-libre-${ABI}-debug.apk"
 if [[ ! -f "$APK_SRC" ]]; then
