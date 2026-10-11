@@ -31,17 +31,16 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.media3.common.C
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import coil3.load
 import dagger.hilt.android.AndroidEntryPoint
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
-import dev.jdtech.jellyfin.presentation.player.SpeedSelectionDialogFragment
-import dev.jdtech.jellyfin.presentation.player.TrackSelectionDialogFragment
+import dev.jdtech.jellyfin.presentation.player.PlayerMenuDialogFragment
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
@@ -52,6 +51,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 var isControlsLocked: Boolean = false
+var isVolumeBrightnessLocked: Boolean = false
 
 @AndroidEntryPoint
 class PlayerActivity : BasePlayerActivity() {
@@ -159,9 +159,7 @@ class PlayerActivity : BasePlayerActivity() {
             videoDescriptionTextView.maxLines = if (descriptionExpanded) Int.MAX_VALUE else 2
         }
 
-        val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
-        val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
-        val speedButton = binding.playerView.findViewById<ImageButton>(R.id.btn_speed)
+        val playerMenuButton = binding.playerView.findViewById<ImageButton>(R.id.btn_player_menu)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
@@ -250,14 +248,10 @@ class PlayerActivity : BasePlayerActivity() {
 
                             // File Loaded
                             if (fileLoaded) {
-                                audioButton.isEnabled = true
-                                audioButton.imageAlpha = 255
+                                playerMenuButton.isEnabled = true
+                                playerMenuButton.imageAlpha = 255
                                 lockButton.isEnabled = true
                                 lockButton.imageAlpha = 255
-                                subtitleButton.isEnabled = true
-                                subtitleButton.imageAlpha = 255
-                                speedButton.isEnabled = true
-                                speedButton.imageAlpha = 255
                                 pipButton.isEnabled = true
                                 pipButton.imageAlpha = 255
                             }
@@ -309,17 +303,11 @@ class PlayerActivity : BasePlayerActivity() {
             }
         }
 
-        audioButton.isEnabled = false
-        audioButton.imageAlpha = 75
+        playerMenuButton.isEnabled = false
+        playerMenuButton.imageAlpha = 75
 
         lockButton.isEnabled = false
         lockButton.imageAlpha = 75
-
-        subtitleButton.isEnabled = false
-        subtitleButton.imageAlpha = 75
-
-        speedButton.isEnabled = false
-        speedButton.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false
@@ -330,19 +318,25 @@ class PlayerActivity : BasePlayerActivity() {
             pipSpace.isVisible = false
         }
 
-        audioButton.setOnClickListener {
-            TrackSelectionDialogFragment(C.TRACK_TYPE_AUDIO, viewModel)
-                .show(supportFragmentManager, "trackselectiondialog")
+        playerMenuButton.setOnClickListener {
+            PlayerMenuDialogFragment(viewModel).show(supportFragmentManager, "playermenudialog")
         }
 
         val exoPlayerControlView = findViewById<FrameLayout>(R.id.player_controls)
         val lockedLayout = findViewById<FrameLayout>(R.id.locked_player_view)
 
         lockButton.setOnClickListener {
-            exoPlayerControlView.visibility = View.GONE
-            lockedLayout.visibility = View.VISIBLE
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
-            isControlsLocked = true
+            if (!isVolumeBrightnessLocked) {
+                // First press: lock the volume and brightness gestures only.
+                isVolumeBrightnessLocked = true
+                lockButton.setImageResource(CoreR.drawable.ic_lock_gestures)
+            } else {
+                // Second press: full lock (previous behaviour).
+                exoPlayerControlView.visibility = View.GONE
+                lockedLayout.visibility = View.VISIBLE
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                isControlsLocked = true
+            }
         }
 
         unlockButton.setOnClickListener {
@@ -350,16 +344,8 @@ class PlayerActivity : BasePlayerActivity() {
             lockedLayout.visibility = View.GONE
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             isControlsLocked = false
-        }
-
-        subtitleButton.setOnClickListener {
-            TrackSelectionDialogFragment(C.TRACK_TYPE_TEXT, viewModel)
-                .show(supportFragmentManager, "trackselectiondialog")
-        }
-
-        speedButton.setOnClickListener {
-            SpeedSelectionDialogFragment(viewModel)
-                .show(supportFragmentManager, "speedselectiondialog")
+            isVolumeBrightnessLocked = false
+            lockButton.setImageResource(CoreR.drawable.ic_lock)
         }
 
         pipButton.setOnClickListener { pictureInPicture() }

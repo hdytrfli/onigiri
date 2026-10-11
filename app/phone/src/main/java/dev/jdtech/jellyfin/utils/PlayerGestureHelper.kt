@@ -29,6 +29,7 @@ import coil3.transform.RoundedCornersTransformation
 import dev.jdtech.jellyfin.PlayerActivity
 import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.isControlsLocked
+import dev.jdtech.jellyfin.isVolumeBrightnessLocked
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
 import dev.jdtech.jellyfin.player.core.domain.models.Trickplay
 import dev.jdtech.jellyfin.player.local.R
@@ -318,6 +319,8 @@ class PlayerGestureHelper(
                     if (inExclusionArea(firstEvent)) return false
                     // Disables volume gestures when player is locked
                     if (isControlsLocked) return false
+                    // Disables volume/brightness gestures when gesture-locked
+                    if (isVolumeBrightnessLocked) return false
 
                     if (abs(distanceY / distanceX) < 2) return false
 
