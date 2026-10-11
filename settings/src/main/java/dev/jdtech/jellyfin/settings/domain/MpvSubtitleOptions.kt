@@ -28,11 +28,24 @@ object MpvSubtitleOptions {
     /** Raw option values for `MPVLib.setOptionString`. */
     fun buildOptions(appPreferences: AppPreferences): Map<String, String> {
         val useMargins = yesNo(appPreferences.getValue(appPreferences.playerMpvSubUseMargins))
+        val borderEnabled = appPreferences.getValue(appPreferences.playerMpvSubBorderEnabled)
+        val backgroundEnabled =
+            appPreferences.getValue(appPreferences.playerMpvSubBackgroundEnabled)
         val backColor =
-            backColorWithAlpha(
-                appPreferences.getValue(appPreferences.playerMpvSubBackColor),
-                appPreferences.getValue(appPreferences.playerMpvSubBackOpacity),
-            )
+            if (backgroundEnabled) {
+                backColorWithAlpha(
+                    appPreferences.getValue(appPreferences.playerMpvSubBackColor),
+                    appPreferences.getValue(appPreferences.playerMpvSubBackOpacity),
+                )
+            } else {
+                "#00000000"
+            }
+        val borderSize =
+            if (borderEnabled) {
+                appPreferences.getValue(appPreferences.playerMpvSubBorderSize)
+            } else {
+                "0"
+            }
         return mapOf(
             "sub-font-size" to appPreferences.getValue(appPreferences.playerMpvSubFontSize),
             "sub-color" to appPreferences.getValue(appPreferences.playerMpvSubColor),
@@ -41,10 +54,13 @@ object MpvSubtitleOptions {
             "sub-ass-force-margins" to useMargins,
             "sub-bold" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubBold)),
             "sub-italic" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubItalic)),
-            "sub-outline-size" to appPreferences.getValue(appPreferences.playerMpvSubBorderSize),
+            "sub-outline-size" to borderSize,
             "sub-outline-color" to appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
             "sub-back-color" to backColor,
             "sub-border-style" to "background-box",
+            "sub-shadow-offset" to
+                appPreferences.getValue(appPreferences.playerMpvSubBackgroundPadding),
+            "sub-ass-override" to appPreferences.getValue(appPreferences.playerMpvSubAssOverride),
         )
     }
 }

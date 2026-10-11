@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,15 +57,8 @@ fun HomeHeader(
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_logo),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = Color.Unspecified,
-                )
                 Text(
                     text = serverName,
                     overflow = TextOverflow.Ellipsis,

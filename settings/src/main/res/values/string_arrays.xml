@@ -115,6 +115,31 @@
         <item>230</item>
         <item>255</item>
     </string-array>
+    <string-array name="mpv_sub_background_padding">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+    </string-array>
+    <string-array name="mpv_sub_ass_override">
+        <item>No</item>
+        <item>Yes</item>
+        <item>Scale</item>
+        <item>Force</item>
+        <item>Strip</item>
+    </string-array>
+    <string-array name="mpv_sub_ass_override_values">
+        <item>no</item>
+        <item>yes</item>
+        <item>scale</item>
+        <item>force</item>
+        <item>strip</item>
+    </string-array>
     <string-array name="media_segments_auto_skip">
         <item>@string/media_segments_auto_skip_pip</item>
         <item>@string/media_segments_auto_skip_always</item>

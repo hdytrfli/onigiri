@@ -86,8 +86,17 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.backdropPortraitRatio),
                     appPreferences.observe(appPreferences.backdropLandscapeRatio),
                     appPreferences.observe(appPreferences.contentSpacing),
-                ) { portraitRatio, landscapeRatio, contentSpacing ->
-                    Triple(portraitRatio, landscapeRatio, contentSpacing)
+                    appPreferences.observe(appPreferences.confirmExit),
+                    appPreferences.observe(appPreferences.navigationAnimation),
+                ) { portraitRatio, landscapeRatio, contentSpacing, confirmExit, navigationAnimation
+                    ->
+                    InterfacePrefs(
+                        portraitRatio,
+                        landscapeRatio,
+                        contentSpacing,
+                        confirmExit,
+                        navigationAnimation,
+                    )
                 }
 
             val titlePrefs =
@@ -114,9 +123,13 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
                         isOfflineMode = offlineMode,
-                        backdropPortraitRatio = interfacePrefs.first.toFloatOrNull() ?: 1.5f,
-                        backdropLandscapeRatio = interfacePrefs.second.toFloatOrNull() ?: 2f,
-                        contentSpacingScale = interfacePrefs.third.toFloatOrNull() ?: 1f,
+                        backdropPortraitRatio =
+                            interfacePrefs.portraitRatio.toFloatOrNull() ?: 1.5f,
+                        backdropLandscapeRatio =
+                            interfacePrefs.landscapeRatio.toFloatOrNull() ?: 2f,
+                        contentSpacingScale = interfacePrefs.contentSpacing.toFloatOrNull() ?: 1f,
+                        confirmExit = interfacePrefs.confirmExit,
+                        navigationAnimation = interfacePrefs.navigationAnimation,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.35f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
@@ -139,6 +152,14 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val ratio: String,
         val naive: Boolean,
     )
+
+    private data class InterfacePrefs(
+        val portraitRatio: String,
+        val landscapeRatio: String,
+        val contentSpacing: String,
+        val confirmExit: Boolean,
+        val navigationAnimation: Boolean,
+    )
 }
 
 data class MainState(
@@ -155,4 +176,6 @@ data class MainState(
     val titleLandscapeWidth: Float = 0.35f,
     val titleImageRatio: Float = 2f,
     val naiveTitleOverlay: Boolean = false,
+    val confirmExit: Boolean = false,
+    val navigationAnimation: Boolean = true,
 )

@@ -10,4 +10,8 @@ interface Preference {
     val enabled: Boolean
     val dependencies: List<PreferenceBackend<Boolean>>
     val supportedDeviceTypes: List<DeviceType>
+
+    /** When true and [dependencies] are not all satisfied, hide instead of disabling. */
+    val hideWhenDisabled: Boolean
+        get() = false
 }

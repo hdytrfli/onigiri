@@ -29,6 +29,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val seasonGridColumnsPortrait = Preference("pref_season_grid_columns_portrait", "3")
     val seasonGridColumnsLandscape = Preference("pref_season_grid_columns_landscape", "4")
     val contentSpacing = Preference("pref_content_spacing", "1.25")
+    val navigationAnimation = Preference("pref_navigation_animation", true)
     val naiveTitleOverlay = Preference("pref_naive_title_overlay", false)
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.35")
@@ -57,6 +58,10 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerMpvSubBorderColor = Preference("pref_player_mpv_sub_border_color", "#FF000000")
     val playerMpvSubBackColor = Preference("pref_player_mpv_sub_back_color", "#FF000000")
     val playerMpvSubBackOpacity = Preference("pref_player_mpv_sub_back_opacity", "179")
+    val playerMpvSubAssOverride = Preference("pref_player_mpv_sub_ass_override", "scale")
+    val playerMpvSubBackgroundPadding = Preference("pref_player_mpv_sub_background_padding", "0")
+    val playerMpvSubBorderEnabled = Preference("pref_player_mpv_sub_border_enabled", false)
+    val playerMpvSubBackgroundEnabled = Preference("pref_player_mpv_sub_background_enabled", true)
 
     // Player - gestures
     val playerGestures = Preference("pref_player_gestures", true)
@@ -127,6 +132,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Offline mode
     val offlineMode = Preference("pref_offline_mode", false)
+
+    // General
+    val confirmExit = Preference("pref_confirm_exit", false)
 
     // Migrations
     val mpvMigrated = Preference("mpv_migrated", false)

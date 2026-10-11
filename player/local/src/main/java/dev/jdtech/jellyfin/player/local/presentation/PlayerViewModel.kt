@@ -190,6 +190,8 @@ constructor(
                         .setSubBorderColor(subOptions.getValue("sub-outline-color"))
                         .setSubBackColor(subOptions.getValue("sub-back-color"))
                         .setSubBorderStyle(subOptions.getValue("sub-border-style"))
+                        .setSubAssOverride(subOptions.getValue("sub-ass-override"))
+                        .setSubShadowOffset(subOptions.getValue("sub-shadow-offset"))
                         .setAlwaysPlaySubtitles(alwaysPlaySubtitles)
                         .build()
                 }

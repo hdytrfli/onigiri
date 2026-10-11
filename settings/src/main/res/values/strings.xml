@@ -66,6 +66,11 @@
     <string name="picture_in_picture_gesture">Picture-in-picture home gesture</string>
     <string name="picture_in_picture_gesture_summary">Use home button or gesture to enter picture-in-picture while the video is playing</string>
     <string name="offline_mode">Offline Mode</string>
+    <string name="confirm_exit">Confirm exit</string>
+    <string name="confirm_exit_summary">Ask for confirmation before closing the app</string>
+    <string name="confirm_exit_dialog_title">Exit app?</string>
+    <string name="confirm_exit_dialog_text">Are you sure you want to exit?</string>
+    <string name="exit">Exit</string>
     <string name="offline_mode_summary">Watch movies and series without a connection to the server</string>
     <string name="theme">Theme</string>
     <string name="theme_system">Follow system</string>
@@ -79,6 +84,8 @@
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="content_spacing">Content spacing</string>
+    <string name="navigation_animation">Navigation animation</string>
+    <string name="navigation_animation_summary">Animate screen transitions and the navigation bar</string>
     <string name="naive_title_overlay">Naive title overlay</string>
     <string name="naive_title_overlay_summary">Apply a white overlay to title images. May look wrong for some titles.</string>
     <string name="title_image">Title image</string>
@@ -139,6 +146,10 @@
     <string name="pref_player_mpv_sub_border_color">Border color</string>
     <string name="pref_player_mpv_sub_back_color">Background color</string>
     <string name="pref_player_mpv_sub_back_opacity">Background opacity</string>
+    <string name="pref_player_mpv_sub_background_padding">Background padding</string>
+    <string name="pref_player_mpv_sub_border_enabled">Border</string>
+    <string name="pref_player_mpv_sub_background_enabled">Background</string>
+    <string name="pref_player_mpv_sub_ass_override">ASS style override</string>
     <string name="pref_player_mpv_sub_pos">Position</string>
     <string name="pref_player_mpv_sub_pos_summary">Vertical position in % of screen height. 100 is the default bottom position.</string>
     <string name="pref_player_mpv_sub_use_margins">Use margins</string>

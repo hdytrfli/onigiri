@@ -67,6 +67,8 @@ class MPVPlayer(
     private val subBorderColor: String = "#FF000000",
     private val subBackColor: String = "#FF000000",
     private val subBorderStyle: String = "background-box",
+    private val subAssOverride: String = "scale",
+    private val subShadowOffset: String = "0",
     private val alwaysPlaySubtitles: Boolean = false,
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
@@ -98,6 +100,8 @@ class MPVPlayer(
         subBorderColor = builder.subBorderColor,
         subBackColor = builder.subBackColor,
         subBorderStyle = builder.subBorderStyle,
+        subAssOverride = builder.subAssOverride,
+        subShadowOffset = builder.subShadowOffset,
         alwaysPlaySubtitles = builder.alwaysPlaySubtitles,
     )
 
@@ -159,6 +163,12 @@ class MPVPlayer(
         var subBorderStyle: String = "background-box"
             private set
 
+        var subAssOverride: String = "scale"
+            private set
+
+        var subShadowOffset: String = "0"
+            private set
+
         var alwaysPlaySubtitles: Boolean = false
             private set
 
@@ -213,6 +223,14 @@ class MPVPlayer(
 
         fun setSubBorderStyle(subBorderStyle: String) = apply {
             this.subBorderStyle = subBorderStyle
+        }
+
+        fun setSubAssOverride(subAssOverride: String) = apply {
+            this.subAssOverride = subAssOverride
+        }
+
+        fun setSubShadowOffset(subShadowOffset: String) = apply {
+            this.subShadowOffset = subShadowOffset
         }
 
         fun setAlwaysPlaySubtitles(alwaysPlaySubtitles: Boolean) = apply {
@@ -270,6 +288,8 @@ class MPVPlayer(
         mpvLib.setOptionString("sub-outline-color", subBorderColor)
         mpvLib.setOptionString("sub-back-color", subBackColor)
         mpvLib.setOptionString("sub-border-style", subBorderStyle)
+        mpvLib.setOptionString("sub-ass-override", subAssOverride)
+        mpvLib.setOptionString("sub-shadow-offset", subShadowOffset)
         if (alwaysPlaySubtitles) {
             mpvLib.setOptionString("sub-auto", "all")
             mpvLib.setOptionString("sid", "auto")

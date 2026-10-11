@@ -47,7 +47,13 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                 }
                             },
                             backendPreference = appPreferences.offlineMode,
-                        )
+                        ),
+                        PreferenceSwitch(
+                            nameStringResource = R.string.confirm_exit,
+                            descriptionStringRes = R.string.confirm_exit_summary,
+                            supportedDeviceTypes = listOf(DeviceType.PHONE),
+                            backendPreference = appPreferences.confirmExit,
+                        ),
                     )
             ),
             PreferenceGroup(
@@ -164,6 +170,15 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         appPreferences.contentSpacing,
                                                     options = R.array.content_spacing_options,
                                                     optionValues = R.array.content_spacing_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.navigation_animation,
+                                                    descriptionStringRes =
+                                                        R.string.navigation_animation_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.navigationAnimation,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
@@ -514,6 +529,20 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                                 appPreferences
                                                                                     .playerMpvSubItalic,
                                                                         ),
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_ass_override,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubAssOverride,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_sub_ass_override,
+                                                                            optionValues =
+                                                                                R.array
+                                                                                    .mpv_sub_ass_override_values,
+                                                                        ),
                                                                     ),
                                                             ),
                                                             PreferenceGroup(
@@ -521,10 +550,24 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                     R.string.mpv_sub_group_outline,
                                                                 preferences =
                                                                     listOf(
+                                                                        PreferenceSwitch(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_enabled,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubBorderEnabled,
+                                                                        ),
                                                                         PreferenceSelect(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_size,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBorderEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubBorderSize,
@@ -539,6 +582,12 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_color,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBorderEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubBorderColor,
@@ -557,10 +606,24 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                         .mpv_sub_group_background,
                                                                 preferences =
                                                                     listOf(
+                                                                        PreferenceSwitch(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_background_enabled,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubBackgroundEnabled,
+                                                                        ),
                                                                         PreferenceSelect(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_back_color,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBackgroundEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubBackColor,
@@ -575,6 +638,12 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_back_opacity,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBackgroundEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubBackOpacity,
@@ -584,6 +653,26 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             optionValues =
                                                                                 R.array
                                                                                     .mpv_sub_back_opacity_values,
+                                                                        ),
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_background_padding,
+                                                                            dependencies =
+                                                                                listOf(
+                                                                                    appPreferences
+                                                                                        .playerMpvSubBackgroundEnabled
+                                                                                ),
+                                                                            hideWhenDisabled = true,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubBackgroundPadding,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_sub_background_padding,
+                                                                            optionValues =
+                                                                                R.array
+                                                                                    .mpv_sub_background_padding,
                                                                         ),
                                                                     ),
                                                             ),
@@ -1106,6 +1195,12 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                         } else {
                                             true
                                         }
+                                    }
+                                    .filter { preference ->
+                                        !preference.hideWhenDisabled ||
+                                            preference.dependencies.all {
+                                                appPreferences.getValue(it)
+                                            }
                                     }
                                     .map { preference ->
                                         when (preference) {

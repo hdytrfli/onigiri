@@ -5,7 +5,7 @@
     android:id="@+id/player_controls"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/player_background">
+    android:background="@drawable/player_controls_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -296,7 +296,7 @@
         </LinearLayout>
 
 
-        <androidx.media3.ui.DefaultTimeBar
+        <dev.jdtech.jellyfin.ui.RoundedTimeBar
             android:id="@+id/exo_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
