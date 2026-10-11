@@ -74,7 +74,11 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
                         return null
                     }
 
-                    val episode = nextUpEpisode ?: episodes.first()
+                    // Use the matching episode from the fetched list so it carries the
+                    // requested fields (e.g. OVERVIEW); getNextUp() does not populate them.
+                    val episode =
+                        nextUpEpisode?.let { nextUp -> episodes.firstOrNull { it.id == nextUp.id } }
+                            ?: episodes.first()
 
                     items = episodes
                     episode

@@ -41,8 +41,10 @@ import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
+import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -167,17 +169,38 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         val playerMenuButton = binding.playerView.findViewById<ImageButton>(R.id.btn_player_menu)
+        val btnEpisodes = binding.playerView.findViewById<ImageButton>(R.id.btn_episodes)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
         val gestureLockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_gesture_lock)
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
 
+        // Episodes sheet
+        val episodesOverlay = findViewById<FrameLayout>(R.id.player_episodes_overlay)
+        val episodesScrim = findViewById<View>(R.id.player_episodes_scrim)
+        val episodesPanel = findViewById<View>(R.id.player_episodes_panel)
+        val episodesList = findViewById<ListView>(R.id.player_episodes_list)
+
+        val episodeAdapter =
+            PlayerEpisodeAdapter(this) { episode ->
+                viewModel.selectEpisode(episode.id)
+                hideOptionsSheet(episodesOverlay, episodesPanel, episodesScrim)
+            }
+        episodesList.adapter = episodeAdapter
+        episodesScrim.setOnClickListener {
+            hideOptionsSheet(episodesOverlay, episodesPanel, episodesScrim)
+        }
+        btnEpisodes.setOnClickListener {
+            showOptionsSheet(episodesOverlay, episodesPanel, episodesScrim)
+        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     var lastLogo: String? = null
                     var lastOverview: String? = null
+                    var lastEpisodes: List<FindroidEpisode> = emptyList()
                     viewModel.uiState.collect { uiState ->
                         Timber.d("$uiState")
                         uiState.apply {
@@ -260,8 +283,19 @@ class PlayerActivity : BasePlayerActivity() {
                                 playerMenuButton.imageAlpha = 255
                                 lockButton.isEnabled = true
                                 lockButton.imageAlpha = 255
+                                gestureLockButton.isEnabled = true
+                                gestureLockButton.imageAlpha = 255
+                                btnEpisodes.isEnabled = true
+                                btnEpisodes.imageAlpha = 255
                                 pipButton.isEnabled = true
                                 pipButton.imageAlpha = 255
+                            }
+
+                            // Episodes
+                            btnEpisodes.isVisible = currentSeasonEpisodes.isNotEmpty()
+                            if (currentSeasonEpisodes != lastEpisodes) {
+                                lastEpisodes = currentSeasonEpisodes
+                                episodeAdapter.submit(currentSeasonEpisodes)
                             }
                         }
                     }
@@ -316,6 +350,12 @@ class PlayerActivity : BasePlayerActivity() {
 
         lockButton.isEnabled = false
         lockButton.imageAlpha = 75
+
+        gestureLockButton.isEnabled = false
+        gestureLockButton.imageAlpha = 75
+
+        btnEpisodes.isEnabled = false
+        btnEpisodes.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false

@@ -18,6 +18,7 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidSegmentType
 import dev.jdtech.jellyfin.player.core.domain.models.PlayerChapter
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.ItemFields
 import timber.log.Timber
 
 @HiltViewModel
@@ -83,6 +85,8 @@ constructor(
         val fileLoaded: Boolean,
         val currentItemLogo: String? = null,
         val currentItemOverview: String? = null,
+        val currentSeasonEpisodes: List<FindroidEpisode> = emptyList(),
+        val currentEpisodeId: UUID? = null,
     )
 
     private var items: MutableList<PlayerItem> = mutableListOf()
@@ -396,6 +400,10 @@ constructor(
                             )
                         }
 
+                        if (item.parentIndexNumber != null) {
+                            loadSeasonEpisodes(item.itemId)
+                        }
+
                         repository.postPlaybackStart(item.itemId)
 
                         if (segmentsSkipButton || segmentsAutoSkip) {
@@ -535,6 +543,28 @@ constructor(
     fun selectSpeed(speed: Float) {
         player.setPlaybackSpeed(speed)
         playbackSpeed = speed
+    }
+
+    private suspend fun loadSeasonEpisodes(itemId: UUID) {
+        try {
+            val episode = repository.getEpisode(itemId)
+            val episodes =
+                repository.getEpisodes(
+                    seriesId = episode.seriesId,
+                    seasonId = episode.seasonId,
+                    fields = listOf(ItemFields.OVERVIEW),
+                )
+            _uiState.update { it.copy(currentSeasonEpisodes = episodes, currentEpisodeId = itemId) }
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    fun selectEpisode(itemId: UUID) {
+        val index = items.indexOfFirst { it.itemId == itemId }
+        if (index >= 0) {
+            player.seekTo(index, C.TIME_UNSET)
+        }
     }
 
     private suspend fun getSegments(itemId: UUID) {

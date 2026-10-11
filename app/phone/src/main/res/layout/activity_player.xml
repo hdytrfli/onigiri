@@ -193,4 +193,36 @@
                 android:dividerHeight="0dp" />
         </LinearLayout>
     </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/player_episodes_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <View
+            android:id="@+id/player_episodes_scrim"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#99000000" />
+
+        <LinearLayout
+            android:id="@+id/player_episodes_panel"
+            android:layout_width="400dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="@drawable/player_options_panel_background"
+            android:elevation="8dp"
+            android:orientation="vertical"
+            android:paddingTop="16dp">
+
+            <ListView
+                android:id="@+id/player_episodes_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:dividerHeight="0dp" />
+        </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

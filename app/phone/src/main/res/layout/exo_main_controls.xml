@@ -73,6 +73,22 @@
                 android:layout_height="0dp" />
 
             <ImageButton
+                android:id="@+id/btn_episodes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@drawable/transparent_circle_background"
+                android:contentDescription="@string/player_controls_episodes"
+                android:padding="16dp"
+                android:src="@drawable/ic_tv"
+                android:visibility="gone"
+                app:tint="@android:color/white" />
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="0dp" />
+
+            <ImageButton
                 android:id="@+id/btn_gesture_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

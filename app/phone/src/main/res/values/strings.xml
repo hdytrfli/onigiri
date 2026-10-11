@@ -2,6 +2,7 @@
 <resources>
     <string name="player_controls_options">Playback options</string>
     <string name="player_controls_lock_gestures">Lock volume and brightness gestures</string>
+    <string name="player_controls_episodes">Episodes</string>
     <string name="player_menu_tab_audio">Audio</string>
     <string name="player_menu_tab_subtitles">Subtitles</string>
     <string name="player_menu_tab_speed">Speed</string>
