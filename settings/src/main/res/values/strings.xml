@@ -38,7 +38,7 @@
     <string name="mpv_player_summary">Use the experimental mpv player to play videos. mpv has support for more video, audio and subtitle codecs.</string>
     <string name="gestures">Gestures</string>
     <string name="player_gestures">Player gestures</string>
-    <string name="player_gestures_vb">Volume and brightness gestures</string>
+    <string name="player_gestures_vb">Volume, brightness and zoom gestures</string>
     <string name="player_gestures_zoom">Zoom gesture</string>
     <string name="player_gestures_seek">Seek gesture</string>
     <string name="player_gestures_double_tap">Double tap to seek</string>
@@ -154,4 +154,6 @@
     <string name="player_time_display">Time display</string>
     <string name="pref_player_time_display">Show</string>
     <string name="pref_player_time_end_format">End time format</string>
+    <string name="hide_status_bar">Hide status bar</string>
+    <string name="hide_status_bar_summary">Hide the system status bar outside the player</string>
 </resources>

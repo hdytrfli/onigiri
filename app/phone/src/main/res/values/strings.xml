@@ -9,8 +9,8 @@
     <string name="player_time_finished_at">finished at %1$s</string>
     <string name="player_time_finished_in">finished in %1$d mins</string>
     <string name="refresh">Refresh</string>
-    <string name="player_gestures_locked">Volume and brightness locked</string>
-    <string name="player_gestures_unlocked">Volume and brightness unlocked</string>
+    <string name="player_gestures_locked">Volume, brightness and zoom locked</string>
+    <string name="player_gestures_unlocked">Volume, brightness and zoom unlocked</string>
     <string name="player_screen_locked">Screen locked</string>
     <string name="player_screen_unlocked">Screen unlocked</string>
     <string name="player_controls_info">Media details</string>

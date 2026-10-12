@@ -167,6 +167,14 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     backendPreference =
                                                         appPreferences.dynamicColors,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.hide_status_bar,
+                                                    descriptionStringRes =
+                                                        R.string.hide_status_bar_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.hideStatusBar,
+                                                ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.content_spacing,
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),

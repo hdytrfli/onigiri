@@ -87,8 +87,15 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.backdropLandscapeRatio),
                     appPreferences.observe(appPreferences.contentSpacing),
                     appPreferences.observe(appPreferences.confirmExit),
-                ) { portraitRatio, landscapeRatio, contentSpacing, confirmExit ->
-                    InterfacePrefs(portraitRatio, landscapeRatio, contentSpacing, confirmExit)
+                    appPreferences.observe(appPreferences.hideStatusBar),
+                ) { portraitRatio, landscapeRatio, contentSpacing, confirmExit, hideStatusBar ->
+                    InterfacePrefs(
+                        portraitRatio,
+                        landscapeRatio,
+                        contentSpacing,
+                        confirmExit,
+                        hideStatusBar,
+                    )
                 }
 
             val titlePrefs =
@@ -121,6 +128,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                             interfacePrefs.landscapeRatio.toFloatOrNull() ?: 2.3333333f,
                         contentSpacingScale = interfacePrefs.contentSpacing.toFloatOrNull() ?: 1f,
                         confirmExit = interfacePrefs.confirmExit,
+                        hideStatusBar = interfacePrefs.hideStatusBar,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
@@ -149,6 +157,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val landscapeRatio: String,
         val contentSpacing: String,
         val confirmExit: Boolean,
+        val hideStatusBar: Boolean,
     )
 }
 
@@ -167,4 +176,5 @@ data class MainState(
     val titleImageRatio: Float = 2f,
     val naiveTitleOverlay: Boolean = false,
     val confirmExit: Boolean = false,
+    val hideStatusBar: Boolean = false,
 )

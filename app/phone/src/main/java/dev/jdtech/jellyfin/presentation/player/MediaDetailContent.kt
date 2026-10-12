@@ -64,7 +64,13 @@ fun MediaDetailContent(detail: MediaDetailState) {
         }
 
         Column(
-            modifier = Modifier.padding(MaterialTheme.spacings.default),
+            modifier =
+                Modifier.padding(
+                    start = MaterialTheme.spacings.default,
+                    top = if (backdropUri == null) MaterialTheme.spacings.default else 0.dp,
+                    end = MaterialTheme.spacings.default,
+                    bottom = MaterialTheme.spacings.default,
+                ),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
             if (backdropUri == null) {
@@ -145,7 +151,12 @@ private fun BackdropHeader(backdropUri: String, title: String?) {
                 text = it,
                 style = MaterialTheme.typography.titleMedium,
                 modifier =
-                    Modifier.align(Alignment.BottomStart).padding(MaterialTheme.spacings.default),
+                    Modifier.align(Alignment.BottomStart)
+                        .padding(
+                            start = MaterialTheme.spacings.default,
+                            end = MaterialTheme.spacings.default,
+                            bottom = MaterialTheme.spacings.medium,
+                        ),
             )
         }
     }
