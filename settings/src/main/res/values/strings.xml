@@ -127,8 +127,8 @@
     <string name="always_play_subtitles">Always play subtitles</string>
     <string name="always_play_subtitles_summary">Show subtitles automatically when available</string>
     <string name="player_options">Player options</string>
-    <string name="mpv_options">mpv options</string>
-    <string name="mpv_options_summary">Hardware decoding, outputs and subtitle style for the mpv player</string>
+    <string name="mpv_options">MPV options</string>
+    <string name="mpv_options_summary">Hardware decoding, outputs and subtitle style for the MPV player</string>
     <string name="mpv_subtitles">Subtitles</string>
     <string name="mpv_subtitles_summary">Customize mpv subtitle style. Applied when playback starts.</string>
     <string name="mpv_sub_group_text">Text</string>

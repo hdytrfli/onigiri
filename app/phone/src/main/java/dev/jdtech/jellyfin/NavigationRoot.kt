@@ -9,8 +9,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -80,6 +85,7 @@ import dev.jdtech.jellyfin.presentation.setup.login.LoginScreen
 import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
+import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
@@ -285,7 +291,23 @@ private fun MainNavigation(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // Consume the hidden status-bar/cutout top inset here as well, right above the navigation
+    // suite, so the rail does not reserve space when the status bar is hidden.
+    val navSuiteInsets =
+        if (LocalHideStatusBar.current) {
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+        } else {
+            WindowInsets(0, 0, 0, 0)
+        }
+    Box(modifier = Modifier.fillMaxSize().consumeWindowInsets(navSuiteInsets)) {
+        // Only the bottom navigation bar gets the extra vertical padding; the rail already applies
+        // its own vertical padding, and adding this there leaves an unwanted gap at the top.
+        val navItemModifier =
+            if (customNavSuiteType == NavigationSuiteType.NavigationRail) {
+                Modifier
+            } else {
+                Modifier.padding(vertical = 8.dp)
+            }
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 navigationItems.forEach { item ->
@@ -304,7 +326,7 @@ private fun MainNavigation(
                                 contentDescription = stringResource(item.title),
                             )
                         },
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = navItemModifier,
                         enabled = item.enabled,
                         label = { Text(text = stringResource(item.title)) },
                     )
