@@ -444,6 +444,8 @@ class PlayerGestureHelper(
                     override fun onScale(detector: ScaleGestureDetector): Boolean {
                         // Disables zoom gesture if view is locked
                         if (isControlsLocked) return false
+                        // Also disable zoom when volume/brightness gestures are locked
+                        if (isVolumeBrightnessLocked) return false
                         lastScaleEvent = SystemClock.elapsedRealtime()
                         val scaleFactor = detector.scaleFactor
                         if (

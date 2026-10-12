@@ -57,6 +57,9 @@ constructor(
                                 episode.sources.firstOrNull()?.let {
                                     videoMetadataParser.parse(it)
                                 },
+                            backdropUri =
+                                (episode.images.backdrop ?: episode.images.showBackdrop)
+                                    ?.toString(),
                         )
                     } else {
                         val movie = repository.getMovie(itemId)
@@ -72,6 +75,7 @@ constructor(
                             people = movie.people,
                             videoMetadata =
                                 movie.sources.firstOrNull()?.let { videoMetadataParser.parse(it) },
+                            backdropUri = movie.images.backdrop?.toString(),
                         )
                     }
                 _state.emit(detail)

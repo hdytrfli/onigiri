@@ -15,5 +15,6 @@ data class MediaDetailState(
     val genres: List<String> = emptyList(),
     val people: List<FindroidItemPerson> = emptyList(),
     val videoMetadata: VideoMetadata? = null,
+    val backdropUri: String? = null,
     val error: Exception? = null,
 )

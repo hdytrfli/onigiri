@@ -28,6 +28,7 @@ import android.widget.ListView
 import android.widget.Space
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,8 @@ import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
@@ -249,7 +252,21 @@ class PlayerActivity : BasePlayerActivity() {
                 }
             }
             FindroidTheme(darkTheme = true, dynamicColor = false) {
-                MediaDetailContent(detailState)
+                CompositionLocalProvider(
+                    LocalBackdropRatios provides
+                        BackdropRatios(
+                            portrait =
+                                appPreferences
+                                    .getValue(appPreferences.backdropPortraitRatio)
+                                    .toFloat(),
+                            landscape =
+                                appPreferences
+                                    .getValue(appPreferences.backdropLandscapeRatio)
+                                    .toFloat(),
+                        )
+                ) {
+                    MediaDetailContent(detailState)
+                }
             }
         }
 
@@ -353,6 +370,8 @@ class PlayerActivity : BasePlayerActivity() {
                                 gestureLockButton.imageAlpha = 255
                                 btnEpisodes.isEnabled = true
                                 btnEpisodes.imageAlpha = 255
+                                btnInfo.isEnabled = true
+                                btnInfo.imageAlpha = 255
                                 pipButton.isEnabled = true
                                 pipButton.imageAlpha = 255
                             }
@@ -437,6 +456,9 @@ class PlayerActivity : BasePlayerActivity() {
 
         btnEpisodes.isEnabled = false
         btnEpisodes.imageAlpha = 75
+
+        btnInfo.isEnabled = false
+        btnInfo.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false

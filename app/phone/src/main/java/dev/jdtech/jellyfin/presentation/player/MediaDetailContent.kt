@@ -1,11 +1,13 @@
 package dev.jdtech.jellyfin.presentation.player
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +38,7 @@ import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import org.jellyfin.sdk.model.api.PersonKind
 
 /** Read-only media details shown in the player, mirroring the movie/episode detail page. */
@@ -50,57 +56,98 @@ fun MediaDetailContent(detail: MediaDetailState) {
         remember(detail.people) { detail.people.firstOrNull { it.type == PersonKind.DIRECTOR } }
     val writers = remember(detail.people) { detail.people.filter { it.type == PersonKind.WRITER } }
 
-    Column(
-        modifier =
-            Modifier.fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = MaterialTheme.spacings.default),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-    ) {
-        detail.title?.let { title ->
-            Text(text = title, style = MaterialTheme.typography.titleLarge)
+    val backdropUri = detail.backdropUri
+
+    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        if (backdropUri != null) {
+            BackdropHeader(backdropUri = backdropUri, title = detail.title)
         }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.padding(MaterialTheme.spacings.default),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
-            detail.year?.let { year ->
-                Text(text = year.toString(), style = MaterialTheme.typography.bodyMedium)
+            if (backdropUri == null) {
+                detail.title?.let { title ->
+                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                }
             }
-            detail.runtimeMinutes?.let { runtime ->
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                detail.year?.let { year ->
+                    Text(text = year.toString(), style = MaterialTheme.typography.bodyMedium)
+                }
+                detail.runtimeMinutes?.let { runtime ->
+                    Text(
+                        text = stringResource(CoreR.string.runtime_minutes, runtime),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                detail.officialRating?.let { rating ->
+                    Text(text = rating, style = MaterialTheme.typography.bodyMedium)
+                }
+                detail.communityRating?.let { rating ->
+                    Text(text = "%.1f".format(rating), style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+
+            detail.videoMetadata?.let { videoMetadata -> VideoMetadataBar(videoMetadata) }
+
+            detail.overview
+                ?.takeIf { it.isNotBlank() }
+                ?.let { overview -> OverviewText(text = overview, maxCollapsedLines = 4) }
+
+            if (detail.genres.isNotEmpty() || director != null || writers.isNotEmpty()) {
+                InfoText(genres = detail.genres, director = director, writers = writers)
+            }
+
+            if (actors.isNotEmpty()) {
                 Text(
-                    text = stringResource(CoreR.string.runtime_minutes, runtime),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = stringResource(CoreR.string.cast_amp_crew),
+                    style = MaterialTheme.typography.titleMedium,
                 )
+                actors.forEach { person -> PersonRow(person = person) }
             }
-            detail.officialRating?.let { rating ->
-                Text(text = rating, style = MaterialTheme.typography.bodyMedium)
-            }
-            detail.communityRating?.let { rating ->
-                Text(text = "%.1f".format(rating), style = MaterialTheme.typography.bodyMedium)
-            }
+
+            Spacer(Modifier.size(MaterialTheme.spacings.default))
         }
+    }
+}
 
-        detail.videoMetadata?.let { videoMetadata -> VideoMetadataBar(videoMetadata) }
-
-        detail.overview
-            ?.takeIf { it.isNotBlank() }
-            ?.let { overview -> OverviewText(text = overview, maxCollapsedLines = 4) }
-
-        if (detail.genres.isNotEmpty() || director != null || writers.isNotEmpty()) {
-            InfoText(genres = detail.genres, director = director, writers = writers)
-        }
-
-        if (actors.isNotEmpty()) {
-            Text(
-                text = stringResource(CoreR.string.cast_amp_crew),
-                style = MaterialTheme.typography.titleMedium,
+@Composable
+private fun BackdropHeader(backdropUri: String, title: String?) {
+    val backgroundColor = MaterialTheme.colorScheme.background
+    Box(
+        modifier =
+            Modifier.fillMaxWidth().aspectRatio(LocalBackdropRatios.current.portrait).clipToBounds()
+    ) {
+        AsyncImage(
+            model = backdropUri,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawRect(Color.Black.copy(alpha = 0.1f))
+            drawRect(
+                brush =
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, backgroundColor),
+                        startY = 0f,
+                    )
             )
-            actors.forEach { person -> PersonRow(person = person) }
         }
-
-        Spacer(Modifier.size(MaterialTheme.spacings.default))
+        title?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.titleMedium,
+                modifier =
+                    Modifier.align(Alignment.BottomStart).padding(MaterialTheme.spacings.default),
+            )
+        }
     }
 }
 
