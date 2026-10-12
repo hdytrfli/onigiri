@@ -41,6 +41,39 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import org.jellyfin.sdk.model.api.PersonKind
 
+/**
+ * Backdrop + title + (year, runtime, ratings). Shared by the media-detail sheet and the playback
+ * options sheet.
+ */
+@Composable
+fun MediaDetailHeader(detail: MediaDetailState) {
+    if (detail.isLoading) return
+
+    val backdropUri = detail.backdropUri
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (backdropUri != null) {
+            BackdropHeader(backdropUri = backdropUri, title = detail.title)
+        }
+        Column(
+            modifier =
+                Modifier.padding(
+                    start = MaterialTheme.spacings.default,
+                    top =
+                        if (backdropUri == null) MaterialTheme.spacings.default
+                        else MaterialTheme.spacings.medium,
+                    end = MaterialTheme.spacings.default,
+                )
+        ) {
+            if (backdropUri == null) {
+                detail.title?.let { title ->
+                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            MetadataRow(detail)
+        }
+    }
+}
+
 /** Read-only media details shown in the player, mirroring the movie/episode detail page. */
 @Composable
 fun MediaDetailContent(detail: MediaDetailState) {
@@ -56,50 +89,19 @@ fun MediaDetailContent(detail: MediaDetailState) {
         remember(detail.people) { detail.people.firstOrNull { it.type == PersonKind.DIRECTOR } }
     val writers = remember(detail.people) { detail.people.filter { it.type == PersonKind.WRITER } }
 
-    val backdropUri = detail.backdropUri
-
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        if (backdropUri != null) {
-            BackdropHeader(backdropUri = backdropUri, title = detail.title)
-        }
+        MediaDetailHeader(detail)
 
         Column(
             modifier =
                 Modifier.padding(
                     start = MaterialTheme.spacings.default,
-                    top = if (backdropUri == null) MaterialTheme.spacings.default else 0.dp,
+                    top = MaterialTheme.spacings.medium,
                     end = MaterialTheme.spacings.default,
                     bottom = MaterialTheme.spacings.default,
                 ),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
-            if (backdropUri == null) {
-                detail.title?.let { title ->
-                    Text(text = title, style = MaterialTheme.typography.titleMedium)
-                }
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                detail.year?.let { year ->
-                    Text(text = year.toString(), style = MaterialTheme.typography.bodyMedium)
-                }
-                detail.runtimeMinutes?.let { runtime ->
-                    Text(
-                        text = stringResource(CoreR.string.runtime_minutes, runtime),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                detail.officialRating?.let { rating ->
-                    Text(text = rating, style = MaterialTheme.typography.bodyMedium)
-                }
-                detail.communityRating?.let { rating ->
-                    Text(text = "%.1f".format(rating), style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-
             detail.videoMetadata?.let { videoMetadata -> VideoMetadataBar(videoMetadata) }
 
             detail.overview
@@ -119,6 +121,30 @@ fun MediaDetailContent(detail: MediaDetailState) {
             }
 
             Spacer(Modifier.size(MaterialTheme.spacings.default))
+        }
+    }
+}
+
+@Composable
+private fun MetadataRow(detail: MediaDetailState) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        detail.year?.let { year ->
+            Text(text = year.toString(), style = MaterialTheme.typography.bodyMedium)
+        }
+        detail.runtimeMinutes?.let { runtime ->
+            Text(
+                text = stringResource(CoreR.string.runtime_minutes, runtime),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        detail.officialRating?.let { rating ->
+            Text(text = rating, style = MaterialTheme.typography.bodyMedium)
+        }
+        detail.communityRating?.let { rating ->
+            Text(text = "%.1f".format(rating), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

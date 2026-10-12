@@ -53,6 +53,7 @@ import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.MediaDetailContent
+import dev.jdtech.jellyfin.presentation.player.MediaDetailHeader
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
@@ -272,6 +273,39 @@ class PlayerActivity : BasePlayerActivity() {
 
         detailScrim.setOnClickListener { hideOptionsSheet(detailOverlay, detailPanel, detailScrim) }
         btnInfo.setOnClickListener { showOptionsSheet(detailOverlay, detailPanel, detailScrim) }
+
+        // Playback options header (backdrop + title + metadata)
+        val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
+        optionsHeaderComposeView.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnDetachedFromWindow
+        )
+        optionsHeaderComposeView.setContent {
+            val detailState by detailViewModel.state.collectAsStateWithLifecycle()
+            val itemId = detailItemId.value
+            val isEpisode = detailItemIsEpisode.value
+            LaunchedEffect(itemId, isEpisode) {
+                if (itemId != null) {
+                    detailViewModel.load(itemId, isEpisode)
+                }
+            }
+            FindroidTheme(darkTheme = true, dynamicColor = false) {
+                CompositionLocalProvider(
+                    LocalBackdropRatios provides
+                        BackdropRatios(
+                            portrait =
+                                appPreferences
+                                    .getValue(appPreferences.backdropPortraitRatio)
+                                    .toFloat(),
+                            landscape =
+                                appPreferences
+                                    .getValue(appPreferences.backdropLandscapeRatio)
+                                    .toFloat(),
+                        )
+                ) {
+                    MediaDetailHeader(detailState)
+                }
+            }
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -667,19 +701,20 @@ class PlayerActivity : BasePlayerActivity() {
 
     private fun optionsItems(tab: Int): List<PlayerMenuItem> =
         when (tab) {
-            0 -> trackItems(C.TRACK_TYPE_AUDIO)
-            1 -> trackItems(C.TRACK_TYPE_TEXT)
+            0 -> trackItems(C.TRACK_TYPE_AUDIO, CoreR.drawable.ic_music)
+            1 -> trackItems(C.TRACK_TYPE_TEXT, CoreR.drawable.ic_case_sensitive)
             else ->
                 playerSpeeds.mapIndexed { index, speed ->
                     PlayerMenuItem(
                         title = playerSpeedTexts[index],
                         subtitle = null,
                         selected = speed == viewModel.playbackSpeed,
+                        iconRes = CoreR.drawable.ic_gauge,
                     )
                 }
         }
 
-    private fun trackItems(type: @C.TrackType Int): List<PlayerMenuItem> {
+    private fun trackItems(type: @C.TrackType Int, iconRes: Int): List<PlayerMenuItem> {
         val groups =
             viewModel.player.currentTracks.groups.filter { it.type == type && it.isSupported }
 
@@ -689,6 +724,8 @@ class PlayerActivity : BasePlayerActivity() {
                 title = getString(CoreR.string.none),
                 subtitle = null,
                 selected = groups.none { it.isSelected },
+                iconRes = iconRes,
+                iconSquircle = true,
             )
         )
         groups.forEachIndexed { index, group ->
@@ -698,6 +735,8 @@ class PlayerActivity : BasePlayerActivity() {
                     title = format.label ?: format.language ?: "Track ${index + 1}",
                     subtitle = format.codecs,
                     selected = group.isSelected,
+                    iconRes = iconRes,
+                    iconSquircle = true,
                 )
             )
         }

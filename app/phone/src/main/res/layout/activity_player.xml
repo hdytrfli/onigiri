@@ -178,28 +178,23 @@
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:background="@drawable/player_options_panel_background"
+            android:clipToOutline="true"
             android:elevation="8dp"
-            android:orientation="vertical"
-            android:paddingTop="16dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/player_options_title"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/player_options_header"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="8dp"
-                android:text="@string/player_controls_options"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@android:color/white" />
+                android:layout_height="wrap_content" />
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/player_options_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:tabGravity="fill"
-                app:tabMode="fixed" />
+                app:tabMode="fixed"
+                app:tabSelectedTextColor="@android:color/white"
+                app:tabTextColor="#B3FFFFFF" />
 
             <ListView
                 android:id="@+id/player_options_list"

@@ -14,6 +14,8 @@ data class PlayerMenuItem(
     val title: String,
     val subtitle: String?,
     val selected: Boolean,
+    val iconRes: Int? = null,
+    val iconSquircle: Boolean = false,
 )
 
 class PlayerMenuAdapter(
@@ -40,6 +42,17 @@ class PlayerMenuAdapter(
                 ?: LayoutInflater.from(context).inflate(R.layout.item_player_menu, parent, false)
 
         val item = items[position]
+
+        val iconView = view.findViewById<ImageView>(R.id.item_icon)
+        if (item.iconRes == null) {
+            iconView.visibility = View.GONE
+        } else {
+            iconView.visibility = View.VISIBLE
+            iconView.setImageResource(item.iconRes)
+            iconView.setBackgroundResource(
+                if (item.iconSquircle) R.drawable.squircle_background else 0
+            )
+        }
 
         view.findViewById<ImageView>(R.id.item_check).visibility =
             if (item.selected) View.VISIBLE else View.INVISIBLE
