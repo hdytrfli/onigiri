@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
@@ -11,6 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 
 data class SafePadding(val start: Dp, val top: Dp, val end: Dp, val bottom: Dp)
+
+/** When true, the status bar is hidden and its top inset must not be reserved. */
+val LocalHideStatusBar = compositionLocalOf { false }
 
 @Composable
 fun rememberSafePadding(handleStartInsets: Boolean = true): SafePadding {
@@ -36,7 +40,12 @@ fun rememberSafePadding(handleStartInsets: Boolean = true): SafePadding {
             }
         }
 
-    val safePaddingTop = with(density) { WindowInsets.safeDrawing.getTop(this).toDp() }
+    val safePaddingTop =
+        if (LocalHideStatusBar.current) {
+            0.dp
+        } else {
+            with(density) { WindowInsets.safeDrawing.getTop(this).toDp() }
+        }
     val safePaddingEnd =
         with(density) { WindowInsets.safeDrawing.getRight(this, layoutDirection).toDp() }
     val safePaddingBottom = with(density) { WindowInsets.safeDrawing.getBottom(this).toDp() }

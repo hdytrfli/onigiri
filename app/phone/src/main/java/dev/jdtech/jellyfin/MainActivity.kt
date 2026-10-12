@@ -16,6 +16,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                                 landscape = state.backdropLandscapeRatio,
                             ),
                         LocalContentSpacingScale provides state.contentSpacingScale,
+                        LocalHideStatusBar provides state.hideStatusBar,
                         LocalNaiveTitleOverlay provides state.naiveTitleOverlay,
                         LocalTitleImageConfig provides
                             TitleImageConfig(
