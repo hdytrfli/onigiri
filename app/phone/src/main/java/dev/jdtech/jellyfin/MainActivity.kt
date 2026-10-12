@@ -5,9 +5,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,29 +63,40 @@ class MainActivity : AppCompatActivity() {
 
             FindroidTheme(dynamicColor = state.isDynamicColors) {
                 if (!state.isLoading) {
-                    CompositionLocalProvider(
-                        LocalOfflineMode provides state.isOfflineMode,
-                        LocalBackdropRatios provides
-                            BackdropRatios(
-                                portrait = state.backdropPortraitRatio,
-                                landscape = state.backdropLandscapeRatio,
-                            ),
-                        LocalContentSpacingScale provides state.contentSpacingScale,
-                        LocalHideStatusBar provides state.hideStatusBar,
-                        LocalNaiveTitleOverlay provides state.naiveTitleOverlay,
-                        LocalTitleImageConfig provides
-                            TitleImageConfig(
-                                portraitWidth = state.titlePortraitWidth,
-                                landscapeWidth = state.titleLandscapeWidth,
-                                ratio = state.titleImageRatio,
-                            ),
+                    // When the status bar is hidden, consume its inset for the whole app so no
+                    // screen (Scaffold top bars, nav rail, safe padding) reserves that space.
+                    Box(
+                        modifier =
+                            if (state.hideStatusBar) {
+                                Modifier.consumeWindowInsets(WindowInsets.statusBars)
+                            } else {
+                                Modifier
+                            }
                     ) {
-                        NavigationRoot(
-                            hasServers = state.hasServers,
-                            hasCurrentServer = state.hasCurrentServer,
-                            hasCurrentUser = state.hasCurrentUser,
-                            confirmExit = state.confirmExit,
-                        )
+                        CompositionLocalProvider(
+                            LocalOfflineMode provides state.isOfflineMode,
+                            LocalBackdropRatios provides
+                                BackdropRatios(
+                                    portrait = state.backdropPortraitRatio,
+                                    landscape = state.backdropLandscapeRatio,
+                                ),
+                            LocalContentSpacingScale provides state.contentSpacingScale,
+                            LocalHideStatusBar provides state.hideStatusBar,
+                            LocalNaiveTitleOverlay provides state.naiveTitleOverlay,
+                            LocalTitleImageConfig provides
+                                TitleImageConfig(
+                                    portraitWidth = state.titlePortraitWidth,
+                                    landscapeWidth = state.titleLandscapeWidth,
+                                    ratio = state.titleImageRatio,
+                                ),
+                        ) {
+                            NavigationRoot(
+                                hasServers = state.hasServers,
+                                hasCurrentServer = state.hasCurrentServer,
+                                hasCurrentUser = state.hasCurrentUser,
+                                confirmExit = state.confirmExit,
+                            )
+                        }
                     }
                 }
             }

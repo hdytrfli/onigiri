@@ -224,19 +224,24 @@
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:background="@drawable/player_options_panel_background"
+            android:clipToOutline="true"
             android:elevation="8dp"
-            android:orientation="vertical"
-            android:paddingTop="16dp">
+            android:orientation="vertical">
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/player_episodes_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/player_episodes_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="8dp"
-                android:text="@string/player_controls_episodes"
+                android:paddingStart="20dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="4dp"
+                android:text="@string/other_episodes"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@android:color/white" />
 

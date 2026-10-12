@@ -28,6 +28,7 @@ import android.widget.ListView
 import android.widget.Space
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +49,7 @@ import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
+import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
@@ -233,6 +235,10 @@ class PlayerActivity : BasePlayerActivity() {
             showOptionsSheet(episodesOverlay, episodesPanel, episodesScrim)
         }
 
+        // Episodes sheet header (backdrop + title + metadata + description)
+        val episodesHeaderComposeView = findViewById<ComposeView>(R.id.player_episodes_header)
+        setMediaHeaderContent(episodesHeaderComposeView)
+
         // Media detail sheet
         val detailOverlay = findViewById<FrameLayout>(R.id.player_detail_overlay)
         val detailScrim = findViewById<View>(R.id.player_detail_scrim)
@@ -240,72 +246,14 @@ class PlayerActivity : BasePlayerActivity() {
         detailPanel.layoutParams = detailPanel.layoutParams.apply { width = sheetWidth }
 
         val detailComposeView = findViewById<ComposeView>(R.id.player_detail_compose)
-        detailComposeView.setViewCompositionStrategy(
-            ViewCompositionStrategy.DisposeOnDetachedFromWindow
-        )
-        detailComposeView.setContent {
-            val detailState by detailViewModel.state.collectAsStateWithLifecycle()
-            val itemId = detailItemId.value
-            val isEpisode = detailItemIsEpisode.value
-            LaunchedEffect(itemId, isEpisode) {
-                if (itemId != null) {
-                    detailViewModel.load(itemId, isEpisode)
-                }
-            }
-            FindroidTheme(darkTheme = true, dynamicColor = false) {
-                CompositionLocalProvider(
-                    LocalBackdropRatios provides
-                        BackdropRatios(
-                            portrait =
-                                appPreferences
-                                    .getValue(appPreferences.backdropPortraitRatio)
-                                    .toFloat(),
-                            landscape =
-                                appPreferences
-                                    .getValue(appPreferences.backdropLandscapeRatio)
-                                    .toFloat(),
-                        )
-                ) {
-                    MediaDetailContent(detailState)
-                }
-            }
-        }
+        setDetailComposeContent(detailComposeView) { MediaDetailContent(it) }
 
         detailScrim.setOnClickListener { hideOptionsSheet(detailOverlay, detailPanel, detailScrim) }
         btnInfo.setOnClickListener { showOptionsSheet(detailOverlay, detailPanel, detailScrim) }
 
-        // Playback options header (backdrop + title + metadata)
+        // Playback options header (backdrop + title + metadata + description)
         val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
-        optionsHeaderComposeView.setViewCompositionStrategy(
-            ViewCompositionStrategy.DisposeOnDetachedFromWindow
-        )
-        optionsHeaderComposeView.setContent {
-            val detailState by detailViewModel.state.collectAsStateWithLifecycle()
-            val itemId = detailItemId.value
-            val isEpisode = detailItemIsEpisode.value
-            LaunchedEffect(itemId, isEpisode) {
-                if (itemId != null) {
-                    detailViewModel.load(itemId, isEpisode)
-                }
-            }
-            FindroidTheme(darkTheme = true, dynamicColor = false) {
-                CompositionLocalProvider(
-                    LocalBackdropRatios provides
-                        BackdropRatios(
-                            portrait =
-                                appPreferences
-                                    .getValue(appPreferences.backdropPortraitRatio)
-                                    .toFloat(),
-                            landscape =
-                                appPreferences
-                                    .getValue(appPreferences.backdropLandscapeRatio)
-                                    .toFloat(),
-                        )
-                ) {
-                    MediaDetailHeader(detailState)
-                }
-            }
-        }
+        setMediaHeaderContent(optionsHeaderComposeView)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -697,6 +645,49 @@ class PlayerActivity : BasePlayerActivity() {
         try {
             enterPictureInPictureMode(pipParams())
         } catch (_: IllegalArgumentException) {}
+    }
+
+    /** Sets up [composeView] with the shared media header content. */
+    private fun setMediaHeaderContent(composeView: ComposeView) {
+        setDetailComposeContent(composeView) { MediaDetailHeader(it) }
+    }
+
+    /**
+     * Shared Compose setup for the player's media sheets: provides the theme, backdrop ratios and
+     * the loaded media detail, then renders [content].
+     */
+    private fun setDetailComposeContent(
+        composeView: ComposeView,
+        content: @Composable (MediaDetailState) -> Unit,
+    ) {
+        composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+        composeView.setContent {
+            val detailState by detailViewModel.state.collectAsStateWithLifecycle()
+            val itemId = detailItemId.value
+            val isEpisode = detailItemIsEpisode.value
+            LaunchedEffect(itemId, isEpisode) {
+                if (itemId != null) {
+                    detailViewModel.load(itemId, isEpisode)
+                }
+            }
+            FindroidTheme(darkTheme = true, dynamicColor = false) {
+                CompositionLocalProvider(
+                    LocalBackdropRatios provides
+                        BackdropRatios(
+                            portrait =
+                                appPreferences
+                                    .getValue(appPreferences.backdropPortraitRatio)
+                                    .toFloat(),
+                            landscape =
+                                appPreferences
+                                    .getValue(appPreferences.backdropLandscapeRatio)
+                                    .toFloat(),
+                        )
+                ) {
+                    content(detailState)
+                }
+            }
+        }
     }
 
     private fun optionsItems(tab: Int): List<PlayerMenuItem> =

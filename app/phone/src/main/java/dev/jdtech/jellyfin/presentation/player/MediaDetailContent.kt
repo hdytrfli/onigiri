@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,8 +41,8 @@ import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import org.jellyfin.sdk.model.api.PersonKind
 
 /**
- * Backdrop + title + (year, runtime, ratings). Shared by the media-detail sheet and the playback
- * options sheet.
+ * Backdrop, title, metadata and description. Shared by the media-detail, episodes and playback
+ * options sheets.
  */
 @Composable
 fun MediaDetailHeader(detail: MediaDetailState) {
@@ -62,7 +61,8 @@ fun MediaDetailHeader(detail: MediaDetailState) {
                         if (backdropUri == null) MaterialTheme.spacings.default
                         else MaterialTheme.spacings.medium,
                     end = MaterialTheme.spacings.default,
-                )
+                ),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
             if (backdropUri == null) {
                 detail.title?.let { title ->
@@ -70,6 +70,9 @@ fun MediaDetailHeader(detail: MediaDetailState) {
                 }
             }
             MetadataRow(detail)
+            detail.overview
+                ?.takeIf { it.isNotBlank() }
+                ?.let { overview -> OverviewText(text = overview, maxCollapsedLines = 4) }
         }
     }
 }
@@ -104,10 +107,6 @@ fun MediaDetailContent(detail: MediaDetailState) {
         ) {
             detail.videoMetadata?.let { videoMetadata -> VideoMetadataBar(videoMetadata) }
 
-            detail.overview
-                ?.takeIf { it.isNotBlank() }
-                ?.let { overview -> OverviewText(text = overview, maxCollapsedLines = 4) }
-
             if (detail.genres.isNotEmpty() || director != null || writers.isNotEmpty()) {
                 InfoText(genres = detail.genres, director = director, writers = writers)
             }
@@ -119,8 +118,6 @@ fun MediaDetailContent(detail: MediaDetailState) {
                 )
                 actors.forEach { person -> PersonRow(person = person) }
             }
-
-            Spacer(Modifier.size(MaterialTheme.spacings.default))
         }
     }
 }
