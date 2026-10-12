@@ -4,12 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
+import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jellyfin.sdk.model.api.PersonKind
 
 @HiltViewModel
 class MediaDetailViewModel
@@ -53,6 +57,9 @@ constructor(
                             runtimeMinutes = episode.runtimeTicks / 600_000_000,
                             communityRating = episode.communityRating,
                             people = people,
+                            actors = getActors(people),
+                            director = getDirector(people),
+                            writers = getWriters(people),
                             videoMetadata =
                                 episode.sources.firstOrNull()?.let {
                                     videoMetadataParser.parse(it)
@@ -73,6 +80,9 @@ constructor(
                             communityRating = movie.communityRating,
                             genres = movie.genres,
                             people = movie.people,
+                            actors = getActors(movie.people),
+                            director = getDirector(movie.people),
+                            writers = getWriters(movie.people),
                             videoMetadata =
                                 movie.sources.firstOrNull()?.let { videoMetadataParser.parse(it) },
                             backdropUri = movie.images.backdrop?.toString(),
@@ -83,5 +93,19 @@ constructor(
                 _state.emit(MediaDetailState(error = e))
             }
         }
+    }
+
+    private suspend fun getActors(people: List<FindroidItemPerson>): List<FindroidItemPerson> {
+        return withContext(Dispatchers.Default) { people.filter { it.type == PersonKind.ACTOR } }
+    }
+
+    private suspend fun getDirector(people: List<FindroidItemPerson>): FindroidItemPerson? {
+        return withContext(Dispatchers.Default) {
+            people.firstOrNull { it.type == PersonKind.DIRECTOR }
+        }
+    }
+
+    private suspend fun getWriters(people: List<FindroidItemPerson>): List<FindroidItemPerson> {
+        return withContext(Dispatchers.Default) { people.filter { it.type == PersonKind.WRITER } }
     }
 }

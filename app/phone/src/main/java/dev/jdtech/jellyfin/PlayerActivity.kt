@@ -19,7 +19,9 @@ import android.os.Process
 import android.util.Rational
 import android.view.SurfaceView
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.AbsListView
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -222,6 +224,14 @@ class PlayerActivity : BasePlayerActivity() {
         val episodesList = findViewById<ListView>(R.id.player_episodes_list)
         episodesPanel.layoutParams = episodesPanel.layoutParams.apply { width = sheetWidth }
 
+        // Header (backdrop + title + metadata + description) and the "Other episodes" label scroll
+        // with the list, so they don't eat the space left for the episodes.
+        val episodesHeaderComposeView = findViewById<ComposeView>(R.id.player_episodes_header)
+        val episodesTitle = findViewById<TextView>(R.id.player_episodes_title)
+        episodesList.addScrollableHeader(episodesHeaderComposeView)
+        episodesList.addScrollableHeader(episodesTitle)
+        setMediaHeaderContent(episodesHeaderComposeView)
+
         val episodeAdapter =
             PlayerEpisodeAdapter(this) { episode ->
                 viewModel.selectEpisode(episode.id)
@@ -235,10 +245,6 @@ class PlayerActivity : BasePlayerActivity() {
             showOptionsSheet(episodesOverlay, episodesPanel, episodesScrim)
         }
 
-        // Episodes sheet header (backdrop + title + metadata + description)
-        val episodesHeaderComposeView = findViewById<ComposeView>(R.id.player_episodes_header)
-        setMediaHeaderContent(episodesHeaderComposeView)
-
         // Media detail sheet
         val detailOverlay = findViewById<FrameLayout>(R.id.player_detail_overlay)
         val detailScrim = findViewById<View>(R.id.player_detail_scrim)
@@ -250,10 +256,6 @@ class PlayerActivity : BasePlayerActivity() {
 
         detailScrim.setOnClickListener { hideOptionsSheet(detailOverlay, detailPanel, detailScrim) }
         btnInfo.setOnClickListener { showOptionsSheet(detailOverlay, detailPanel, detailScrim) }
-
-        // Playback options header (backdrop + title + metadata + description)
-        val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
-        setMediaHeaderContent(optionsHeaderComposeView)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -458,14 +460,28 @@ class PlayerActivity : BasePlayerActivity() {
         val optionsTabs = findViewById<TabLayout>(R.id.player_options_tabs)
         val optionsList = findViewById<ListView>(R.id.player_options_list)
 
-        val menuAdapter =
+        // Header (backdrop + title + metadata + description) and the tab row scroll with the list,
+        // so they don't eat the space left for the audio/subtitle/speed items.
+        val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
+        optionsList.addScrollableHeader(optionsHeaderComposeView)
+        optionsList.addScrollableHeader(optionsTabs)
+        setMediaHeaderContent(optionsHeaderComposeView)
+
+        lateinit var menuAdapter: PlayerMenuAdapter
+        menuAdapter =
             PlayerMenuAdapter(this) { position ->
                 when (optionsTabs.selectedTabPosition) {
                     0 -> viewModel.switchToTrack(C.TRACK_TYPE_AUDIO, position - 1)
                     1 -> viewModel.switchToTrack(C.TRACK_TYPE_TEXT, position - 1)
                     else -> viewModel.selectSpeed(playerSpeeds[position])
                 }
-                hideOptionsSheet(optionsOverlay, optionsPanel, optionsScrim)
+                // Keep the sheet open so several changes can be made in a row. Reflect the choice
+                // immediately, then resync with the player once it has applied the change.
+                menuAdapter.select(position)
+                optionsList.postDelayed(
+                    { menuAdapter.submit(optionsItems(optionsTabs.selectedTabPosition)) },
+                    250L,
+                )
             }
         optionsList.adapter = menuAdapter
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_audio))
@@ -752,6 +768,20 @@ class PlayerActivity : BasePlayerActivity() {
             .withEndAction { overlay.visibility = View.GONE }
             .start()
         scrim.animate().alpha(0f).setDuration(200L).start()
+    }
+
+    /**
+     * Reparents [view] into this list as a non-selectable header so it scrolls together with the
+     * rows. Must be called before the adapter is set.
+     */
+    private fun ListView.addScrollableHeader(view: View) {
+        (view.parent as? ViewGroup)?.removeView(view)
+        view.layoutParams =
+            AbsListView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+        addHeaderView(view, null, false)
     }
 
     /** Briefly shows [message] in the same pill used for the seek/fast-forward overlay. */

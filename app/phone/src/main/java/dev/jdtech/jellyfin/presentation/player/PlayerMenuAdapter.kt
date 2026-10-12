@@ -30,6 +30,17 @@ class PlayerMenuAdapter(
         notifyDataSetChanged()
     }
 
+    /**
+     * Marks the row at [position] as the only selected one without waiting for the player to apply
+     * the change. Used to keep the sheet open while reflecting the choice immediately.
+     */
+    fun select(position: Int) {
+        items.indices.forEach { index ->
+            items[index] = items[index].copy(selected = index == position)
+        }
+        notifyDataSetChanged()
+    }
+
     override fun getCount(): Int = items.size
 
     override fun getItem(position: Int): PlayerMenuItem = items[position]

@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +20,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,11 +39,10 @@ import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
-import org.jellyfin.sdk.model.api.PersonKind
 
 /**
- * Backdrop, title, metadata and description. Shared by the media-detail, episodes and playback
- * options sheets.
+ * Everything shared by the media-detail, episodes and playback-options sheets: backdrop, title,
+ * year/runtime/ratings, video metadata pills, description and the genres/director/writers table.
  */
 @Composable
 fun MediaDetailHeader(detail: MediaDetailState) {
@@ -70,10 +70,22 @@ fun MediaDetailHeader(detail: MediaDetailState) {
                 }
             }
             MetadataRow(detail)
+            detail.videoMetadata?.let { videoMetadata -> VideoMetadataBar(videoMetadata) }
             detail.overview
                 ?.takeIf { it.isNotBlank() }
                 ?.let { overview -> OverviewText(text = overview, maxCollapsedLines = 4) }
+            if (
+                detail.genres.isNotEmpty() || detail.director != null || detail.writers.isNotEmpty()
+            ) {
+                InfoText(
+                    genres = detail.genres,
+                    director = detail.director,
+                    writers = detail.writers,
+                )
+            }
         }
+        // Separates the shared header from sheet-specific content.
+        Spacer(Modifier.height(MaterialTheme.spacings.default))
     }
 }
 
@@ -87,36 +99,24 @@ fun MediaDetailContent(detail: MediaDetailState) {
         return
     }
 
-    val actors = remember(detail.people) { detail.people.filter { it.type == PersonKind.ACTOR } }
-    val director =
-        remember(detail.people) { detail.people.firstOrNull { it.type == PersonKind.DIRECTOR } }
-    val writers = remember(detail.people) { detail.people.filter { it.type == PersonKind.WRITER } }
-
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         MediaDetailHeader(detail)
 
-        Column(
-            modifier =
-                Modifier.padding(
-                    start = MaterialTheme.spacings.default,
-                    top = MaterialTheme.spacings.medium,
-                    end = MaterialTheme.spacings.default,
-                    bottom = MaterialTheme.spacings.default,
-                ),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-        ) {
-            detail.videoMetadata?.let { videoMetadata -> VideoMetadataBar(videoMetadata) }
-
-            if (detail.genres.isNotEmpty() || director != null || writers.isNotEmpty()) {
-                InfoText(genres = detail.genres, director = director, writers = writers)
-            }
-
-            if (actors.isNotEmpty()) {
+        if (detail.actors.isNotEmpty()) {
+            Column(
+                modifier =
+                    Modifier.padding(
+                        start = MaterialTheme.spacings.default,
+                        end = MaterialTheme.spacings.default,
+                        bottom = MaterialTheme.spacings.default,
+                    ),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+            ) {
                 Text(
                     text = stringResource(CoreR.string.cast_amp_crew),
                     style = MaterialTheme.typography.titleMedium,
                 )
-                actors.forEach { person -> PersonRow(person = person) }
+                detail.actors.forEach { person -> PersonRow(person = person) }
             }
         }
     }
