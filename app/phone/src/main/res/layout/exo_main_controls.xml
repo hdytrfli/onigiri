@@ -64,7 +64,7 @@
                 android:background="@drawable/transparent_circle_background"
                 android:contentDescription="@string/player_controls_info"
                 android:padding="16dp"
-                android:src="@drawable/ic_ellipsis"
+                android:src="@drawable/ic_text_align_justify"
                 app:tint="@android:color/white" />
 
             <ImageButton
