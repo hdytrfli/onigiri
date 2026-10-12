@@ -28,8 +28,14 @@ import android.widget.ListView
 import android.widget.Space
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
@@ -41,12 +47,15 @@ import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
+import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
+import dev.jdtech.jellyfin.presentation.player.MediaDetailContent
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
+import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
@@ -74,12 +83,20 @@ class PlayerActivity : BasePlayerActivity() {
     lateinit var binding: ActivityPlayerBinding
     private var playerGestureHelper: PlayerGestureHelper? = null
     override val viewModel: PlayerViewModel by viewModels()
+    private val detailViewModel: MediaDetailViewModel by viewModels()
     private var previewScrubListener: PreviewScrubListener? = null
     private var wasZoom: Boolean = false
     private var skipButtonTimeoutExpired: Boolean = true
 
     private lateinit var skipSegmentButton: Button
     private lateinit var playerTimeRight: TextView
+
+    private val detailItemId = mutableStateOf<UUID?>(null)
+    private val detailItemIsEpisode = mutableStateOf(false)
+
+    private val hidePlayerOverlayMessageAction = Runnable {
+        binding.progressScrubberLayout.visibility = View.GONE
+    }
 
     private val isPipSupported by lazy {
         // Check if device has PiP feature
@@ -165,6 +182,8 @@ class PlayerActivity : BasePlayerActivity() {
             }
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
+        val videoEpisodeNameTextView =
+            binding.playerView.findViewById<TextView>(R.id.video_episode_name)
 
         // Tap the description to expand/collapse it.
         var descriptionExpanded = false
@@ -175,6 +194,7 @@ class PlayerActivity : BasePlayerActivity() {
 
         val playerMenuButton = binding.playerView.findViewById<ImageButton>(R.id.btn_player_menu)
         val btnEpisodes = binding.playerView.findViewById<ImageButton>(R.id.btn_episodes)
+        val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
@@ -209,6 +229,33 @@ class PlayerActivity : BasePlayerActivity() {
             showOptionsSheet(episodesOverlay, episodesPanel, episodesScrim)
         }
 
+        // Media detail sheet
+        val detailOverlay = findViewById<FrameLayout>(R.id.player_detail_overlay)
+        val detailScrim = findViewById<View>(R.id.player_detail_scrim)
+        val detailPanel = findViewById<View>(R.id.player_detail_panel)
+        detailPanel.layoutParams = detailPanel.layoutParams.apply { width = sheetWidth }
+
+        val detailComposeView = findViewById<ComposeView>(R.id.player_detail_compose)
+        detailComposeView.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnDetachedFromWindow
+        )
+        detailComposeView.setContent {
+            val detailState by detailViewModel.state.collectAsStateWithLifecycle()
+            val itemId = detailItemId.value
+            val isEpisode = detailItemIsEpisode.value
+            LaunchedEffect(itemId, isEpisode) {
+                if (itemId != null) {
+                    detailViewModel.load(itemId, isEpisode)
+                }
+            }
+            FindroidTheme(darkTheme = true, dynamicColor = false) {
+                MediaDetailContent(detailState)
+            }
+        }
+
+        detailScrim.setOnClickListener { hideOptionsSheet(detailOverlay, detailPanel, detailScrim) }
+        btnInfo.setOnClickListener { showOptionsSheet(detailOverlay, detailPanel, detailScrim) }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -232,6 +279,10 @@ class PlayerActivity : BasePlayerActivity() {
                                 }
                             }
                             videoNameTextView.text = currentItemTitle
+
+                            // Episode name (episodes only), shown above the overview
+                            videoEpisodeNameTextView.isVisible = !currentEpisodeName.isNullOrBlank()
+                            videoEpisodeNameTextView.text = currentEpisodeName
 
                             // Description
                             if (currentItemOverview != lastOverview) {
@@ -316,6 +367,10 @@ class PlayerActivity : BasePlayerActivity() {
                                 lastEpisodeId = currentEpisodeId
                                 episodeAdapter.submit(currentSeasonEpisodes, currentEpisodeId)
                             }
+
+                            // Media detail sheet follows the current item.
+                            detailItemId.value = currentItemId
+                            detailItemIsEpisode.value = currentItemIsEpisode
                         }
                     }
                 }
@@ -442,6 +497,12 @@ class PlayerActivity : BasePlayerActivity() {
                 if (isVolumeBrightnessLocked) CoreR.drawable.ic_circle_off
                 else CoreR.drawable.ic_circle
             )
+            showPlayerOverlayMessage(
+                getString(
+                    if (isVolumeBrightnessLocked) R.string.player_gestures_locked
+                    else R.string.player_gestures_unlocked
+                )
+            )
         }
 
         lockButton.setOnClickListener {
@@ -449,6 +510,7 @@ class PlayerActivity : BasePlayerActivity() {
             lockedLayout.visibility = View.VISIBLE
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
             isControlsLocked = true
+            showPlayerOverlayMessage(getString(R.string.player_screen_locked))
         }
 
         unlockButton.setOnClickListener {
@@ -458,6 +520,7 @@ class PlayerActivity : BasePlayerActivity() {
             isControlsLocked = false
             isVolumeBrightnessLocked = false
             gestureLockButton.setImageResource(CoreR.drawable.ic_circle)
+            showPlayerOverlayMessage(getString(R.string.player_screen_unlocked))
         }
 
         pipButton.setOnClickListener { pictureInPicture() }
@@ -637,6 +700,15 @@ class PlayerActivity : BasePlayerActivity() {
             .withEndAction { overlay.visibility = View.GONE }
             .start()
         scrim.animate().alpha(0f).setDuration(200L).start()
+    }
+
+    /** Briefly shows [message] in the same pill used for the seek/fast-forward overlay. */
+    private fun showPlayerOverlayMessage(message: String) {
+        binding.progressScrubberTrickplay.visibility = View.GONE
+        binding.progressScrubberText.text = message
+        binding.progressScrubberLayout.visibility = View.VISIBLE
+        binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
+        binding.progressScrubberLayout.postDelayed(hidePlayerOverlayMessageAction, 1500L)
     }
 
     private fun updatePlayerTimeRight() {

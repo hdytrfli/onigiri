@@ -13,4 +13,5 @@
     <string name="player_gestures_unlocked">Volume and brightness unlocked</string>
     <string name="player_screen_locked">Screen locked</string>
     <string name="player_screen_unlocked">Screen unlocked</string>
+    <string name="player_controls_info">Media details</string>
 </resources>

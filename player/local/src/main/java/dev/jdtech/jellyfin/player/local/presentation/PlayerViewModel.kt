@@ -85,6 +85,9 @@ constructor(
         val fileLoaded: Boolean,
         val currentItemLogo: String? = null,
         val currentItemOverview: String? = null,
+        val currentEpisodeName: String? = null,
+        val currentItemId: UUID? = null,
+        val currentItemIsEpisode: Boolean = false,
         val currentSeasonEpisodes: List<FindroidEpisode> = emptyList(),
         val currentEpisodeId: UUID? = null,
     )
@@ -389,11 +392,24 @@ constructor(
                             } else {
                                 item.name
                             }
+                        val episodeName =
+                            if (item.parentIndexNumber != null && item.indexNumber != null) {
+                                application.getString(
+                                    R.string.episode_name,
+                                    item.indexNumber,
+                                    item.name,
+                                )
+                            } else {
+                                null
+                            }
                         _uiState.update {
                             it.copy(
                                 currentItemTitle = itemTitle,
                                 currentItemLogo = item.logoUri,
                                 currentItemOverview = item.overview,
+                                currentEpisodeName = episodeName,
+                                currentItemId = item.itemId,
+                                currentItemIsEpisode = item.parentIndexNumber != null,
                                 currentSegment = null,
                                 currentChapters = item.chapters,
                                 fileLoaded = false,

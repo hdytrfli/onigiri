@@ -31,6 +31,21 @@
                 android:src="@drawable/ic_arrow_left"
                 app:tint="@android:color/white" />
 
+            <Space
+                android:id="@+id/space_pip"
+                android:layout_width="16dp"
+                android:layout_height="0dp" />
+
+            <ImageButton
+                android:id="@+id/btn_pip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/transparent_circle_background"
+                android:contentDescription="@string/picture_in_picture"
+                android:padding="16dp"
+                android:src="@drawable/ic_picture_in_picture"
+                app:tint="@android:color/white" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -42,26 +57,22 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
-                android:id="@+id/btn_pip"
+                android:id="@+id/btn_info"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:background="@drawable/transparent_circle_background"
-                android:contentDescription="@string/picture_in_picture"
+                android:contentDescription="@string/player_controls_info"
                 android:padding="16dp"
-                android:src="@drawable/ic_picture_in_picture"
+                android:src="@drawable/ic_ellipsis"
                 app:tint="@android:color/white" />
-
-            <Space
-                android:id="@+id/space_pip"
-                android:layout_width="16dp"
-                android:layout_height="0dp" />
 
             <ImageButton
                 android:id="@+id/btn_player_menu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:layout_marginStart="16dp"
                 android:background="@drawable/transparent_circle_background"
                 android:contentDescription="@string/player_controls_options"
                 android:padding="16dp"
@@ -221,6 +232,22 @@
         <Space
             android:layout_width="0dp"
             android:layout_height="8dp" />
+
+        <TextView
+            android:id="@+id/video_episode_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:alpha="0.9"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@android:color/white"
+            android:textFontWeight="500"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="1. Episode name" />
 
         <LinearLayout
             android:layout_width="match_parent"

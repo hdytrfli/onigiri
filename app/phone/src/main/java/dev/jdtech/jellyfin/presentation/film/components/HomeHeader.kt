@@ -2,6 +2,11 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
@@ -13,10 +18,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,24 +96,38 @@ fun HomeHeader(
                 }
             }
 
-            Surface(
-                onClick = onRetryClick,
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                enabled = !isLoading,
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ) {
-                Box {
-                    if (isLoading) {
-                        Box(modifier = Modifier.size(32.dp).align(Alignment.Center)) {
-                            CircularProgressIndicator()
+            AnimatedVisibility(visible = isLoading || isError, enter = fadeIn(), exit = fadeOut()) {
+                Surface(
+                    onClick = onRetryClick,
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                    enabled = !isLoading,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ) {
+                    Box {
+                        if (isLoading) {
+                            val rotation =
+                                rememberInfiniteTransition(label = "loading")
+                                    .animateFloat(
+                                        initialValue = 0f,
+                                        targetValue = 360f,
+                                        animationSpec =
+                                            infiniteRepeatable(tween(1000, easing = LinearEasing)),
+                                        label = "rotation",
+                                    )
+                                    .value
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_loader_circle),
+                                contentDescription = null,
+                                modifier = Modifier.align(Alignment.Center).rotate(rotation),
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                                contentDescription = stringResource(R.string.refresh),
+                                modifier = Modifier.align(Alignment.Center),
+                            )
                         }
-                    } else {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                            contentDescription = stringResource(R.string.refresh),
-                            modifier = Modifier.align(Alignment.Center),
-                        )
                     }
                 }
             }
