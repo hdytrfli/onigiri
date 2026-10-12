@@ -32,6 +32,10 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
     private val eventsChannel = Channel<SettingsEvent>()
     val events = eventsChannel.receiveAsFlow()
 
+    // Remembered so dependent selects can re-evaluate visibility after they update their flags.
+    private var lastIndexes: List<Int> = emptyList()
+    private var lastDeviceType: DeviceType = DeviceType.PHONE
+
     private val topLevelPreferences =
         listOf(
             PreferenceGroup(
@@ -682,6 +686,12 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                             appPreferences.playerTimeShowFinish,
                                                             value == "finish",
                                                         )
+                                                        // Re-evaluate visibility now that the flag
+                                                        // changed (the screen reloads before this).
+                                                        loadPreferences(
+                                                            lastIndexes,
+                                                            lastDeviceType,
+                                                        )
                                                     },
                                                     options = R.array.player_time_display_options,
                                                     optionValues =
@@ -1148,6 +1158,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
         )
 
     fun loadPreferences(indexes: List<Int> = emptyList(), deviceType: DeviceType) {
+        lastIndexes = indexes
+        lastDeviceType = deviceType
         viewModelScope.launch {
             val isMpvBackend = appPreferences.getValue(appPreferences.playerBackend) == "mpv"
 

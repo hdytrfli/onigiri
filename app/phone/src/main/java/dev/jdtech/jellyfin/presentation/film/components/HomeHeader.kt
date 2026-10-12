@@ -25,9 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -90,29 +92,24 @@ fun HomeHeader(
                 }
             }
 
-            AnimatedVisibility(visible = isLoading || isError, enter = fadeIn(), exit = fadeOut()) {
-                Surface(
-                    onClick = onRetryClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    enabled = !isLoading,
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ) {
-                    Box {
-                        when {
-                            isError -> {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                                    contentDescription = null,
-                                    modifier = Modifier.align(Alignment.Center),
-                                )
-                            }
-                            isLoading -> {
-                                Box(modifier = Modifier.size(32.dp).align(Alignment.Center)) {
-                                    CircularProgressIndicator()
-                                }
-                            }
+            Surface(
+                onClick = onRetryClick,
+                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                enabled = !isLoading,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ) {
+                Box {
+                    if (isLoading) {
+                        Box(modifier = Modifier.size(32.dp).align(Alignment.Center)) {
+                            CircularProgressIndicator()
                         }
+                    } else {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                            contentDescription = stringResource(R.string.refresh),
+                            modifier = Modifier.align(Alignment.Center),
+                        )
                     }
                 }
             }

@@ -561,9 +561,29 @@ constructor(
     }
 
     fun selectEpisode(itemId: UUID) {
-        val index = items.indexOfFirst { it.itemId == itemId }
-        if (index >= 0) {
-            player.seekTo(index, C.TIME_UNSET)
+        val existingIndex = items.indexOfFirst { it.itemId == itemId }
+        if (existingIndex >= 0) {
+            player.seekTo(existingIndex, C.TIME_UNSET)
+            return
+        }
+
+        // The playlist is built lazily (current item plus its neighbours only), so resolve the
+        // requested episode on demand and insert it in season order before seeking to it.
+        viewModelScope.launch {
+            val playerItem = playlistManager.getPlayerItem(itemId) ?: return@launch
+            val targetOrder = playlistManager.getItemIndex(itemId)
+
+            var insertIndex = items.size
+            for (i in items.indices) {
+                if (playlistManager.getItemIndex(items[i].itemId) > targetOrder) {
+                    insertIndex = i
+                    break
+                }
+            }
+
+            items.add(insertIndex, playerItem)
+            player.addMediaItem(insertIndex, playerItem.toMediaItem())
+            player.seekTo(insertIndex, C.TIME_UNSET)
         }
     }
 

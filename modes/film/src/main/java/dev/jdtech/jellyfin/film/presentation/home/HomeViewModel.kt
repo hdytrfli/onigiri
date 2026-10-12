@@ -40,6 +40,15 @@ constructor(
     private val uiTextContinueWatching = UiText.StringResource(FilmR.string.continue_watching)
     private val uiTextNextUp = UiText.StringResource(FilmR.string.next_up)
 
+    private var hasLoadedOnce = false
+
+    /** Loads the home data only on first entry; use [loadData] to force a refresh. */
+    fun loadDataIfNeeded() {
+        if (hasLoadedOnce) return
+        hasLoadedOnce = true
+        loadData()
+    }
+
     fun loadData() {
         Timber.i("Loading data")
         viewModelScope.launch(Dispatchers.Default) {

@@ -219,6 +219,30 @@ class PlaylistManager @Inject internal constructor(private val repository: Jelly
         currentItemIndex = items.indexOfFirst { it.id == itemId }
     }
 
+    /**
+     * Returns the [PlayerItem] for [itemId], converting (and caching) it if it is part of the
+     * current list (e.g. the season). Returns null when the item can't be played.
+     */
+    suspend fun getPlayerItem(itemId: UUID): PlayerItem? {
+        playerItems
+            .firstOrNull { it.itemId == itemId }
+            ?.let {
+                return it
+            }
+
+        val item = items.firstOrNull { it.id == itemId } ?: return null
+
+        return try {
+            item.toPlayerItem(null, 0L).also { playerItems.add(it) }
+        } catch (e: Exception) {
+            Timber.e("Failed to retrieve player item for $itemId: $e")
+            null
+        }
+    }
+
+    /** Index of [itemId] in the underlying item list (e.g. the season), or -1 when absent. */
+    fun getItemIndex(itemId: UUID): Int = items.indexOfFirst { it.id == itemId }
+
     private suspend fun FindroidItem.toPlayerItem(
         mediaSourceIndex: Int?,
         playbackPosition: Long,
