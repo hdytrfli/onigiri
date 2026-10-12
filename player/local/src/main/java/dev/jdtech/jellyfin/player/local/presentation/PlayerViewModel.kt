@@ -112,6 +112,12 @@ constructor(
 
     var alwaysPlaySubtitles: Boolean = false
 
+    /**
+     * Set when the user manually turns subtitles off. Suppresses the "always play subtitles"
+     * auto-selection until the next media item so the choice sticks.
+     */
+    private var subtitlesDisabledByUser: Boolean = false
+
     var isInPictureInPictureMode: Boolean = false
 
     init {
@@ -376,6 +382,8 @@ constructor(
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
+        // A new item should honour "always play subtitles" again.
+        subtitlesDisabledByUser = false
         savedStateHandle["mediaItemIndex"] = player.currentMediaItemIndex
         viewModelScope.launch {
             try {
@@ -485,7 +493,7 @@ constructor(
     }
 
     override fun onTracksChanged(tracks: Tracks) {
-        if (!alwaysPlaySubtitles) return
+        if (!alwaysPlaySubtitles || subtitlesDisabledByUser) return
         val hasSelectedText =
             tracks.groups.any { group -> group.type == C.TRACK_TYPE_TEXT && group.isSelected }
         if (hasSelectedText) return
@@ -531,6 +539,10 @@ constructor(
     }
 
     fun switchToTrack(trackType: @C.TrackType Int, index: Int) {
+        // Remember an explicit subtitle choice so "always play subtitles" doesn't undo it.
+        if (trackType == C.TRACK_TYPE_TEXT) {
+            subtitlesDisabledByUser = index == -1
+        }
         // Index -1 equals disable track
         if (index == -1) {
             player.trackSelectionParameters =

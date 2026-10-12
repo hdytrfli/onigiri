@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.TimeBar
 
 /**
  * A [DefaultTimeBar] that draws the progress bar with fully rounded ends (both ends), using the
@@ -20,6 +21,11 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private var currentPosition: Long = 0L
     private var currentDuration: Long = 0L
     private var currentBuffered: Long = 0L
+
+    // While the user drags the scrubber, draw from the finger position instead of the playback
+    // position (which only updates after the interaction ends).
+    private var scrubbing: Boolean = false
+    private var scrubPosition: Long = 0L
 
     private val playedColor: Int
     private val bufferedColor: Int
@@ -48,6 +54,29 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             ta.getColor(androidx.media3.ui.R.styleable.DefaultTimeBar_scrubber_color, Color.WHITE)
         barHeightPx = ta.getDimension(androidx.media3.ui.R.styleable.DefaultTimeBar_bar_height, 0f)
         ta.recycle()
+
+        addListener(
+            object : TimeBar.OnScrubListener {
+                override fun onScrubStart(timeBar: TimeBar, position: Long) {
+                    scrubbing = true
+                    scrubPosition = position
+                    invalidate()
+                }
+
+                override fun onScrubMove(timeBar: TimeBar, position: Long) {
+                    scrubPosition = position
+                    invalidate()
+                }
+
+                override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+                    scrubbing = false
+                    if (!canceled) {
+                        currentPosition = position
+                    }
+                    invalidate()
+                }
+            }
+        )
     }
 
     override fun setPosition(position: Long) {
@@ -66,11 +95,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (currentDuration <= 0L) {
-            super.onDraw(canvas)
-            return
-        }
-
         val width = width.toFloat()
         val height = height.toFloat()
         if (width <= 0f || height <= 0f) {
@@ -84,8 +108,20 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         val trackEnd = width - inset
         val trackWidth = (trackEnd - trackStart).coerceAtLeast(0f)
 
-        val playedFraction = (currentPosition.toFloat() / currentDuration).coerceIn(0f, 1f)
-        val bufferedFraction = (currentBuffered.toFloat() / currentDuration).coerceIn(0f, 1f)
+        val position = if (scrubbing) scrubPosition else currentPosition
+        // Until the duration is known the bar is just the rounded unplayed track.
+        val playedFraction =
+            if (currentDuration > 0L) {
+                (position.toFloat() / currentDuration).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
+        val bufferedFraction =
+            if (currentDuration > 0L) {
+                (currentBuffered.toFloat() / currentDuration).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
         val playedX = trackStart + trackWidth * playedFraction
         val bufferedX = trackStart + trackWidth * bufferedFraction
 
@@ -95,11 +131,15 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         paint.color = unplayedColor
         canvas.drawLine(trackStart, centerY, trackEnd, centerY, paint)
 
-        paint.color = bufferedColor
-        canvas.drawLine(trackStart, centerY, bufferedX, centerY, paint)
+        if (bufferedFraction > 0f) {
+            paint.color = bufferedColor
+            canvas.drawLine(trackStart, centerY, bufferedX, centerY, paint)
+        }
 
-        paint.color = playedColor
-        canvas.drawLine(trackStart, centerY, playedX, centerY, paint)
+        if (playedFraction > 0f) {
+            paint.color = playedColor
+            canvas.drawLine(trackStart, centerY, playedX, centerY, paint)
+        }
 
         paint.style = Paint.Style.FILL
         paint.color = scrubberColor
