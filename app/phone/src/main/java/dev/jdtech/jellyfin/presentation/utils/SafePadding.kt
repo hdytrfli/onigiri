@@ -1,7 +1,10 @@
 package dev.jdtech.jellyfin.presentation.utils
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
@@ -15,6 +18,20 @@ data class SafePadding(val start: Dp, val top: Dp, val end: Dp, val bottom: Dp)
 
 /** When true, the status bar is hidden and its top inset must not be reserved. */
 val LocalHideStatusBar = compositionLocalOf { false }
+
+/**
+ * Insets for a top app bar: the status bar and display cutout, collapsed to zero while the status
+ * bar is hidden. Screens that call `recalculateWindowInsets` reset the consumed insets for their
+ * subtree, so they must drop the top inset themselves instead of relying on the app-wide consumed
+ * insets.
+ */
+@Composable
+fun topBarWindowInsets(): WindowInsets =
+    if (LocalHideStatusBar.current) {
+        WindowInsets(0, 0, 0, 0)
+    } else {
+        WindowInsets.statusBars.union(WindowInsets.displayCutout)
+    }
 
 @Composable
 fun rememberSafePadding(handleStartInsets: Boolean = true): SafePadding {

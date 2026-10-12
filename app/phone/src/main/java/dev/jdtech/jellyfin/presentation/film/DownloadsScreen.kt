@@ -33,6 +33,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 
 @Composable
 fun DownloadsScreen(
@@ -67,7 +68,7 @@ private fun DownloadsScreenLayout(state: CollectionState, onAction: (CollectionA
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(CoreR.string.title_download)) },
-                windowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+                windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
         },

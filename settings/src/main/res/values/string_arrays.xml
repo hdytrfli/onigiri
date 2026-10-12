@@ -19,14 +19,28 @@
         <item>mediacodec</item>
         <item>mediacodec-copy</item>
     </string-array>
+    <string-array name="mpv_hwdec_options">
+        <item>No</item>
+        <item>MediaCodec</item>
+        <item>MediaCodec (copy)</item>
+    </string-array>
     <string-array name="mpv_vos">
         <item>gpu</item>
         <item>gpu-next</item>
+    </string-array>
+    <string-array name="mpv_vo_options">
+        <item>GPU</item>
+        <item>GPU Next</item>
     </string-array>
     <string-array name="mpv_aos">
         <item>audiotrack</item>
         <item>opensles</item>
         <item>aaudio</item>
+    </string-array>
+    <string-array name="mpv_ao_options">
+        <item>AudioTrack</item>
+        <item>OpenSL ES</item>
+        <item>AAudio</item>
     </string-array>
     <string-array name="mpv_sub_font_size">
         <item>20</item>

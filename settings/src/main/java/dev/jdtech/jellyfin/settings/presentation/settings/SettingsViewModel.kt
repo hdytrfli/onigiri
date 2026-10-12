@@ -385,7 +385,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                                 appPreferences
                                                                                     .playerMpvHwdec,
                                                                             options =
-                                                                                R.array.mpv_hwdec,
+                                                                                R.array
+                                                                                    .mpv_hwdec_options,
                                                                             optionValues =
                                                                                 R.array.mpv_hwdec,
                                                                         ),
@@ -397,7 +398,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                                 appPreferences
                                                                                     .playerMpvVo,
                                                                             options =
-                                                                                R.array.mpv_vos,
+                                                                                R.array
+                                                                                    .mpv_vo_options,
                                                                             optionValues =
                                                                                 R.array.mpv_vos,
                                                                         ),
@@ -409,7 +411,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                                 appPreferences
                                                                                     .playerMpvAo,
                                                                             options =
-                                                                                R.array.mpv_aos,
+                                                                                R.array
+                                                                                    .mpv_ao_options,
                                                                             optionValues =
                                                                                 R.array.mpv_aos,
                                                                         ),

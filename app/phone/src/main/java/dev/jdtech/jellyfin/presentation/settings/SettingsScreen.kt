@@ -39,6 +39,7 @@ import dev.jdtech.jellyfin.presentation.settings.components.SettingsGroupCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
+import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.enums.DeviceType
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
@@ -161,6 +162,7 @@ private fun SettingsScreenLayout(
                         )
                     }
                 },
+                windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
         },

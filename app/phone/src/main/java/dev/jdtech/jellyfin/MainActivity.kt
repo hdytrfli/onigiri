@@ -7,8 +7,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -50,13 +54,16 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
 
-            // Optionally hide the system status bar in the main (non-player) UI.
-            DisposableEffect(state.hideStatusBar) {
-                val controller = WindowCompat.getInsetsController(window, window.decorView)
-                if (state.hideStatusBar) {
-                    controller.hide(WindowInsetsCompat.Type.statusBars())
-                } else {
-                    controller.show(WindowInsetsCompat.Type.statusBars())
+            // Optionally hide the system status bar in the main (non-player) UI. Skipped while the
+            // state is still loading so we don't show the bar again right after onCreate hid it.
+            DisposableEffect(state.isLoading, state.hideStatusBar) {
+                if (!state.isLoading) {
+                    val controller = WindowCompat.getInsetsController(window, window.decorView)
+                    if (state.hideStatusBar) {
+                        controller.hide(WindowInsetsCompat.Type.statusBars())
+                    } else {
+                        controller.show(WindowInsetsCompat.Type.statusBars())
+                    }
                 }
                 onDispose {}
             }
@@ -64,11 +71,17 @@ class MainActivity : AppCompatActivity() {
             FindroidTheme(dynamicColor = state.isDynamicColors) {
                 if (!state.isLoading) {
                     // When the status bar is hidden, consume its inset for the whole app so no
-                    // screen (Scaffold top bars, nav rail, safe padding) reserves that space.
+                    // screen (Scaffold top bars, nav rail, safe padding) reserves that space. The
+                    // display cutout inset stays non-zero once the bar is gone, so it is consumed
+                    // too; otherwise the nav rail and top bars keep a gap at the top.
                     Box(
                         modifier =
                             if (state.hideStatusBar) {
-                                Modifier.consumeWindowInsets(WindowInsets.statusBars)
+                                Modifier.consumeWindowInsets(
+                                    WindowInsets.statusBars
+                                        .union(WindowInsets.displayCutout)
+                                        .only(WindowInsetsSides.Top)
+                                )
                             } else {
                                 Modifier
                             }
