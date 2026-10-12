@@ -26,6 +26,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     // position (which only updates after the interaction ends).
     private var scrubbing: Boolean = false
     private var scrubPosition: Long = 0L
+    // After the finger is lifted, keep drawing the scrub position until the player has seeked
+    // there, otherwise the periodic position updates snap the bar back to the old position.
+    private var awaitingSeek: Boolean = false
 
     private val playedColor: Int
     private val bufferedColor: Int
@@ -59,6 +62,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             object : TimeBar.OnScrubListener {
                 override fun onScrubStart(timeBar: TimeBar, position: Long) {
                     scrubbing = true
+                    awaitingSeek = false
                     scrubPosition = position
                     invalidate()
                 }
@@ -70,8 +74,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
                 override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
                     scrubbing = false
-                    if (!canceled) {
-                        currentPosition = position
+                    if (canceled) {
+                        awaitingSeek = false
+                    } else {
+                        // Hold the scrub position until the player reports a position near it.
+                        scrubPosition = position
+                        awaitingSeek = true
                     }
                     invalidate()
                 }
@@ -81,6 +89,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     override fun setPosition(position: Long) {
         currentPosition = position
+        if (awaitingSeek && kotlin.math.abs(position - scrubPosition) <= SEEK_TOLERANCE_MS) {
+            awaitingSeek = false
+        }
         super.setPosition(position)
     }
 
@@ -108,7 +119,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         val trackEnd = width - inset
         val trackWidth = (trackEnd - trackStart).coerceAtLeast(0f)
 
-        val position = if (scrubbing) scrubPosition else currentPosition
+        val position = if (scrubbing || awaitingSeek) scrubPosition else currentPosition
         // Until the duration is known the bar is just the rounded unplayed track.
         val playedFraction =
             if (currentDuration > 0L) {
@@ -146,3 +157,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         canvas.drawCircle(playedX, centerY, thickness * 0.9f, paint)
     }
 }
+
+/** How close the player's position must be to the scrub position before we trust it again. */
+private const val SEEK_TOLERANCE_MS = 1_000L

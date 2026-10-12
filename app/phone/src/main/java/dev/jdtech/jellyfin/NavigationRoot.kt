@@ -300,17 +300,10 @@ private fun MainNavigation(
             WindowInsets(0, 0, 0, 0)
         }
     Box(modifier = Modifier.fillMaxSize().consumeWindowInsets(navSuiteInsets)) {
-        // Only the bottom navigation bar gets the extra vertical padding; the rail already applies
-        // its own vertical padding, and adding this there leaves an unwanted gap at the top.
-        val navItemModifier =
-            if (customNavSuiteType == NavigationSuiteType.NavigationRail) {
-                Modifier
-            } else {
-                Modifier.padding(vertical = 8.dp)
-            }
+        val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
         NavigationSuiteScaffold(
             navigationSuiteItems = {
-                navigationItems.forEach { item ->
+                navigationItems.forEachIndexed { index, item ->
                     item(
                         selected = topLevelRoute == item.route,
                         onClick = {
@@ -326,7 +319,14 @@ private fun MainNavigation(
                                 contentDescription = stringResource(item.title),
                             )
                         },
-                        modifier = navItemModifier,
+                        modifier =
+                            if (isRail) {
+                                // Match the top bar's top padding on the rail (first item only, so
+                                // the items keep their normal spacing).
+                                if (index == 0) Modifier.padding(top = 8.dp) else Modifier
+                            } else {
+                                Modifier.padding(vertical = 8.dp)
+                            },
                         enabled = item.enabled,
                         label = { Text(text = stringResource(item.title)) },
                     )

@@ -737,9 +737,10 @@ class PlayerActivity : BasePlayerActivity() {
         )
         groups.forEachIndexed { index, group ->
             val format = group.mediaTrackGroup.getFormat(0)
+            val language = languageDisplayName(format.language)
             items.add(
                 PlayerMenuItem(
-                    title = format.label ?: format.language ?: "Track ${index + 1}",
+                    title = format.label ?: language ?: "Track ${index + 1}",
                     subtitle = format.codecs,
                     selected = group.isSelected,
                     iconRes = iconRes,
@@ -748,6 +749,16 @@ class PlayerActivity : BasePlayerActivity() {
             )
         }
         return items
+    }
+
+    /**
+     * Turns an ISO language code from the media metadata (e.g. "eng") into a display name (e.g.
+     * "English"). Returns null for missing/unknown codes so callers can fall back.
+     */
+    private fun languageDisplayName(code: String?): String? {
+        if (code.isNullOrBlank() || code.equals("und", ignoreCase = true)) return null
+        val name = Locale.forLanguageTag(code).displayLanguage
+        return if (name.isBlank() || name.equals(code, ignoreCase = true)) null else name
     }
 
     private fun showOptionsSheet(overlay: View, panel: View, scrim: View) {
