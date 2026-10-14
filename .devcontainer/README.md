@@ -66,6 +66,34 @@ adb uninstall dev.jdtech.jellyfin.staging
   git -C /work log --oneline -3
   ```
 
+## Network
+
+The devcontainer runs with **host networking** (`runArgs: ["--network=host"]`)
+so it shares the Docker host's network and can reach the phone on your LAN.
+Without it, the container sits on Docker's bridge network and `adb connect` to
+the phone's IP can fail.
+
+> Docker Desktop must support host networking (4.34+; on Windows/macOS it may
+> need to be enabled in **Settings → Resources → Network**). Rebuild the
+> container after changing `runArgs`.
+
+Diagnose reachability inside the container:
+
+```bash
+ping -c1 192.168.1.42          # phone IP
+nc -vz 192.168.1.42 40001      # wireless-debugging port
+```
+
+If host networking isn't available, run the adb server on the Windows host
+instead and point the container at it (needs adb on the host):
+
+```bash
+# on the Windows host
+adb -a start-server
+# in the container
+export ADB_SERVER_SOCKET=tcp:host.docker.internal:5037
+```
+
 ## Notes / troubleshooting
 
 - The container must be able to reach the phone on the LAN. If `adb connect`

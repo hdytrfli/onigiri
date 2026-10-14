@@ -5,6 +5,9 @@
   },
   "workspaceFolder": "/work",
   "workspaceMount": "source=${localWorkspaceFolder},target=/work,type=bind,consistency=cached",
+  "runArgs": [
+    "--network=host"
+  ],
   "mounts": [
     "source=findroid-adb-keys,target=/root/.android,type=volume"
   ],

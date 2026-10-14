@@ -11,7 +11,7 @@ ENV ANDROID_HOME=/opt/android-sdk
 ENV PATH=$PATH:/opt/platform-tools
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl unzip git iproute2 \
+    && apt-get install -y --no-install-recommends ca-certificates curl unzip git iproute2 iputils-ping netcat-openbsd \
     && rm -rf /var/lib/apt/lists/* \
     && curl -fsSL -o /tmp/platform-tools.zip https://dl.google.com/android/repository/platform-tools-latest-linux.zip \
     && unzip -q /tmp/platform-tools.zip -d /opt \
