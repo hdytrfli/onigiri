@@ -780,19 +780,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
-                                                        R.string.player_brightness_remember,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences.playerGestures,
-                                                            appPreferences.playerGesturesVB,
-                                                        ),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerGesturesBrightnessRemember,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
                                                         R.string.player_start_maximized,
                                                     descriptionStringRes =
                                                         R.string.player_start_maximized_summary,

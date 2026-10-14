@@ -153,6 +153,7 @@ class PlayerActivity : BasePlayerActivity() {
         val lockedControls = binding.playerView.findViewById<View>(R.id.locked_player_view)
 
         isControlsLocked = false
+        isVolumeBrightnessLocked = false
 
         configureInsets(playerControls)
         configureInsets(lockedControls)
@@ -867,30 +868,20 @@ class PlayerActivity : BasePlayerActivity() {
 
                 wasZoom = playerGestureHelper?.isZoomEnabled == true
                 playerGestureHelper?.updateZoomMode(false)
-
-                // Brightness mode Auto
-                window.attributes =
-                    window.attributes.apply {
-                        screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-                    }
             }
 
             false -> {
                 binding.playerView.useController = true
                 playerGestureHelper?.updateZoomMode(wasZoom)
-
-                // Override auto brightness
-                if (
-                    appPreferences.getValue(appPreferences.playerGesturesVB) &&
-                        appPreferences.getValue(appPreferences.playerGesturesBrightnessRemember)
-                ) {
-                    window.attributes =
-                        window.attributes.apply {
-                            screenBrightness =
-                                appPreferences.getValue(appPreferences.playerBrightness)
-                        }
-                }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // These locks are process-wide; reset them so a fresh player starts unlocked and the
+        // buttons' icons match the state.
+        isControlsLocked = false
+        isVolumeBrightnessLocked = false
     }
 }
