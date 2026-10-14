@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.utils
 
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
@@ -21,7 +20,6 @@ import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
 import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.PathInterpolator
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -76,9 +74,6 @@ class PlayerGestureHelper(
 
     private var playbackSpeedIncrease: Float = 2f
     private var lastPlaybackSpeed: Float = 0f
-
-    /** Animates the hold-to-speed-up boost so it eases in and out instead of jumping. */
-    private var speedAnimator: ValueAnimator? = null
 
     private val screenWidth = Resources.getSystem().displayMetrics.widthPixels
     private val screenHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -155,7 +150,7 @@ class PlayerGestureHelper(
         playerView.player?.let {
             if (it.isPlaying) {
                 lastPlaybackSpeed = it.playbackParameters.speed
-                animatePlaybackSpeed(playbackSpeedIncrease)
+                it.setPlaybackSpeed(playbackSpeedIncrease)
                 activity.binding.progressScrubberTrickplay.visibility = View.GONE
                 activity.binding.progressScrubberText.text =
                     playerView.context.getString(R.string.player_controls_fast_forward)
@@ -164,18 +159,21 @@ class PlayerGestureHelper(
         }
     }
 
-    /** Ramps the playback speed towards [target] over a short, eased transition. */
-    private fun animatePlaybackSpeed(target: Float) {
-        val player = playerView.player ?: return
-        speedAnimator?.cancel()
-        speedAnimator =
-            ValueAnimator.ofFloat(player.playbackParameters.speed, target).apply {
-                duration = SPEED_TRANSITION_MS
-                interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
-                addUpdateListener { player.setPlaybackSpeed(it.animatedValue as Float) }
-                start()
-            }
+    /**
+     * Applies [value] (0..1) as either the brightness of the player window (app-local, remembered
+     * across sessions) or the device's actual screen brightness, depending on the user's setting.
+     */
+    private fun applyBrightness(value: Float) {
+        if (useSystemBrightness()) {
+            setSystemBrightness(value)
+        } else {
+            activity.window.attributes =
+                activity.window.attributes.apply { screenBrightness = value }
+        }
     }
+
+    private fun useSystemBrightness(): Boolean =
+        appPreferences.getValue(appPreferences.playerBrightnessMode) == "system"
 
     /**
      * Applies [value] (0..1) to the device's actual screen brightness, so it stays changed after
@@ -424,24 +422,30 @@ class PlayerGestureHelper(
 
                         swipeGestureVolumeOpen = true
                     } else {
-                        // Swiping on the left changes the device's actual (absolute) brightness.
+                        // Swiping on the left changes the brightness.
                         val brightnessRange = BRIGHTNESS_OVERRIDE_OFF..BRIGHTNESS_OVERRIDE_FULL
 
-                        // Initialize on first swipe from the current system brightness.
+                        // Initialize on first swipe from the current window brightness, falling
+                        // back to the system brightness.
                         if (swipeGestureValueTrackerBrightness == -1f) {
+                            val windowBrightness = activity.window.attributes.screenBrightness
                             swipeGestureValueTrackerBrightness =
-                                (Settings.System.getInt(
-                                        activity.contentResolver,
-                                        Settings.System.SCREEN_BRIGHTNESS,
-                                        128,
-                                    ) / 255f)
-                                    .coerceIn(brightnessRange)
+                                when (windowBrightness) {
+                                    in brightnessRange -> windowBrightness
+                                    else ->
+                                        (Settings.System.getInt(
+                                                activity.contentResolver,
+                                                Settings.System.SCREEN_BRIGHTNESS,
+                                                128,
+                                            ) / 255f)
+                                            .coerceIn(brightnessRange)
+                                }
                         }
                         swipeGestureValueTrackerBrightness =
                             (swipeGestureValueTrackerBrightness + ratioChange).coerceIn(
                                 brightnessRange
                             )
-                        setSystemBrightness(swipeGestureValueTrackerBrightness)
+                        applyBrightness(swipeGestureValueTrackerBrightness)
 
                         activity.binding.gestureBrightnessLayout.visibility = View.VISIBLE
                         activity.binding.gestureBrightnessProgressBar.max =
@@ -535,6 +539,13 @@ class PlayerGestureHelper(
                 if (isVisible) {
                     removeCallbacks(hideGestureBrightnessIndicatorOverlayAction)
                     postDelayed(hideGestureBrightnessIndicatorOverlayAction, 1000)
+                    if (!useSystemBrightness()) {
+                        // Remember the app-local brightness for the next session.
+                        appPreferences.setValue(
+                            appPreferences.playerBrightness,
+                            swipeGestureValueTrackerBrightness,
+                        )
+                    }
                     swipeGestureBrightnessOpen = false
                 }
             }
@@ -556,7 +567,7 @@ class PlayerGestureHelper(
             lastPlaybackSpeed > 0 &&
                 (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL)
         ) {
-            animatePlaybackSpeed(lastPlaybackSpeed)
+            playerView.player?.setPlaybackSpeed(lastPlaybackSpeed)
             lastPlaybackSpeed = 0f
             activity.binding.progressScrubberLayout.visibility = View.GONE
         }
@@ -627,6 +638,15 @@ class PlayerGestureHelper(
     }
 
     init {
+        // Restore the remembered app-local brightness when opening the player.
+        if (!useSystemBrightness()) {
+            val remembered = appPreferences.getValue(appPreferences.playerBrightness)
+            if (remembered >= 0f) {
+                activity.window.attributes =
+                    activity.window.attributes.apply { screenBrightness = remembered }
+            }
+        }
+
         updateZoomMode(appPreferences.getValue(appPreferences.playerGesturesStartMaximized))
 
         applyOverlayTextSize()
@@ -654,6 +674,3 @@ class PlayerGestureHelper(
         }
     }
 }
-
-/** Duration of the eased hold-to-speed-up transition. */
-private const val SPEED_TRANSITION_MS = 250L

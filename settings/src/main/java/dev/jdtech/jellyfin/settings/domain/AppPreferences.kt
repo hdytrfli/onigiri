@@ -39,6 +39,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
+    val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
     // Player - time display
     val playerTimeDisplay = Preference("pref_player_time_display", "duration")
@@ -76,6 +77,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerGesturesSeekTrickplay = Preference("pref_player_gestures_seek_trickplay", true)
     val playerGesturesChapterSkip = Preference("pref_player_gestures_chapter_skip", false)
     val playerGesturesStartMaximized = Preference("pref_player_start_maximized", false)
+
+    /** "app" (player-window brightness) or "system" (device brightness). */
+    val playerBrightnessMode = Preference("pref_player_brightness_mode", "app")
 
     // Player - seeking
     val playerSeekBackInc = Preference("pref_player_seek_back_inc", 5_000L)

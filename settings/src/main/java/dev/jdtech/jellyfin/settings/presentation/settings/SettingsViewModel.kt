@@ -744,6 +744,25 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     backendPreference =
                                                         appPreferences.playerGesturesVB,
                                                 ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.player_brightness_mode,
+                                                    descriptionStringRes =
+                                                        R.string.player_brightness_mode_summary,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerGestures,
+                                                            appPreferences.playerGesturesVB,
+                                                        ),
+                                                    hideWhenDisabled = true,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerBrightnessMode,
+                                                    options =
+                                                        R.array.player_brightness_mode_options,
+                                                    optionValues =
+                                                        R.array.player_brightness_mode_values,
+                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.player_gestures_seek,

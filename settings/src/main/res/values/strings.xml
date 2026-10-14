@@ -45,6 +45,8 @@
     <string name="player_gestures_double_tap_summary">Double tap on the left or right side to skip</string>
     <string name="player_gestures_chapter_skip">Chapter gesture</string>
     <string name="player_gestures_vb_summary">Swipe up and down on the right side of the screen to change the volume and on the left side to change the brightness</string>
+    <string name="player_brightness_mode">Brightness control</string>
+    <string name="player_brightness_mode_summary">App changes only the player window; System changes the device brightness (needs permission)</string>
     <string name="player_gestures_zoom_summary">Pinch to fill the screen with the video</string>
     <string name="player_gestures_chapter_skip_summary">Long press on the left or right side to skip chapters, overriding the 2x speed gesture</string>
     <string name="player_gestures_seek_summary">Swipe horizontally to seek forwards or backwards</string>
