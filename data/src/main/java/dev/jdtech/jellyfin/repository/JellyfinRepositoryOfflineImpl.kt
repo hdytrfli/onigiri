@@ -31,7 +31,9 @@ import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.UserConfiguration
+import org.jellyfin.sdk.model.api.UserPolicy
 
 class JellyfinRepositoryOfflineImpl(
     private val context: Context,
@@ -306,6 +308,15 @@ class JellyfinRepositoryOfflineImpl(
     override suspend fun getUserConfiguration(): UserConfiguration? {
         return null
     }
+
+    override suspend fun getUserPolicy(): UserPolicy? = null
+
+    override suspend fun searchRemoteSubtitles(
+        itemId: UUID,
+        language: String,
+    ): List<RemoteSubtitleInfo> = emptyList()
+
+    override suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String) = Unit
 
     override suspend fun getDownloads(): List<FindroidItem> =
         withContext(Dispatchers.IO) {

@@ -18,7 +18,9 @@ import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.UserConfiguration
+import org.jellyfin.sdk.model.api.UserPolicy
 
 interface JellyfinRepository {
     suspend fun getPublicSystemInfo(): PublicSystemInfo
@@ -115,6 +117,15 @@ interface JellyfinRepository {
     suspend fun updateDeviceName(name: String)
 
     suspend fun getUserConfiguration(): UserConfiguration?
+
+    /** The current user's policy, used to gate admin-only features (e.g. subtitle search). */
+    suspend fun getUserPolicy(): UserPolicy?
+
+    /** Searches remote subtitle providers (e.g. the OpenSubtitles plugin) for [language]. */
+    suspend fun searchRemoteSubtitles(itemId: UUID, language: String): List<RemoteSubtitleInfo>
+
+    /** Asks the server to download and attach the remote subtitle [subtitleId] to [itemId]. */
+    suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String)
 
     suspend fun getDownloads(): List<FindroidItem>
 

@@ -110,4 +110,9 @@
     <string name="download_paused">Paused</string>
     <string name="download_downloading">Downloading…</string>
     <string name="download_failed">Failed to download</string>
+    <string name="download">Download</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="search_subtitles">Search subtitles</string>
+    <string name="search_subtitles_error">Couldn\'t search for subtitles</string>
+    <string name="search_subtitles_empty">No subtitles found. Make sure a subtitle provider (e.g. OpenSubtitles) is installed on the server.</string>
 </resources>

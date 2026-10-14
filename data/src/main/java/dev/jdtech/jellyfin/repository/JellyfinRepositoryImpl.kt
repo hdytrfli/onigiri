@@ -48,11 +48,13 @@ import org.jellyfin.sdk.model.api.PlaybackProgressInfo
 import org.jellyfin.sdk.model.api.PlaybackStartInfo
 import org.jellyfin.sdk.model.api.PlaybackStopInfo
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.RepeatMode
 import org.jellyfin.sdk.model.api.SortOrder as ItemSortOrder
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
 import org.jellyfin.sdk.model.api.UserConfiguration
+import org.jellyfin.sdk.model.api.UserPolicy
 import timber.log.Timber
 
 class JellyfinRepositoryImpl(
@@ -551,6 +553,25 @@ class JellyfinRepositoryImpl(
 
     override suspend fun getUserConfiguration(): UserConfiguration =
         withContext(Dispatchers.IO) { jellyfinApi.userApi.getCurrentUser().content.configuration!! }
+
+    override suspend fun getUserPolicy(): UserPolicy? =
+        withContext(Dispatchers.IO) { jellyfinApi.userApi.getCurrentUser().content.policy }
+
+    override suspend fun searchRemoteSubtitles(
+        itemId: UUID,
+        language: String,
+    ): List<RemoteSubtitleInfo> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.subtitleApi
+                .searchRemoteSubtitles(itemId = itemId, language = language)
+                .content
+        }
+
+    override suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String) {
+        withContext(Dispatchers.IO) {
+            jellyfinApi.subtitleApi.downloadRemoteSubtitles(itemId = itemId, subtitleId = subtitleId)
+        }
+    }
 
     override suspend fun getDownloads(): List<FindroidItem> =
         withContext(Dispatchers.IO) {
