@@ -10,6 +10,7 @@
 # Usage:
 #   ./debug.sh build              build the staging APK (Docker) and install it
 #   ./debug.sh install [apk]      install the newest staging APK (or a given path)
+#   ./debug.sh push               copy the newest APK to /sdcard/Download (for MIUI)
 #   ./debug.sh logcat [args...]   follow the log (defaults to the app's pid)
 #   ./debug.sh launch             force-stop then launch the app
 #   ./debug.sh devices            list connected devices
@@ -55,6 +56,11 @@ fi
 
 adb() { "$ADB" "$@"; }
 
+# Git-Bash passes /c/... paths that a Windows adb.exe can't read; convert when we can.
+host_path() {
+    if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi
+}
+
 newest_apk() {
     ls -t "$REPO_DIR"/docker-output/phone-libre-*-staging-*.apk 2>/dev/null | head -1
 }
@@ -67,7 +73,7 @@ install_apk() {
         exit 1
     }
     echo "==> Installing $path"
-    adb install -r "$path"
+    adb install -r "$(host_path "$path")"
 }
 
 adb start-server >/dev/null
@@ -99,6 +105,17 @@ case "${1:-}" in
         echo "==> Launched $APP_ID"
         ;;
     devices) adb devices -l ;;
+    push)
+        apk="$(newest_apk)"
+        [[ -n "$apk" && -f "$apk" ]] || {
+            echo "error: no APK found — run './debug.sh build' first" >&2
+            exit 1
+        }
+        echo "==> Pushing $(basename "$apk") to /sdcard/Download/"
+        MSYS_NO_PATHCONV=1 adb push "$(host_path "$apk")" /sdcard/Download/
+        echo "==> Now open it from the tablet's Files app (Download) to install."
+        echo "    (MIUI blocks adb installs, so this manual step is needed.)"
+        ;;
     shell)
         shift || true
         adb shell "$@"
@@ -106,7 +123,7 @@ case "${1:-}" in
     clear) adb shell pm clear "$APP_ID" ;;
     uninstall) adb uninstall "$APP_ID" ;;
     *)
-        sed -n '2,25p' "$0"
+        sed -n '2,22p' "$0"
         exit 1
         ;;
 esac
