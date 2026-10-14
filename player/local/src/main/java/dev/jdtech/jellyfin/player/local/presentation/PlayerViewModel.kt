@@ -216,6 +216,16 @@ constructor(
     fun initializePlayer(itemId: UUID, itemKind: String, startFromBeginning: Boolean) {
         player.addListener(this)
 
+        // A different item is about to play: drop the previous item's episode list so the episodes
+        // sheet can't show stale data (e.g. when replacing the media via PiP).
+        _uiState.update {
+            it.copy(
+                currentSeasonEpisodes = emptyList(),
+                currentEpisodeId = null,
+                currentItemIsEpisode = false,
+            )
+        }
+
         viewModelScope.launch {
             val startItem =
                 try {
@@ -418,6 +428,16 @@ constructor(
                                 currentEpisodeName = episodeName,
                                 currentItemId = item.itemId,
                                 currentItemIsEpisode = item.parentIndexNumber != null,
+                                // Movies have no episode list; clear the previous series' one.
+                                currentSeasonEpisodes =
+                                    if (item.parentIndexNumber != null) {
+                                        it.currentSeasonEpisodes
+                                    } else {
+                                        emptyList()
+                                    },
+                                currentEpisodeId =
+                                    if (item.parentIndexNumber != null) it.currentEpisodeId
+                                    else null,
                                 currentSegment = null,
                                 currentChapters = item.chapters,
                                 fileLoaded = false,
