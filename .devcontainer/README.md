@@ -10,6 +10,9 @@ container to install / log / forward.
 VS Code → **Dev Containers: Reopen in Container** (needs the *Dev Containers*
 extension and Docker running). The repo is mounted at `/work`.
 
+The container is named `findroid-devcontainer` (set via `runArgs`, since
+`devcontainer.json` has no name field) so it's easy to spot in `docker ps`.
+
 The adb keys live in the `findroid-adb-keys` volume, so a phone that you paired
 once stays trusted across container rebuilds.
 

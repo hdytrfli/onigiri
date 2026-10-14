@@ -6,7 +6,9 @@
   "workspaceFolder": "/work",
   "workspaceMount": "source=${localWorkspaceFolder},target=/work,type=bind,consistency=cached",
   "runArgs": [
-    "--network=host"
+    "--network=host",
+    "--name",
+    "findroid-devcontainer"
   ],
   "mounts": [
     "source=findroid-adb-keys,target=/root/.android,type=volume"
@@ -19,7 +21,10 @@
         "terminal.integrated.defaultProfile.linux": "bash",
         "git.autoRepositoryDetection": true,
         "git.openRepositoryInParentFolders": "always"
-      }
+      },
+      "extensions": [
+        "fwcd.kotlin"
+      ]
     }
   }
 }
