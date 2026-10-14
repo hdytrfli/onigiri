@@ -158,15 +158,13 @@ class PlayerActivity : BasePlayerActivity() {
         configureInsets(playerControls)
         configureInsets(lockedControls)
 
-        if (appPreferences.getValue(appPreferences.playerGestures)) {
-            playerGestureHelper =
-                PlayerGestureHelper(
-                    appPreferences,
-                    this,
-                    binding.playerView,
-                    getSystemService(AUDIO_SERVICE) as AudioManager,
-                )
-        }
+        playerGestureHelper =
+            PlayerGestureHelper(
+                appPreferences,
+                this,
+                binding.playerView,
+                getSystemService(AUDIO_SERVICE) as AudioManager,
+            )
 
         binding.playerView.findViewById<View>(R.id.back_button).setOnClickListener {
             finishPlayback()
@@ -511,7 +509,10 @@ class PlayerActivity : BasePlayerActivity() {
         val exoPlayerControlView = findViewById<FrameLayout>(R.id.player_controls)
         val lockedLayout = findViewById<FrameLayout>(R.id.locked_player_view)
 
-        gestureLockButton.isVisible = appPreferences.getValue(appPreferences.playerGesturesVB)
+        gestureLockButton.isVisible =
+            appPreferences.getValue(appPreferences.playerGesturesVolume) ||
+                appPreferences.getValue(appPreferences.playerGesturesBrightness) ||
+                appPreferences.getValue(appPreferences.playerGesturesZoom)
         gestureLockButton.setOnClickListener {
             isVolumeBrightnessLocked = !isVolumeBrightnessLocked
             gestureLockButton.setImageResource(

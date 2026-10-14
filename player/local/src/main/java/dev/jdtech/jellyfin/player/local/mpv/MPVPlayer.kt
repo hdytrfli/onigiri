@@ -69,7 +69,6 @@ class MPVPlayer(
     private val subBorderStyle: String = "background-box",
     private val subAssOverride: String = "scale",
     private val subShadowOffset: String = "0",
-    private val alwaysPlaySubtitles: Boolean = false,
 ) : BasePlayer(), MPVLib.EventObserver, AudioManager.OnAudioFocusChangeListener {
     private val mpvLib: MPVLib
     private val audioManager: AudioManager by lazy { context.getSystemService()!! }
@@ -102,7 +101,6 @@ class MPVPlayer(
         subBorderStyle = builder.subBorderStyle,
         subAssOverride = builder.subAssOverride,
         subShadowOffset = builder.subShadowOffset,
-        alwaysPlaySubtitles = builder.alwaysPlaySubtitles,
     )
 
     class Builder(val context: Context) {
@@ -169,9 +167,6 @@ class MPVPlayer(
         var subShadowOffset: String = "0"
             private set
 
-        var alwaysPlaySubtitles: Boolean = false
-            private set
-
         fun setAudioAttributes(audioAttributes: AudioAttributes, handleAudioFocus: Boolean) =
             apply {
                 this.audioAttributes = audioAttributes
@@ -233,10 +228,6 @@ class MPVPlayer(
             this.subShadowOffset = subShadowOffset
         }
 
-        fun setAlwaysPlaySubtitles(alwaysPlaySubtitles: Boolean) = apply {
-            this.alwaysPlaySubtitles = alwaysPlaySubtitles
-        }
-
         fun build() = MPVPlayer(this)
     }
 
@@ -290,10 +281,6 @@ class MPVPlayer(
         mpvLib.setOptionString("sub-border-style", subBorderStyle)
         mpvLib.setOptionString("sub-ass-override", subAssOverride)
         mpvLib.setOptionString("sub-shadow-offset", subShadowOffset)
-        if (alwaysPlaySubtitles) {
-            mpvLib.setOptionString("sub-auto", "all")
-            mpvLib.setOptionString("sid", "auto")
-        }
 
         // Language
         // Split on "-" and use last part because media3 does some weird mapping
@@ -302,9 +289,12 @@ class MPVPlayer(
         trackSelectionParameters.preferredAudioLanguages.firstOrNull()?.let {
             mpvLib.setOptionString("alang", it.split("-").last())
         }
+        // A preferred subtitle language means subtitles should play in that language. With no
+        // preference (the "None" option) mpv keeps its default and shows no subtitles.
         trackSelectionParameters.preferredTextLanguages.firstOrNull()?.let {
-            println(it.split("-").last())
             mpvLib.setOptionString("slang", it.split("-").last())
+            mpvLib.setOptionString("sub-auto", "all")
+            mpvLib.setOptionString("sid", "auto")
         }
 
         // Other options

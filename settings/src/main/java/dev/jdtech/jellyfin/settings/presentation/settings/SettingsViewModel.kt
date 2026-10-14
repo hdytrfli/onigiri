@@ -41,28 +41,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
             PreferenceGroup(
                 preferences =
                     listOf(
-                        PreferenceSwitch(
-                            nameStringResource = R.string.offline_mode,
-                            iconDrawableId = R.drawable.ic_server_off,
-                            supportedDeviceTypes = listOf(DeviceType.PHONE),
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(SettingsEvent.RestartActivity)
-                                }
-                            },
-                            backendPreference = appPreferences.offlineMode,
-                        ),
-                        PreferenceSwitch(
-                            nameStringResource = R.string.confirm_exit,
-                            iconDrawableId = R.drawable.ic_exit,
-                            supportedDeviceTypes = listOf(DeviceType.PHONE),
-                            backendPreference = appPreferences.confirmExit,
-                        ),
-                    )
-            ),
-            PreferenceGroup(
-                preferences =
-                    listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_language,
                             iconDrawableId = R.drawable.ic_languages,
@@ -314,6 +292,30 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 )
                                             )
                                     ),
+                                    PreferenceGroup(
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.offline_mode,
+                                                    iconDrawableId = R.drawable.ic_server_off,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    onClick = {
+                                                        viewModelScope.launch {
+                                                            eventsChannel.send(
+                                                                SettingsEvent.RestartActivity
+                                                            )
+                                                        }
+                                                    },
+                                                    backendPreference = appPreferences.offlineMode,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.confirm_exit,
+                                                    iconDrawableId = R.drawable.ic_exit,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference = appPreferences.confirmExit,
+                                                ),
+                                            )
+                                    ),
                                 ),
                         )
                     )
@@ -346,14 +348,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         appPreferences.playerBackend,
                                                     options = R.array.player_backends,
                                                     optionValues = R.array.player_backends,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.always_play_subtitles,
-                                                    descriptionStringRes =
-                                                        R.string.always_play_subtitles_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerAlwaysPlaySubtitles,
                                                 ),
                                                 PreferenceCategory(
                                                     nameStringResource = R.string.mpv_options,
@@ -728,62 +722,40 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                         preferences =
                                             listOf(
                                                 PreferenceSwitch(
-                                                    nameStringResource = R.string.player_gestures,
-                                                    backendPreference =
-                                                        appPreferences.playerGestures,
+                                                    nameStringResource =
+                                                        R.string.player_gestures_volume,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_volume_summary,
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesVolume,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
-                                                        R.string.player_gestures_vb,
+                                                        R.string.player_gestures_brightness,
                                                     descriptionStringRes =
-                                                        R.string.player_gestures_vb_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
+                                                        R.string.player_gestures_brightness_summary,
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
-                                                        appPreferences.playerGesturesVB,
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.player_brightness_mode,
-                                                    descriptionStringRes =
-                                                        R.string.player_brightness_mode_summary,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences.playerGestures,
-                                                            appPreferences.playerGesturesVB,
-                                                        ),
-                                                    hideWhenDisabled = true,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.playerBrightnessMode,
-                                                    options =
-                                                        R.array.player_brightness_mode_options,
-                                                    optionValues =
-                                                        R.array.player_brightness_mode_values,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_seek,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_seek_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesSeek,
+                                                        appPreferences.playerGesturesBrightness,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.player_gestures_zoom,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_zoom_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesZoom,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_gestures_seek,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_seek_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesSeek,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
@@ -791,8 +763,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     descriptionStringRes =
                                                         R.string
                                                             .player_gestures_chapter_skip_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesChapterSkip,
@@ -802,8 +772,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_start_maximized,
                                                     descriptionStringRes =
                                                         R.string.player_start_maximized_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesStartMaximized,
@@ -813,8 +781,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_gestures_double_tap,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_double_tap_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGestures),
                                                     supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesDoubleTap,

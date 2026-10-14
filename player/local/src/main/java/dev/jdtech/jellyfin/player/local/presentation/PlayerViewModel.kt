@@ -113,22 +113,12 @@ constructor(
 
     var playbackSpeed: Float = 1f
 
-    var alwaysPlaySubtitles: Boolean = false
-
-    /**
-     * Set when the user manually turns subtitles off. Suppresses the "always play subtitles"
-     * auto-selection until the next media item so the choice sticks.
-     */
-    private var subtitlesDisabledByUser: Boolean = false
-
     /** The item whose remembered track selection was already applied, so it isn't re-applied. */
     private var appliedSelectionItemId: String? = null
 
     var isInPictureInPictureMode: Boolean = false
 
     init {
-        alwaysPlaySubtitles = appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles)
-
         segmentsSkipButton = appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButton)
         segmentsSkipButtonTypes =
             appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButtonType)
@@ -156,7 +146,6 @@ constructor(
                 .setPreferredTextLanguage(
                     appPreferences.getValue(appPreferences.preferredSubtitleLanguage)
                 )
-                .setSelectUndeterminedTextLanguage(alwaysPlaySubtitles)
                 .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
         )
 
@@ -211,7 +200,6 @@ constructor(
                         .setSubBorderStyle(subOptions.getValue("sub-border-style"))
                         .setSubAssOverride(subOptions.getValue("sub-ass-override"))
                         .setSubShadowOffset(subOptions.getValue("sub-shadow-offset"))
-                        .setAlwaysPlaySubtitles(alwaysPlaySubtitles)
                         .build()
                 }
 
@@ -398,8 +386,6 @@ constructor(
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
-        // A new item should honour "always play subtitles" again.
-        subtitlesDisabledByUser = false
         appliedSelectionItemId = null
         savedStateHandle["mediaItemIndex"] = player.currentMediaItemIndex
         viewModelScope.launch {
@@ -521,13 +507,11 @@ constructor(
 
     override fun onTracksChanged(tracks: Tracks) {
         applyRememberedTrackSelection(tracks)
-        autoSelectSubtitles(tracks)
     }
 
     /**
      * Restores the audio/subtitle track the user chose for this item the last time it was played,
-     * once per item. An explicit choice wins over the language defaults and "always play
-     * subtitles".
+     * once per item. An explicit choice wins over the preferred-language defaults.
      */
     private fun applyRememberedTrackSelection(tracks: Tracks) {
         val itemId = currentItemId() ?: return
@@ -548,7 +532,6 @@ constructor(
         }
         if (storedText != TrackSelectionStore.UNSET) {
             applyTrackSelection(parameters, tracks, C.TRACK_TYPE_TEXT, storedText)
-            subtitlesDisabledByUser = storedText == TrackSelectionStore.DISABLED
         }
 
         player.trackSelectionParameters = parameters.build()
@@ -572,39 +555,6 @@ constructor(
         parameters
             .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, 0))
             .setTrackTypeDisabled(trackType, false)
-    }
-
-    /**
-     * Turns on the first available subtitle track when "always play subtitles" is enabled and the
-     * user hasn't chosen one for this item.
-     */
-    private fun autoSelectSubtitles(tracks: Tracks) {
-        if (!alwaysPlaySubtitles || subtitlesDisabledByUser) return
-        val itemId = currentItemId()
-        val scope = currentTrackScope()
-        if (
-            itemId != null &&
-                scope != null &&
-                trackSelectionStore.getText(scope, itemId) != TrackSelectionStore.UNSET
-        ) {
-            // The remembered choice is applied above; don't override it here.
-            return
-        }
-        val hasSelectedText =
-            tracks.groups.any { group -> group.type == C.TRACK_TYPE_TEXT && group.isSelected }
-        if (hasSelectedText) return
-        val textGroup =
-            tracks.groups.firstOrNull { group ->
-                group.type == C.TRACK_TYPE_TEXT && group.isSupported
-            }
-        if (textGroup != null) {
-            player.trackSelectionParameters =
-                player.trackSelectionParameters
-                    .buildUpon()
-                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-                    .setOverrideForType(TrackSelectionOverride(textGroup.mediaTrackGroup, 0))
-                    .build()
-        }
     }
 
     private fun currentItemId(): UUID? =
@@ -648,10 +598,6 @@ constructor(
     }
 
     fun switchToTrack(trackType: @C.TrackType Int, index: Int) {
-        // Remember an explicit subtitle choice so "always play subtitles" doesn't undo it.
-        if (trackType == C.TRACK_TYPE_TEXT) {
-            subtitlesDisabledByUser = index == -1
-        }
         // Remember the choice for this item so it is restored the next time it plays.
         val scope = currentTrackScope()
         val itemId = currentItemId()

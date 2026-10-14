@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.settings.domain
 
 import android.content.SharedPreferences
 import dev.jdtech.jellyfin.settings.domain.models.Preference
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -9,16 +10,24 @@ import kotlinx.coroutines.flow.callbackFlow
 import timber.log.Timber
 
 class AppPreferences @Inject constructor(val sharedPreferences: SharedPreferences) {
+    /**
+     * Default preferred language, matching the device language (ISO 639-2, e.g. "eng"), so the
+     * audio/subtitle selectors start aligned with the app language.
+     */
+    private val defaultLanguage: String? = runCatching {
+        Locale.getDefault().getISO3Language()
+    }.getOrNull()?.takeIf { it != "und" }
+
     // Server
     val currentServer = Preference<String?>("pref_current_server", null)
 
     // Language
-    val preferredAudioLanguage = Preference<String?>("pref_audio_language", null)
-    val preferredSubtitleLanguage = Preference<String?>("pref_subtitle_language", null)
+    val preferredAudioLanguage = Preference<String?>("pref_audio_language", defaultLanguage)
+    val preferredSubtitleLanguage = Preference<String?>("pref_subtitle_language", defaultLanguage)
 
     // Interface
     val theme = Preference("pref_theme", "system")
-    val dynamicColors = Preference("pref_dynamic_colors", true)
+    val dynamicColors = Preference("pref_dynamic_colors", false)
     val hideStatusBar = Preference("pref_hide_status_bar", false)
     val homeSuggestions = Preference<Boolean>("home_suggestions", true)
     val homeContinueWatching = Preference<Boolean>("home_continue_watching", true)
@@ -38,7 +47,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
-    val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
     // Player - time display
@@ -69,21 +77,18 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerMpvSubBorderStyle = Preference("pref_player_mpv_sub_border_style", "opaque-box")
 
     // Player - gestures
-    val playerGestures = Preference("pref_player_gestures", true)
-    val playerGesturesVB = Preference("pref_player_gestures_vb", true)
-    val playerGesturesZoom = Preference("pref_player_gestures_zoom", false)
+    val playerGesturesVolume = Preference("pref_player_gestures_volume", true)
+    val playerGesturesBrightness = Preference("pref_player_gestures_brightness", true)
+    val playerGesturesZoom = Preference("pref_player_gestures_zoom", true)
     val playerGesturesSeek = Preference("pref_player_gestures_seek", true)
-    val playerGesturesDoubleTap = Preference("pref_player_gestures_double_tap", true)
+    val playerGesturesDoubleTap = Preference("pref_player_gestures_double_tap", false)
     val playerGesturesSeekTrickplay = Preference("pref_player_gestures_seek_trickplay", true)
     val playerGesturesChapterSkip = Preference("pref_player_gestures_chapter_skip", false)
     val playerGesturesStartMaximized = Preference("pref_player_start_maximized", false)
 
-    /** "app" (player-window brightness) or "system" (device brightness). */
-    val playerBrightnessMode = Preference("pref_player_brightness_mode", "app")
-
     // Player - seeking
     val playerSeekBackInc = Preference("pref_player_seek_back_inc", 5_000L)
-    val playerSeekForwardInc = Preference("pref_player_seek_forward_inc", 15_000L)
+    val playerSeekForwardInc = Preference("pref_player_seek_forward_inc", 5_000L)
     val playerChapterMarkers = Preference("pref_player_chapter_markers", true)
 
     // Player - Media Segments
@@ -142,7 +147,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val offlineMode = Preference("pref_offline_mode", false)
 
     // General
-    val confirmExit = Preference("pref_confirm_exit", false)
+    val confirmExit = Preference("pref_confirm_exit", true)
 
     // Migrations
     val mpvMigrated = Preference("mpv_migrated", false)

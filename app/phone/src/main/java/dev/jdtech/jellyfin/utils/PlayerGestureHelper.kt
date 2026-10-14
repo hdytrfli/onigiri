@@ -1,11 +1,9 @@
 package dev.jdtech.jellyfin.utils
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.media.AudioManager
-import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
@@ -38,7 +36,6 @@ import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import kotlin.math.abs
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 
@@ -66,9 +63,6 @@ class PlayerGestureHelper(
     private var swipeGestureVolumeOpen = false
     private var swipeGestureBrightnessOpen = false
     private var swipeGestureProgressOpen = false
-
-    /** Guards against repeatedly sending the user to grant WRITE_SETTINGS. */
-    private var writeSettingsRequested = false
 
     private var lastScaleEvent: Long = 0
 
@@ -159,49 +153,9 @@ class PlayerGestureHelper(
         }
     }
 
-    /**
-     * Applies [value] (0..1) as either the brightness of the player window (app-local, remembered
-     * across sessions) or the device's actual screen brightness, depending on the user's setting.
-     */
+    /** Applies [value] (0..1) to the player window's brightness (app-local, remembered). */
     private fun applyBrightness(value: Float) {
-        if (useSystemBrightness()) {
-            setSystemBrightness(value)
-        } else {
-            activity.window.attributes =
-                activity.window.attributes.apply { screenBrightness = value }
-        }
-    }
-
-    private fun useSystemBrightness(): Boolean =
-        appPreferences.getValue(appPreferences.playerBrightnessMode) == "system"
-
-    /**
-     * Applies [value] (0..1) to the device's actual screen brightness, so it stays changed after
-     * leaving the player. Needs WRITE_SETTINGS; the first time it's required the user is sent to
-     * the system screen to grant it.
-     */
-    private fun setSystemBrightness(value: Float) {
-        if (!Settings.System.canWrite(activity)) {
-            if (!writeSettingsRequested) {
-                writeSettingsRequested = true
-                try {
-                    activity.startActivity(
-                        Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                            data = Uri.parse("package:${activity.packageName}")
-                        }
-                    )
-                } catch (e: Exception) {
-                    Timber.e(e)
-                }
-            }
-            return
-        }
-        val brightness = (value * 255f).roundToInt().coerceIn(1, 255)
-        Settings.System.putInt(
-            activity.contentResolver,
-            Settings.System.SCREEN_BRIGHTNESS,
-            brightness,
-        )
+        activity.window.attributes = activity.window.attributes.apply { screenBrightness = value }
     }
 
     private fun handleChapterSkip(e: MotionEvent) {
@@ -390,6 +344,9 @@ class PlayerGestureHelper(
 
                     if (firstEvent.x.toInt() > viewCenterX) {
                         // Swiping on the right, change volume
+                        if (!appPreferences.getValue(appPreferences.playerGesturesVolume)) {
+                            return false
+                        }
 
                         val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
                         if (swipeGestureValueTrackerVolume == -1f)
@@ -423,6 +380,10 @@ class PlayerGestureHelper(
                         swipeGestureVolumeOpen = true
                     } else {
                         // Swiping on the left changes the brightness.
+                        if (!appPreferences.getValue(appPreferences.playerGesturesBrightness)) {
+                            return false
+                        }
+
                         val brightnessRange = BRIGHTNESS_OVERRIDE_OFF..BRIGHTNESS_OVERRIDE_FULL
 
                         // Initialize on first swipe from the current window brightness, falling
@@ -539,13 +500,11 @@ class PlayerGestureHelper(
                 if (isVisible) {
                     removeCallbacks(hideGestureBrightnessIndicatorOverlayAction)
                     postDelayed(hideGestureBrightnessIndicatorOverlayAction, 1000)
-                    if (!useSystemBrightness()) {
-                        // Remember the app-local brightness for the next session.
-                        appPreferences.setValue(
-                            appPreferences.playerBrightness,
-                            swipeGestureValueTrackerBrightness,
-                        )
-                    }
+                    // Remember the app-local brightness for the next session.
+                    appPreferences.setValue(
+                        appPreferences.playerBrightness,
+                        swipeGestureValueTrackerBrightness,
+                    )
                     swipeGestureBrightnessOpen = false
                 }
             }
@@ -639,12 +598,10 @@ class PlayerGestureHelper(
 
     init {
         // Restore the remembered app-local brightness when opening the player.
-        if (!useSystemBrightness()) {
-            val remembered = appPreferences.getValue(appPreferences.playerBrightness)
-            if (remembered >= 0f) {
-                activity.window.attributes =
-                    activity.window.attributes.apply { screenBrightness = remembered }
-            }
+        val rememberedBrightness = appPreferences.getValue(appPreferences.playerBrightness)
+        if (rememberedBrightness >= 0f) {
+            activity.window.attributes =
+                activity.window.attributes.apply { screenBrightness = rememberedBrightness }
         }
 
         updateZoomMode(appPreferences.getValue(appPreferences.playerGesturesStartMaximized))
@@ -658,8 +615,12 @@ class PlayerGestureHelper(
                 when (event.pointerCount) {
                     1 -> {
                         tapGestureDetector.onTouchEvent(event)
-                        if (appPreferences.getValue(appPreferences.playerGesturesVB))
+                        if (
+                            appPreferences.getValue(appPreferences.playerGesturesVolume) ||
+                                appPreferences.getValue(appPreferences.playerGesturesBrightness)
+                        ) {
                             vbGestureDetector.onTouchEvent(event)
+                        }
                         if (appPreferences.getValue(appPreferences.playerGesturesSeek))
                             seekGestureDetector.onTouchEvent(event)
                     }

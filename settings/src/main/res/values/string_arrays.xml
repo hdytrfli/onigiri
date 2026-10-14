@@ -283,12 +283,4 @@
         <item>12</item>
         <item>human</item>
     </string-array>
-    <string-array name="player_brightness_mode_options">
-        <item>App only</item>
-        <item>System</item>
-    </string-array>
-    <string-array name="player_brightness_mode_values">
-        <item>app</item>
-        <item>system</item>
-    </string-array>
 </resources>
