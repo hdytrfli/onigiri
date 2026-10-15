@@ -71,29 +71,6 @@ fun SubtitleOffsetControl(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         ) {
-            Text(
-                text = stringResource(R.string.player_subtitle_offset_by),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = formatSubtitleOffset(delaySeconds),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White,
-                modifier =
-                    Modifier.clip(MaterialTheme.shapes.small)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .padding(
-                            horizontal = MaterialTheme.spacings.small,
-                            vertical = MaterialTheme.spacings.extraSmall,
-                        ),
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-        ) {
             HoldRepeatIcon(
                 iconRes = CoreR.drawable.ic_minus_fat,
                 contentDescription = stringResource(R.string.player_subtitle_delay_earlier),
@@ -128,6 +105,22 @@ fun SubtitleOffsetControl(
                 onStep = { update(delaySeconds + STEP_SECONDS) },
             )
             ResetIcon(onClick = { update(0f) })
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        ) {
+            Text(
+                text = stringResource(R.string.player_subtitle_offset_by),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = formatSubtitleOffset(delaySeconds),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White,
+            )
         }
         Text(
             text = stringResource(R.string.player_subtitle_offset_disclaimer),
