@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.player
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
@@ -46,10 +50,11 @@ private const val STEP_SECONDS = 0.1f
 @Composable
 fun SubtitleOffsetControl(
     enabled: Boolean,
+    initialDelaySeconds: Float,
     onDelayChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var delaySeconds by remember { mutableStateOf(0f) }
+    var delaySeconds by remember(initialDelaySeconds) { mutableStateOf(initialDelaySeconds) }
 
     fun update(value: Float) {
         delaySeconds = value.coerceIn(-MAX_OFFSET_SECONDS, MAX_OFFSET_SECONDS)
@@ -64,6 +69,8 @@ fun SubtitleOffsetControl(
         Text(
             text = stringResource(R.string.player_subtitle_offset),
             style = MaterialTheme.typography.titleMedium,
+            color = Color.White,
+            modifier = Modifier.fillMaxWidth(),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -82,6 +89,15 @@ fun SubtitleOffsetControl(
                 valueRange = -MAX_OFFSET_SECONDS..MAX_OFFSET_SECONDS,
                 enabled = enabled,
                 colors = sliderColors(),
+                thumb = {
+                    Box(
+                        modifier =
+                            Modifier.width(3.dp)
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(1.5.dp))
+                                .background(Color.White)
+                    )
+                },
                 track = { state ->
                     SliderDefaults.Track(
                         sliderState = state,
@@ -99,6 +115,12 @@ fun SubtitleOffsetControl(
             )
             ResetIcon(enabled = enabled, onClick = { update(0f) })
         }
+        Text(
+            text = stringResource(R.string.player_subtitle_offset_disclaimer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth(),
+        )
         if (!enabled) {
             Text(
                 text = stringResource(R.string.player_subtitle_offset_unavailable),

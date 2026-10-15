@@ -123,6 +123,21 @@ constructor(
     fun setSubtitleDelay(seconds: Float) {
         subtitleDelaySeconds = seconds
         (player as? MPVPlayer)?.setSubtitleDelay(seconds.toDouble())
+        val itemId = currentItemId()
+        val scope = currentTrackScope()
+        if (itemId != null && scope != null) {
+            trackSelectionStore.setSubtitleOffset(scope, itemId, seconds)
+        }
+    }
+
+    /** Restores the subtitle offset remembered for the current item, if any. */
+    private fun applyRememberedSubtitleOffset() {
+        val itemId = currentItemId() ?: return
+        val scope = currentTrackScope() ?: return
+        val offset = trackSelectionStore.getSubtitleOffset(scope, itemId)
+        if (offset.isNaN()) return
+        subtitleDelaySeconds = offset
+        (player as? MPVPlayer)?.setSubtitleDelay(offset.toDouble())
     }
 
     /** The item whose remembered track selection was already applied, so it isn't re-applied. */
@@ -401,6 +416,9 @@ constructor(
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
         appliedSelectionItemId = null
+        subtitleDelaySeconds = 0f
+        (player as? MPVPlayer)?.setSubtitleDelay(0.0)
+        applyRememberedSubtitleOffset()
         savedStateHandle["mediaItemIndex"] = player.currentMediaItemIndex
         viewModelScope.launch {
             try {

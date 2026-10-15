@@ -24,6 +24,17 @@ class TrackSelectionStore @Inject constructor(private val sharedPreferences: Sha
 
     fun setText(scope: String, itemId: UUID, index: Int) = set(scope, TEXT_PREFIX, itemId, index)
 
+    /** The stored subtitle offset (seconds) for [itemId], or [Float.NaN] if none is stored. */
+    fun getSubtitleOffset(scope: String, itemId: UUID): Float {
+        ensureScope(scope)
+        return sharedPreferences.getFloat(OFFSET_PREFIX + itemId, Float.NaN)
+    }
+
+    fun setSubtitleOffset(scope: String, itemId: UUID, seconds: Float) {
+        ensureScope(scope)
+        sharedPreferences.edit().putFloat(OFFSET_PREFIX + itemId, seconds).apply()
+    }
+
     private fun get(scope: String, prefix: String, itemId: UUID): Int {
         ensureScope(scope)
         return sharedPreferences.getInt(prefix + itemId, UNSET)
@@ -41,7 +52,11 @@ class TrackSelectionStore @Inject constructor(private val sharedPreferences: Sha
         if (sharedPreferences.getString(SCOPE_KEY, null) == scope) return
         val editor = sharedPreferences.edit()
         sharedPreferences.all.keys
-            .filter { it.startsWith(AUDIO_PREFIX) || it.startsWith(TEXT_PREFIX) }
+            .filter {
+                it.startsWith(AUDIO_PREFIX) ||
+                    it.startsWith(TEXT_PREFIX) ||
+                    it.startsWith(OFFSET_PREFIX)
+            }
             .forEach(editor::remove)
         editor.putString(SCOPE_KEY, scope)
         editor.apply()
@@ -56,6 +71,7 @@ class TrackSelectionStore @Inject constructor(private val sharedPreferences: Sha
 
         private const val AUDIO_PREFIX = "pref_track_audio_"
         private const val TEXT_PREFIX = "pref_track_text_"
+        private const val OFFSET_PREFIX = "pref_sub_offset_"
         private const val SCOPE_KEY = "pref_track_scope"
     }
 }

@@ -38,6 +38,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeCap = Paint.Cap.ROUND }
 
+    private val density = resources.displayMetrics.density
+
     init {
         val styleable = androidx.media3.ui.R.styleable.DefaultTimeBar
         val ta = context.obtainStyledAttributes(attrs, styleable, defStyleAttr, 0)
@@ -153,10 +155,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
 
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = thickness
+        paint.strokeWidth = HANDLE_WIDTH_DP * density
         paint.color = scrubberColor
         // Vertical rounded "line" handle, matching the Compose slider's thumb.
-        val handleHalf = thickness * HANDLE_HALF_FACTOR
+        val handleHalf = HANDLE_HEIGHT_DP / 2f * density
         canvas.drawLine(playedX, centerY - handleHalf, playedX, centerY + handleHalf, paint)
     }
 }
@@ -164,5 +166,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 /** How close the player's position must be to the scrub position before we trust it again. */
 private const val SEEK_TOLERANCE_MS = 1_000L
 
-/** Handle half-height as a fraction of the track thickness (a vertical rounded "line"). */
-private const val HANDLE_HALF_FACTOR = 1.25f
+/** Handle size in dp: a thin vertical rounded line (matches the Compose slider thumb). */
+private const val HANDLE_WIDTH_DP = 3f
+private const val HANDLE_HEIGHT_DP = 12f

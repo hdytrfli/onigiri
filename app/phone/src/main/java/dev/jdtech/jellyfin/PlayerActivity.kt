@@ -495,6 +495,7 @@ class PlayerActivity : BasePlayerActivity() {
             FindroidTheme {
                 SubtitleOffsetControl(
                     enabled = viewModel.player is MPVPlayer,
+                    initialDelaySeconds = viewModel.subtitleDelaySeconds,
                     onDelayChange = { seconds ->
                         viewModel.setSubtitleDelay(seconds)
                         showPlayerOverlayMessage(
