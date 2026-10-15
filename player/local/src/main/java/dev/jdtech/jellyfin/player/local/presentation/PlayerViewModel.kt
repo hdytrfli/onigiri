@@ -15,9 +15,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
-import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidSegment
@@ -97,7 +94,6 @@ constructor(
 
     private var items: MutableList<PlayerItem> = mutableListOf()
 
-    private val trackSelector = DefaultTrackSelector(application)
     var playWhenReady = true
     private var currentMediaItemIndex = savedStateHandle["mediaItemIndex"] ?: 0
     private var playbackPosition: Long = savedStateHandle["position"] ?: 0
@@ -165,10 +161,8 @@ constructor(
                 .setUsage(C.USAGE_MEDIA)
                 .build()
 
-        trackSelector.setParameters(
-            trackSelector
-                .buildUponParameters()
-                .setTunnelingEnabled(true)
+        val trackSelectionParameters =
+            TrackSelectionParameters.Builder(application)
                 .setPreferredAudioLanguage(
                     appPreferences.getValue(appPreferences.preferredAudioLanguage)
                 )
@@ -176,64 +170,35 @@ constructor(
                     appPreferences.getValue(appPreferences.preferredSubtitleLanguage)
                 )
                 .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-        )
+                .build()
 
-        val playerBackend = appPreferences.getValue(appPreferences.playerBackend)
+        val subOptions =
+            dev.jdtech.jellyfin.settings.domain.MpvSubtitleOptions.buildOptions(appPreferences)
         player =
-            when (playerBackend) {
-                "exoplayer" -> {
-                    val renderersFactory =
-                        DefaultRenderersFactory(application)
-                            .setExtensionRendererMode(
-                                DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
-                            )
-                    ExoPlayer.Builder(application, renderersFactory)
-                        .setAudioAttributes(audioAttributes, true)
-                        .setTrackSelector(trackSelector)
-                        .setSeekBackIncrementMs(
-                            appPreferences.getValue(appPreferences.playerSeekBackInc)
-                        )
-                        .setSeekForwardIncrementMs(
-                            appPreferences.getValue(appPreferences.playerSeekForwardInc)
-                        )
-                        .setPauseAtEndOfMediaItems(true)
-                        .build()
-                }
-                "mpv" -> {
-                    val subOptions =
-                        dev.jdtech.jellyfin.settings.domain.MpvSubtitleOptions.buildOptions(
-                            appPreferences
-                        )
-                    MPVPlayer.Builder(application)
-                        .setAudioAttributes(audioAttributes, true)
-                        .setTrackSelectionParameters(trackSelector.parameters)
-                        .setSeekBackIncrementMs(
-                            appPreferences.getValue(appPreferences.playerSeekBackInc)
-                        )
-                        .setSeekForwardIncrementMs(
-                            appPreferences.getValue(appPreferences.playerSeekForwardInc)
-                        )
-                        .setPauseAtEndOfMediaItems(true)
-                        .setVideoOutput(appPreferences.getValue(appPreferences.playerMpvVo))
-                        .setAudioOutput(appPreferences.getValue(appPreferences.playerMpvAo))
-                        .setHwDec(appPreferences.getValue(appPreferences.playerMpvHwdec))
-                        .setSubFontSize(subOptions.getValue("sub-font-size"))
-                        .setSubColor(subOptions.getValue("sub-color"))
-                        .setSubPos(subOptions.getValue("sub-pos"))
-                        .setSubUseMargins(subOptions.getValue("sub-use-margins"))
-                        .setSubBold(subOptions.getValue("sub-bold"))
-                        .setSubItalic(subOptions.getValue("sub-italic"))
-                        .setSubBorderSize(subOptions.getValue("sub-outline-size"))
-                        .setSubBorderColor(subOptions.getValue("sub-outline-color"))
-                        .setSubBackColor(subOptions.getValue("sub-back-color"))
-                        .setSubBorderStyle(subOptions.getValue("sub-border-style"))
-                        .setSubAssOverride(subOptions.getValue("sub-ass-override"))
-                        .setSubShadowOffset(subOptions.getValue("sub-shadow-offset"))
-                        .build()
-                }
-
-                else -> throw RuntimeException("$playerBackend is not a valid player backend")
-            }
+            MPVPlayer.Builder(application)
+                .setAudioAttributes(audioAttributes, true)
+                .setTrackSelectionParameters(trackSelectionParameters)
+                .setSeekBackIncrementMs(appPreferences.getValue(appPreferences.playerSeekBackInc))
+                .setSeekForwardIncrementMs(
+                    appPreferences.getValue(appPreferences.playerSeekForwardInc)
+                )
+                .setPauseAtEndOfMediaItems(true)
+                .setVideoOutput(appPreferences.getValue(appPreferences.playerMpvVo))
+                .setAudioOutput(appPreferences.getValue(appPreferences.playerMpvAo))
+                .setHwDec(appPreferences.getValue(appPreferences.playerMpvHwdec))
+                .setSubFontSize(subOptions.getValue("sub-font-size"))
+                .setSubColor(subOptions.getValue("sub-color"))
+                .setSubPos(subOptions.getValue("sub-pos"))
+                .setSubUseMargins(subOptions.getValue("sub-use-margins"))
+                .setSubBold(subOptions.getValue("sub-bold"))
+                .setSubItalic(subOptions.getValue("sub-italic"))
+                .setSubBorderSize(subOptions.getValue("sub-outline-size"))
+                .setSubBorderColor(subOptions.getValue("sub-outline-color"))
+                .setSubBackColor(subOptions.getValue("sub-back-color"))
+                .setSubBorderStyle(subOptions.getValue("sub-border-style"))
+                .setSubAssOverride(subOptions.getValue("sub-ass-override"))
+                .setSubShadowOffset(subOptions.getValue("sub-shadow-offset"))
+                .build()
     }
 
     fun initializePlayer(itemId: UUID, itemKind: String, startFromBeginning: Boolean) {
@@ -516,7 +481,7 @@ constructor(
         if (
             !playWhenReady &&
                 reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM &&
-                player.playbackState == ExoPlayer.STATE_READY
+                player.playbackState == Player.STATE_READY
         ) {
             viewModelScope.launch {
                 val mediaId = player.currentMediaItem?.mediaId
@@ -638,18 +603,18 @@ constructor(
     override fun onPlaybackStateChanged(state: Int) {
         var stateString = "UNKNOWN_STATE             -"
         when (state) {
-            ExoPlayer.STATE_IDLE -> {
-                stateString = "ExoPlayer.STATE_IDLE      -"
+            Player.STATE_IDLE -> {
+                stateString = "Player.STATE_IDLE      -"
             }
-            ExoPlayer.STATE_BUFFERING -> {
-                stateString = "ExoPlayer.STATE_BUFFERING -"
+            Player.STATE_BUFFERING -> {
+                stateString = "Player.STATE_BUFFERING -"
             }
-            ExoPlayer.STATE_READY -> {
-                stateString = "ExoPlayer.STATE_READY     -"
+            Player.STATE_READY -> {
+                stateString = "Player.STATE_READY     -"
                 _uiState.update { it.copy(fileLoaded = true) }
             }
-            ExoPlayer.STATE_ENDED -> {
-                stateString = "ExoPlayer.STATE_ENDED     -"
+            Player.STATE_ENDED -> {
+                stateString = "Player.STATE_ENDED     -"
                 eventsChannel.trySend(PlayerEvents.NavigateBack)
             }
         }

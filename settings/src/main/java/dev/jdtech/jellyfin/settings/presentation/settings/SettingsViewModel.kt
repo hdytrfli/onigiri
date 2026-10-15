@@ -350,14 +350,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                         nameStringResource = R.string.player_options,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.pref_player_backend,
-                                                    backendPreference =
-                                                        appPreferences.playerBackend,
-                                                    options = R.array.player_backends,
-                                                    optionValues = R.array.player_backends,
-                                                ),
                                                 PreferenceCategory(
                                                     nameStringResource = R.string.mpv_options,
                                                     descriptionStringRes =
@@ -1153,7 +1145,7 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
         lastIndexes = indexes
         lastDeviceType = deviceType
         viewModelScope.launch {
-            val isMpvBackend = appPreferences.getValue(appPreferences.playerBackend) == "mpv"
+            val isMpvBackend = true
 
             // Hide the whole mpv section (and its subtitle page) unless mpv is
             // the active player backend.

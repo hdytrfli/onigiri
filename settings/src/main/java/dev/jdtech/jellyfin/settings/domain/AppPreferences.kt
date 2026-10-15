@@ -48,7 +48,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val titleImageRatio = Preference("pref_title_image_ratio", "2")
 
     // Player
-    val playerBackend = Preference("pref_player_backend", "exoplayer")
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 

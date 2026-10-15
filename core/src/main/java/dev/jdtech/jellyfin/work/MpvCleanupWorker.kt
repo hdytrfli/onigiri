@@ -28,11 +28,7 @@ constructor(
     }
 
     private fun migratePreference() {
-        // Migrate to new player backend preference
-        val defaultMpv = appPreferences.getValue(appPreferences.playerMpv)
-        if (defaultMpv) {
-            appPreferences.setValue(appPreferences.playerBackend, "mpv")
-        }
+        // mpv is the only player backend now; nothing to migrate.
     }
 
     private fun cleanUpDirs() {
