@@ -156,7 +156,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             paint.color = playedColor
             paint.style = Paint.Style.FILL
             val radius = thickness / 2f
-            val rect = RectF(trackStart, centerY - radius, playedX, centerY + radius)
+            // The unplayed/buffered lines use round caps, so they extend half a thickness past
+            // their start; start the played rect half a thickness earlier to line up.
+            val rect = RectF(trackStart - radius, centerY - radius, playedX, centerY + radius)
             val radii = floatArrayOf(radius, radius, 0f, 0f, 0f, 0f, radius, radius)
             val path = Path()
             path.addRoundRect(rect, radii, Path.Direction.CW)

@@ -467,8 +467,8 @@ class PlayerActivity : BasePlayerActivity() {
         // so they don't eat the space left for the audio/subtitle/speed items.
         val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
         optionsList.addScrollableHeader(optionsHeaderComposeView)
-        optionsList.addScrollableHeader(optionsOffset)
         optionsList.addScrollableHeader(optionsTabs)
+        optionsList.addScrollableHeader(optionsOffset)
         setMediaHeaderContent(optionsHeaderComposeView)
 
         lateinit var menuAdapter: PlayerMenuAdapter
@@ -491,21 +491,32 @@ class PlayerActivity : BasePlayerActivity() {
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_audio))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_subtitles))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_speed))
+        val subtitleSelected = androidx.compose.runtime.mutableStateOf(false)
+        viewModel.player.addListener(
+            object : androidx.media3.common.Player.Listener {
+                override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
+                    subtitleSelected.value =
+                        tracks.groups.any { it.type == C.TRACK_TYPE_TEXT && it.isSelected }
+                }
+            }
+        )
         optionsOffset.setContent {
             FindroidTheme {
-                SubtitleOffsetControl(
-                    enabled = viewModel.player is MPVPlayer,
-                    initialDelaySeconds = viewModel.subtitleDelaySeconds,
-                    onDelayChange = { seconds ->
-                        viewModel.setSubtitleDelay(seconds)
-                        showPlayerOverlayMessage(
-                            getString(
-                                R.string.player_subtitle_offset_value,
-                                formatSubtitleOffset(seconds),
+                if (subtitleSelected.value) {
+                    SubtitleOffsetControl(
+                        enabled = viewModel.player is MPVPlayer,
+                        initialDelaySeconds = viewModel.subtitleDelaySeconds,
+                        onDelayChange = { seconds ->
+                            viewModel.setSubtitleDelay(seconds)
+                            showPlayerOverlayMessage(
+                                getString(
+                                    R.string.player_subtitle_offset_value,
+                                    formatSubtitleOffset(seconds),
+                                )
                             )
-                        )
-                    },
-                )
+                        },
+                    )
+                }
             }
         }
         optionsTabs.addOnTabSelectedListener(
