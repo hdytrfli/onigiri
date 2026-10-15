@@ -114,5 +114,22 @@
     <string name="downloaded">Downloaded</string>
     <string name="search_subtitles">Search subtitles</string>
     <string name="search_subtitles_error">Couldn\'t search for subtitles</string>
-    <string name="search_subtitles_empty">No subtitles found. Make sure a subtitle provider (e.g. OpenSubtitles) is installed on the server.</string>
+    <string name="search_subtitles_empty">No subtitles found</string>
+    <string name="existing_subtitles">Existing subtitles</string>
+    <string name="available_subtitles">Available subtitles</string>
+    <string name="language">Language</string>
+    <string name="delete">Delete</string>
+    <string name="subtitle_source">Source</string>
+    <string name="subtitle_format">Format</string>
+    <string name="subtitle_author">Author</string>
+    <string name="subtitle_downloads">Downloads</string>
+    <string name="subtitle_rating">Rating</string>
+    <string name="subtitle_frame_rate">Frame rate</string>
+    <string name="subtitle_hearing_impaired">Hearing impaired</string>
+    <string name="subtitle_forced">Forced</string>
+    <string name="subtitle_ai_translated">AI translated</string>
+    <string name="subtitle_machine_translated">Machine translated</string>
+    <string name="subtitle_details">Details</string>
+    <string name="subtitle_comment">Comment</string>
+    <string name="downloading_at">Downloading at %1$d%%</string>
 </resources>

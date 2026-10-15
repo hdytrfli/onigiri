@@ -18,9 +18,6 @@
     <string name="mpv_player_summary">Utilize o leitor experimental de MPV para reproduzir vídeos. MPV tem suporte para mais codecs de vídeo, áudio e subtítulos.</string>
     <string name="player_gestures_zoom">Gestor de Zoom</string>
     <string name="gestures">Gestos</string>
-    <string name="player_gestures_vb">Gestor de volume e luminosidade</string>
-    <string name="player_gestures">Gestor de reprodução</string>
-    <string name="player_brightness_remember">Lembrar o nível de brilho</string>
     <string name="player_gestures_zoom_summary">Clique para preencher o ecrã com o vídeo</string>
     <string name="theme_system">Seguir sistema</string>
     <string name="seeking">Procura</string>
@@ -39,7 +36,6 @@
     <string name="settings_category_servers">Servidores</string>
     <string name="settings_category_download">Transferências</string>
     <string name="settings_category_language">Idioma</string>
-    <string name="player_gestures_vb_summary">Deslizar para cima e para baixo no lado direito do ecrã para alterar o volume e no lado esquerdo para alterar a luminosidade</string>
     <string name="settings_cache_size_message">A aplicação irá utilizar esta quantidade de MB do seu espaço em disco para armazenar imagens do servidor Jellyfin. Valores maiores podem ser benéficos em redes mais lentas.</string>
     <string name="settings_preferred_audio_language">Preferir idioma de audio</string>
     <string name="settings_use_cache_summary">Cache de imagens em memória para acelerar o tempo de carregamento. Terá efeito após o reinício da aplicação.</string>

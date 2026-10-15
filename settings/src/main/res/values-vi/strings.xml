@@ -18,9 +18,7 @@
     <string name="download_roaming">Tải về trong khi chuyển vung</string>
     <string name="gestures">Cử chỉ</string>
     <string name="player_gestures_zoom">Cử chỉ thu phóng</string>
-    <string name="player_gestures_vb">Cử chỉ điều chỉnh âm lượng và độ sáng màn hình</string>
     <string name="player_gestures_zoom_summary">Chụm hai ngón tay vào và ra để video lấp đầy màn hình</string>
-    <string name="player_brightness_remember">Ghi nhớ độ sáng màn hình</string>
     <string name="seeking">Tua</string>
     <string name="seek_back_increment">Gia số tua lùi</string>
     <string name="seek_forward_increment">Gia số tua tới</string>
@@ -42,8 +40,6 @@
     <string name="privacy_policy">Chính sách về quyền riêng tư</string>
     <string name="download_mobile_data">Tải về sử dụng mạng dữ liệu</string>
     <string name="mpv_player_summary">Dùng trình phát mpv thử nghiệm để phát video. mpv hỗ trợ nhiều bộ giải mã hình ảnh, âm thanh và phụ đề hơn.</string>
-    <string name="player_gestures">Cử chỉ trong trình xem</string>
-    <string name="player_gestures_vb_summary">Vuốt lên và xuống ở phía bên phải màn hình để điều chỉnh âm lượng, và ở bên trái đề điều chỉnh độ sáng màn hình</string>
     <string name="dynamic_colors_summary">Dùng hệ thống đổi màu động của ngôn ngữ thiết kế Material You (chỉ khả dụng cho Android 12+)</string>
     <string name="settings_connect_timeout">Thời gian kết nối hết hạn</string>
     <string name="player_gestures_seek_summary">Vuốt ngang để tua tới hoặc tua lui</string>

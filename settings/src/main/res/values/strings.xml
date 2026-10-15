@@ -38,7 +38,8 @@
     <string name="mpv_player_summary">Use the experimental mpv player to play videos. mpv has support for more video, audio and subtitle codecs.</string>
     <string name="gestures">Gestures</string>
     <string name="player_gestures_volume">Volume gesture</string>
-    <string name="player_gestures_volume_summary">Swipe up and down on the right side of the screen to change the volume</string>
+    <string name="always_play_subtitles">Always play subtitles</string>
+    <string name="always_play_subtitles_summary">Play a subtitle even when none matches the preferred subtitle language</string>    <string name="player_gestures_volume_summary">Swipe up and down on the right side of the screen to change the volume</string>
     <string name="player_gestures_brightness">Brightness gesture</string>
     <string name="player_gestures_brightness_summary">Swipe up and down on the left side of the screen to change the brightness</string>
     <string name="player_gestures_zoom">Zoom gesture</string>

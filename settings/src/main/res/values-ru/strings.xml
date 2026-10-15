@@ -23,11 +23,7 @@
     <string name="download_roaming">Скачивать в роуминге</string>
     <string name="mpv_player_summary">Использовать экспериментальный проигрыватель mpv для воспроизведения видео. mpv поддерживает больше форматов видео, аудио и субтитров.</string>
     <string name="gestures">Жесты</string>
-    <string name="player_gestures">Жесты проигрывателя</string>
-    <string name="player_gestures_vb">Жесты громкости и яркости</string>
     <string name="player_gestures_zoom">Жесты масштаба</string>
-    <string name="player_gestures_vb_summary">Проведите пальцем вверх и вниз по правой стороне экрана для изменения громкости и по левой стороне для изменения яркости</string>
-    <string name="player_brightness_remember">Запоминать яркость</string>
     <string name="seek_forward_increment">Шаг перемотки вперёд</string>
     <string name="subtitles">Субтитры</string>
     <string name="subtitles_summary">Изменить стиль субтитров</string>

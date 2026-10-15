@@ -18,11 +18,8 @@
     <string name="download_mobile_data">Ladda ner med mobildata</string>
     <string name="download_roaming">Ladda ner vid roaming</string>
     <string name="gestures">Gester</string>
-    <string name="player_gestures">Spelargester</string>
     <string name="player_gestures_zoom">Zoomgest</string>
-    <string name="player_gestures_vb">Volym- och ljusstyrkegester</string>
     <string name="player_gestures_seek_summary">Svep horisontellt för att spola framåt eller bakåt</string>
-    <string name="player_brightness_remember">Kom ihåg ljusstyrkenivå</string>
     <string name="seeking">Spolar</string>
     <string name="seek_back_increment">Spola bakåt intervall</string>
     <string name="seek_forward_increment">Spola framåt intervall</string>
@@ -44,7 +41,6 @@
     <string name="settings_cache_size_message">Appen kommer att använda detta antal MB av ditt lagringsutrymme för att lagra bilder från Jellyfin-servern. Större värden kan vara fördelaktiga på långsammare nätverk.</string>
     <string name="mpv_player_summary">Använd den experimentella mpv-spelaren för att spela videor. mpv har stöd för fler video, ljud och textningsformat.</string>
     <string name="player_gestures_seek">Spolningsgest</string>
-    <string name="player_gestures_vb_summary">Svep upp och ned på höger sida av skärmen för att ändra volymen och på vänster sida för att ändra ljusstyrkan</string>
     <string name="player_gestures_zoom_summary">Nyp in för att fylla skärmen med videon</string>
     <string name="dynamic_colors">Dynamiska färger</string>
     <string name="dynamic_colors_summary">Använd Material You dynamiska färger (endast tillgängligt på Android 12+)</string>

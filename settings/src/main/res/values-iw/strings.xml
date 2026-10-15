@@ -15,10 +15,8 @@
     <string name="about">אודות</string>
     <string name="download_roaming">הורד בנדידה</string>
     <string name="mpv_player">נגן mpv</string>
-    <string name="player_gestures">מחוות נגן</string>
     <string name="player_gestures_zoom">מחוות זום</string>
     <string name="player_gestures_seek">מחוות חיפוש</string>
-    <string name="player_brightness_remember">זכור רמת בהירות</string>
     <string name="player_gestures_seek_summary">החלק אופקית כדי לקפוץ קדימה או אחורה</string>
     <string name="dynamic_colors">צבעים דינמיים</string>
     <string name="subtitles">כתוביות</string>
@@ -44,11 +42,9 @@
     <string name="privacy_policy">מדיניות פרטיות</string>
     <string name="download_mobile_data">הורד באמצעות נתונים סלולריים</string>
     <string name="gestures">מחוות</string>
-    <string name="player_gestures_vb">מחוות עוצמת שמע ובהירות</string>
     <string name="settings_use_cache_title">מטמון תמונות</string>
     <string name="settings_use_cache_summary">שמור תמונות במטמון כדי להאיץ זמני טעינה. ייכנס לתוקף לאחר הפעלה מחדש של היישומון.</string>
     <string name="mpv_player_summary">השתמש בנגן mpv הניסיוני כדי לנגן וידאו. ל-mpv יש תמיכה ביותר מפענחי וידאו, שמע וכתוביות.</string>
-    <string name="player_gestures_vb_summary">החלק למעלה ולמטה בצידו הימני של המסך כדי לשנות את עוצמת השמע ובצידו השמאלי כדי לשנות את הבהירות</string>
     <string name="player_gestures_zoom_summary">צבוט כדי להציג את הוידאו במסך מלא</string>
     <string name="seek_back_increment">גודל קפיצה אחורה (מילי שניות)</string>
     <string name="dynamic_colors_summary">השתמש בצבעים דינמיים של Material You (זמין רק בגרסת אנדרואיד 12 ומעלה)</string>

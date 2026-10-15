@@ -17,11 +17,9 @@
     <string name="mpv_player">एमपीवी (mpv) प्लेयर</string>
     <string name="download_roaming">रोमिंग के दौरान डाउनलोड करें</string>
     <string name="gestures">इशारे</string>
-    <string name="player_gestures">प्लेयर के इशारे</string>
     <string name="player_gestures_zoom">ज़ूम के इशारे</string>
     <string name="player_gestures_zoom_summary">वीडियो को स्क्रीन में भरने के लिए पिंच करें</string>
     <string name="player_gestures_seek">खोजने (सीक) का इशारा</string>
-    <string name="player_brightness_remember">चमक के स्तर को याद रखें</string>
     <string name="settings_category_network">नेटवर्क</string>
     <string name="settings_category_servers">सर्वर्स</string>
     <string name="settings_use_cache_summary">डिस्क पर इमेजेस कैश (cache) करें ताकि लोडिंग टाइम तेज हो। यह ऐप रीस्टार्ट के बाद प्रभावी होगा।</string>
@@ -30,7 +28,6 @@
     <string name="theme">थीम</string>
     <string name="settings_use_cache_title">कैश (cache) इमेजेस</string>
     <string name="settings_cache_size_message">जेलीफिन सर्वर से छवियों को संग्रहीत करने के लिए ऐप आपके डिस्क की इस एमबी का उपयोग करेगी। धीमे नेटवर्क पर बड़े मान फायदेमंद हो सकता हैं।</string>
-    <string name="player_gestures_vb_summary">स्क्रीन के दाएं हिस्से पर ऊपर और नीचे स्वाइप करके वॉल्यूम बदलें और बाएं हिस्से पर स्वाइप करके चमक बदलें</string>
     <string name="subtitles">उपशीर्षक</string>
     <string name="mpv_player_summary">वीडियो चलाने के लिए प्रयोगात्मक एमपीवी (mpv) प्लेयर का उपयोग करें। एमपीवी में अधिक वीडियो, ऑडियो और सबटाइटल कोडेक्स के लिए समर्थन है।</string>
     <string name="player_gestures_seek_summary">आगे या पीछे खोजने (सीक) के लिए क्षैतिज रूप से स्वाइप करें</string>

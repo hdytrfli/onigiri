@@ -16,7 +16,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
      */
     private val defaultLanguage: String? = runCatching {
         Locale.getDefault().getISO3Language()
-    }.getOrNull()?.takeIf { it != "und" }
+    }
+        .getOrNull()
+        ?.takeIf { it != "und" }
 
     // Server
     val currentServer = Preference<String?>("pref_current_server", null)
@@ -47,6 +49,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Player
     val playerBackend = Preference("pref_player_backend", "exoplayer")
+    val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
     // Player - time display

@@ -23,9 +23,6 @@
     <string name="settings_category_player">Player</string>
     <string name="mpv_player_summary">Benutze den experimentellen MPV-Player. Dieser unterstützt mehr Codecs in Bezug auf sowohl Video, Audio als auch Untertitel.</string>
     <string name="gestures">Gesten</string>
-    <string name="player_gestures">Player-Gesten</string>
-    <string name="player_brightness_remember">Helligkeitsniveau beibehalten</string>
-    <string name="player_gestures_vb_summary">Wische auf der rechten Seite des Bildschirms hoch und runter, um die Lautstärke anzupassen und auf der linken Seite, um die Helligkeit anzupassen</string>
     <string name="seeking">Suchen</string>
     <string name="subtitles">Untertitel</string>
     <string name="subtitles_summary">Untertitel anpassen</string>
@@ -33,7 +30,6 @@
     <string name="theme_dark">Dunkel</string>
     <string name="dynamic_colors">Dynamische Farben</string>
     <string name="dynamic_colors_summary">Dynamische Farben nutzen (ab Android 12 verfügbar)</string>
-    <string name="player_gestures_vb">Lautstärke- und Helligkeits-Gesten</string>
     <string name="player_gestures_zoom">Zoom-Geste</string>
     <string name="player_gestures_zoom_summary">Zwei-Finger-Zoom um das Video an den Bildschirm anzupassen</string>
     <string name="seek_forward_increment">Weiter suchen inkrement</string>

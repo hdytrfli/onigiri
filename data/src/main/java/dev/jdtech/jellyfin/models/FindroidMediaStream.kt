@@ -6,6 +6,8 @@ import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRangeType
 
 data class FindroidMediaStream(
+    val index: Int,
+    val mediaSourceId: String,
     val title: String,
     val displayTitle: String?,
     val language: String,
@@ -20,8 +22,13 @@ data class FindroidMediaStream(
     val videoDoViTitle: String?,
 )
 
-fun MediaStream.toFindroidMediaStream(jellyfinRepository: JellyfinRepository): FindroidMediaStream {
+fun MediaStream.toFindroidMediaStream(
+    jellyfinRepository: JellyfinRepository,
+    mediaSourceId: String,
+): FindroidMediaStream {
     return FindroidMediaStream(
+        index = index,
+        mediaSourceId = mediaSourceId,
         title = title.orEmpty(),
         displayTitle = displayTitle,
         language = language.orEmpty(),
@@ -39,6 +46,9 @@ fun MediaStream.toFindroidMediaStream(jellyfinRepository: JellyfinRepository): F
 
 fun FindroidMediaStreamDto.toFindroidMediaStream(): FindroidMediaStream {
     return FindroidMediaStream(
+        // The stream index is not persisted locally; deleting only happens while online.
+        index = -1,
+        mediaSourceId = sourceId,
         title = title,
         displayTitle = displayTitle,
         language = language,

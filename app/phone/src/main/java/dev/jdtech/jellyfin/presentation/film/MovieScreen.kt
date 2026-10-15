@@ -46,14 +46,15 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
-import dev.jdtech.jellyfin.presentation.film.components.SubtitleSearchAction
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.SubtitleSearchAction
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -70,6 +71,8 @@ fun MovieScreen(
     navigateBack: () -> Unit,
     navigateHome: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
+    navigateToSubtitleSearch: (itemId: UUID) -> Unit,
+    navigateToDownloads: () -> Unit,
     viewModel: MovieViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
@@ -126,6 +129,8 @@ fun MovieScreen(
             viewModel.onAction(action)
         },
         onDownloaderAction = { action -> downloaderViewModel.onAction(action) },
+        onSubtitleSearch = navigateToSubtitleSearch,
+        onNavigateToDownloads = navigateToDownloads,
     )
 }
 
@@ -135,6 +140,8 @@ private fun MovieScreenLayout(
     downloaderState: DownloaderState,
     onAction: (MovieAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
+    onSubtitleSearch: (UUID) -> Unit = {},
+    onNavigateToDownloads: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -221,7 +228,6 @@ private fun MovieScreenLayout(
                     }
                     ItemButtonsBar(
                         item = movie,
-                        downloaderState = downloaderState,
                         onPlayClick = { startFromBeginning ->
                             onAction(MovieAction.Play(startFromBeginning = startFromBeginning))
                         },
@@ -237,17 +243,6 @@ private fun MovieScreenLayout(
                                 false -> onAction(MovieAction.MarkAsFavorite)
                             }
                         },
-                        onTrailerClick = { uri -> onAction(MovieAction.PlayTrailer(uri)) },
-                        onDownloadClick = { storageIndex ->
-                            onDownloaderAction(DownloaderAction.Download(movie, storageIndex))
-                        },
-                        onDownloadCancelClick = {
-                            onDownloaderAction(DownloaderAction.CancelDownload(movie))
-                        },
-                        onDownloadDeleteClick = {
-                            onDownloaderAction(DownloaderAction.DeleteDownload(movie))
-                        },
-                        trailingContent = { SubtitleSearchAction(itemId = movie.id) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
@@ -282,6 +277,29 @@ private fun MovieScreenLayout(
             hasHomeButton = true,
             onBackClick = { onAction(MovieAction.OnBackClick) },
             onHomeClick = { onAction(MovieAction.OnHomeClick) },
+            trailingContent = {
+                state.movie?.let { movie ->
+                    DownloadButton(
+                        item = movie,
+                        downloaderState = downloaderState,
+                        onDownloadClick = { storageIndex ->
+                            onDownloaderAction(DownloaderAction.Download(movie, storageIndex))
+                        },
+                        onCancelDownloadClick = {
+                            onDownloaderAction(DownloaderAction.CancelDownload(movie))
+                        },
+                        onDeleteDownloadClick = {
+                            onDownloaderAction(DownloaderAction.DeleteDownload(movie))
+                        },
+                        onNavigateToDownloads = onNavigateToDownloads,
+                    )
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    SubtitleSearchAction(
+                        itemId = movie.id,
+                        onClick = { onSubtitleSearch(movie.id) },
+                    )
+                }
+            },
         )
     }
 }

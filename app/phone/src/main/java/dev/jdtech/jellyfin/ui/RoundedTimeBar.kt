@@ -154,9 +154,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
         paint.style = Paint.Style.FILL
         paint.color = scrubberColor
-        canvas.drawCircle(playedX, centerY, thickness * 0.9f, paint)
+        // Slightly larger than the track, matching the Compose slider's handle.
+        canvas.drawCircle(playedX, centerY, thickness * HANDLE_RADIUS_FACTOR, paint)
     }
 }
 
 /** How close the player's position must be to the scrub position before we trust it again. */
 private const val SEEK_TOLERANCE_MS = 1_000L
+
+/** Scrubber radius as a fraction of the track thickness (≈10dp handle for an 8dp track). */
+private const val HANDLE_RADIUS_FACTOR = 0.625f

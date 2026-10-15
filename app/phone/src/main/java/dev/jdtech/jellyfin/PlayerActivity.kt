@@ -54,6 +54,7 @@ import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.MediaDetailContent
@@ -61,6 +62,8 @@ import dev.jdtech.jellyfin.presentation.player.MediaDetailHeader
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
+import dev.jdtech.jellyfin.presentation.player.SubtitleOffsetControl
+import dev.jdtech.jellyfin.presentation.player.formatSubtitleOffset
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
@@ -458,6 +461,7 @@ class PlayerActivity : BasePlayerActivity() {
         optionsPanel.layoutParams = optionsPanel.layoutParams.apply { width = sheetWidth }
         val optionsTabs = findViewById<TabLayout>(R.id.player_options_tabs)
         val optionsList = findViewById<ListView>(R.id.player_options_list)
+        val optionsOffset = findViewById<ComposeView>(R.id.player_options_offset)
 
         // Header (backdrop + title + metadata + description) and the tab row scroll with the list,
         // so they don't eat the space left for the audio/subtitle/speed items.
@@ -486,6 +490,22 @@ class PlayerActivity : BasePlayerActivity() {
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_audio))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_subtitles))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_speed))
+        optionsOffset.setContent {
+            FindroidTheme {
+                SubtitleOffsetControl(
+                    enabled = viewModel.player is MPVPlayer,
+                    onDelayChange = { seconds ->
+                        viewModel.setSubtitleDelay(seconds)
+                        showPlayerOverlayMessage(
+                            getString(
+                                R.string.player_subtitle_offset_value,
+                                formatSubtitleOffset(seconds),
+                            )
+                        )
+                    },
+                )
+            }
+        }
         optionsTabs.addOnTabSelectedListener(
             object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab) {
@@ -734,7 +754,6 @@ class PlayerActivity : BasePlayerActivity() {
                 subtitle = null,
                 selected = groups.none { it.isSelected },
                 iconRes = iconRes,
-                iconSquircle = true,
             )
         )
         groups.forEachIndexed { index, group ->
@@ -746,7 +765,6 @@ class PlayerActivity : BasePlayerActivity() {
                     subtitle = format.codecs,
                     selected = group.isSelected,
                     iconRes = iconRes,
-                    iconSquircle = true,
                 )
             )
         }

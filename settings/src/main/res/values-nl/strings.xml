@@ -15,13 +15,9 @@
     <string name="theme_dark">Donker</string>
     <string name="dynamic_colors_summary">Gebruik je eigen dynamische kleuren (alleen beschikbaar op Android 12+)</string>
     <string name="dynamic_colors">Dynamische kleuren</string>
-    <string name="player_gestures_vb">Volume en felheid gebaren</string>
     <string name="player_gestures_zoom">Zoom beweging</string>
-    <string name="player_gestures_vb_summary">Veeg aan de rechterkant van het scherm omhoog en omlaag om het volume te wijzigen en aan de linkerkant om de helderheid te wijzigen</string>
     <string name="player_gestures_zoom_summary">Zoomen om het scherm te vullen met de video</string>
     <string name="gestures">Gebaren</string>
-    <string name="player_gestures">Spelersgebaren</string>
-    <string name="player_brightness_remember">Onthoud felheidsniveau</string>
     <string name="settings_category_network">Netwerk</string>
     <string name="settings_request_timeout">Time-out verzoek</string>
     <string name="settings_connect_timeout">Verbinding time-out</string>

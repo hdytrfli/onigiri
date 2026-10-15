@@ -29,14 +29,10 @@
     <string name="download_mobile_data">Download med mobildata</string>
     <string name="download_roaming">Download ved roaming</string>
     <string name="mpv_player_summary">Brug den eksperimentelle mpv-afspiller til at afspille videoer. mpv understøtter flere codecs til video, lyd og undertekster.</string>
-    <string name="player_gestures_vb_summary">Swipe op og ned i højre side af skærmen for at ændre lydstyrke, og i venstre side for at ændre lysstyrke</string>
-    <string name="player_brightness_remember">Husk lysstyrkeniveau</string>
     <string name="theme_light">Lyst</string>
     <string name="theme_dark">Mørkt</string>
     <string name="settings_category_network">Netværk</string>
     <string name="pref_player_chapter_markers">Kapitelmarkører</string>
-    <string name="player_gestures">Afspillerbevægelser</string>
-    <string name="player_gestures_vb">Bevægelser for lydstyrke og lysstyrke</string>
     <string name="gestures">Bevægelser</string>
     <string name="pref_player_trickplay">Trickplay</string>
     <string name="app_language">App-sprog</string>

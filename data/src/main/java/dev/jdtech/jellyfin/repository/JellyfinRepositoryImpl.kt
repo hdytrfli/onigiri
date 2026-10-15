@@ -63,6 +63,11 @@ class JellyfinRepositoryImpl(
     private val database: ServerDatabaseDao,
     private val appPreferences: AppPreferences,
 ) : JellyfinRepository {
+    // Cached so opening a detail screen doesn't re-fetch the policy every time. Invalidated when
+    // the signed-in user changes.
+    private var cachedUserPolicy: UserPolicy? = null
+    private var cachedUserPolicyUserId: UUID? = null
+
     override suspend fun getPublicSystemInfo(): PublicSystemInfo =
         withContext(Dispatchers.IO) { jellyfinApi.systemApi.getPublicSystemInfo().content }
 
@@ -555,7 +560,17 @@ class JellyfinRepositoryImpl(
         withContext(Dispatchers.IO) { jellyfinApi.userApi.getCurrentUser().content.configuration!! }
 
     override suspend fun getUserPolicy(): UserPolicy? =
-        withContext(Dispatchers.IO) { jellyfinApi.userApi.getCurrentUser().content.policy }
+        withContext(Dispatchers.IO) {
+            val userId = jellyfinApi.userId
+            val cached = cachedUserPolicy
+            if (cached != null && cachedUserPolicyUserId == userId) {
+                return@withContext cached
+            }
+            jellyfinApi.userApi.getCurrentUser().content.policy?.also { policy ->
+                cachedUserPolicy = policy
+                cachedUserPolicyUserId = userId
+            }
+        }
 
     override suspend fun searchRemoteSubtitles(
         itemId: UUID,
@@ -569,8 +584,15 @@ class JellyfinRepositoryImpl(
 
     override suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String) {
         withContext(Dispatchers.IO) {
-            jellyfinApi.subtitleApi.downloadRemoteSubtitles(itemId = itemId, subtitleId = subtitleId)
+            jellyfinApi.subtitleApi.downloadRemoteSubtitles(
+                itemId = itemId,
+                subtitleId = subtitleId,
+            )
         }
+    }
+
+    override suspend fun deleteSubtitle(itemId: UUID, index: Int) {
+        withContext(Dispatchers.IO) { jellyfinApi.subtitleApi.deleteSubtitle(itemId, index) }
     }
 
     override suspend fun getDownloads(): List<FindroidItem> =

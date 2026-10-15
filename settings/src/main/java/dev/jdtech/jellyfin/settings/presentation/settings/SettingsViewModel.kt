@@ -91,6 +91,15 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     optionValues = R.array.languages_values,
                                                     optionsIncludeNull = true,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.always_play_subtitles,
+                                                    descriptionStringRes =
+                                                        R.string.always_play_subtitles_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerAlwaysPlaySubtitles,
+                                                ),
                                             )
                                     ),
                                 ),

@@ -23,6 +23,7 @@ fun CollectionGrid(
     sections: List<CollectionSection>,
     innerPadding: PaddingValues,
     onAction: (CollectionAction) -> Unit,
+    showSectionHeaders: Boolean = true,
 ) {
     LazyVerticalGrid(
         columns = GridCellsAdaptiveWithMinColumns(minSize = 160.dp, minColumns = 2),
@@ -32,18 +33,20 @@ fun CollectionGrid(
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
     ) {
         sections.forEach { section ->
-            stickyHeader {
-                Card {
-                    Text(
-                        text = section.name.asString(),
-                        modifier =
-                            Modifier.padding(
-                                horizontal = MaterialTheme.spacings.medium,
-                                vertical = MaterialTheme.spacings.medium,
-                            ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+            if (showSectionHeaders) {
+                stickyHeader {
+                    Card {
+                        Text(
+                            text = section.name.asString(),
+                            modifier =
+                                Modifier.padding(
+                                    horizontal = MaterialTheme.spacings.medium,
+                                    vertical = MaterialTheme.spacings.medium,
+                                ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                 }
             }
             items(items = section.items, key = { it.id }) { item ->

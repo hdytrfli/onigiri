@@ -10,11 +10,8 @@
     <string name="mpv_player">mpv 플레이어</string>
     <string name="download_roaming">로밍 중에도 다운로드</string>
     <string name="gestures">제스처</string>
-    <string name="player_gestures">플레이어 제스처</string>
-    <string name="player_gestures_vb">볼륨 및 밝기 제스처</string>
     <string name="player_gestures_zoom">줌 제스처</string>
     <string name="player_gestures_zoom_summary">핀치 인으로 화면 채우기</string>
-    <string name="player_brightness_remember">밝기 저장</string>
     <string name="seeking">탐색</string>
     <string name="seek_back_increment">되감기 시간</string>
     <string name="settings_category_download">다운로드</string>
@@ -29,7 +26,6 @@
     <string name="settings_category_servers">서버</string>
     <string name="settings_category_player">플레이어</string>
     <string name="settings_cache_size_message">설정한 용량의 저장공간 용량을 Jellyfin 서버의 이미지 캐시를 저장하는 데 사용합니다. 값이 클수록 느린 네트워크에서 큰 효과가 있습니다.</string>
-    <string name="player_gestures_vb_summary">화면 오른쪽을 위아래로 스와이프하여 볼륨을 변경하고 왼쪽을 스와이프하여 밝기 변경</string>
     <string name="seek_forward_increment">빨리 감기 시간</string>
     <string name="dynamic_colors_summary">Material You 동적 색상 사용(Android 12 이상에서만 사용 가능)</string>
     <string name="settings_use_cache_summary">이미지 캐시를 저장공간에 저장하여 로딩 시간을 단축합니다. 앱을 다시 시작한 후에 적용됩니다.</string>

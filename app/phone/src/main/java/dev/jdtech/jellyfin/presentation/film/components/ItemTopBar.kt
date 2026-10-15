@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -25,6 +26,7 @@ fun ItemTopBar(
     hasHomeButton: Boolean,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
+    trailingContent: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable (RowScope.() -> Unit) = {},
 ) {
     val safePadding = rememberSafePadding()
@@ -68,6 +70,8 @@ fun ItemTopBar(
             }
         }
         content()
+        Spacer(modifier = Modifier.weight(1f))
+        trailingContent?.invoke(this)
     }
 }
 

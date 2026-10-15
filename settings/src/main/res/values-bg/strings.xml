@@ -32,8 +32,6 @@
     <string name="pref_player_mpv_ao">Аудио изход</string>
     <string name="dynamic_colors">Динамични цветове</string>
     <string name="player_gestures_zoom_summary">Щипнете, за да изпълните екрана с видеото</string>
-    <string name="player_brightness_remember">Запомняне на нивото на яркост</string>
-    <string name="player_gestures_vb_summary">Плъзнете нагоре или надолу в дясната част на екрана, за да промените силата на звука, и в лявата част, за да промените яркостта</string>
     <string name="seek_back_increment">Стъпка за превъртане назад</string>
     <string name="pref_player_mpv_vo">Видео изход</string>
     <string name="extra_info_summary">Показва подробна информация за аудио, видео и субтитри</string>
@@ -44,8 +42,6 @@
     <string name="player_gestures_seek">Жест за превъртане</string>
     <string name="player_gestures_seek_summary">Плъзнете хоризонтално, за да превъртите напред или назад</string>
     <string name="app_language">Език на приложението</string>
-    <string name="player_gestures">Жестове в плейъра</string>
-    <string name="player_gestures_vb">Жестове за сила на звука и яркост</string>
     <string name="dynamic_colors_summary">Използване на динамичните цветове на Material You (достъпно само за Android 12+)</string>
     <string name="seek_forward_increment">Стъпка за превъртане напред</string>
     <string name="pref_player_mpv_hwdec">Хардуерно декодиране</string>

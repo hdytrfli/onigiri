@@ -16,11 +16,8 @@
     <string name="mpv_player">mpv плеєр</string>
     <string name="download_roaming">Завантажувати в роумінгу</string>
     <string name="gestures">Жести</string>
-    <string name="player_gestures">Жести програвача</string>
-    <string name="player_gestures_vb">Жести гучності та яскравості</string>
     <string name="player_gestures_zoom_summary">Натисніть, щоб заповнити екран відео</string>
     <string name="player_gestures_seek_summary">Проведіть по горизонталі, щоб перейти вперед або назад</string>
-    <string name="player_brightness_remember">Запам\'ятати рівень яскравості</string>
     <string name="seeking">Пошук (Перемотка)</string>
     <string name="seek_back_increment">Крок пошуку назад</string>
     <string name="amoled_theme">Темна тема AMOLED</string>
@@ -47,7 +44,6 @@
     <string name="mpv_player_summary">Для відтворення відео використовувати експериментальний програвач mpv. mpv підтримує більше відео-, аудіо- та субтитрів.</string>
     <string name="player_gestures_zoom">Жест масштабування</string>
     <string name="player_gestures_seek">Жест перемотування</string>
-    <string name="player_gestures_vb_summary">Проведіть вгору і вниз по правій стороні екрана, щоб змінити гучність, і по лівій стороні, щоб змінити яскравість</string>
     <string name="seek_forward_increment">Крок пошуку вперед</string>
     <string name="dynamic_colors">Динамічні кольори</string>
     <string name="dynamic_colors_summary">Використовувати кольори Material You (доступно лише на Android 12+)</string>

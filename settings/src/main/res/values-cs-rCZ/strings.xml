@@ -26,17 +26,13 @@
     <string name="dynamic_colors_summary">Použit dynamické barvy Material You (dostupné pouze v systému Android 12+)</string>
     <string name="seek_forward_increment">Délka posunout vpřed</string>
     <string name="app_language">Jazyk aplikace</string>
-    <string name="player_gestures_vb">Gesta hlasitosti a jasu obrazovky</string>
     <string name="gestures">Gesta</string>
-    <string name="player_gestures">Gesta přehrávače</string>
     <string name="subtitles">Titulky</string>
     <string name="amoled_theme">Černý motiv AMOLED</string>
     <string name="extra_info">Zobrazit dodatečné informace</string>
     <string name="settings_category_cache">Mezipamět</string>
     <string name="download_mobile_data">Stahovat pomocí mobilních dat</string>
     <string name="download_roaming">Stahování při roamingu</string>
-    <string name="player_gestures_vb_summary">Přejetím nahoru a dolů na pravé straně obrazovky změníte hlasitost a na levé straně změníte jas</string>
-    <string name="player_brightness_remember">Pamatovat si úroveň jasu</string>
     <string name="theme_light">Světlé</string>
     <string name="theme_dark">Tmavé</string>
     <string name="seek_back_increment">Délka posunout zpět</string>

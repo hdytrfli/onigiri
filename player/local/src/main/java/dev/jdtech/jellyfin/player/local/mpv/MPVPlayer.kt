@@ -1607,6 +1607,11 @@ class MPVPlayer(
         }
     }
 
+    /** Shifts subtitle timing by [seconds] (positive = subtitles appear later). */
+    fun setSubtitleDelay(seconds: Double) {
+        mpvLib.setPropertyDouble("sub-delay", seconds)
+    }
+
     private val surfaceHolder: SurfaceHolder.Callback =
         object : SurfaceHolder.Callback {
             /**

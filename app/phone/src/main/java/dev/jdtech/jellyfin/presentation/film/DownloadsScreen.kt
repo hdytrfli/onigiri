@@ -84,7 +84,12 @@ private fun DownloadsScreenLayout(state: CollectionState, onAction: (CollectionA
             }
         }
 
-        CollectionGrid(sections = state.sections, innerPadding = innerPadding, onAction = onAction)
+        CollectionGrid(
+            sections = state.sections,
+            innerPadding = innerPadding,
+            onAction = onAction,
+            showSectionHeaders = false,
+        )
     }
 }
 

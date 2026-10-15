@@ -76,6 +76,7 @@ import dev.jdtech.jellyfin.presentation.film.MovieScreen
 import dev.jdtech.jellyfin.presentation.film.PersonScreen
 import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
+import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
@@ -546,6 +547,11 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { personId ->
                     navigator.navigate(PersonRoute(personId = personId.toString()))
                 },
+            navigateToSubtitleSearch =
+                resumedAction { itemId ->
+                    navigator.navigate(SubtitleSearchRoute(itemId = itemId.toString()))
+                },
+            navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
         )
     }
     entry<ShowRoute> { key ->
@@ -601,6 +607,17 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { seriesId ->
                     navigator.navigateOrReuse(ShowRoute(showId = seriesId.toString()))
                 },
+            navigateToSubtitleSearch =
+                resumedAction { itemId ->
+                    navigator.navigate(SubtitleSearchRoute(itemId = itemId.toString()))
+                },
+            navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
+        )
+    }
+    entry<SubtitleSearchRoute> { key ->
+        SubtitleSearchScreen(
+            itemId = UUID.fromString(key.itemId),
+            navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }
     entry<PersonRoute> { key ->

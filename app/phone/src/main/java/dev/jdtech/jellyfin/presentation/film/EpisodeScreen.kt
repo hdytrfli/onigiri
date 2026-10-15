@@ -48,13 +48,14 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
-import dev.jdtech.jellyfin.presentation.film.components.SubtitleSearchAction
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.SubtitleSearchAction
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -74,6 +75,8 @@ fun EpisodeScreen(
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToSeason: (seasonId: UUID) -> Unit,
     navigateToShow: (seriesId: UUID) -> Unit,
+    navigateToSubtitleSearch: (itemId: UUID) -> Unit,
+    navigateToDownloads: () -> Unit,
     viewModel: EpisodeViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
@@ -126,6 +129,8 @@ fun EpisodeScreen(
             viewModel.onAction(action)
         },
         onDownloaderAction = { action -> downloaderViewModel.onAction(action) },
+        onSubtitleSearch = navigateToSubtitleSearch,
+        onNavigateToDownloads = navigateToDownloads,
     )
 }
 
@@ -135,6 +140,8 @@ private fun EpisodeScreenLayout(
     downloaderState: DownloaderState,
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
+    onSubtitleSearch: (UUID) -> Unit = {},
+    onNavigateToDownloads: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -228,7 +235,6 @@ private fun EpisodeScreenLayout(
                     }
                     ItemButtonsBar(
                         item = episode,
-                        downloaderState = downloaderState,
                         onPlayClick = { startFromBeginning ->
                             onAction(EpisodeAction.Play(startFromBeginning = startFromBeginning))
                         },
@@ -244,17 +250,6 @@ private fun EpisodeScreenLayout(
                                 false -> onAction(EpisodeAction.MarkAsFavorite)
                             }
                         },
-                        onTrailerClick = {},
-                        onDownloadClick = { storageIndex ->
-                            onDownloaderAction(DownloaderAction.Download(episode, storageIndex))
-                        },
-                        onDownloadCancelClick = {
-                            onDownloaderAction(DownloaderAction.CancelDownload(episode))
-                        },
-                        onDownloadDeleteClick = {
-                            onDownloaderAction(DownloaderAction.DeleteDownload(episode))
-                        },
-                        trailingContent = { SubtitleSearchAction(itemId = episode.id) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
@@ -291,46 +286,70 @@ private fun EpisodeScreenLayout(
             hasHomeButton = true,
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
             onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
-        ) {
-            Spacer(modifier = Modifier.width(4.dp))
-            state.episode?.let { episode ->
-                Button(
-                    onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
-                    modifier = Modifier.alpha(0.7f),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = Color.White,
-                        ),
-                ) {
-                    Text(
-                        text = episode.seriesName,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
+            content = {
+                Spacer(modifier = Modifier.width(4.dp))
+                state.episode?.let { episode ->
+                    Button(
+                        onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
+                        modifier = Modifier.alpha(0.7f),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color.Black,
+                                contentColor = Color.White,
+                            ),
+                    ) {
+                        Text(
+                            text = episode.seriesName,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId)) },
+                        modifier = Modifier.alpha(0.7f),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color.Black,
+                                contentColor = Color.White,
+                            ),
+                    ) {
+                        episode.seasonName?.let { seasonName -> Text(seasonName) }
+                            ?: run {
+                                Text(
+                                    stringResource(
+                                        CoreR.string.season_number,
+                                        episode.parentIndexNumber,
+                                    )
+                                )
+                            }
+                    }
+                }
+            },
+            trailingContent = {
+                state.episode?.let { episode ->
+                    DownloadButton(
+                        item = episode,
+                        downloaderState = downloaderState,
+                        onDownloadClick = { storageIndex ->
+                            onDownloaderAction(DownloaderAction.Download(episode, storageIndex))
+                        },
+                        onCancelDownloadClick = {
+                            onDownloaderAction(DownloaderAction.CancelDownload(episode))
+                        },
+                        onDeleteDownloadClick = {
+                            onDownloaderAction(DownloaderAction.DeleteDownload(episode))
+                        },
+                        onNavigateToDownloads = onNavigateToDownloads,
+                    )
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    SubtitleSearchAction(
+                        itemId = episode.id,
+                        onClick = { onSubtitleSearch(episode.id) },
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId)) },
-                    modifier = Modifier.alpha(0.7f),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = Color.White,
-                        ),
-                ) {
-                    episode.seasonName?.let { seasonName -> Text(seasonName) }
-                        ?: run {
-                            Text(
-                                stringResource(
-                                    CoreR.string.season_number,
-                                    episode.parentIndexNumber,
-                                )
-                            )
-                        }
-                }
-            }
-        }
+            },
+        )
     }
 }
 

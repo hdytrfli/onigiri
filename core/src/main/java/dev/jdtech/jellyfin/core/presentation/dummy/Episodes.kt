@@ -30,6 +30,8 @@ val dummyEpisode =
                     mediaStreams =
                         listOf(
                             FindroidMediaStream(
+                                index = 0,
+                                mediaSourceId = "",
                                 title = "",
                                 displayTitle = "",
                                 language = "en",

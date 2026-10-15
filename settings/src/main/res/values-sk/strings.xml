@@ -16,13 +16,10 @@
     <string name="mpv_player">Prehrávač mpv</string>
     <string name="download_roaming">Sťahovať počas roamingu</string>
     <string name="gestures">Gestá</string>
-    <string name="player_gestures">Gestá prehrávača</string>
-    <string name="player_gestures_vb">Gestá hlasitosti a jasu</string>
     <string name="player_gestures_zoom">Gestá priblíženia</string>
     <string name="player_gestures_seek">Navigačné gestá</string>
     <string name="player_gestures_zoom_summary">Odtiahnite 2 prsty od seba pre zväčšenie videa na celú obrazovku</string>
     <string name="player_gestures_seek_summary">Potiahnite prst horizontálne pre navigáciu vo videu</string>
-    <string name="player_brightness_remember">Zapamätať úroveň jasu</string>
     <string name="seeking">Pretáčanie</string>
     <string name="seek_back_increment">Velkosť pretočenia dozadu</string>
     <string name="seek_forward_increment">Velkosť pretočenia dopredu</string>
@@ -46,7 +43,6 @@
     <string name="privacy_policy">Zásady ochrany súkromia</string>
     <string name="download_mobile_data">Sťahovať pomocou mobilných dát</string>
     <string name="mpv_player_summary">Použiť experimentálny prehrávač mpv na prehrávanie videí. Mpv má širšiu podporu audio/video kodekov a formátov titulkov.</string>
-    <string name="player_gestures_vb_summary">Potiahnite prstom hore a dole na pravej strane obrazovky na nastavenie hlasitosti a na ľavej na zmenu jasu</string>
     <string name="dynamic_colors_summary">Použiť dynamické farby Dynamic You (iba pre Android 12+)</string>
     <string name="extra_info">Zobraziť doplnkové informácie</string>
     <string name="extra_info_summary">Zobraziť detailné informácie o zvuku, videu a titulkoch</string>

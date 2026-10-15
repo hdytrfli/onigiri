@@ -18,8 +18,6 @@
     <string name="settings_cache_size_message">L\'app userà questa quantità di MB per salvare le immagini del tuo server Jellyfin. Valori alti potrebbero aiutarti in caso di connessione lenta.</string>
     <string name="mpv_player_summary">Usa il player sperimentale MPV per riprodurre i video. MPV supporta più codec audio, video e sottotitoli.</string>
     <string name="seek_forward_increment">Salta avanti di</string>
-    <string name="player_gestures_vb">Gesti volume e luminosità</string>
-    <string name="player_gestures_vb_summary">Scorri su e giù nel lato destro dello schermo per cambiare il volume, a sinistra per cambiare la luminosità</string>
     <string name="about">Info</string>
     <string name="privacy_policy">Informativa sulla privacy</string>
     <string name="mpv_player">Player MPV</string>
@@ -29,9 +27,7 @@
     <string name="gestures">Gesti</string>
     <string name="player_gestures_zoom">Gesto zoom</string>
     <string name="player_gestures_zoom_summary">Pizzica per riempire lo schermo con il video</string>
-    <string name="player_brightness_remember">Ricorda luminosità</string>
     <string name="seek_back_increment">Riavvolgi di</string>
-    <string name="player_gestures">Gesti player</string>
     <string name="subtitles">Sottotitoli</string>
     <string name="subtitles_summary">Personalizza lo stile dei sottotitoli</string>
     <string name="dynamic_colors">Colori dinamici</string>

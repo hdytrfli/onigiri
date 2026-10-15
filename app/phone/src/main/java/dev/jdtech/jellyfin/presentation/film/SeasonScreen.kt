@@ -163,10 +163,6 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                                 false -> onAction(SeasonAction.MarkAsFavorite)
                             }
                         },
-                        onTrailerClick = {},
-                        onDownloadClick = {},
-                        onDownloadCancelClick = {},
-                        onDownloadDeleteClick = {},
                         modifier =
                             Modifier.padding(start = paddingStart, end = paddingEnd).fillMaxWidth(),
                         canPlay = state.episodes.isNotEmpty(),

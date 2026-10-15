@@ -113,12 +113,26 @@ constructor(
 
     var playbackSpeed: Float = 1f
 
+    /** When on, play any subtitle if none matches the preferred subtitle language. */
+    var alwaysPlaySubtitles: Boolean = false
+
+    /** Subtitle timing offset in seconds (positive = subtitles appear later). */
+    var subtitleDelaySeconds: Float = 0f
+        private set
+
+    fun setSubtitleDelay(seconds: Float) {
+        subtitleDelaySeconds = seconds
+        (player as? MPVPlayer)?.setSubtitleDelay(seconds.toDouble())
+    }
+
     /** The item whose remembered track selection was already applied, so it isn't re-applied. */
     private var appliedSelectionItemId: String? = null
 
     var isInPictureInPictureMode: Boolean = false
 
     init {
+        alwaysPlaySubtitles = appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles)
+
         segmentsSkipButton = appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButton)
         segmentsSkipButtonTypes =
             appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButtonType)
@@ -507,6 +521,39 @@ constructor(
 
     override fun onTracksChanged(tracks: Tracks) {
         applyRememberedTrackSelection(tracks)
+        autoSelectSubtitles(tracks)
+    }
+
+    /**
+     * When "always play subtitles" is on, selects the first available subtitle if none is selected
+     * and the user has no remembered choice for this item.
+     */
+    private fun autoSelectSubtitles(tracks: Tracks) {
+        if (!alwaysPlaySubtitles) return
+        val itemId = currentItemId()
+        val scope = currentTrackScope()
+        if (
+            itemId != null &&
+                scope != null &&
+                trackSelectionStore.getText(scope, itemId) != TrackSelectionStore.UNSET
+        ) {
+            return
+        }
+        val hasSelectedText =
+            tracks.groups.any { group -> group.type == C.TRACK_TYPE_TEXT && group.isSelected }
+        if (hasSelectedText) return
+        val textGroup =
+            tracks.groups.firstOrNull { group ->
+                group.type == C.TRACK_TYPE_TEXT && group.isSupported
+            }
+        if (textGroup != null) {
+            player.trackSelectionParameters =
+                player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                    .setOverrideForType(TrackSelectionOverride(textGroup.mediaTrackGroup, 0))
+                    .build()
+        }
     }
 
     /**

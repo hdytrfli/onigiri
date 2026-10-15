@@ -15,7 +15,6 @@ data class PlayerMenuItem(
     val subtitle: String?,
     val selected: Boolean,
     val iconRes: Int? = null,
-    val iconSquircle: Boolean = false,
 )
 
 class PlayerMenuAdapter(
@@ -60,9 +59,6 @@ class PlayerMenuAdapter(
         } else {
             iconView.visibility = View.VISIBLE
             iconView.setImageResource(item.iconRes)
-            iconView.setBackgroundResource(
-                if (item.iconSquircle) R.drawable.squircle_background else 0
-            )
         }
 
         view.findViewById<ImageView>(R.id.item_check).visibility =

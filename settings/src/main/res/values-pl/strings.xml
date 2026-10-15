@@ -5,7 +5,6 @@
     <string name="settings_cache_size_message">Aplikacja zużyje tyle pamięci urządzenia by przechowywać obrazy z serwera Jellyfin. Większe wartości mogą być korzystne w wolnych sieciach.</string>
     <string name="download_mobile_data">Pobieraj używając danych komórkowych</string>
     <string name="mpv_player_summary">Używaj eksperymentalnego odtwarzacza MPV do odtwarzania wideo. MPV wspiera więcej kodeków wideo, audio i napisów.</string>
-    <string name="player_gestures_vb_summary">Przesuń w górę lub w dół po prawej stronie ekrany by zmienić głośność, po lewej stronie by zmienić jasność</string>
     <string name="settings_category_language">Język</string>
     <string name="settings_preferred_subtitle_language">Preferowany język napisów</string>
     <string name="settings_category_servers">Serwery</string>
@@ -24,9 +23,6 @@
     <string name="mpv_player">Odtwarzacz MPV</string>
     <string name="download_roaming">Pobieraj w roamingu</string>
     <string name="gestures">Gesty</string>
-    <string name="player_gestures">Gesty odtwarzacza</string>
-    <string name="player_brightness_remember">Pamiętaj ustawienia jasności ekranu</string>
-    <string name="player_gestures_vb">Gesty kontroli głośności i jasności ekranu</string>
     <string name="player_gestures_zoom">Gest przybliżenia</string>
     <string name="player_gestures_zoom_summary">Uszczypnij by wypełnić ekran</string>
     <string name="dynamic_colors">Dynamiczne kolory</string>

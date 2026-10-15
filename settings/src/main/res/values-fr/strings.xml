@@ -2,7 +2,6 @@
 <resources>
     <string name="title_settings">Paramètres</string>
     <string name="title_download">Téléchargements</string>
-    <string name="player_brightness_remember">Enregistrer la luminosité</string>
     <string name="settings_category_language">Langue</string>
     <string name="settings_preferred_audio_language">Langue audio préférée</string>
     <string name="settings_preferred_subtitle_language">Langue de sous-titres préférée</string>
@@ -18,15 +17,12 @@
     <string name="privacy_policy">Politique de confidentialité</string>
     <string name="mpv_player_summary">Utiliser le lecteur expérimental mpv. Ce lecteur supporte davantage de codecs vidéo, audio et sous-titres.</string>
     <string name="gestures">Gestes</string>
-    <string name="player_gestures">Gestes du lecteur</string>
-    <string name="player_gestures_vb_summary">Glisser vers le haut et le bas sur le côté droit de l\'écran pour modifier le volume et sur le côté gauche de l\'écran pour modifier la luminosité</string>
     <string name="settings_category_cache">Cache</string>
     <string name="settings_use_cache_title">Sauvegarder les images dans le cache</string>
     <string name="settings_use_cache_summary">Sauvegarder les images dans le cache sur votre appareil pour accélérer les chargements. Prendra effet après un redémarrage de l\'application.</string>
     <string name="settings_cache_size">Taille du cache</string>
     <string name="settings_cache_size_message">L\'application utilisera cette taille en Mo pour stocker les images de votre serveur Jellyfin sur votre appareil. Allouer un plus grand espace peut être bénéfique si votre réseau est lent.</string>
     <string name="download_roaming">Télécharger en itinérance</string>
-    <string name="player_gestures_vb">Gestes de volume et luminosité</string>
     <string name="player_gestures_zoom">Geste de zoom</string>
     <string name="player_gestures_zoom_summary">Pincer pour remplir l\'écran avec la vidéo</string>
     <string name="seeking">Recherche</string>

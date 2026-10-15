@@ -187,11 +187,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/player_options_offset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/player_options_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:tabGravity="fill"
+                app:tabIndicatorFullWidth="false"
                 app:tabMode="fixed"
                 app:tabSelectedTextColor="@android:color/white"
                 app:tabTextColor="#B3FFFFFF" />

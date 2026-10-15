@@ -14,12 +14,9 @@
     <string name="mpv_player">mpv player</string>
     <string name="download_roaming">Prenos med gostovanjem prenosnih podatkov</string>
     <string name="gestures">Gibi</string>
-    <string name="player_gestures">Gibi predvajalnika videov</string>
-    <string name="player_gestures_vb">Gibi za glasnost in svetlost</string>
     <string name="player_gestures_zoom">Gibi povečave</string>
     <string name="player_gestures_zoom_summary">Stisnite, da zaslon zapolnite z videoposnetkom</string>
     <string name="player_gestures_seek_summary">Povlecite vodoravno za premik naprej ali nazaj</string>
-    <string name="player_brightness_remember">Zapomni si stopnjo svetlosti</string>
     <string name="player_gestures_seek">Gibi za iskanje</string>
     <string name="seeking">iskanje</string>
     <string name="seek_back_increment">Iskanja nazaj</string>
@@ -46,7 +43,6 @@
     <string name="theme">Tema</string>
     <string name="download_mobile_data">Prenos preko mobilnih podatkov</string>
     <string name="mpv_player_summary">Za predvajanje videoposnetkov uporabite poskusni predvajalnik mpv player. mpv podpora več kodekov za video, zvok in podnapise.</string>
-    <string name="player_gestures_vb_summary">Povlecite gor in dol na desni strani zaslona, da spremenite glasnost, in na levi strani, da spremenite svetlost</string>
     <string name="settings_connect_timeout">Časovna omejitev povezave</string>
     <string name="offline_mode">Način brez povezave</string>
     <string name="extra_info">Prikaži dodatne informacije</string>

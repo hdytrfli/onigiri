@@ -318,6 +318,8 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String) = Unit
 
+    override suspend fun deleteSubtitle(itemId: UUID, index: Int) = Unit
+
     override suspend fun getDownloads(): List<FindroidItem> =
         withContext(Dispatchers.IO) {
             val items = mutableListOf<FindroidItem>()

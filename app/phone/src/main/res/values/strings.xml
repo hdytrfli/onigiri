@@ -6,6 +6,13 @@
     <string name="player_menu_tab_audio">Audio</string>
     <string name="player_menu_tab_subtitles">Subtitles</string>
     <string name="player_menu_tab_speed">Speed</string>
+    <string name="player_menu_tab_offset">Offset</string>
+    <string name="player_subtitle_offset">Subtitle offset</string>
+    <string name="player_subtitle_offset_value">Subtitle offset: %1$s</string>
+    <string name="player_subtitle_offset_reset">Reset subtitle offset</string>
+    <string name="player_subtitle_offset_unavailable">Subtitle offset is only available with the mpv player backend</string>
+    <string name="player_subtitle_delay_earlier">Subtitles earlier</string>
+    <string name="player_subtitle_delay_later">Subtitles later</string>
     <string name="player_time_finished_at">finished at %1$s</string>
     <string name="player_time_finished_in">finished in %1$d mins</string>
     <string name="refresh">Refresh</string>

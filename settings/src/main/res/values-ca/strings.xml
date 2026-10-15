@@ -22,12 +22,8 @@
     <string name="pref_player_mpv_vo">Sortida de vídeo</string>
     <string name="pref_player_mpv_ao">Sortida d\'àudio</string>
     <string name="gestures">Gestos</string>
-    <string name="player_gestures">Gestos del reproductor</string>
-    <string name="player_gestures_vb">Gestos de volum i brillantor</string>
     <string name="player_gestures_zoom">Gestos de zoom</string>
-    <string name="player_gestures_vb_summary">Llisca amunt i avall a la part dreta de la pantalla per canviar el volum i a l\'esquerra per canviar la brillantor</string>
     <string name="title_download">Baixades</string>
     <string name="download_mobile_data">Descarrega amb dades mòbils</string>
-    <string name="player_brightness_remember">Recorda el nivell de brillantor</string>
     <string name="none">Cap</string>
 </resources>

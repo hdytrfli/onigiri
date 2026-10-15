@@ -9,7 +9,6 @@
     <string name="theme">Tema</string>
     <string name="settings_category_device">Cihaz</string>
     <string name="about">Hakkında</string>
-    <string name="player_brightness_remember">Parlaklık seviyesini hatırla</string>
     <string name="settings_category_servers">Sunucular</string>
     <string name="subtitles">Altyazılar</string>
     <string name="settings_preferred_subtitle_language">Tercih edilen altyazı dili</string>
@@ -29,8 +28,6 @@
     <string name="subtitles_summary">Altyazıların görünümünü özelleştir</string>
     <string name="settings_category_network">Ağ</string>
     <string name="settings_cache_size">Önbellek boyutu</string>
-    <string name="player_gestures">Oynatıcı hareketleri</string>
-    <string name="player_gestures_vb">Ses ve parlaklık hareketleri</string>
     <string name="settings_category_interface">Arayüz</string>
     <string name="settings_use_cache_summary">Yükleme sürelerini hızlandırmak için resimleri diske önbelleğe alın. Uygulama yeniden başlatıldıktan sonra etkili olacaktır.</string>
     <string name="settings_cache_size_message">Uygulama, Jellyfin sunucusundan gelen görüntüleri depolamak için disk alanınızın bu miktarını MB kullanacaktır. Daha büyük değerler, daha yavaş ağlarda faydalı olabilir.</string>
@@ -52,7 +49,6 @@
     <string name="mpv_player_summary">Videoları oynatmak için deneysel mpv oynatıcısını kullanın. mpv daha fazla video, ses ve altyazı kedeğini destekler.</string>
     <string name="player_gestures_seek">İleri/geri sarma hareketi</string>
     <string name="player_gestures_chapter_skip">Bölüm hareketi</string>
-    <string name="player_gestures_vb_summary">Ekranın sağ ve sol tarafında aşağı yükarı kaydırarak ekran parlaklığı ve ses seviyenini kontrol ediniz</string>
     <string name="player_gestures_zoom_summary">Videoyu ekrana doldurmak için iki parmağınızla yakınlaştırın</string>
     <string name="player_gestures_chapter_skip_summary">Sağ/Sol tarafa basılı tutarak bölüm (başlık) atlayın (2x hız özelliğini geçersiz kılar)</string>
     <string name="player_gestures_seek_summary">Yatay hareketle ileri veya geri kaydırın</string>

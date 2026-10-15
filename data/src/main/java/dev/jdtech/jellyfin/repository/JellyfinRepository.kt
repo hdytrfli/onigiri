@@ -127,6 +127,9 @@ interface JellyfinRepository {
     /** Asks the server to download and attach the remote subtitle [subtitleId] to [itemId]. */
     suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String)
 
+    /** Deletes the external subtitle stream [index] attached to [itemId]. */
+    suspend fun deleteSubtitle(itemId: UUID, index: Int)
+
     suspend fun getDownloads(): List<FindroidItem>
 
     fun getUserId(): UUID
