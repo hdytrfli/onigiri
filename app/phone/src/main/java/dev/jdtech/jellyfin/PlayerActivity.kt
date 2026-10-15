@@ -467,6 +467,7 @@ class PlayerActivity : BasePlayerActivity() {
         // so they don't eat the space left for the audio/subtitle/speed items.
         val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
         optionsList.addScrollableHeader(optionsHeaderComposeView)
+        optionsList.addScrollableHeader(optionsOffset)
         optionsList.addScrollableHeader(optionsTabs)
         setMediaHeaderContent(optionsHeaderComposeView)
 
