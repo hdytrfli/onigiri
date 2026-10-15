@@ -62,7 +62,8 @@ fun SubtitleOffsetControl(
     }
 
     Column(
-        modifier = modifier.fillMaxWidth().padding(MaterialTheme.spacings.default),
+        modifier =
+            modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
     ) {
@@ -117,7 +118,7 @@ fun SubtitleOffsetControl(
         }
         Text(
             text = stringResource(R.string.player_subtitle_offset_disclaimer),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
         )

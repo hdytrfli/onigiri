@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
 import android.util.AttributeSet
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
@@ -150,8 +152,16 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
 
         if (playedFraction > 0f) {
+            // Rounded on the left, flat on the right (where it meets the handle).
             paint.color = playedColor
-            canvas.drawLine(trackStart, centerY, playedX, centerY, paint)
+            paint.style = Paint.Style.FILL
+            val radius = thickness / 2f
+            val rect = RectF(trackStart, centerY - radius, playedX, centerY + radius)
+            val radii = floatArrayOf(radius, radius, 0f, 0f, 0f, 0f, radius, radius)
+            val path = Path()
+            path.addRoundRect(rect, radii, Path.Direction.CW)
+            canvas.drawPath(path, paint)
+            paint.style = Paint.Style.STROKE
         }
 
         paint.style = Paint.Style.STROKE
