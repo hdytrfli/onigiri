@@ -8,6 +8,7 @@
     <string name="player_menu_tab_speed">Speed</string>
     <string name="player_menu_tab_offset">Offset</string>
     <string name="player_subtitle_offset">Subtitle offset</string>
+    <string name="player_subtitle_offset_by">Offsetting subtitle by</string>
     <string name="player_subtitle_offset_value">Offset subtitle by %1$s</string>
     <string name="player_subtitle_offset_reset">Reset subtitle offset</string>
     <string name="player_subtitle_offset_disclaimer">Applies on this device only. Remembered between plays, but not saved to the server.</string>

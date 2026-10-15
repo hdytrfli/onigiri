@@ -69,12 +69,12 @@ fun SubtitleOffsetControl(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         ) {
             Text(
-                text = stringResource(R.string.player_subtitle_offset),
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
-                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.player_subtitle_offset_by),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = formatSubtitleOffset(delaySeconds),

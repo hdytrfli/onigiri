@@ -491,10 +491,6 @@ class PlayerActivity : BasePlayerActivity() {
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_subtitles))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_offset))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_speed))
-        optionsTabs.getTabAt(2)?.setCustomView(R.layout.tab_player_offset)
-        val offsetTabValue =
-            optionsTabs.getTabAt(2)?.customView?.findViewById<TextView>(R.id.tab_offset_value)
-        offsetTabValue?.text = formatSubtitleOffset(viewModel.subtitleDelaySeconds)
         val offsetTabSelected = androidx.compose.runtime.mutableStateOf(false)
         optionsOffset.setContent {
             FindroidTheme {
@@ -503,7 +499,6 @@ class PlayerActivity : BasePlayerActivity() {
                         initialDelaySeconds = viewModel.subtitleDelaySeconds,
                         onDelayChange = { seconds ->
                             viewModel.setSubtitleDelay(seconds)
-                            offsetTabValue?.text = formatSubtitleOffset(seconds)
                             showPlayerOverlayMessage(
                                 getString(
                                     R.string.player_subtitle_offset_value,
