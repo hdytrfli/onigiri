@@ -54,7 +54,6 @@ import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidEpisode
-import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
 import dev.jdtech.jellyfin.presentation.player.MediaDetailContent
@@ -503,7 +502,6 @@ class PlayerActivity : BasePlayerActivity() {
             FindroidTheme {
                 if (subtitleSelected.value) {
                     SubtitleOffsetControl(
-                        enabled = viewModel.player is MPVPlayer,
                         initialDelaySeconds = viewModel.subtitleDelaySeconds,
                         onDelayChange = { seconds ->
                             viewModel.setSubtitleDelay(seconds)

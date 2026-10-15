@@ -58,7 +58,7 @@ constructor(
     private val trackSelectionStore: TrackSelectionStore,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel(), Player.Listener {
-    val player: Player
+    val player: MPVPlayer
 
     private val _uiState =
         MutableStateFlow(
@@ -118,7 +118,7 @@ constructor(
 
     fun setSubtitleDelay(seconds: Float) {
         subtitleDelaySeconds = seconds
-        (player as? MPVPlayer)?.setSubtitleDelay(seconds.toDouble())
+        player.setSubtitleDelay(seconds.toDouble())
         val itemId = currentItemId()
         val scope = currentTrackScope()
         if (itemId != null && scope != null) {
@@ -133,7 +133,7 @@ constructor(
         val offset = trackSelectionStore.getSubtitleOffset(scope, itemId)
         if (offset.isNaN()) return
         subtitleDelaySeconds = offset
-        (player as? MPVPlayer)?.setSubtitleDelay(offset.toDouble())
+        player.setSubtitleDelay(offset.toDouble())
     }
 
     /** The item whose remembered track selection was already applied, so it isn't re-applied. */
@@ -382,7 +382,7 @@ constructor(
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
         appliedSelectionItemId = null
         subtitleDelaySeconds = 0f
-        (player as? MPVPlayer)?.setSubtitleDelay(0.0)
+        player.setSubtitleDelay(0.0)
         applyRememberedSubtitleOffset()
         savedStateHandle["mediaItemIndex"] = player.currentMediaItemIndex
         viewModelScope.launch {

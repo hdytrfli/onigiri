@@ -49,7 +49,6 @@ private const val STEP_SECONDS = 0.1f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubtitleOffsetControl(
-    enabled: Boolean,
     initialDelaySeconds: Float,
     onDelayChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
@@ -96,7 +95,6 @@ fun SubtitleOffsetControl(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         ) {
             HoldRepeatIcon(
-                enabled = enabled,
                 iconRes = CoreR.drawable.ic_minus_fat,
                 contentDescription = stringResource(R.string.player_subtitle_delay_earlier),
                 onStep = { update(delaySeconds - STEP_SECONDS) },
@@ -105,7 +103,6 @@ fun SubtitleOffsetControl(
                 value = delaySeconds,
                 onValueChange = { update(it) },
                 valueRange = -MAX_OFFSET_SECONDS..MAX_OFFSET_SECONDS,
-                enabled = enabled,
                 colors = sliderColors(),
                 thumb = {
                     Box(
@@ -126,12 +123,11 @@ fun SubtitleOffsetControl(
                 modifier = Modifier.weight(1f),
             )
             HoldRepeatIcon(
-                enabled = enabled,
                 iconRes = CoreR.drawable.ic_plus,
                 contentDescription = stringResource(R.string.player_subtitle_delay_later),
                 onStep = { update(delaySeconds + STEP_SECONDS) },
             )
-            ResetIcon(enabled = enabled, onClick = { update(0f) })
+            ResetIcon(onClick = { update(0f) })
         }
         Text(
             text = stringResource(R.string.player_subtitle_offset_disclaimer),
@@ -139,20 +135,12 @@ fun SubtitleOffsetControl(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
         )
-        if (!enabled) {
-            Text(
-                text = stringResource(R.string.player_subtitle_offset_unavailable),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
     }
 }
 
 /** An icon that fires [onStep] repeatedly while held, accelerating over time. */
 @Composable
 private fun HoldRepeatIcon(
-    enabled: Boolean,
     iconRes: Int,
     contentDescription: String,
     onStep: () -> Unit,
@@ -171,8 +159,7 @@ private fun HoldRepeatIcon(
 
     Box(
         modifier =
-            Modifier.size(32.dp).pointerInput(enabled) {
-                if (!enabled) return@pointerInput
+            Modifier.size(32.dp).pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
                         pressed = true
@@ -187,27 +174,23 @@ private fun HoldRepeatIcon(
             painter = painterResource(iconRes),
             contentDescription = contentDescription,
             modifier = Modifier.size(20.dp),
-            tint =
-                if (enabled) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
 
 /** A 20dp icon (matching the track rows) that resets the offset to zero. */
 @Composable
-private fun ResetIcon(enabled: Boolean, onClick: () -> Unit) {
+private fun ResetIcon(onClick: () -> Unit) {
     Box(
-        modifier = Modifier.size(32.dp).clickable(enabled = enabled, onClick = onClick),
+        modifier = Modifier.size(32.dp).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = painterResource(CoreR.drawable.ic_rotate_ccw),
             contentDescription = stringResource(R.string.player_subtitle_offset_reset),
             modifier = Modifier.size(20.dp),
-            tint =
-                if (enabled) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

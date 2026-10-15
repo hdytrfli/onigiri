@@ -20,7 +20,6 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import androidx.core.view.isVisible
-import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.load
 import coil3.request.crossfade
@@ -477,13 +476,7 @@ class PlayerGestureHelper(
     }
 
     fun updateZoomMode(enabled: Boolean) {
-        if (playerView.player is MPVPlayer) {
-            (playerView.player as MPVPlayer).updateZoomMode(enabled)
-        } else {
-            playerView.resizeMode =
-                if (enabled) AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                else AspectRatioFrameLayout.RESIZE_MODE_FIT
-        }
+        (playerView.player as? MPVPlayer)?.updateZoomMode(enabled)
         isZoomEnabled = enabled
     }
 
