@@ -467,6 +467,7 @@ class PlayerActivity : BasePlayerActivity() {
         val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
         optionsList.addScrollableHeader(optionsHeaderComposeView)
         optionsList.addScrollableHeader(optionsTabs)
+        optionsList.addScrollableHeader(optionsOffset)
         setMediaHeaderContent(optionsHeaderComposeView)
 
         lateinit var menuAdapter: PlayerMenuAdapter
@@ -475,7 +476,7 @@ class PlayerActivity : BasePlayerActivity() {
                 when (optionsTabs.selectedTabPosition) {
                     0 -> viewModel.switchToTrack(C.TRACK_TYPE_AUDIO, position - 1)
                     1 -> viewModel.switchToTrack(C.TRACK_TYPE_TEXT, position - 1)
-                    else -> viewModel.selectSpeed(playerSpeeds[position])
+                    3 -> viewModel.selectSpeed(playerSpeeds[position])
                 }
                 // Keep the sheet open so several changes can be made in a row. Reflect the choice
                 // immediately, then resync with the player once it has applied the change.
@@ -488,23 +489,21 @@ class PlayerActivity : BasePlayerActivity() {
         optionsList.adapter = menuAdapter
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_audio))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_subtitles))
+        optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_offset))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_speed))
-        val subtitleSelected = androidx.compose.runtime.mutableStateOf(false)
-        viewModel.player.addListener(
-            object : androidx.media3.common.Player.Listener {
-                override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
-                    subtitleSelected.value =
-                        tracks.groups.any { it.type == C.TRACK_TYPE_TEXT && it.isSelected }
-                }
-            }
-        )
+        optionsTabs.getTabAt(2)?.setCustomView(R.layout.tab_player_offset)
+        val offsetTabValue =
+            optionsTabs.getTabAt(2)?.customView?.findViewById<TextView>(R.id.tab_offset_value)
+        offsetTabValue?.text = formatSubtitleOffset(viewModel.subtitleDelaySeconds)
+        val offsetTabSelected = androidx.compose.runtime.mutableStateOf(false)
         optionsOffset.setContent {
             FindroidTheme {
-                if (subtitleSelected.value) {
+                if (offsetTabSelected.value) {
                     SubtitleOffsetControl(
                         initialDelaySeconds = viewModel.subtitleDelaySeconds,
                         onDelayChange = { seconds ->
                             viewModel.setSubtitleDelay(seconds)
+                            offsetTabValue?.text = formatSubtitleOffset(seconds)
                             showPlayerOverlayMessage(
                                 getString(
                                     R.string.player_subtitle_offset_value,
@@ -519,6 +518,7 @@ class PlayerActivity : BasePlayerActivity() {
         optionsTabs.addOnTabSelectedListener(
             object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab) {
+                    offsetTabSelected.value = tab.position == 2
                     menuAdapter.submit(optionsItems(tab.position))
                 }
 
@@ -742,7 +742,7 @@ class PlayerActivity : BasePlayerActivity() {
         when (tab) {
             0 -> trackItems(C.TRACK_TYPE_AUDIO, CoreR.drawable.ic_music)
             1 -> trackItems(C.TRACK_TYPE_TEXT, CoreR.drawable.ic_case_sensitive)
-            else ->
+            3 ->
                 playerSpeeds.mapIndexed { index, speed ->
                     PlayerMenuItem(
                         title = playerSpeedTexts[index],
@@ -751,6 +751,7 @@ class PlayerActivity : BasePlayerActivity() {
                         iconRes = CoreR.drawable.ic_gauge,
                     )
                 }
+            else -> emptyList()
         }
 
     private fun trackItems(type: @C.TrackType Int, iconRes: Int): List<PlayerMenuItem> {
