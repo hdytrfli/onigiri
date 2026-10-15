@@ -187,11 +187,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <androidx.compose.ui.platform.ComposeView
-                android:id="@+id/player_options_offset"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/player_options_tabs"
                 android:layout_width="match_parent"
@@ -205,10 +200,16 @@
             <ListView
                 android:id="@+id/player_options_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:divider="@null"
                 android:dividerHeight="0dp"
                 android:scrollbars="none" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/player_options_offset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </FrameLayout>
 

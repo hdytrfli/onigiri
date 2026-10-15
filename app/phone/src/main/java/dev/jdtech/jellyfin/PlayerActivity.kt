@@ -468,7 +468,6 @@ class PlayerActivity : BasePlayerActivity() {
         val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
         optionsList.addScrollableHeader(optionsHeaderComposeView)
         optionsList.addScrollableHeader(optionsTabs)
-        optionsList.addScrollableHeader(optionsOffset)
         setMediaHeaderContent(optionsHeaderComposeView)
 
         lateinit var menuAdapter: PlayerMenuAdapter
