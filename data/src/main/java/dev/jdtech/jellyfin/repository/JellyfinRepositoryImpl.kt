@@ -41,6 +41,8 @@ import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.ItemFilter
 import org.jellyfin.sdk.model.api.ItemSortBy
 import org.jellyfin.sdk.model.api.MediaType
+import org.jellyfin.sdk.model.api.MovieInfo
+import org.jellyfin.sdk.model.api.MovieInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.PlayMethod
 import org.jellyfin.sdk.model.api.PlaybackInfoDto
 import org.jellyfin.sdk.model.api.PlaybackOrder
@@ -48,6 +50,7 @@ import org.jellyfin.sdk.model.api.PlaybackProgressInfo
 import org.jellyfin.sdk.model.api.PlaybackStartInfo
 import org.jellyfin.sdk.model.api.PlaybackStopInfo
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.RepeatMode
 import org.jellyfin.sdk.model.api.SortOrder as ItemSortOrder
@@ -593,6 +596,46 @@ class JellyfinRepositoryImpl(
 
     override suspend fun deleteSubtitle(itemId: UUID, index: Int) {
         withContext(Dispatchers.IO) { jellyfinApi.subtitleApi.deleteSubtitle(itemId, index) }
+    }
+
+    override suspend fun searchRemoteMovies(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+    ): List<RemoteSearchResult> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi
+                .getMovieRemoteSearchResults(
+                    MovieInfoRemoteSearchQuery(
+                        MovieInfo(
+                            name,
+                            null,
+                            null,
+                            null,
+                            null,
+                            emptyMap(),
+                            year,
+                            null,
+                            null,
+                            null,
+                            false,
+                        ),
+                        itemId,
+                        null,
+                        false,
+                    )
+                )
+                .content
+        }
+
+    override suspend fun applyRemoteSearchResult(
+        itemId: UUID,
+        result: RemoteSearchResult,
+        replaceAllImages: Boolean,
+    ) {
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi.applySearchCriteria(itemId, replaceAllImages, result)
+        }
     }
 
     override suspend fun getDownloads(): List<FindroidItem> =

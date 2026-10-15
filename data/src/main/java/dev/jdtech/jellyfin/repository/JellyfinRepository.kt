@@ -18,6 +18,7 @@ import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
@@ -129,6 +130,16 @@ interface JellyfinRepository {
 
     /** Deletes the external subtitle stream [index] attached to [itemId]. */
     suspend fun deleteSubtitle(itemId: UUID, index: Int)
+
+    /** Searches remote metadata providers for movies matching [name] (optionally [year]). */
+    suspend fun searchRemoteMovies(itemId: UUID, name: String, year: Int?): List<RemoteSearchResult>
+
+    /** Applies the chosen remote search [result] to [itemId], replacing its metadata. */
+    suspend fun applyRemoteSearchResult(
+        itemId: UUID,
+        result: RemoteSearchResult,
+        replaceAllImages: Boolean = true,
+    )
 
     suspend fun getDownloads(): List<FindroidItem>
 

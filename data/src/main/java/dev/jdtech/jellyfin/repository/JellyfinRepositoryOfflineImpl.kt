@@ -31,6 +31,7 @@ import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
@@ -319,6 +320,18 @@ class JellyfinRepositoryOfflineImpl(
     override suspend fun downloadRemoteSubtitle(itemId: UUID, subtitleId: String) = Unit
 
     override suspend fun deleteSubtitle(itemId: UUID, index: Int) = Unit
+
+    override suspend fun searchRemoteMovies(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+    ): List<RemoteSearchResult> = emptyList()
+
+    override suspend fun applyRemoteSearchResult(
+        itemId: UUID,
+        result: RemoteSearchResult,
+        replaceAllImages: Boolean,
+    ) = Unit
 
     override suspend fun getDownloads(): List<FindroidItem> =
         withContext(Dispatchers.IO) {

@@ -131,5 +131,14 @@
     <string name="subtitle_machine_translated">Machine translated</string>
     <string name="subtitle_details">Details</string>
     <string name="subtitle_comment">Comment</string>
+    <string name="identify">Identify</string>
+    <string name="identify_search_hint">Title</string>
+    <string name="identify_year_hint">Year (optional)</string>
+    <string name="identify_year">Year</string>
+    <string name="identify_source">Source</string>
+    <string name="identify_providers">Provider IDs</string>
+    <string name="identify_overview">Overview</string>
+    <string name="identify_error">Couldn\'t search remote providers</string>
+    <string name="identify_empty">No results found</string>
     <string name="downloading_at">Downloading at %1$d%%</string>
 </resources>

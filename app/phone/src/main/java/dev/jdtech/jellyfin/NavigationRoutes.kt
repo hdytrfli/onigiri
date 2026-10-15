@@ -46,6 +46,8 @@ data class CollectionRoute(val collectionId: String, val collectionName: String)
 
 @Serializable data class SubtitleSearchRoute(val itemId: String) : NavKey
 
+@Serializable data class IdentifyRoute(val itemId: String) : NavKey
+
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey
 
 @Serializable data class SettingsFileEditRoute(val filePath: String) : NavKey

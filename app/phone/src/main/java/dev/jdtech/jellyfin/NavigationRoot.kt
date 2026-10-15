@@ -70,6 +70,7 @@ import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
 import dev.jdtech.jellyfin.presentation.film.EpisodeScreen
 import dev.jdtech.jellyfin.presentation.film.FavoritesScreen
 import dev.jdtech.jellyfin.presentation.film.HomeScreen
+import dev.jdtech.jellyfin.presentation.film.IdentifyScreen
 import dev.jdtech.jellyfin.presentation.film.LibraryScreen
 import dev.jdtech.jellyfin.presentation.film.MediaScreen
 import dev.jdtech.jellyfin.presentation.film.MovieScreen
@@ -551,6 +552,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { itemId ->
                     navigator.navigate(SubtitleSearchRoute(itemId = itemId.toString()))
                 },
+            navigateToIdentify =
+                resumedAction { itemId ->
+                    navigator.navigate(IdentifyRoute(itemId = itemId.toString()))
+                },
             navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
         )
     }
@@ -616,6 +621,12 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     }
     entry<SubtitleSearchRoute> { key ->
         SubtitleSearchScreen(
+            itemId = UUID.fromString(key.itemId),
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+        )
+    }
+    entry<IdentifyRoute> { key ->
+        IdentifyScreen(
             itemId = UUID.fromString(key.itemId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )

@@ -48,6 +48,7 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -72,6 +73,7 @@ fun MovieScreen(
     navigateHome: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToSubtitleSearch: (itemId: UUID) -> Unit,
+    navigateToIdentify: (itemId: UUID) -> Unit,
     navigateToDownloads: () -> Unit,
     viewModel: MovieViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
@@ -130,6 +132,7 @@ fun MovieScreen(
         },
         onDownloaderAction = { action -> downloaderViewModel.onAction(action) },
         onSubtitleSearch = navigateToSubtitleSearch,
+        onIdentify = navigateToIdentify,
         onNavigateToDownloads = navigateToDownloads,
     )
 }
@@ -141,6 +144,7 @@ private fun MovieScreenLayout(
     onAction: (MovieAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
     onSubtitleSearch: (UUID) -> Unit = {},
+    onIdentify: (UUID) -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
@@ -298,6 +302,8 @@ private fun MovieScreenLayout(
                         itemId = movie.id,
                         onClick = { onSubtitleSearch(movie.id) },
                     )
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    IdentifyAction(itemId = movie.id, onClick = { onIdentify(movie.id) })
                 }
             },
         )
