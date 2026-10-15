@@ -795,6 +795,7 @@ class PlayerActivity : BasePlayerActivity() {
         }
         scrim.alpha = 0f
         scrim.animate().alpha(1f).setDuration(200L).start()
+        fadePlayerControls(show = false)
     }
 
     private fun hideOptionsSheet(overlay: View, panel: View, scrim: View) {
@@ -805,6 +806,27 @@ class PlayerActivity : BasePlayerActivity() {
             .withEndAction { overlay.visibility = View.GONE }
             .start()
         scrim.animate().alpha(0f).setDuration(200L).start()
+        fadePlayerControls(show = true)
+    }
+
+    /**
+     * Eases the player overlay (title, seek bar, buttons) out while a sheet is open, and back in.
+     */
+    private fun fadePlayerControls(show: Boolean) {
+        val controller = binding.playerView.findViewById<View>(R.id.exo_controller) ?: return
+        controller.animate().cancel()
+        if (show) {
+            binding.playerView.showController()
+            controller.alpha = 0f
+            controller.animate().alpha(1f).setDuration(200L).start()
+        } else {
+            controller
+                .animate()
+                .alpha(0f)
+                .setDuration(200L)
+                .withEndAction { binding.playerView.hideController() }
+                .start()
+        }
     }
 
     /**
