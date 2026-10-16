@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.ImageInfo
+import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
@@ -339,6 +341,25 @@ class JellyfinRepositoryOfflineImpl(
         itemId: UUID,
         result: RemoteSearchResult,
         replaceAllImages: Boolean,
+    ) = Unit
+
+    override suspend fun getItemImages(itemId: UUID): List<ImageInfo> = emptyList()
+
+    override suspend fun uploadItemImage(
+        itemId: UUID,
+        type: ImageType,
+        index: Int?,
+        content: ByteArray,
+        mediaType: String,
+    ) = Unit
+
+    override suspend fun deleteItemImage(itemId: UUID, type: ImageType, index: Int?) = Unit
+
+    override suspend fun updateItemImageIndex(
+        itemId: UUID,
+        type: ImageType,
+        oldIndex: Int,
+        newIndex: Int,
     ) = Unit
 
     override suspend fun getDownloads(): List<FindroidItem> =

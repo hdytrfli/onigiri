@@ -16,6 +16,8 @@ import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.ImageInfo
+import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
@@ -152,6 +154,36 @@ interface JellyfinRepository {
         itemId: UUID,
         result: RemoteSearchResult,
         replaceAllImages: Boolean = true,
+    )
+
+    /** Lists the images currently attached to [itemId], as reported by the server. */
+    suspend fun getItemImages(itemId: UUID): List<ImageInfo>
+
+    /**
+     * Uploads [content] as an image of [type] for [itemId]. When [index] is given the image at that
+     * index is replaced (or added, for multi-image types like backdrops); otherwise the type's
+     * single image is replaced.
+     */
+    suspend fun uploadItemImage(
+        itemId: UUID,
+        type: ImageType,
+        index: Int?,
+        content: ByteArray,
+        mediaType: String,
+    )
+
+    /** Deletes the image of [type] at [index] (or the type's only image when [index] is null). */
+    suspend fun deleteItemImage(itemId: UUID, type: ImageType, index: Int?)
+
+    /**
+     * Moves the image of [type] from [oldIndex] to [newIndex]. The image at index 0 is the primary
+     * image, so this is how a different backdrop is promoted.
+     */
+    suspend fun updateItemImageIndex(
+        itemId: UUID,
+        type: ImageType,
+        oldIndex: Int,
+        newIndex: Int,
     )
 
     suspend fun getDownloads(): List<FindroidItem>

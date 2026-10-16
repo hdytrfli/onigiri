@@ -32,11 +32,14 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import org.jellyfin.sdk.model.FileInfo
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.DeviceOptionsDto
 import org.jellyfin.sdk.model.api.DeviceProfile
 import org.jellyfin.sdk.model.api.GeneralCommandType
+import org.jellyfin.sdk.model.api.ImageInfo
+import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.ItemFilter
 import org.jellyfin.sdk.model.api.ItemSortBy
@@ -669,6 +672,41 @@ class JellyfinRepositoryImpl(
     ) {
         withContext(Dispatchers.IO) {
             jellyfinApi.itemLookupApi.applySearchCriteria(itemId, replaceAllImages, result)
+        }
+    }
+
+    override suspend fun getItemImages(itemId: UUID): List<ImageInfo> =
+        withContext(Dispatchers.IO) { jellyfinApi.imageApi.getItemImageInfos(itemId).content }
+
+    override suspend fun uploadItemImage(
+        itemId: UUID,
+        type: ImageType,
+        index: Int?,
+        content: ByteArray,
+        mediaType: String,
+    ) {
+        withContext(Dispatchers.IO) {
+            val fileInfo = FileInfo(content, mediaType)
+            if (index != null) {
+                jellyfinApi.imageApi.setItemImageByIndex(itemId, type, index, fileInfo)
+            } else {
+                jellyfinApi.imageApi.setItemImage(itemId, type, fileInfo)
+            }
+        }
+    }
+
+    override suspend fun deleteItemImage(itemId: UUID, type: ImageType, index: Int?) {
+        withContext(Dispatchers.IO) { jellyfinApi.imageApi.deleteItemImage(itemId, type, index) }
+    }
+
+    override suspend fun updateItemImageIndex(
+        itemId: UUID,
+        type: ImageType,
+        oldIndex: Int,
+        newIndex: Int,
+    ) {
+        withContext(Dispatchers.IO) {
+            jellyfinApi.imageApi.updateItemImageIndex(itemId, type, oldIndex, newIndex)
         }
     }
 

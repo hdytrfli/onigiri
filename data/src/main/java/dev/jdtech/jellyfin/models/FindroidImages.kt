@@ -104,3 +104,25 @@ fun FindroidEpisodeDto.toLocalFindroidImages(itemId: UUID): FindroidImages {
         showBackdrop = Uri.Builder().appendEncodedPath("images/$seriesId/backdrop").build(),
     )
 }
+
+/**
+ * Builds the URL for an item image of [type], optionally at [index], with the cache-busting [tag]
+ * from [org.jellyfin.sdk.model.api.ImageInfo]. Mirrors the URLs built by [toFindroidImages] so the
+ * same Coil ImageLoader (and its authentication) can load them.
+ */
+fun buildItemImageUrl(
+    baseUrl: String,
+    itemId: UUID,
+    type: ImageType,
+    index: Int? = null,
+    tag: String? = null,
+): Uri {
+    val builder = Uri.parse(baseUrl).buildUpon().appendEncodedPath("items/$itemId/Images/$type")
+    if (index != null) {
+        builder.appendEncodedPath(index.toString())
+    }
+    if (!tag.isNullOrBlank()) {
+        builder.appendQueryParameter("tag", tag)
+    }
+    return builder.build()
+}
