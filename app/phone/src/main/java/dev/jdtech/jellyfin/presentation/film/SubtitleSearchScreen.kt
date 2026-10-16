@@ -474,15 +474,25 @@ private fun ExistingSubtitleRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Only external subtitles can be deleted from the server.
-            if (stream.isExternal) {
-                if (deleting) {
+            val canDelete = stream.isExternal
+            // Fixed size so the row keeps the same height whether the button shows, is
+            // disabled, or is replaced by the deleting spinner.
+            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                if (deleting && canDelete) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    IconButton(onClick = onDelete) {
+                    // Always shown, so deletable and non-deletable rows have the same height.
+                    // When it can't be deleted it's disabled and drawn muted.
+                    IconButton(onClick = onDelete, enabled = canDelete) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_trash),
                             contentDescription = stringResource(CoreR.string.delete),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint =
+                                if (canDelete) {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                                },
                         )
                     }
                 }
