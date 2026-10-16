@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.settings.R
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
-import dev.jdtech.jellyfin.settings.presentation.enums.DeviceType
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceAppLanguage
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceFileEdit
@@ -34,7 +33,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
 
     // Remembered so dependent selects can re-evaluate visibility after they update their flags.
     private var lastIndexes: List<Int> = emptyList()
-    private var lastDeviceType: DeviceType = DeviceType.PHONE
 
     private val topLevelPreferences =
         listOf(
@@ -96,7 +94,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.always_play_subtitles,
                                                     descriptionStringRes =
                                                         R.string.always_play_subtitles_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerAlwaysPlaySubtitles,
                                                 ),
@@ -129,7 +126,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                             listOf(
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.theme,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference = appPreferences.theme,
                                                     onUpdate = { value ->
                                                         viewModelScope.launch {
@@ -150,7 +146,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     enabled =
                                                         Build.VERSION.SDK_INT >=
                                                             Build.VERSION_CODES.S,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.dynamicColors,
                                                 ),
@@ -158,13 +153,11 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     nameStringResource = R.string.hide_status_bar,
                                                     descriptionStringRes =
                                                         R.string.hide_status_bar_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.hideStatusBar,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.content_spacing,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.contentSpacing,
                                                     options = R.array.content_spacing_options,
@@ -173,7 +166,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.season_grid_columns_portrait,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.seasonGridColumnsPortrait,
                                                     options = R.array.season_grid_columns,
@@ -182,7 +174,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.season_grid_columns_landscape,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.seasonGridColumnsLandscape,
                                                     options = R.array.season_grid_columns,
@@ -197,7 +188,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.backdrop_portrait_ratio,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.backdropPortraitRatio,
                                                     options = R.array.backdrop_ratios,
@@ -206,7 +196,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.backdrop_landscape_ratio,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.backdropLandscapeRatio,
                                                     options = R.array.backdrop_ratios,
@@ -221,7 +210,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.title_portrait_width,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.titlePortraitWidth,
                                                     options = R.array.title_width_options,
@@ -230,7 +218,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.title_landscape_width,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.titleLandscapeWidth,
                                                     options = R.array.title_width_options_low,
@@ -239,7 +226,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.title_player_width,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.titlePlayerWidth,
                                                     options = R.array.title_width_options_low,
@@ -247,7 +233,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.title_image_ratio,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.titleImageRatio,
                                                     options = R.array.title_ratio_options,
@@ -258,7 +243,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.naive_title_overlay,
                                                     descriptionStringRes =
                                                         R.string.naive_title_overlay_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.naiveTitleOverlay,
                                                 ),
@@ -307,7 +291,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.offline_mode,
                                                     iconDrawableId = R.drawable.ic_server_off,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     onClick = {
                                                         viewModelScope.launch {
                                                             eventsChannel.send(
@@ -320,7 +303,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.confirm_exit,
                                                     iconDrawableId = R.drawable.ic_exit,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference = appPreferences.confirmExit,
                                                 ),
                                             )
@@ -696,7 +678,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         // changed (the screen reloads before this).
                                                         loadPreferences(
                                                             lastIndexes,
-                                                            lastDeviceType,
                                                         )
                                                     },
                                                     options = R.array.player_time_display_options,
@@ -727,7 +708,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_gestures_volume,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_volume_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesVolume,
                                                 ),
@@ -736,7 +716,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_gestures_brightness,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_brightness_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesBrightness,
                                                 ),
@@ -745,7 +724,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_gestures_zoom,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_zoom_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesZoom,
                                                 ),
@@ -754,7 +732,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_gestures_seek,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_seek_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesSeek,
                                                 ),
@@ -764,7 +741,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     descriptionStringRes =
                                                         R.string
                                                             .player_gestures_chapter_skip_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesChapterSkip,
                                                 ),
@@ -773,7 +749,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_start_maximized,
                                                     descriptionStringRes =
                                                         R.string.player_start_maximized_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesStartMaximized,
                                                 ),
@@ -782,7 +757,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_gestures_double_tap,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_double_tap_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesDoubleTap,
                                                 ),
@@ -797,7 +771,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.player_controls_timeout,
                                                     descriptionStringRes =
                                                         R.string.player_controls_timeout_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerControlsTimeout,
                                                     options =
@@ -900,7 +873,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                             appPreferences
                                                                 .playerMediaSegmentsAutoSkip
                                                         ),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences
                                                             .playerMediaSegmentsAutoSkipMode,
@@ -956,7 +928,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                             .pref_player_gestures_seek_trickplay_summary,
                                                     dependencies =
                                                         listOf(appPreferences.playerTrickplay),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerGesturesSeekTrickplay,
                                                 ),
@@ -971,7 +942,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         R.string.picture_in_picture_gesture,
                                                     descriptionStringRes =
                                                         R.string.picture_in_picture_gesture_summary,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.playerPipGesture,
                                                 )
@@ -1015,7 +985,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                         PreferenceCategory(
                             nameStringResource = R.string.title_download,
                             iconDrawableId = R.drawable.ic_download,
-                            supportedDeviceTypes = listOf(DeviceType.PHONE),
                             onClick = {
                                 viewModelScope.launch {
                                     eventsChannel.send(
@@ -1033,7 +1002,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.download_mobile_data,
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.downloadOverMobileData,
                                                 ),
@@ -1043,7 +1011,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         listOf(
                                                             appPreferences.downloadOverMobileData
                                                         ),
-                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
                                                     backendPreference =
                                                         appPreferences.downloadWhenRoaming,
                                                 ),
@@ -1160,9 +1127,8 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
             ),
         )
 
-    fun loadPreferences(indexes: List<Int> = emptyList(), deviceType: DeviceType) {
+    fun loadPreferences(indexes: List<Int> = emptyList()) {
         lastIndexes = indexes
-        lastDeviceType = deviceType
         viewModelScope.launch {
             val isMpvBackend = true
 
@@ -1202,7 +1168,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                         preferenceGroup.copy(
                             preferences =
                                 preferenceGroup.preferences
-                                    .filter { it.supportedDeviceTypes.contains(deviceType) }
                                     .filter {
                                         if (!isMpvBackend && it is PreferenceCategory) {
                                             it.nameStringResource != R.string.mpv_options &&

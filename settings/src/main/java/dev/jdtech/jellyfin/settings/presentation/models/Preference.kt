@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.settings.presentation.models
 
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
-import dev.jdtech.jellyfin.settings.presentation.enums.DeviceType
 
 interface Preference {
     val nameStringResource: Int
@@ -9,7 +8,6 @@ interface Preference {
     val iconDrawableId: Int?
     val enabled: Boolean
     val dependencies: List<PreferenceBackend<Boolean>>
-    val supportedDeviceTypes: List<DeviceType>
 
     /** When true and [dependencies] are not all satisfied, hide instead of disabling. */
     val hideWhenDisabled: Boolean
