@@ -153,6 +153,8 @@
     <string name="identify_advanced_description">Add a year or provider IDs to narrow the results</string>
     <string name="downloading_at">Downloading at %1$d%%</string>
     <string name="edit_images">Edit images</string>
+    <string name="search_images">Search images</string>
+    <string name="upload">Upload</string>
     <string name="replace">Replace</string>
     <string name="make_primary">Make primary</string>
     <string name="no_image">No image</string>

@@ -67,6 +67,7 @@ import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
+import dev.jdtech.jellyfin.presentation.film.EditImageSearchScreen
 import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
 import dev.jdtech.jellyfin.presentation.film.EpisodeScreen
 import dev.jdtech.jellyfin.presentation.film.FavoritesScreen
@@ -94,6 +95,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
 import kotlinx.coroutines.launch
+import org.jellyfin.sdk.model.api.ImageType
 
 private val TOP_LEVEL_ROUTES = setOf(HomeRoute, MediaRoute, FavoritesRoute, DownloadsRoute)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
@@ -686,6 +688,17 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<EditImagesRoute> { key ->
         EditImagesScreen(
             itemId = UUID.fromString(key.itemId),
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            navigateToImageSearch =
+                resumedAction { type ->
+                    navigator.navigate(EditImageSearchRoute(itemId = key.itemId, type = type.name))
+                },
+        )
+    }
+    entry<EditImageSearchRoute> { key ->
+        EditImageSearchScreen(
+            itemId = UUID.fromString(key.itemId),
+            type = ImageType.valueOf(key.type),
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }

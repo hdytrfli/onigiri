@@ -9,27 +9,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +45,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,6 +54,7 @@ import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImagesState
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImagesViewModel
+import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -66,19 +67,19 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageInfo
 import org.jellyfin.sdk.model.api.ImageType
 
-private val ThumbnailSize = 96.dp
-
-/** Which image slot a pending file-picker result belongs to. */
-private data class PendingUpload(val type: ImageType, val index: Int?)
+/** Which image slot a pending add/replace belongs to; a null index means a single-image type. */
+private data class ImageTarget(val type: ImageType, val index: Int?)
 
 /**
  * Lets an admin view and edit an item's images, grouped by type: upload or replace an image, delete
- * one, and (for backdrops) promote an image to primary. Styled like the settings pages.
+ * one, and add images to a type. Full-width, with each type rendered as a plain section (no cards);
+ * the empty placeholder tile is what starts the add flow.
  */
 @Composable
 fun EditImagesScreen(
     itemId: UUID,
     navigateBack: () -> Unit,
+    navigateToImageSearch: (ImageType) -> Unit,
     viewModel: EditImagesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,7 +88,8 @@ fun EditImagesScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var pendingUpload by remember { mutableStateOf<PendingUpload?>(null) }
+    var pendingUpload by remember { mutableStateOf<ImageTarget?>(null) }
+    var chooserTarget by remember { mutableStateOf<ImageTarget?>(null) }
 
     val filePicker =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -115,15 +117,28 @@ fun EditImagesScreen(
     EditImagesScreenLayout(
         itemId = itemId,
         state = state,
-        onUpload = { type, index ->
-            pendingUpload = PendingUpload(type, index)
-            filePicker.launch("image/*")
-        },
+        onAdd = { type, index -> chooserTarget = ImageTarget(type, index) },
+        onReplace = { type, index -> chooserTarget = ImageTarget(type, index) },
         onDelete = { type, index -> viewModel.delete(itemId, type, index) },
         onMakePrimary = { type, index -> viewModel.makePrimary(itemId, type, index) },
         onDismissError = viewModel::dismissError,
         navigateBack = navigateBack,
     )
+
+    chooserTarget?.let { target ->
+        ImageSourceChooser(
+            onUpload = {
+                chooserTarget = null
+                pendingUpload = target
+                filePicker.launch("image/*")
+            },
+            onSearch = {
+                chooserTarget = null
+                navigateToImageSearch(target.type)
+            },
+            onDismiss = { chooserTarget = null },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,7 +146,8 @@ fun EditImagesScreen(
 private fun EditImagesScreenLayout(
     itemId: UUID,
     state: EditImagesState,
-    onUpload: (ImageType, Int?) -> Unit,
+    onAdd: (ImageType, Int?) -> Unit,
+    onReplace: (ImageType, Int?) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
     onMakePrimary: (ImageType, Int) -> Unit,
     onDismissError: () -> Unit,
@@ -177,18 +193,18 @@ private fun EditImagesScreenLayout(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(innerPadding),
                 contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
                 items(items = types, key = { it.name }) { type ->
-                    val images = state.images.filter { it.imageType == type }
-                    ImageTypeCard(
+                    ImageTypeSection(
                         itemId = itemId,
                         type = type,
-                        images = images,
+                        images = state.images.filter { it.imageType == type },
                         baseUrl = state.baseUrl,
                         busy = state.busyKey?.startsWith("${type.name}:") == true,
-                        onUpload = onUpload,
+                        downloading = state.downloadingType == type,
+                        onAdd = onAdd,
+                        onReplace = onReplace,
                         onDelete = onDelete,
                         onMakePrimary = onMakePrimary,
                     )
@@ -200,205 +216,261 @@ private fun EditImagesScreenLayout(
     state.error?.let { error -> ErrorDialog(exception = error, onDismissRequest = onDismissError) }
 }
 
+/** A plain, full-width section for one image [type]: a header, then the type's tiles beneath it. */
 @Composable
-private fun ImageTypeCard(
+private fun ImageTypeSection(
     itemId: UUID,
     type: ImageType,
     images: List<ImageInfo>,
     baseUrl: String,
     busy: Boolean,
-    onUpload: (ImageType, Int?) -> Unit,
+    downloading: Boolean,
+    onAdd: (ImageType, Int?) -> Unit,
+    onReplace: (ImageType, Int?) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
     onMakePrimary: (ImageType, Int) -> Unit,
 ) {
-    Card(
-        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(
-            modifier = Modifier.padding(MaterialTheme.spacings.medium),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = imageTypeLabel(type),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                if (busy) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+    val ratio = imageTypeAspectRatio(type)
+    val tileWidth = imageTileWidth(type)
+
+    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
+        Text(text = imageTypeLabel(type), style = MaterialTheme.typography.titleMedium)
+        when {
+            // While a remote download runs, show a single centred placeholder for the type.
+            downloading -> BusyTile(width = tileWidth, ratio = ratio)
+            // Backdrop is the only multi-image type: its tiles plus a trailing add placeholder.
+            type == ImageType.BACKDROP ->
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)
+                ) {
+                    items(items = images, key = { it.imageIndex ?: it.hashCode() }) { image ->
+                        val index = image.imageIndex
+                        ImageTile(
+                            itemId = itemId,
+                            type = type,
+                            image = image,
+                            baseUrl = baseUrl,
+                            width = tileWidth,
+                            ratio = ratio,
+                            enabled = !busy,
+                            onMakePrimary = index?.let { { onMakePrimary(type, it) } },
+                            makePrimaryEnabled = index != 0,
+                            onReplace = { onReplace(type, index) },
+                            onDelete = { onDelete(type, index) },
+                        )
+                    }
+                    item(key = "add") {
+                        PlaceholderTile(
+                            width = tileWidth,
+                            ratio = ratio,
+                            enabled = !busy,
+                            onAdd = { onAdd(type, images.size) },
+                        )
+                    }
                 }
-            }
-            when {
-                images.isEmpty() ->
-                    EmptyImageRow(
-                        busy = busy,
-                        onAdd = { onUpload(type, null) },
+            else -> {
+                val image = images.firstOrNull()
+                if (image == null) {
+                    PlaceholderTile(
+                        width = tileWidth,
+                        ratio = ratio,
+                        enabled = !busy,
+                        onAdd = { onAdd(type, null) },
                     )
-                images.size == 1 -> {
-                    val image = images.first()
-                    SingleImageRow(
+                } else {
+                    ImageTile(
                         itemId = itemId,
                         type = type,
                         image = image,
                         baseUrl = baseUrl,
-                        busy = busy,
-                        onReplace = { onUpload(type, image.imageIndex) },
+                        width = tileWidth,
+                        ratio = ratio,
+                        enabled = !busy,
+                        onReplace = { onReplace(type, image.imageIndex) },
                         onDelete = { onDelete(type, image.imageIndex) },
                     )
                 }
-                else ->
-                    MultipleImageRow(
-                        itemId = itemId,
-                        type = type,
-                        images = images,
-                        baseUrl = baseUrl,
-                        busy = busy,
-                        onAdd = { onUpload(type, images.size) },
-                        onDelete = { image -> onDelete(type, image.imageIndex) },
-                        onMakePrimary = { image ->
-                            image.imageIndex?.let { onMakePrimary(type, it) }
-                        },
-                    )
             }
         }
     }
 }
 
+/**
+ * An image tile: the preview, then its resolution/size and the actions. [onMakePrimary] is only
+ * supplied for multi-image types (Backdrop); it is disabled on the image that is already primary.
+ */
 @Composable
-private fun EmptyImageRow(busy: Boolean, onAdd: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-    ) {
-        Box(
-            modifier =
-                Modifier.size(ThumbnailSize)
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_image),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-            text = stringResource(CoreR.string.no_image),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        TextButton(onClick = onAdd, enabled = !busy) { Text(stringResource(CoreR.string.add)) }
-    }
-}
-
-@Composable
-private fun SingleImageRow(
+private fun ImageTile(
     itemId: UUID,
     type: ImageType,
     image: ImageInfo,
     baseUrl: String,
-    busy: Boolean,
+    width: Dp?,
+    ratio: Float,
+    enabled: Boolean,
     onReplace: () -> Unit,
     onDelete: () -> Unit,
+    onMakePrimary: (() -> Unit)? = null,
+    makePrimaryEnabled: Boolean = true,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+    Column(
+        modifier = Modifier.tileWidth(width),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
     ) {
-        ImageThumbnail(itemId = itemId, type = type, image = image, baseUrl = baseUrl)
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-        ) {
+        AsyncImage(
+            model = buildItemImageUrl(baseUrl, itemId, type, image.imageIndex, image.imageTag),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .aspectRatio(ratio)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = imageMetadata(image),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-                TextButton(onClick = onReplace, enabled = !busy) {
-                    Text(stringResource(CoreR.string.replace))
-                }
-                TextButton(onClick = onDelete, enabled = !busy) {
-                    Text(stringResource(CoreR.string.delete))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MultipleImageRow(
-    itemId: UUID,
-    type: ImageType,
-    images: List<ImageInfo>,
-    baseUrl: String,
-    busy: Boolean,
-    onAdd: () -> Unit,
-    onDelete: (ImageInfo) -> Unit,
-    onMakePrimary: (ImageInfo) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            items(items = images, key = { image -> image.imageIndex ?: image.hashCode() }) { image
-                ->
-                var menuOpen by remember { mutableStateOf(false) }
-                Box {
-                    ImageThumbnail(
-                        itemId = itemId,
-                        type = type,
-                        image = image,
-                        baseUrl = baseUrl,
-                        modifier = Modifier.clickable(enabled = !busy) { menuOpen = true },
+            if (onMakePrimary != null) {
+                IconButton(onClick = onMakePrimary, enabled = enabled && makePrimaryEnabled) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_star),
+                        contentDescription = stringResource(CoreR.string.make_primary),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(CoreR.string.make_primary)) },
-                            enabled = image.imageIndex != 0,
-                            onClick = {
-                                menuOpen = false
-                                onMakePrimary(image)
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(CoreR.string.delete)) },
-                            onClick = {
-                                menuOpen = false
-                                onDelete(image)
-                            },
-                        )
-                    }
                 }
             }
-        }
-        Row {
-            TextButton(onClick = onAdd, enabled = !busy) { Text(stringResource(CoreR.string.add)) }
+            IconButton(onClick = onReplace, enabled = enabled) {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                    contentDescription = stringResource(CoreR.string.replace),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onDelete, enabled = enabled) {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_trash),
+                    contentDescription = stringResource(CoreR.string.delete),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
+/** An empty slot that doubles as the "add" button: tapping it starts the add flow. */
 @Composable
-private fun ImageThumbnail(
-    itemId: UUID,
-    type: ImageType,
-    image: ImageInfo,
-    baseUrl: String,
-    modifier: Modifier = Modifier,
+private fun PlaceholderTile(
+    width: Dp?,
+    ratio: Float,
+    enabled: Boolean,
+    onAdd: () -> Unit,
 ) {
-    AsyncImage(
-        model = buildItemImageUrl(baseUrl, itemId, type, image.imageIndex, image.imageTag),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
+    Box(
         modifier =
-            modifier
-                .size(ThumbnailSize)
+            Modifier.tileWidth(width)
+                .aspectRatio(ratio)
+                .clip(MaterialTheme.shapes.small)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .clickable(enabled = enabled, onClick = onAdd),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(CoreR.drawable.ic_plus),
+            contentDescription = stringResource(CoreR.string.add),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** A tile-sized placeholder with a centred spinner, shown while a remote image is downloading. */
+@Composable
+private fun BusyTile(width: Dp?, ratio: Float) {
+    Box(
+        modifier =
+            Modifier.tileWidth(width)
+                .aspectRatio(ratio)
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
+    }
+}
+
+/** Applies the tile's fixed [width], or the full available width when it is null (logo/banner). */
+private fun Modifier.tileWidth(width: Dp?): Modifier =
+    if (width == null) this.fillMaxWidth() else this.width(width)
+
+/**
+ * The tile width for [type]; null means "full width" (used for the wide logo/banner shapes). Sizes
+ * are deliberately generous: too big reads better than too small.
+ */
+private fun imageTileWidth(type: ImageType): Dp? =
+    when (type) {
+        ImageType.PRIMARY,
+        ImageType.DISC,
+        ImageType.BOX,
+        ImageType.BOX_REAR,
+        ImageType.PROFILE -> 160.dp
+        ImageType.LOGO,
+        ImageType.BANNER -> null
+        else -> 220.dp
+    }
+
+/**
+ * The chooser shown when adding or replacing an image: upload from the device or search remotely.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ImageSourceChooser(
+    onUpload: () -> Unit,
+    onSearch: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(bottom = MaterialTheme.spacings.default)
+        ) {
+            ChooserRow(
+                icon = CoreR.drawable.ic_image,
+                label = stringResource(CoreR.string.upload),
+                onClick = onUpload,
+            )
+            ChooserRow(
+                icon = CoreR.drawable.ic_search,
+                label = stringResource(CoreR.string.search),
+                onClick = onSearch,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChooserRow(icon: Int, label: String, onClick: () -> Unit) {
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(
+                    horizontal = MaterialTheme.spacings.default,
+                    vertical = MaterialTheme.spacings.medium,
+                ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(MaterialTheme.spacings.medium))
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+    }
 }
 
 /** The image types offered for an item kind, before adding any type the item already has. */
