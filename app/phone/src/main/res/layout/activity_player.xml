@@ -170,7 +170,7 @@
             android:id="@+id/player_options_scrim"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent" />
+            android:background="@drawable/player_controls_background" />
 
         <LinearLayout
             android:id="@+id/player_options_panel"
@@ -224,7 +224,7 @@
             android:id="@+id/player_episodes_scrim"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent" />
+            android:background="@drawable/player_controls_background" />
 
         <LinearLayout
             android:id="@+id/player_episodes_panel"
@@ -274,7 +274,7 @@
             android:id="@+id/player_detail_scrim"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent" />
+            android:background="@drawable/player_controls_background" />
 
         <LinearLayout
             android:id="@+id/player_detail_panel"

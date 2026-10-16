@@ -65,12 +65,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <View
-        android:id="@+id/player_overlay_gradient"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/player_controls_background" />
-
     <androidx.media3.ui.PlayerControlView
         android:id="@id/exo_controller"
         android:layout_width="match_parent"
