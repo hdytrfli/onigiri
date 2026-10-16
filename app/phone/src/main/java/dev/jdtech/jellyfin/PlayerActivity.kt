@@ -821,8 +821,10 @@ class PlayerActivity : BasePlayerActivity() {
             panel.translationX = panel.width.toFloat()
             panel.animate().translationX(0f).setDuration(200L).start()
         }
-        scrim.alpha = 0f
-        scrim.animate().alpha(1f).setDuration(200L).start()
+        // The scrim is the same gradient as the player controls, so switch it on at full strength
+        // straight away: crossfading two identical gradients briefly lightens the result.
+        scrim.animate().cancel()
+        scrim.alpha = 1f
         fadePlayerControls(show = false)
     }
 
@@ -833,26 +835,37 @@ class PlayerActivity : BasePlayerActivity() {
             .setDuration(200L)
             .withEndAction { overlay.visibility = View.GONE }
             .start()
-        scrim.animate().alpha(0f).setDuration(200L).start()
-        fadePlayerControls(show = true)
+        // Hold the scrim at full strength while the controls fade back in, then drop it in a
+        // single step, so the gradient never dips during the transition.
+        fadePlayerControls(show = true) {
+            scrim.animate().cancel()
+            scrim.alpha = 0f
+        }
     }
 
     /**
      * Eases the player overlay (title, seek bar, buttons) out while a sheet is open, and back in.
      */
-    private fun fadePlayerControls(show: Boolean) {
-        val controller = binding.playerView.findViewById<View>(R.id.exo_controller) ?: return
+    private fun fadePlayerControls(show: Boolean, onEnd: () -> Unit = {}) {
+        val controller = binding.playerView.findViewById<View>(R.id.exo_controller)
+        if (controller == null) {
+            onEnd()
+            return
+        }
         controller.animate().cancel()
         if (show) {
             binding.playerView.showController()
             controller.alpha = 0f
-            controller.animate().alpha(1f).setDuration(200L).start()
+            controller.animate().alpha(1f).setDuration(200L).withEndAction { onEnd() }.start()
         } else {
             controller
                 .animate()
                 .alpha(0f)
                 .setDuration(200L)
-                .withEndAction { binding.playerView.hideController() }
+                .withEndAction {
+                    binding.playerView.hideController()
+                    onEnd()
+                }
                 .start()
         }
     }
