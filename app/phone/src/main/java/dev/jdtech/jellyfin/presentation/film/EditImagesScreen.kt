@@ -418,12 +418,6 @@ private fun ImagePreview(
                 onDismissRequest = { menuOpen = false },
                 modifier = Modifier.width(OverflowMenuWidth),
             ) {
-                // Header: the image type name, muted and not clickable.
-                DropdownMenuItem(
-                    text = { Text(imageTypeLabel(type)) },
-                    enabled = false,
-                    onClick = {},
-                )
                 MenuActionItem(
                     icon = CoreR.drawable.ic_rotate_ccw,
                     label = stringResource(CoreR.string.replace),
@@ -458,12 +452,12 @@ private fun ImagePreview(
     }
 }
 
-/** A single action row in the per-tile overflow menu, with a leading icon. */
+/** A single action row in the per-tile overflow menu, with a trailing icon. */
 @Composable
 private fun MenuActionItem(icon: Int, label: String, enabled: Boolean, onClick: () -> Unit) {
     DropdownMenuItem(
         text = { Text(label) },
-        leadingIcon = { Icon(painter = painterResource(icon), contentDescription = null) },
+        trailingIcon = { Icon(painter = painterResource(icon), contentDescription = null) },
         enabled = enabled,
         onClick = onClick,
     )

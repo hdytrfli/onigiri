@@ -93,8 +93,14 @@ private fun EditImageSearchLayout(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    // Fewer, larger columns than the Identify grid: 3 in portrait, 4 in landscape.
-    val columns = if (isLandscape) 4 else 3
+    // Posters (Primary) get a denser grid than the other types; the others keep a larger preview.
+    val columns =
+        when {
+            type == ImageType.PRIMARY && isLandscape -> 8
+            type == ImageType.PRIMARY -> 5
+            isLandscape -> 4
+            else -> 3
+        }
 
     Scaffold(
         modifier =
