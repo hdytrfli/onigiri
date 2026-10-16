@@ -1,7 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,11 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,14 +33,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,20 +56,31 @@ import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageInfo
 import org.jellyfin.sdk.model.api.ImageType
 
-/** Which image slot a pending add/replace belongs to; a null index means a single-image type. */
-private data class ImageTarget(val type: ImageType, val index: Int?)
+/** The display order for the image types, most important first. */
+private val ImageTypeOrder =
+    listOf(
+        ImageType.PRIMARY,
+        ImageType.BACKDROP,
+        ImageType.THUMB,
+        ImageType.LOGO,
+        ImageType.BANNER,
+        ImageType.ART,
+        ImageType.DISC,
+        ImageType.BOX,
+        ImageType.BOX_REAR,
+        ImageType.MENU,
+        ImageType.SCREENSHOT,
+        ImageType.PROFILE,
+    )
 
 /**
- * Lets an admin view and edit an item's images, grouped by type: upload or replace an image, delete
- * one, and add images to a type. Full-width, with each type rendered as a plain section (no cards);
- * the empty placeholder tile is what starts the add flow.
+ * Lets an admin view and edit an item's images, grouped by type: replace an image, delete one, and
+ * add images to a type by searching the server's remote providers. Full-width, with each type
+ * rendered as a plain section (no cards); the empty placeholder tile starts the search flow.
  */
 @Composable
 fun EditImagesScreen(
@@ -86,59 +93,15 @@ fun EditImagesScreen(
 
     LaunchedEffect(itemId) { viewModel.load(itemId) }
 
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var pendingUpload by remember { mutableStateOf<ImageTarget?>(null) }
-    var chooserTarget by remember { mutableStateOf<ImageTarget?>(null) }
-
-    val filePicker =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            val target = pendingUpload
-            pendingUpload = null
-            if (uri == null || target == null) return@rememberLauncherForActivityResult
-            scope.launch {
-                val bytes =
-                    withContext(Dispatchers.IO) {
-                        context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                    }
-                if (bytes != null) {
-                    val mediaType = context.contentResolver.getType(uri) ?: "image/*"
-                    viewModel.upload(
-                        itemId = itemId,
-                        type = target.type,
-                        index = target.index,
-                        content = bytes,
-                        mediaType = mediaType,
-                    )
-                }
-            }
-        }
-
     EditImagesScreenLayout(
         itemId = itemId,
         state = state,
-        onAdd = { type, index -> chooserTarget = ImageTarget(type, index) },
-        onReplace = { type, index -> chooserTarget = ImageTarget(type, index) },
+        onEditImage = navigateToImageSearch,
         onDelete = { type, index -> viewModel.delete(itemId, type, index) },
         onMakePrimary = { type, index -> viewModel.makePrimary(itemId, type, index) },
         onDismissError = viewModel::dismissError,
         navigateBack = navigateBack,
     )
-
-    chooserTarget?.let { target ->
-        ImageSourceChooser(
-            onUpload = {
-                chooserTarget = null
-                pendingUpload = target
-                filePicker.launch("image/*")
-            },
-            onSearch = {
-                chooserTarget = null
-                navigateToImageSearch(target.type)
-            },
-            onDismiss = { chooserTarget = null },
-        )
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,8 +109,7 @@ fun EditImagesScreen(
 private fun EditImagesScreenLayout(
     itemId: UUID,
     state: EditImagesState,
-    onAdd: (ImageType, Int?) -> Unit,
-    onReplace: (ImageType, Int?) -> Unit,
+    onEditImage: (ImageType) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
     onMakePrimary: (ImageType, Int) -> Unit,
     onDismissError: () -> Unit,
@@ -184,11 +146,14 @@ private fun EditImagesScreenLayout(
                 CircularProgressIndicator()
             }
         } else {
-            // Types relevant to the item, followed by any other type the item already has. CHAPTER
-            // is server-generated from the video, so it is never editable.
+            // Types relevant to the item, plus any other type it already has, sorted by
+            // importance. CHAPTER is server-generated from the video, so it is never editable.
             val presentTypes =
                 state.images.map { it.imageType }.distinct().filter { it != ImageType.CHAPTER }
-            val types = (defaultImageTypes(state.kind) + presentTypes).distinct()
+            val types =
+                (defaultImageTypes(state.kind) + presentTypes).distinct().sortedBy {
+                    imageTypeSortIndex(it)
+                }
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(innerPadding),
@@ -203,8 +168,7 @@ private fun EditImagesScreenLayout(
                         baseUrl = state.baseUrl,
                         busy = state.busyKey?.startsWith("${type.name}:") == true,
                         downloading = state.downloadingType == type,
-                        onAdd = onAdd,
-                        onReplace = onReplace,
+                        onEditImage = onEditImage,
                         onDelete = onDelete,
                         onMakePrimary = onMakePrimary,
                     )
@@ -225,8 +189,7 @@ private fun ImageTypeSection(
     baseUrl: String,
     busy: Boolean,
     downloading: Boolean,
-    onAdd: (ImageType, Int?) -> Unit,
-    onReplace: (ImageType, Int?) -> Unit,
+    onEditImage: (ImageType) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
     onMakePrimary: (ImageType, Int) -> Unit,
 ) {
@@ -253,10 +216,10 @@ private fun ImageTypeSection(
                             width = tileWidth,
                             ratio = ratio,
                             enabled = !busy,
+                            onReplace = { onEditImage(type) },
+                            onDelete = { onDelete(type, index) },
                             onMakePrimary = index?.let { { onMakePrimary(type, it) } },
                             makePrimaryEnabled = index != 0,
-                            onReplace = { onReplace(type, index) },
-                            onDelete = { onDelete(type, index) },
                         )
                     }
                     item(key = "add") {
@@ -264,7 +227,7 @@ private fun ImageTypeSection(
                             width = tileWidth,
                             ratio = ratio,
                             enabled = !busy,
-                            onAdd = { onAdd(type, images.size) },
+                            onAdd = { onEditImage(type) },
                         )
                     }
                 }
@@ -275,7 +238,7 @@ private fun ImageTypeSection(
                         width = tileWidth,
                         ratio = ratio,
                         enabled = !busy,
-                        onAdd = { onAdd(type, null) },
+                        onAdd = { onEditImage(type) },
                     )
                 } else {
                     ImageTile(
@@ -286,7 +249,7 @@ private fun ImageTypeSection(
                         width = tileWidth,
                         ratio = ratio,
                         enabled = !busy,
-                        onReplace = { onReplace(type, image.imageIndex) },
+                        onReplace = { onEditImage(type) },
                         onDelete = { onDelete(type, image.imageIndex) },
                     )
                 }
@@ -296,8 +259,9 @@ private fun ImageTypeSection(
 }
 
 /**
- * An image tile: the preview, then its resolution/size and the actions. [onMakePrimary] is only
- * supplied for multi-image types (Backdrop); it is disabled on the image that is already primary.
+ * An image tile: the preview, then its resolution and file size and a single overflow button with
+ * the tile's actions. [onMakePrimary] is only supplied for multi-image types (Backdrop); it is
+ * disabled on the image that is already primary.
  */
 @Composable
 private fun ImageTile(
@@ -313,6 +277,8 @@ private fun ImageTile(
     onMakePrimary: (() -> Unit)? = null,
     makePrimaryEnabled: Boolean = true,
 ) {
+    var menuOpen by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.tileWidth(width),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
@@ -320,7 +286,7 @@ private fun ImageTile(
         AsyncImage(
             model = buildItemImageUrl(baseUrl, itemId, type, image.imageIndex, image.imageTag),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = imageTypeContentScale(type),
             modifier =
                 Modifier.fillMaxWidth()
                     .aspectRatio(ratio)
@@ -328,42 +294,67 @@ private fun ImageTile(
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = imageMetadata(image),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            if (onMakePrimary != null) {
-                IconButton(onClick = onMakePrimary, enabled = enabled && makePrimaryEnabled) {
+            Column(modifier = Modifier.weight(1f)) {
+                imageResolution(image)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { resolution ->
+                        Text(
+                            text = resolution,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                Text(
+                    text = formatSize(image.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Box {
+                IconButton(onClick = { menuOpen = true }, enabled = enabled) {
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_star),
-                        contentDescription = stringResource(CoreR.string.make_primary),
+                        painter = painterResource(CoreR.drawable.ic_ellipsis),
+                        contentDescription = stringResource(CoreR.string.more_options),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-            IconButton(onClick = onReplace, enabled = enabled) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                    contentDescription = stringResource(CoreR.string.replace),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            IconButton(onClick = onDelete, enabled = enabled) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_trash),
-                    contentDescription = stringResource(CoreR.string.delete),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(CoreR.string.replace)) },
+                        enabled = enabled,
+                        onClick = {
+                            menuOpen = false
+                            onReplace()
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(CoreR.string.delete)) },
+                        enabled = enabled,
+                        onClick = {
+                            menuOpen = false
+                            onDelete()
+                        },
+                    )
+                    if (onMakePrimary != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(CoreR.string.make_primary)) },
+                            enabled = enabled && makePrimaryEnabled,
+                            onClick = {
+                                menuOpen = false
+                                onMakePrimary()
+                            },
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-/** An empty slot that doubles as the "add" button: tapping it starts the add flow. */
+/** An empty slot that doubles as the "add" button: tapping it starts the search flow. */
 @Composable
 private fun PlaceholderTile(
     width: Dp?,
@@ -408,70 +399,31 @@ private fun Modifier.tileWidth(width: Dp?): Modifier =
     if (width == null) this.fillMaxWidth() else this.width(width)
 
 /**
- * The tile width for [type]; null means "full width" (used for the wide logo/banner shapes). Sizes
+ * The tile width for [type]; null means "full width" (the wide logo/banner shapes). The 16:9 tiles
  * are deliberately generous: too big reads better than too small.
  */
 private fun imageTileWidth(type: ImageType): Dp? =
     when (type) {
         ImageType.PRIMARY,
         ImageType.DISC,
-        ImageType.BOX,
-        ImageType.BOX_REAR,
-        ImageType.PROFILE -> 160.dp
+        ImageType.BOX -> 160.dp
         ImageType.LOGO,
         ImageType.BANNER -> null
-        else -> 220.dp
+        else -> 260.dp
     }
 
-/**
- * The chooser shown when adding or replacing an image: upload from the device or search remotely.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ImageSourceChooser(
-    onUpload: () -> Unit,
-    onSearch: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(bottom = MaterialTheme.spacings.default)
-        ) {
-            ChooserRow(
-                icon = CoreR.drawable.ic_image,
-                label = stringResource(CoreR.string.upload),
-                onClick = onUpload,
-            )
-            ChooserRow(
-                icon = CoreR.drawable.ic_search,
-                label = stringResource(CoreR.string.search),
-                onClick = onSearch,
-            )
-        }
+/** 16:9 previews are shown whole (Fit); the poster and square types fill their container (Crop). */
+private fun imageTypeContentScale(type: ImageType): ContentScale =
+    when (type) {
+        ImageType.PRIMARY,
+        ImageType.DISC,
+        ImageType.BOX -> ContentScale.Crop
+        else -> ContentScale.Fit
     }
-}
 
-@Composable
-private fun ChooserRow(icon: Int, label: String, onClick: () -> Unit) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(
-                    horizontal = MaterialTheme.spacings.default,
-                    vertical = MaterialTheme.spacings.medium,
-                ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.width(MaterialTheme.spacings.medium))
-        Text(text = label, style = MaterialTheme.typography.bodyLarge)
-    }
-}
+/** The position of [type] in the importance order; unknown types sort last. */
+private fun imageTypeSortIndex(type: ImageType): Int =
+    ImageTypeOrder.indexOf(type).let { if (it >= 0) it else ImageTypeOrder.size }
 
 /** The image types offered for an item kind, before adding any type the item already has. */
 private fun defaultImageTypes(kind: BaseItemKind?): List<ImageType> =
@@ -522,11 +474,8 @@ private fun imageTypeLabel(type: ImageType): String =
         else -> type.serialName
     }
 
-private fun imageMetadata(image: ImageInfo): String {
-    val dimensions =
-        if (image.width != null && image.height != null) "${image.width}×${image.height}" else null
-    return listOfNotNull(dimensions, formatSize(image.size)).joinToString(" · ")
-}
+private fun imageResolution(image: ImageInfo): String =
+    if (image.width != null && image.height != null) "${image.width}×${image.height}" else ""
 
 private fun formatSize(bytes: Long): String =
     when {

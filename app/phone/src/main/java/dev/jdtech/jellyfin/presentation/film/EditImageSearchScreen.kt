@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,10 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -90,6 +92,9 @@ private fun EditImageSearchLayout(
     navigateBack: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    // Fewer, larger columns than the Identify grid: 3 in portrait, 4 in landscape.
+    val columns = if (isLandscape) 4 else 3
 
     Scaffold(
         modifier =
@@ -132,16 +137,24 @@ private fun EditImageSearchLayout(
                     )
                 else ->
                     LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 140.dp),
+                        columns = GridCells.Fixed(columns),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
                         horizontalArrangement =
                             Arrangement.spacedBy(MaterialTheme.spacings.default),
                         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                     ) {
-                        items(items = state.results, key = { it.hashCode() }) { result ->
+                        items(
+                            items = state.results,
+                            key = { it.hashCode() },
+                            // A banner is wide, so give it two columns in landscape (one in
+                            // portrait) rather than changing its aspect ratio.
+                            span = { _ ->
+                                GridItemSpan(if (type == ImageType.BANNER && isLandscape) 2 else 1)
+                            },
+                        ) { result ->
                             RemoteImageTile(
                                 result = result,
-                                ratio = imageTypeAspectRatio(type),
+                                ratio = searchImageAspectRatio(type),
                                 onClick = { onApply(result) },
                             )
                         }
@@ -192,3 +205,11 @@ private fun RemoteImageTile(result: RemoteImageInfo, ratio: Float, onClick: () -
 
 private fun remoteImageResolution(image: RemoteImageInfo): String =
     if (image.width != null && image.height != null) "${image.width}×${image.height}" else ""
+
+/**
+ * The preview ratio for [type] in the results grid. Box is shown like Primary (a poster), since
+ * provider box images are usually posters; everything else uses the editor's ratio.
+ */
+private fun searchImageAspectRatio(type: ImageType): Float =
+    if (type == ImageType.BOX) imageTypeAspectRatio(ImageType.PRIMARY)
+    else imageTypeAspectRatio(type)
