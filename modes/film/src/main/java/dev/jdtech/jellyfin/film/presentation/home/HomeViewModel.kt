@@ -42,11 +42,26 @@ constructor(
 
     private var hasLoadedOnce = false
 
-    /** Loads the home data only on first entry; use [loadData] to force a refresh. */
-    fun loadDataIfNeeded() {
-        if (hasLoadedOnce) return
-        hasLoadedOnce = true
-        loadData()
+    /**
+     * Loads everything on first entry. On later entries (coming back from a detail page) it
+     * refreshes the sections but leaves the suggestions alone, so the carousel keeps its items and
+     * scroll position. Use [loadData] for a full refresh.
+     */
+    fun refresh() {
+        if (!hasLoadedOnce) {
+            hasLoadedOnce = true
+            loadData()
+            return
+        }
+        viewModelScope.launch(Dispatchers.Default) {
+            try {
+                loadResumeItems()
+                loadNextUpItems()
+                loadViews()
+            } catch (e: Exception) {
+                _state.emit(_state.value.copy(error = e))
+            }
+        }
     }
 
     fun loadData() {
