@@ -33,7 +33,7 @@ fun EditImagesAction(
     if (state.canManage) {
         FilledTonalIconButton(onClick = onClick, modifier = modifier) {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_image),
+                painter = painterResource(CoreR.drawable.ic_gallery_thumbnails),
                 contentDescription = stringResource(CoreR.string.edit_images),
             )
         }

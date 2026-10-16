@@ -156,7 +156,7 @@
     <string name="search_images">Search images</string>
     <string name="more_options">More options</string>
     <string name="replace">Replace</string>
-    <string name="make_primary">Make primary</string>
+    <string name="make_primary">Primary</string>
     <string name="no_image">No image</string>
     <string name="image_type_primary">Primary</string>
     <string name="image_type_backdrop">Backdrop</string>

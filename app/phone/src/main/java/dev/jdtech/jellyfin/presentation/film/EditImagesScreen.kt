@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,13 +16,14 @@ import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -149,6 +152,8 @@ private fun EditImagesScreenLayout(
                 CircularProgressIndicator()
             }
         } else {
+            val isLandscape =
+                LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
             BoxWithConstraints(
                 modifier =
                     Modifier.fillMaxSize()
@@ -156,9 +161,10 @@ private fun EditImagesScreenLayout(
                         .padding(horizontal = MaterialTheme.spacings.default)
             ) {
                 val gap = MaterialTheme.spacings.medium
-                // The Thumb/Logo/Art row splits the content width into three equal cells; the
-                // backdrop tiles reuse the exact same width so both rows line up.
-                val tileWidth = (maxWidth - gap * 2) / 3
+                // Four columns in landscape, three in portrait; the Thumb/Logo/Art row and the
+                // backdrop tiles share the resulting width so both rows line up.
+                val columns = if (isLandscape) 4 else 3
+                val tileWidth = (maxWidth - gap * (columns - 1)) / columns
 
                 Column(
                     modifier =
@@ -262,7 +268,7 @@ private fun BackdropRow(
             downloading = state.downloadingType == type,
         )
     LazyRow(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
-        items(items = slots, key = { it.listKey() }) { slot ->
+        itemsIndexed(items = slots, key = { _, slot -> slot.listKey() }) { index, slot ->
             ImageSlotTile(
                 slot = slot,
                 itemId = itemId,
@@ -270,6 +276,7 @@ private fun BackdropRow(
                 width = width,
                 ratio = imageTypeAspectRatio(type),
                 enabled = !busy,
+                showLabel = index == 0,
                 onEditImage = onEditImage,
                 onDelete = onDelete,
                 onMakePrimary = onMakePrimary,
@@ -314,16 +321,19 @@ private fun ImageSlotTile(
     width: Dp,
     ratio: Float,
     enabled: Boolean,
+    showLabel: Boolean = true,
     onEditImage: (ImageType) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
     onMakePrimary: (ImageType, Int) -> Unit,
 ) {
+    val label = imageTypeLabel(slot.type)
     Column(
         modifier = Modifier.width(width),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
     ) {
+        // The label row is always present so that tiles with a hidden label stay aligned.
         Text(
-            text = imageTypeLabel(slot.type),
+            text = if (showLabel) label else "",
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -427,6 +437,19 @@ private fun ImagePreview(
                         onReplace()
                     },
                 )
+                if (onMakePrimary != null) {
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_flame,
+                        label = stringResource(CoreR.string.make_primary),
+                        enabled = enabled && makePrimaryEnabled,
+                        onClick = {
+                            menuOpen = false
+                            onMakePrimary()
+                        },
+                    )
+                }
+                // Separate the constructive actions above from the destructive Delete below.
+                HorizontalDivider()
                 MenuActionItem(
                     icon = CoreR.drawable.ic_trash,
                     label = stringResource(CoreR.string.delete),
@@ -436,17 +459,6 @@ private fun ImagePreview(
                         onDelete()
                     },
                 )
-                if (onMakePrimary != null) {
-                    MenuActionItem(
-                        icon = CoreR.drawable.ic_star,
-                        label = stringResource(CoreR.string.make_primary),
-                        enabled = enabled && makePrimaryEnabled,
-                        onClick = {
-                            menuOpen = false
-                            onMakePrimary()
-                        },
-                    )
-                }
             }
         }
     }
