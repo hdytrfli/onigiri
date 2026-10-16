@@ -23,13 +23,36 @@ import org.jellyfin.sdk.model.api.ImageType
  * the server actually stored.
  */
 @HiltViewModel
-class EditImagesViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class EditImagesViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val applyHolder: RemoteImageApplyHolder,
+) : ViewModel() {
     private val _state = MutableStateFlow(EditImagesState())
     val state = _state.asStateFlow()
 
+    /** The item currently being edited, kept so a finished remote download can trigger a reload. */
+    private var currentItemId: UUID? = null
+
+    init {
+        viewModelScope.launch {
+            var previous: ImageType? = null
+            applyHolder.applyingType.collect { type ->
+                _state.update { it.copy(downloadingType = type) }
+                // A download finishing (type -> null) means a new image may now be attached, so
+                // refresh the list even if the user is still on the search screen.
+                if (previous != null && type == null) {
+                    currentItemId?.let { reload(it) }
+                }
+                previous = type
+            }
+        }
+    }
+
     /** Loads the item's images (and its kind, to decide which types to offer). */
     fun load(itemId: UUID) {
+        currentItemId = itemId
         viewModelScope.launch { reload(itemId, showLoading = true) }
     }
 
