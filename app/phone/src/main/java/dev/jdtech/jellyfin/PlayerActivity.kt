@@ -744,7 +744,14 @@ class PlayerActivity : BasePlayerActivity() {
                 playerSpeeds.mapIndexed { index, speed ->
                     PlayerMenuItem(
                         title = playerSpeedTexts[index],
-                        subtitle = null,
+                        subtitle =
+                            getString(
+                                when {
+                                    speed < 1f -> R.string.speed_slower
+                                    speed > 1f -> R.string.speed_faster
+                                    else -> R.string.speed_normal
+                                }
+                            ),
                         selected = speed == viewModel.playbackSpeed,
                         iconRes = CoreR.drawable.ic_gauge,
                     )
@@ -760,7 +767,11 @@ class PlayerActivity : BasePlayerActivity() {
         items.add(
             PlayerMenuItem(
                 title = getString(CoreR.string.none),
-                subtitle = null,
+                subtitle =
+                    getString(
+                        if (type == C.TRACK_TYPE_AUDIO) R.string.track_none_audio
+                        else R.string.track_none_subtitle
+                    ),
                 selected = groups.none { it.isSelected },
                 iconRes = iconRes,
             )
@@ -827,7 +838,7 @@ class PlayerActivity : BasePlayerActivity() {
             panel.translationX = panel.width.toFloat()
             panel.animate().translationX(0f).setDuration(200L).start()
         }
-        fadePlayerControls(show = false)
+        hidePlayerControls()
     }
 
     private fun hideOptionsSheet(overlay: View, panel: View, scrim: View) {
@@ -837,27 +848,24 @@ class PlayerActivity : BasePlayerActivity() {
             .setDuration(200L)
             .withEndAction { overlay.visibility = View.GONE }
             .start()
-        fadePlayerControls(show = true)
+        // Leave the overlay hidden once the sheet closes; just restore its alpha so the next tap
+        // brings it back in.
+        val controller = binding.playerView.findViewById<View>(R.id.exo_controller)
+        controller?.animate()?.cancel()
+        controller?.alpha = 1f
+        binding.playerView.hideController()
     }
 
-    /**
-     * Eases the player overlay (title, seek bar, buttons) out while a sheet is open, and back in.
-     */
-    private fun fadePlayerControls(show: Boolean) {
+    /** Eases the player overlay (title, seek bar, buttons) out while a sheet is open. */
+    private fun hidePlayerControls() {
         val controller = binding.playerView.findViewById<View>(R.id.exo_controller) ?: return
         controller.animate().cancel()
-        if (show) {
-            binding.playerView.showController()
-            controller.alpha = 0f
-            controller.animate().alpha(1f).setDuration(200L).start()
-        } else {
-            controller
-                .animate()
-                .alpha(0f)
-                .setDuration(200L)
-                .withEndAction { binding.playerView.hideController() }
-                .start()
-        }
+        controller
+            .animate()
+            .alpha(0f)
+            .setDuration(200L)
+            .withEndAction { binding.playerView.hideController() }
+            .start()
     }
 
     /**

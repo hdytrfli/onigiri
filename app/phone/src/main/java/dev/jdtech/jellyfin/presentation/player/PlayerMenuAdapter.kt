@@ -77,9 +77,9 @@ class PlayerMenuAdapter(
 
         val subtitleView = view.findViewById<TextView>(R.id.item_subtitle)
         if (item.subtitle.isNullOrBlank()) {
-            // Reserve the second line so every row keeps the same height, whether or not the track
-            // carries a source label.
-            subtitleView.visibility = View.INVISIBLE
+            // Track rows always carry a second line (label, placeholder, or "No audio/subtitle"),
+            // so collapsing here only affects lists that are meant to be one line, like speeds.
+            subtitleView.visibility = View.GONE
         } else {
             subtitleView.visibility = View.VISIBLE
             subtitleView.text = item.subtitle
