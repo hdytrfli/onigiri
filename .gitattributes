@@ -1,3 +1,12 @@
 # Always use LF line endings for the Gradle wrapper script so it runs
 # inside Linux containers as well as on Windows.
 gradlew text eol=lf
+
+# Gradle hashes build scripts and the version catalog to decide whether the
+# configuration cache can be reused. With core.autocrlf=true, git rewrites
+# their line endings whenever it touches them, which invalidates the cache and
+# forces a full reconfigure. Pin them to LF so the working copy stays stable.
+*.gradle.kts text eol=lf
+*.gradle text eol=lf
+gradle/*.toml text eol=lf
+gradle.properties text eol=lf
