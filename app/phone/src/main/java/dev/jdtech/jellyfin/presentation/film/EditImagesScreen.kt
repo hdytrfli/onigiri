@@ -285,8 +285,10 @@ private fun BackdropRow(
 }
 
 /**
- * The tiles a [type] contributes: its images plus a trailing add slot for Backdrop (the multi-image
- * type), or a single image-or-placeholder slot otherwise. While [downloading], one busy slot.
+ * The tiles a [type] contributes. Backdrop (the multi-image type) keeps its images and gains a
+ * trailing slot: a busy slot while [downloading], otherwise the add placeholder. A single-image
+ * type contributes one slot: a busy placeholder while [downloading], otherwise its image or the add
+ * placeholder.
  */
 private fun imageSlots(
     type: ImageType,
@@ -294,9 +296,13 @@ private fun imageSlots(
     downloading: Boolean,
 ): List<ImageSlot> =
     when {
-        downloading -> listOf(ImageSlot.Busy(type))
+        // Backdrop keeps all of its tiles while a download runs; the busy state shows only in the
+        // trailing slot, where the add placeholder normally sits.
         type == ImageType.BACKDROP ->
-            images.map { ImageSlot.Existing(type, it) } + ImageSlot.Add(type)
+            images.map { ImageSlot.Existing(type, it) } +
+                if (downloading) ImageSlot.Busy(type) else ImageSlot.Add(type)
+        // A single-image type has one cell, which becomes the busy placeholder while downloading.
+        downloading -> listOf(ImageSlot.Busy(type))
         else ->
             listOf(
                 images.firstOrNull()?.let { ImageSlot.Existing(type, it) } ?: ImageSlot.Add(type)
@@ -427,15 +433,18 @@ private fun ImagePreview(
                 onDismissRequest = { menuOpen = false },
                 modifier = Modifier.width(OverflowMenuWidth),
             ) {
-                MenuActionItem(
-                    icon = CoreR.drawable.ic_rotate_ccw,
-                    label = stringResource(CoreR.string.replace),
-                    enabled = enabled,
-                    onClick = {
-                        menuOpen = false
-                        onReplace()
-                    },
-                )
+                // A backdrop is multi-image: adding an image appends, so "Replace" is misleading.
+                if (type != ImageType.BACKDROP) {
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_rotate_ccw,
+                        label = stringResource(CoreR.string.replace),
+                        enabled = enabled,
+                        onClick = {
+                            menuOpen = false
+                            onReplace()
+                        },
+                    )
+                }
                 if (onMakePrimary != null) {
                     MenuActionItem(
                         icon = CoreR.drawable.ic_flame,
