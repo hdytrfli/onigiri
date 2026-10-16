@@ -839,22 +839,38 @@ class PlayerActivity : BasePlayerActivity() {
         fadePlayerControls(show = true)
     }
 
+    /** True while any of the side sheets is open. */
+    private fun anySheetShown(): Boolean =
+        listOf(
+                R.id.player_options_overlay,
+                R.id.player_episodes_overlay,
+                R.id.player_detail_overlay,
+            )
+            .any { findViewById<View>(it)?.visibility == View.VISIBLE }
+
     /**
-     * The gradient sits behind both the controls and the sheets, so it stays up while either is
-     * visible and only goes away once both are gone.
+     * The gradient belongs to both the controls and the sheets: it fades together with the controls
+     * while no sheet is open, but stays at full strength while a sheet is open.
      */
     private fun updateOverlayGradient() {
         val gradient = binding.playerView.findViewById<View>(R.id.player_overlay_gradient) ?: return
-        val controlsShown =
+        val controlsVisible =
             binding.playerView.findViewById<View>(R.id.exo_controller)?.visibility == View.VISIBLE
-        val sheetShown =
-            listOf(
-                    R.id.player_options_overlay,
-                    R.id.player_episodes_overlay,
-                    R.id.player_detail_overlay,
-                )
-                .any { findViewById<View>(it)?.visibility == View.VISIBLE }
-        gradient.visibility = if (controlsShown || sheetShown) View.VISIBLE else View.GONE
+        val target = if (controlsVisible || anySheetShown()) 1f else 0f
+        gradient.animate().cancel()
+        if (target > 0f) {
+            gradient.visibility = View.VISIBLE
+        }
+        gradient
+            .animate()
+            .alpha(target)
+            .setDuration(200L)
+            .withEndAction {
+                if (target == 0f) {
+                    gradient.visibility = View.GONE
+                }
+            }
+            .start()
     }
 
     /**

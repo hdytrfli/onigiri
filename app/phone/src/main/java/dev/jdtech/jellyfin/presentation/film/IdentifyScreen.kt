@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +45,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -138,44 +140,54 @@ private fun IdentifyScreenLayout(
                         icon = CoreR.drawable.ic_film,
                         value = state.query,
                         onValueChange = onQueryChange,
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
                     )
-                    // The advanced fields stay in the same group, right below the title.
+                    // The advanced fields stay in the same group, right below the title, two per
+                    // row.
                     AnimatedVisibility(visible = state.advanced) {
                         Column(
                             verticalArrangement =
                                 Arrangement.spacedBy(MaterialTheme.spacings.medium)
                         ) {
-                            IdentifyField(
-                                label = stringResource(CoreR.string.identify_year),
-                                hint = stringResource(CoreR.string.identify_year_field_hint),
-                                icon = CoreR.drawable.ic_calendar,
-                                value = state.year,
-                                onValueChange = onYearChange,
-                                keyboardType = KeyboardType.Number,
-                            )
-                            IdentifyField(
-                                label = stringResource(CoreR.string.identify_imdb),
-                                hint = stringResource(CoreR.string.identify_imdb_hint),
-                                icon = CoreR.drawable.ic_video,
-                                value = state.imdbId,
-                                onValueChange = onImdbChange,
-                            )
-                            IdentifyField(
-                                label = stringResource(CoreR.string.identify_tmdb),
-                                hint = stringResource(CoreR.string.identify_tmdb_hint),
-                                icon = CoreR.drawable.ic_video,
-                                value = state.tmdbId,
-                                onValueChange = onTmdbChange,
-                                keyboardType = KeyboardType.Number,
-                            )
-                            IdentifyField(
-                                label = stringResource(CoreR.string.identify_tvdb),
-                                hint = stringResource(CoreR.string.identify_tvdb_hint),
-                                icon = CoreR.drawable.ic_video,
-                                value = state.tvdbId,
-                                onValueChange = onTvdbChange,
-                                keyboardType = KeyboardType.Number,
-                            )
+                            AdvancedFieldRow {
+                                IdentifyField(
+                                    label = stringResource(CoreR.string.identify_year),
+                                    hint = stringResource(CoreR.string.identify_year_field_hint),
+                                    icon = CoreR.drawable.ic_calendar,
+                                    value = state.year,
+                                    onValueChange = onYearChange,
+                                    keyboardType = KeyboardType.Number,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                IdentifyField(
+                                    label = stringResource(CoreR.string.identify_imdb),
+                                    hint = stringResource(CoreR.string.identify_imdb_hint),
+                                    icon = CoreR.drawable.ic_video,
+                                    value = state.imdbId,
+                                    onValueChange = onImdbChange,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            AdvancedFieldRow {
+                                IdentifyField(
+                                    label = stringResource(CoreR.string.identify_tmdb),
+                                    hint = stringResource(CoreR.string.identify_tmdb_hint),
+                                    icon = CoreR.drawable.ic_video,
+                                    value = state.tmdbId,
+                                    onValueChange = onTmdbChange,
+                                    keyboardType = KeyboardType.Number,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                IdentifyField(
+                                    label = stringResource(CoreR.string.identify_tvdb),
+                                    hint = stringResource(CoreR.string.identify_tvdb_hint),
+                                    icon = CoreR.drawable.ic_video,
+                                    value = state.tvdbId,
+                                    onValueChange = onTvdbChange,
+                                    keyboardType = KeyboardType.Number,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
                         }
                     }
                     // Only the advanced toggle is separated, so the fields read as one group.
@@ -223,6 +235,16 @@ private fun IdentifyDivider() {
     HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
 }
 
+/** A row holding two advanced fields, inset to line up with the title field. */
+@Composable
+private fun AdvancedFieldRow(content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+        content = content,
+    )
+}
+
 /** The "Advanced search" switch row, shown in the same group as the title field. */
 @Composable
 private fun AdvancedRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
@@ -259,9 +281,10 @@ private fun IdentifyField(
     value: String,
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
     ) {
         Text(
@@ -299,6 +322,8 @@ private fun IdentifyField(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color =
                                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                         inner()
