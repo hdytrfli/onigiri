@@ -4,14 +4,10 @@
     <string name="title_download">Downloads</string>
     <string name="settings_category_language">Sprog</string>
     <string name="settings_category_device">Enhed</string>
-    <string name="theme">Tema</string>
     <string name="about">Om</string>
     <string name="privacy_policy">Privatlivspolitik</string>
     <string name="mpv_player">mpv player</string>
-    <string name="dynamic_colors_summary">Brug Material You-dynamiske farver (kun tilgængeligt på Android 12+)</string>
     <string name="subtitles">Undertekster</string>
-    <string name="dynamic_colors">Dynamiske farver</string>
-    <string name="theme_system">Følg system</string>
     <string name="picture_in_picture">Picture-in-picture</string>
     <string name="pref_player_chapter_markers_summary">Vis kapitelmarkører på tidslinjen</string>
     <string name="extra_info">Vis Ekstra Info</string>
@@ -29,8 +25,6 @@
     <string name="download_mobile_data">Download med mobildata</string>
     <string name="download_roaming">Download ved roaming</string>
     <string name="mpv_player_summary">Brug den eksperimentelle mpv-afspiller til at afspille videoer. mpv understøtter flere codecs til video, lyd og undertekster.</string>
-    <string name="theme_light">Lyst</string>
-    <string name="theme_dark">Mørkt</string>
     <string name="settings_category_network">Netværk</string>
     <string name="pref_player_chapter_markers">Kapitelmarkører</string>
     <string name="gestures">Bevægelser</string>

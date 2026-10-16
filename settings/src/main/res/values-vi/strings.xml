@@ -12,7 +12,6 @@
     <string name="settings_category_cache">Bộ nhớ đệm</string>
     <string name="settings_use_cache_title">Ảnh đệm</string>
     <string name="settings_cache_size">Kích thước bộ nhớ đệm</string>
-    <string name="theme">Chủ đề</string>
     <string name="about">Về</string>
     <string name="mpv_player">Trình phát mpv</string>
     <string name="download_roaming">Tải về trong khi chuyển vung</string>
@@ -22,12 +21,8 @@
     <string name="seeking">Tua</string>
     <string name="seek_back_increment">Gia số tua lùi</string>
     <string name="seek_forward_increment">Gia số tua tới</string>
-    <string name="dynamic_colors">Đổi màu động</string>
     <string name="subtitles">Phụ đề</string>
     <string name="subtitles_summary">Tùy chình diện mạo của phụ đề</string>
-    <string name="theme_system">Theo hệ thống</string>
-    <string name="theme_light">Sáng</string>
-    <string name="theme_dark">Tối</string>
     <string name="settings_category_network">Mạng</string>
     <string name="settings_request_timeout">Thời gian yêu cầu hết hạn</string>
     <string name="settings_socket_timeout">Thời gian socket hết hạn</string>
@@ -40,7 +35,6 @@
     <string name="privacy_policy">Chính sách về quyền riêng tư</string>
     <string name="download_mobile_data">Tải về sử dụng mạng dữ liệu</string>
     <string name="mpv_player_summary">Dùng trình phát mpv thử nghiệm để phát video. mpv hỗ trợ nhiều bộ giải mã hình ảnh, âm thanh và phụ đề hơn.</string>
-    <string name="dynamic_colors_summary">Dùng hệ thống đổi màu động của ngôn ngữ thiết kế Material You (chỉ khả dụng cho Android 12+)</string>
     <string name="settings_connect_timeout">Thời gian kết nối hết hạn</string>
     <string name="player_gestures_seek_summary">Vuốt ngang để tua tới hoặc tua lui</string>
     <string name="player_gestures_seek">Cử chỉ tua</string>

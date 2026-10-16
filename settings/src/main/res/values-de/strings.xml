@@ -10,7 +10,6 @@
     <string name="settings_category_cache">Cache</string>
     <string name="settings_use_cache_title">Zwischengespeicherte Bilder</string>
     <string name="settings_cache_size">Zwischenspeichergröße</string>
-    <string name="theme">Thema</string>
     <string name="privacy_policy">Datenschutzrichtlinien</string>
     <string name="mpv_player">MPV Mediaplayer</string>
     <string name="download_mobile_data">Über mobile Daten herunterladen</string>
@@ -26,10 +25,6 @@
     <string name="seeking">Suchen</string>
     <string name="subtitles">Untertitel</string>
     <string name="subtitles_summary">Untertitel anpassen</string>
-    <string name="theme_light">Hell</string>
-    <string name="theme_dark">Dunkel</string>
-    <string name="dynamic_colors">Dynamische Farben</string>
-    <string name="dynamic_colors_summary">Dynamische Farben nutzen (ab Android 12 verfügbar)</string>
     <string name="player_gestures_zoom">Zoom-Geste</string>
     <string name="player_gestures_zoom_summary">Zwei-Finger-Zoom um das Video an den Bildschirm anzupassen</string>
     <string name="seek_forward_increment">Weiter suchen inkrement</string>
@@ -38,7 +33,6 @@
     <string name="settings_connect_timeout">Verbindungszeitüberschreitung</string>
     <string name="settings_socket_timeout">Zeitüberschreitung der Socket</string>
     <string name="seek_back_increment">Zurückspulstufe</string>
-    <string name="theme_system">Übernehme Systemeinstellung</string>
     <string name="pref_player_mpv_hwdec">Hardware-Dekodierung</string>
     <string name="pref_player_mpv_vo">Videoausgang</string>
     <string name="pref_player_mpv_ao">Audioausgang</string>

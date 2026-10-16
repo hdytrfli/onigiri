@@ -11,7 +11,6 @@
     <string name="settings_category_appearance">Stile</string>
     <string name="settings_category_device">Dispositivo</string>
     <string name="settings_use_cache_title">Cache delle immagini</string>
-    <string name="theme">Temi</string>
     <string name="settings_category_cache">Cache</string>
     <string name="settings_use_cache_summary">La cache delle immagini permette di ridurre i tempi di caricamento. Dovrai riavviare l\'app.</string>
     <string name="settings_cache_size">Dimensione della cache</string>
@@ -30,13 +29,8 @@
     <string name="seek_back_increment">Riavvolgi di</string>
     <string name="subtitles">Sottotitoli</string>
     <string name="subtitles_summary">Personalizza lo stile dei sottotitoli</string>
-    <string name="dynamic_colors">Colori dinamici</string>
-    <string name="dynamic_colors_summary">Usa i colori dinamici Material You (disponibile solo per Android 12+)</string>
-    <string name="theme_system">Usa le impostazioni di sistema</string>
     <string name="settings_request_timeout">Timeout richiesta</string>
     <string name="pref_player_mpv_ao">Output audio</string>
-    <string name="theme_light">Chiaro</string>
-    <string name="theme_dark">Scuro</string>
     <string name="settings_category_network">Rete</string>
     <string name="settings_connect_timeout">Timeout connessione</string>
     <string name="settings_socket_timeout">Timeout socket</string>

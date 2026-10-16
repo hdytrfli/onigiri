@@ -14,7 +14,6 @@
     <string name="settings_use_cache_summary">Almacenar imágenes localmente accelera los tiempos de carga. Tomará efecto al reiniciar la app.</string>
     <string name="settings_cache_size">Tamaño de caché</string>
     <string name="settings_cache_size_message">La app usará esta cantidad de MB del almacenamiento interno para las imágenes. Valores grandes pueden ayudar en redes lentas.</string>
-    <string name="theme">Tema</string>
     <string name="about">Acerca de</string>
     <string name="privacy_policy">Política de privacidad</string>
     <string name="mpv_player">Reproductor MPV</string>
@@ -30,11 +29,6 @@
     <string name="seek_forward_increment">Incremento al avanzar</string>
     <string name="subtitles">Subtítulos</string>
     <string name="subtitles_summary">Personalizar apariencia de subtítulos</string>
-    <string name="dynamic_colors">Colores dinámicos</string>
-    <string name="dynamic_colors_summary">Usar colores dinámicos de Material You (solo en Android 12+)</string>
-    <string name="theme_system">Seguir tema del dispositivo</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_dark">Oscuro</string>
     <string name="settings_category_network">Red</string>
     <string name="pref_player_mpv_hwdec">Decodificación por hardware</string>
     <string name="settings_connect_timeout">Esperar conexión</string>

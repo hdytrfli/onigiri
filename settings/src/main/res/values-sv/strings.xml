@@ -11,7 +11,6 @@
     <string name="settings_category_device">Enhet</string>
     <string name="settings_category_cache">Cache</string>
     <string name="settings_cache_size">Lagringsstorlek</string>
-    <string name="theme">Tema</string>
     <string name="about">Om</string>
     <string name="privacy_policy">Integritetspolicy</string>
     <string name="mpv_player">mpv spelaren</string>
@@ -26,9 +25,6 @@
     <string name="amoled_theme">AMOLED-mörkt tema</string>
     <string name="amoled_theme_summary">Använd AMOLED-tema med en helt svart bakgrund</string>
     <string name="subtitles">Textning</string>
-    <string name="theme_system">Följ systemet</string>
-    <string name="theme_light">Ljust</string>
-    <string name="theme_dark">Mörkt</string>
     <string name="settings_request_timeout">Timeout för begäran</string>
     <string name="settings_connect_timeout">Timeout för anslutning</string>
     <string name="pref_player_mpv_vo">Videooutput</string>
@@ -42,8 +38,6 @@
     <string name="mpv_player_summary">Använd den experimentella mpv-spelaren för att spela videor. mpv har stöd för fler video, ljud och textningsformat.</string>
     <string name="player_gestures_seek">Spolningsgest</string>
     <string name="player_gestures_zoom_summary">Nyp in för att fylla skärmen med videon</string>
-    <string name="dynamic_colors">Dynamiska färger</string>
-    <string name="dynamic_colors_summary">Använd Material You dynamiska färger (endast tillgängligt på Android 12+)</string>
     <string name="subtitles_summary">Anpassa textningens utseende</string>
     <string name="settings_category_network">Nätverk</string>
     <string name="settings_socket_timeout">Timeout för socket</string>

@@ -716,7 +716,7 @@ class PlayerActivity : BasePlayerActivity() {
                     detailViewModel.load(itemId, isEpisode)
                 }
             }
-            FindroidTheme(darkTheme = true, dynamicColor = false) {
+            FindroidTheme {
                 CompositionLocalProvider(
                     LocalBackdropRatios provides
                         BackdropRatios(

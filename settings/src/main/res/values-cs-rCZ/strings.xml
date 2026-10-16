@@ -12,7 +12,6 @@
     <string name="settings_use_cache_summary">Cachování obrázků urychluje načítání obsahu. Projeví se po restartu aplikace.</string>
     <string name="settings_cache_size">Nastavit velikost mezipaměti v MB</string>
     <string name="settings_cache_size_message">Aplikace použije tuto velikost v MB k uložení obrázků z Jellyfin serveru. Větší hodnota může být prospěšná na pomalejším připojení.</string>
-    <string name="theme">Téma</string>
     <string name="about">O aplikaci</string>
     <string name="privacy_policy">Zásady ochrany osobních údajů</string>
     <string name="mpv_player">mpv přehrávač</string>
@@ -21,9 +20,6 @@
     <string name="settings_category_network">Síť</string>
     <string name="pref_player_mpv_hwdec">Hardwarové dekódování</string>
     <string name="pref_player_mpv_vo">Výstup videa</string>
-    <string name="theme_system">Podle systému</string>
-    <string name="dynamic_colors">Dynamické barvy</string>
-    <string name="dynamic_colors_summary">Použit dynamické barvy Material You (dostupné pouze v systému Android 12+)</string>
     <string name="seek_forward_increment">Délka posunout vpřed</string>
     <string name="app_language">Jazyk aplikace</string>
     <string name="gestures">Gesta</string>
@@ -33,8 +29,6 @@
     <string name="settings_category_cache">Mezipamět</string>
     <string name="download_mobile_data">Stahovat pomocí mobilních dat</string>
     <string name="download_roaming">Stahování při roamingu</string>
-    <string name="theme_light">Světlé</string>
-    <string name="theme_dark">Tmavé</string>
     <string name="seek_back_increment">Délka posunout zpět</string>
     <string name="amoled_theme_summary">Použít motiv AMOLED s čistě černým pozadím</string>
     <string name="pref_player_mpv_ao">Výstup zvuku</string>

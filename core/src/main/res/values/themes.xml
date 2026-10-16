@@ -5,25 +5,25 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme. Dark-only. -->
     <style name="Theme.Findroid" parent="Base.Theme.Findroid" />
 
-    <style name="Base.Theme.Findroid" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.Findroid" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Primary -->
-        <item name="colorPrimary">@color/primary_light</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorPrimaryContainer">@color/primary_container_light</item>
-        <item name="colorOnPrimaryContainer">@color/on_primary_container_light</item>
+        <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/on_primary_dark</item>
+        <item name="colorPrimaryContainer">@color/primary_container_dark</item>
+        <item name="colorOnPrimaryContainer">@color/on_primary_container_dark</item>
 
         <!-- Secondary -->
-        <item name="colorSecondary">@color/secondary_light</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="colorSecondaryContainer">@color/secondary_container_light</item>
-        <item name="colorOnSecondaryContainer">@color/on_secondary_container_light</item>
+        <item name="colorSecondary">@color/secondary_dark</item>
+        <item name="colorOnSecondary">@color/on_secondary_dark</item>
+        <item name="colorSecondaryContainer">@color/secondary_container_dark</item>
+        <item name="colorOnSecondaryContainer">@color/on_secondary_container_dark</item>
 
         <!-- Surface -->
-        <item name="android:colorBackground">@color/neutral_50</item>
-        <item name="colorSurface">@color/neutral_100</item>
+        <item name="android:colorBackground">@color/neutral_1000</item>
+        <item name="colorSurface">@color/neutral_900</item>
         <item name="colorSurfaceContainer">?attr/colorSurface</item>
         <item name="colorSurfaceContainerLow">?attr/colorSurface</item>
         <item name="colorSurfaceContainerHigh">?attr/colorSurface</item>
@@ -34,7 +34,6 @@
 
         <!-- Status bar -->
         <item name="android:statusBarColor">?attr/colorSurface</item>
-        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
 
         <!-- Shapes -->
         <item name="shapeAppearanceCornerExtraSmall">
@@ -47,11 +46,20 @@
 
         <!-- Navigation bar -->
         <item name="android:navigationBarColor">?attr/colorSurfaceContainer</item>
-        <item name="android:windowLightNavigationBar">?attr/isLightTheme</item>
 
         <!-- Extra -->
         <item name="elevationOverlayEnabled">false</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
         <item name="dialogCornerRadius">28dp</item>
+    </style>
+
+    <!-- Forces a pure black background, e.g. for OLED screens. -->
+    <style name="ThemeOverlay.Findroid.Amoled" parent="">
+        <!-- Surface -->
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="colorSurface">@android:color/black</item>
+        <item name="colorSurfaceContainer">?attr/colorSurface</item>
+        <item name="colorSurfaceContainerLow">?attr/colorSurface</item>
+        <item name="colorSurfaceContainerHigh">?attr/colorSurface</item>
     </style>
 </resources>

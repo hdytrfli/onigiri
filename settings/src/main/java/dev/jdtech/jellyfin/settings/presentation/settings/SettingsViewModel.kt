@@ -124,31 +124,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                         nameStringResource = R.string.settings_category_appearance,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource = R.string.theme,
-                                                    backendPreference = appPreferences.theme,
-                                                    onUpdate = { value ->
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.UpdateTheme(
-                                                                    value ?: "system"
-                                                                )
-                                                            )
-                                                        }
-                                                    },
-                                                    options = R.array.theme,
-                                                    optionValues = R.array.theme_values,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.dynamic_colors,
-                                                    descriptionStringRes =
-                                                        R.string.dynamic_colors_summary,
-                                                    enabled =
-                                                        Build.VERSION.SDK_INT >=
-                                                            Build.VERSION_CODES.S,
-                                                    backendPreference =
-                                                        appPreferences.dynamicColors,
-                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.hide_status_bar,
                                                     descriptionStringRes =

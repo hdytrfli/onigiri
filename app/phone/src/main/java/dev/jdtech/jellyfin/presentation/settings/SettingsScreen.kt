@@ -1,10 +1,7 @@
 package dev.jdtech.jellyfin.presentation.settings
 
 import android.app.Activity
-import android.app.UiModeManager
-import android.os.Build
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,34 +73,6 @@ fun SettingsScreen(
             is SettingsEvent.NavigateToUsers -> navigateToUsers()
             is SettingsEvent.NavigateToServers -> navigateToServers()
             is SettingsEvent.NavigateToAbout -> navigateToAbout()
-            is SettingsEvent.UpdateTheme -> {
-                val uiModeManager = context.getSystemService(UiModeManager::class.java)
-                val nightMode =
-                    when (event.theme) {
-                        "system" ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                UiModeManager.MODE_NIGHT_AUTO
-                            else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                        "light" ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                UiModeManager.MODE_NIGHT_NO
-                            else AppCompatDelegate.MODE_NIGHT_NO
-                        "dark" ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                UiModeManager.MODE_NIGHT_YES
-                            else AppCompatDelegate.MODE_NIGHT_YES
-                        else ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                UiModeManager.MODE_NIGHT_AUTO
-                            else AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    uiModeManager.setApplicationNightMode(nightMode)
-                } else {
-                    AppCompatDelegate.setDefaultNightMode(nightMode)
-                }
-            }
             is SettingsEvent.LaunchIntent -> {
                 try {
                     context.startActivity(event.intent)

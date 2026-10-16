@@ -1,48 +1,7 @@
 package dev.jdtech.jellyfin.presentation.theme
 
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import dev.jdtech.jellyfin.core.presentation.theme.ColorDark
-import dev.jdtech.jellyfin.core.presentation.theme.ColorLight
-
-val lightScheme =
-    lightColorScheme(
-        primary = ColorLight.primaryLight,
-        onPrimary = ColorLight.onPrimaryLight,
-        primaryContainer = ColorLight.primaryContainerLight,
-        onPrimaryContainer = ColorLight.onPrimaryContainerLight,
-        secondary = ColorLight.secondaryLight,
-        onSecondary = ColorLight.onSecondaryLight,
-        secondaryContainer = ColorLight.secondaryContainerLight,
-        onSecondaryContainer = ColorLight.onSecondaryContainerLight,
-        tertiary = ColorLight.tertiaryLight,
-        onTertiary = ColorLight.onTertiaryLight,
-        tertiaryContainer = ColorLight.tertiaryContainerLight,
-        onTertiaryContainer = ColorLight.onTertiaryContainerLight,
-        error = ColorLight.errorLight,
-        onError = ColorLight.onErrorLight,
-        errorContainer = ColorLight.errorContainerLight,
-        onErrorContainer = ColorLight.onErrorContainerLight,
-        background = ColorLight.backgroundLight,
-        onBackground = ColorLight.onBackgroundLight,
-        surface = ColorLight.surfaceLight,
-        onSurface = ColorLight.onSurfaceLight,
-        surfaceVariant = ColorLight.surfaceVariantLight,
-        onSurfaceVariant = ColorLight.onSurfaceVariantLight,
-        outline = ColorLight.outlineLight,
-        outlineVariant = ColorLight.outlineVariantLight,
-        scrim = ColorLight.scrimLight,
-        inverseSurface = ColorLight.inverseSurfaceLight,
-        inverseOnSurface = ColorLight.inverseOnSurfaceLight,
-        inversePrimary = ColorLight.inversePrimaryLight,
-        surfaceDim = ColorLight.surfaceDimLight,
-        surfaceBright = ColorLight.surfaceBrightLight,
-        surfaceContainerLowest = ColorLight.surfaceContainerLowestLight,
-        surfaceContainerLow = ColorLight.surfaceContainerLowLight,
-        surfaceContainer = ColorLight.surfaceContainerLight,
-        surfaceContainerHigh = ColorLight.surfaceContainerHighLight,
-        surfaceContainerHighest = ColorLight.surfaceContainerHighestLight,
-    )
 
 val darkScheme =
     darkColorScheme(

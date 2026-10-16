@@ -58,12 +58,6 @@
     <string name="picture_in_picture_gesture_summary">استخدم زر النافذة الرئيسية أو الإيماءة لعرض الصورة داخل نافذة منبثقة أثناء عرض الفيديو</string>
     <string name="offline_mode">­وضع عدم الاتصال</string>
     <string name="offline_mode_summary">مشاهدة الأفلام والمسلسلات بدون اتصال بالخادم</string>
-    <string name="theme">الثمة</string>
-    <string name="theme_system">حسب النظام</string>
-    <string name="theme_light">فاتح</string>
-    <string name="theme_dark">داكن</string>
-    <string name="dynamic_colors">ألوان ديناميكية</string>
-    <string name="dynamic_colors_summary">استخدم ألوان Material You الديناميكية(متوفرة فقط على أندرويد ١٢ وبعده)</string>
     <string name="extra_info">عرض معلومات إضافية</string>
     <string name="extra_info_summary">يعرض معلومات مفصلة حول الصوت والفيديو والترجمة</string>
     <string name="mb">ميغابايت</string>

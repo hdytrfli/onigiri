@@ -11,7 +11,6 @@
     <string name="settings_category_cache">Vyrovnávacia pamäť</string>
     <string name="settings_use_cache_title">Ukladať obrázky do vyrovnávacej pamäte</string>
     <string name="settings_cache_size">Velkosť vyrovnávacej pamäte</string>
-    <string name="theme">Motív</string>
     <string name="about">O aplikácii</string>
     <string name="mpv_player">Prehrávač mpv</string>
     <string name="download_roaming">Sťahovať počas roamingu</string>
@@ -23,12 +22,8 @@
     <string name="seeking">Pretáčanie</string>
     <string name="seek_back_increment">Velkosť pretočenia dozadu</string>
     <string name="seek_forward_increment">Velkosť pretočenia dopredu</string>
-    <string name="dynamic_colors">Dynamické farby</string>
     <string name="subtitles">Titulky</string>
     <string name="subtitles_summary">Prispôsobiť vzhľad titulkov</string>
-    <string name="theme_system">Podľa systému</string>
-    <string name="theme_light">Svetlý</string>
-    <string name="theme_dark">Temný</string>
     <string name="settings_category_network">Sieť</string>
     <string name="settings_request_timeout">Limit čakania na odpoveď</string>
     <string name="settings_connect_timeout">Limit čakania na pripojenie</string>
@@ -43,7 +38,6 @@
     <string name="privacy_policy">Zásady ochrany súkromia</string>
     <string name="download_mobile_data">Sťahovať pomocou mobilných dát</string>
     <string name="mpv_player_summary">Použiť experimentálny prehrávač mpv na prehrávanie videí. Mpv má širšiu podporu audio/video kodekov a formátov titulkov.</string>
-    <string name="dynamic_colors_summary">Použiť dynamické farby Dynamic You (iba pre Android 12+)</string>
     <string name="extra_info">Zobraziť doplnkové informácie</string>
     <string name="extra_info_summary">Zobraziť detailné informácie o zvuku, videu a titulkoch</string>
     <string name="amoled_theme">AMOLED temný motív</string>

@@ -17,7 +17,6 @@
     <string name="settings_category_cache">Pamięć podręczna</string>
     <string name="title_settings">Ustawienia</string>
     <string name="title_download">Pobrane</string>
-    <string name="theme">Motyw</string>
     <string name="about">Informacje</string>
     <string name="privacy_policy">Polityka prywatności</string>
     <string name="mpv_player">Odtwarzacz MPV</string>
@@ -25,8 +24,6 @@
     <string name="gestures">Gesty</string>
     <string name="player_gestures_zoom">Gest przybliżenia</string>
     <string name="player_gestures_zoom_summary">Uszczypnij by wypełnić ekran</string>
-    <string name="dynamic_colors">Dynamiczne kolory</string>
-    <string name="dynamic_colors_summary">Użyj dynamicznych kolorów Material You (dostępne tylko w Android 12+)</string>
     <string name="pref_player_mpv_hwdec">Dekodowanie sprzętowe</string>
     <string name="settings_category_network">Sieć</string>
     <string name="settings_request_timeout">Limit czasu żądania</string>
@@ -35,9 +32,6 @@
     <string name="subtitles_summary">Dostosuj wygląd napisów</string>
     <string name="subtitles">Napisy</string>
     <string name="seeking">Przesuwanie</string>
-    <string name="theme_system">Zgodnie z systemem</string>
-    <string name="theme_light">Jasny</string>
-    <string name="theme_dark">Ciemny</string>
     <string name="pref_player_mpv_vo">Wyjście wideo</string>
     <string name="pref_player_mpv_ao">Wyjście audio</string>
     <string name="seek_back_increment">Krok przesuwania wstecznego</string>

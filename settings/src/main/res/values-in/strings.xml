@@ -53,12 +53,6 @@
     <string name="picture_in_picture_gesture_summary">Gunakan tombol beranda atau gestur untuk masuk ke mode gambar-dalam-gambar saat video diputar</string>
     <string name="offline_mode">Mode Luring</string>
     <string name="offline_mode_summary">Tonton film dan serial tanpa koneksi ke server</string>
-    <string name="theme">Tema</string>
-    <string name="theme_system">Ikuti sistem</string>
-    <string name="theme_light">Terang</string>
-    <string name="theme_dark">Gelap</string>
-    <string name="dynamic_colors">Warna dinamis</string>
-    <string name="dynamic_colors_summary">Gunakan warna dinamis Material You (hanya tersedia di Android 12 ke atas)</string>
     <string name="extra_info">Tampilkan Info Tambahan</string>
     <string name="extra_info_summary">Menampilkan informasi detail tentang Audio, Video, dan Subtitle</string>
     <string name="mb">MB</string>

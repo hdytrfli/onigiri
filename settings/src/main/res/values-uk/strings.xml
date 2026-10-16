@@ -10,7 +10,6 @@
     <string name="settings_category_cache">Кеш</string>
     <string name="settings_use_cache_title">Кеш зображень</string>
     <string name="settings_cache_size">Розмір кешу</string>
-    <string name="theme">Тема</string>
     <string name="about">Про додаток</string>
     <string name="privacy_policy">Політика конфіденційності</string>
     <string name="mpv_player">mpv плеєр</string>
@@ -24,8 +23,6 @@
     <string name="amoled_theme_summary">Використовувати AMOLED-тему на чистому чорному фоні</string>
     <string name="subtitles">Субтитри</string>
     <string name="subtitles_summary">Налаштувати вигляд субтитрів</string>
-    <string name="theme_light">Світла</string>
-    <string name="theme_dark">Темна</string>
     <string name="settings_category_network">Мережа</string>
     <string name="settings_request_timeout">Таймаут запиту</string>
     <string name="settings_socket_timeout">Таймаут сокета</string>
@@ -45,9 +42,6 @@
     <string name="player_gestures_zoom">Жест масштабування</string>
     <string name="player_gestures_seek">Жест перемотування</string>
     <string name="seek_forward_increment">Крок пошуку вперед</string>
-    <string name="dynamic_colors">Динамічні кольори</string>
-    <string name="dynamic_colors_summary">Використовувати кольори Material You (доступно лише на Android 12+)</string>
-    <string name="theme_system">Як на пристрої</string>
     <string name="settings_connect_timeout">Тайм-аут підключення (мс)</string>
     <string name="extra_info_summary">Відображає детальну інформацію про аудіо, відео та субтитри</string>
     <string name="none">Нічого</string>

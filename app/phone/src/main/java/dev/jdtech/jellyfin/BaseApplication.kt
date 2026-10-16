@@ -1,8 +1,6 @@
 package dev.jdtech.jellyfin
 
 import android.app.Application
-import android.os.Build
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.Constraints
@@ -20,7 +18,6 @@ import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
-import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.HiltAndroidApp
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.work.MpvCleanupWorker
@@ -44,21 +41,6 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            val mode =
-                when (appPreferences.getValue(appPreferences.theme)) {
-                    "system" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                    "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }
-            AppCompatDelegate.setDefaultNightMode(mode)
-        }
-
-        if (appPreferences.getValue(appPreferences.dynamicColors)) {
-            DynamicColors.applyToActivitiesIfAvailable(this)
         }
 
         val workManager = WorkManager.getInstance(applicationContext)

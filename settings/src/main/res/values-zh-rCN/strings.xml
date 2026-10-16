@@ -12,7 +12,6 @@
     <string name="settings_category_device">设备</string>
     <string name="settings_category_cache">缓存</string>
     <string name="settings_use_cache_title">缓存图片</string>
-    <string name="theme">主题</string>
     <string name="about">关于</string>
     <string name="privacy_policy">隐私政策</string>
     <string name="mpv_player">mpv 播放器</string>
@@ -30,11 +29,6 @@
     <string name="seek_forward_increment">快进步进</string>
     <string name="subtitles">字幕</string>
     <string name="subtitles_summary">自定义字幕外观</string>
-    <string name="dynamic_colors">动态色彩</string>
-    <string name="dynamic_colors_summary">使用 Material You 动态颜色（仅适用于 Android 12+）</string>
-    <string name="theme_system">跟随系统</string>
-    <string name="theme_light">浅色</string>
-    <string name="theme_dark">深色</string>
     <string name="settings_category_network">网络</string>
     <string name="settings_request_timeout">请求超时</string>
     <string name="settings_connect_timeout">连接超时</string>

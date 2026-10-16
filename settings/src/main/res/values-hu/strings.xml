@@ -11,7 +11,6 @@
     <string name="settings_category_cache">Gyorsítótár</string>
     <string name="settings_use_cache_title">Képek gyorsidőtározása</string>
     <string name="settings_cache_size">Gyorsidőtár mérete</string>
-    <string name="theme">Téma</string>
     <string name="about">Rólunk</string>
     <string name="privacy_policy">Adatvédelmi nyilatkozat</string>
     <string name="mpv_player">mpv lejátszó</string>
@@ -30,17 +29,12 @@
     <string name="player_gestures_zoom">Zoom gesztus</string>
     <string name="player_gestures_zoom_summary">Nagyítással töltsd ki a kijelzőt</string>
     <string name="subtitles_summary">Szabd testre a feliratok megjelenését</string>
-    <string name="theme_light">Világos</string>
-    <string name="theme_dark">Sötét</string>
     <string name="settings_category_network">Hálózat</string>
-    <string name="dynamic_colors_summary">Használja a Material You dinamikus színeit (Csak Android 12+-on érhető el)</string>
-    <string name="theme_system">Kövesd a rendszert</string>
     <string name="seek_forward_increment">Előre seekelési sebesség növekedése</string>
     <string name="settings_connect_timeout">Csatlakozási időtúllépés</string>
     <string name="pref_player_mpv_hwdec">Hardveres dekódolás</string>
     <string name="settings_socket_timeout">Socket időtúllépése</string>
     <string name="settings_request_timeout">Lekérdezési idő túllépés</string>
-    <string name="dynamic_colors">Dinamikus színek</string>
     <string name="seek_back_increment">Vissza seekelési sebesség növekedése</string>
     <string name="player_gestures_seek_summary">Húzd az ujjad jobbra vagy balra az előre, illetve vissza ugráshoz</string>
     <string name="amoled_theme">AMOLED sötét mód</string>

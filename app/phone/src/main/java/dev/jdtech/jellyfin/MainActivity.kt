@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                 onDispose {}
             }
 
-            FindroidTheme(dynamicColor = state.isDynamicColors) {
+            FindroidTheme {
                 if (!state.isLoading) {
                     // When the status bar is hidden, consume its inset (including the display
                     // cutout, which only becomes non-zero once the bar is gone) for the whole app

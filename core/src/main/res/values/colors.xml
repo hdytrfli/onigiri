@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary -->
-    <color name="primary_light">#1A1A1A</color>
-    <color name="primary_container_light">#E0E0E0</color>
-    <color name="on_primary_container_light">#1A1A1A</color>
-
     <color name="primary_dark">#E6E6E6</color>
     <color name="on_primary_dark">#1A1A1A</color>
     <color name="primary_container_dark">#2A2A2A</color>
     <color name="on_primary_container_dark">#EDEDED</color>
 
     <!-- Secondary -->
-    <color name="secondary_light">#4A4A4A</color>
-    <color name="secondary_container_light">#E0E0E0</color>
-    <color name="on_secondary_container_light">#1A1A1A</color>
-
     <color name="secondary_dark">#B0B0B0</color>
     <color name="on_secondary_dark">#1A1A1A</color>
     <color name="secondary_container_dark">#2A2A2A</color>
@@ -34,8 +26,6 @@
     <color name="neutral_400">#5D82A7</color>
     <color name="neutral_300">#A9BDD1</color>
     <color name="neutral_200">#D7E0E9</color>
-    <color name="neutral_100">#FAFAFA</color>
-    <color name="neutral_50">#FAFAFA</color>
     <color name="transparent_white_300">#4DFFFFFF</color>
     <color name="transparent_black_300">#4D000000</color>
     <color name="red">#EB5757</color>

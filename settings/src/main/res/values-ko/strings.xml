@@ -2,7 +2,6 @@
 <resources>
     <string name="settings_use_cache_title">캐시 이미지</string>
     <string name="settings_category_cache">캐시</string>
-    <string name="theme">테마</string>
     <string name="settings_cache_size">캐시 용량</string>
     <string name="about">정보</string>
     <string name="privacy_policy">개인 정보 보호 정책</string>
@@ -17,7 +16,6 @@
     <string name="settings_category_download">다운로드</string>
     <string name="settings_category_appearance">디자인</string>
     <string name="settings_category_device">디바이스</string>
-    <string name="dynamic_colors">동적 색상</string>
     <string name="title_settings">설정</string>
     <string name="title_download">다운로드</string>
     <string name="settings_category_language">언어</string>
@@ -27,14 +25,10 @@
     <string name="settings_category_player">플레이어</string>
     <string name="settings_cache_size_message">설정한 용량의 저장공간 용량을 Jellyfin 서버의 이미지 캐시를 저장하는 데 사용합니다. 값이 클수록 느린 네트워크에서 큰 효과가 있습니다.</string>
     <string name="seek_forward_increment">빨리 감기 시간</string>
-    <string name="dynamic_colors_summary">Material You 동적 색상 사용(Android 12 이상에서만 사용 가능)</string>
     <string name="settings_use_cache_summary">이미지 캐시를 저장공간에 저장하여 로딩 시간을 단축합니다. 앱을 다시 시작한 후에 적용됩니다.</string>
     <string name="mpv_player_summary">실험용 mpv 플레이어를 사용하여 비디오를 재생합니다. mpv 플레이어는 더 많은 비디오, 오디오 및 자막 코덱을 지원합니다.</string>
     <string name="subtitles">자막</string>
     <string name="subtitles_summary">자막 스타일 커스텀</string>
-    <string name="theme_system">기기 테마와 동기화</string>
-    <string name="theme_light">라이트 모드</string>
-    <string name="theme_dark">다크 모드</string>
     <string name="settings_category_network">네트워크</string>
     <string name="settings_request_timeout">요청시간 초과</string>
     <string name="settings_connect_timeout">연결시간 초과</string>

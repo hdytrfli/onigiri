@@ -10,11 +10,6 @@
     <string name="subtitles_summary">pas het uiterlijk van ondertiteling aan</string>
     <string name="seeking">Zoeken</string>
     <string name="seek_back_increment">Terugzoek stappen</string>
-    <string name="theme_system">Volg systeem</string>
-    <string name="theme_light">Licht</string>
-    <string name="theme_dark">Donker</string>
-    <string name="dynamic_colors_summary">Gebruik je eigen dynamische kleuren (alleen beschikbaar op Android 12+)</string>
-    <string name="dynamic_colors">Dynamische kleuren</string>
     <string name="player_gestures_zoom">Zoom beweging</string>
     <string name="player_gestures_zoom_summary">Zoomen om het scherm te vullen met de video</string>
     <string name="gestures">Gebaren</string>
@@ -38,7 +33,6 @@
     <string name="settings_use_cache_summary">Cache afbeeldingen op schijf om laadtijden te versnellen. Treedt in werking na een herstart van de app.</string>
     <string name="settings_cache_size">Cache grote</string>
     <string name="settings_cache_size_message">App zal deze hoeveelheid MB van uw schijfruimte gebruiken om afbeeldingen van Jellyfin server op te slaan. Grotere waarden kunnen gunstig zijn op tragere netwerken.</string>
-    <string name="theme">Thema</string>
     <string name="about">Over</string>
     <string name="privacy_policy">Privacybeleid</string>
     <string name="mpv_player_summary">Gebruik de experimentele mpv speler om videos af te spelen. mpv heeft ondersteuning voor meer video, audio en ondertiteling codecs.</string>

@@ -6,7 +6,6 @@
     <string name="settings_preferred_audio_language">Tercih edilen ses dili</string>
     <string name="settings_category_download">İndirilenler</string>
     <string name="title_settings">Ayarlar</string>
-    <string name="theme">Tema</string>
     <string name="settings_category_device">Cihaz</string>
     <string name="about">Hakkında</string>
     <string name="settings_category_servers">Sunucular</string>
@@ -15,16 +14,12 @@
     <string name="settings_category_player">Oynatıcı</string>
     <string name="settings_category_appearance">Görünüş</string>
     <string name="amoled_theme">AMOLED karanlık tema</string>
-    <string name="theme_dark">Karanlık</string>
-    <string name="theme_light">Aydınlık</string>
-    <string name="theme_system">Sistemi takip et</string>
     <string name="settings_category_cache">Önbellek</string>
     <string name="settings_use_cache_title">Resimleri önbelleğe al</string>
     <string name="privacy_policy">Gizlilik politikası</string>
     <string name="download_mobile_data">Mobil veri kullanarak indir</string>
     <string name="gestures">Hareketler</string>
     <string name="player_gestures_zoom">Yakınlaştırma hareketi</string>
-    <string name="dynamic_colors">Dinamik renkler</string>
     <string name="subtitles_summary">Altyazıların görünümünü özelleştir</string>
     <string name="settings_category_network">Ağ</string>
     <string name="settings_cache_size">Önbellek boyutu</string>
@@ -69,7 +64,6 @@
     <string name="picture_in_picture_gesture_summary">Video oynamaya devam ederken Resim İçinde Resim modune girmek için ana ekrana kaydırma hareketini kullan</string>
     <string name="offline_mode">Çevrimdışı modu</string>
     <string name="offline_mode_summary">Sunucuya bağlantı olmadan film ve dizileri izle</string>
-    <string name="dynamic_colors_summary">Varsayılan olarak Material You Dinamik renkleri kullan (sadece android 12+ cihazlarda kullanılabilir)</string>
     <string name="extra_info">Ek bilgileri göster</string>
     <string name="extra_info_summary">Ses, Video ve Altyazılar hakkında detaylı bilgileri göster</string>
     <string name="mb">MB</string>
