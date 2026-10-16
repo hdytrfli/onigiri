@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,8 +55,8 @@ import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 
 /**
- * The Identify search form: the title, then an optional "advanced" group (year and provider IDs)
- * behind a switch. Searching opens the results page.
+ * The Identify search form: the title and the "advanced" switch share a group, and the advanced
+ * fields (year and provider IDs) live in their own group. Searching opens the results page.
  */
 @Composable
 fun IdentifyScreen(
@@ -143,30 +144,11 @@ private fun IdentifyScreenLayout(
                             value = state.query,
                             onValueChange = onQueryChange,
                         )
-                    }
-
-                    IdentifyCard {
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth().padding(MaterialTheme.spacings.medium),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(CoreR.string.identify_advanced),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
-                                Text(
-                                    text =
-                                        stringResource(CoreR.string.identify_advanced_description),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Spacer(Modifier.width(MaterialTheme.spacings.medium))
-                            Switch(checked = state.advanced, onCheckedChange = onAdvancedChange)
-                        }
+                        IdentifyDivider()
+                        AdvancedRow(
+                            checked = state.advanced,
+                            onCheckedChange = onAdvancedChange,
+                        )
                     }
 
                     // Last child of the column, so collapsing it adds no stray spacing.
@@ -237,14 +219,39 @@ private fun IdentifyCard(content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+/** Matches the divider style used by the subtitle list. */
 @Composable
 private fun IdentifyDivider() {
-    HorizontalDivider(modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium))
+    HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
+}
+
+/** The "Advanced search" switch row, shown in the same group as the title field. */
+@Composable
+private fun AdvancedRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(MaterialTheme.spacings.medium),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(CoreR.string.identify_advanced),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
+            Text(
+                text = stringResource(CoreR.string.identify_advanced_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.width(MaterialTheme.spacings.medium))
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
 }
 
 /**
- * A labelled field: the label on top, then a row with the icon *outside* the filled input, and the
- * hint underneath.
+ * A labelled field: the label on top, the filled input with the icon *inside* it, and the hint
+ * underneath.
  */
 @Composable
 private fun IdentifyField(
@@ -264,41 +271,40 @@ private fun IdentifyField(
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(MaterialTheme.spacings.medium))
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = true,
-                textStyle =
-                    MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.weight(1f),
-                decorationBox = { inner ->
-                    Box(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                .padding(
-                                    horizontal = MaterialTheme.spacings.medium,
-                                    vertical = 12.dp,
-                                )
-                    ) {
-                        inner()
-                    }
-                },
-            )
-        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle =
+                MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            modifier = Modifier.fillMaxWidth(),
+            decorationBox = { inner ->
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(
+                                horizontal = MaterialTheme.spacings.medium,
+                                vertical = 12.dp,
+                            ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.width(MaterialTheme.spacings.small))
+                    Box(modifier = Modifier.weight(1f)) { inner() }
+                }
+            },
+        )
         Text(
             text = hint,
             style = MaterialTheme.typography.bodySmall,
