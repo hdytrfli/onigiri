@@ -141,7 +141,10 @@ private fun IdentifyScreenLayout(
                     )
                     // The advanced fields stay in the same group, right below the title.
                     AnimatedVisibility(visible = state.advanced) {
-                        Column {
+                        Column(
+                            verticalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacings.medium)
+                        ) {
                             IdentifyField(
                                 label = stringResource(CoreR.string.identify_year),
                                 hint = stringResource(CoreR.string.identify_year_field_hint),
@@ -206,7 +209,11 @@ private fun IdentifyCard(content: @Composable ColumnScope.() -> Unit) {
         colors =
             CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
-        Column(content = content)
+        Column(
+            modifier = Modifier.padding(vertical = MaterialTheme.spacings.medium),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+            content = content,
+        )
     }
 }
 
@@ -220,7 +227,7 @@ private fun IdentifyDivider() {
 @Composable
 private fun AdvancedRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(MaterialTheme.spacings.medium),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -254,7 +261,7 @@ private fun IdentifyField(
     keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(MaterialTheme.spacings.medium),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
     ) {
         Text(
