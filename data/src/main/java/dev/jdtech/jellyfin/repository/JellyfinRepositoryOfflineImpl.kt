@@ -33,6 +33,7 @@ import org.jellyfin.sdk.model.api.ImageInfo
 import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.UserConfiguration
@@ -361,6 +362,11 @@ class JellyfinRepositoryOfflineImpl(
         oldIndex: Int,
         newIndex: Int,
     ) = Unit
+
+    override suspend fun getRemoteImages(itemId: UUID, type: ImageType): List<RemoteImageInfo> =
+        emptyList()
+
+    override suspend fun downloadRemoteImage(itemId: UUID, type: ImageType, imageUrl: String) = Unit
 
     override suspend fun getDownloads(): List<FindroidItem> =
         withContext(Dispatchers.IO) {

@@ -20,6 +20,7 @@ import org.jellyfin.sdk.model.api.ImageInfo
 import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.UserConfiguration
@@ -185,6 +186,12 @@ interface JellyfinRepository {
         oldIndex: Int,
         newIndex: Int,
     )
+
+    /** Searches the server's remote image providers for images of [type] to use on [itemId]. */
+    suspend fun getRemoteImages(itemId: UUID, type: ImageType): List<RemoteImageInfo>
+
+    /** Asks the server to download the remote image at [imageUrl] and attach it as [type]. */
+    suspend fun downloadRemoteImage(itemId: UUID, type: ImageType, imageUrl: String)
 
     suspend fun getDownloads(): List<FindroidItem>
 

@@ -53,6 +53,7 @@ import org.jellyfin.sdk.model.api.PlaybackProgressInfo
 import org.jellyfin.sdk.model.api.PlaybackStartInfo
 import org.jellyfin.sdk.model.api.PlaybackStopInfo
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.RepeatMode
@@ -707,6 +708,25 @@ class JellyfinRepositoryImpl(
     ) {
         withContext(Dispatchers.IO) {
             jellyfinApi.imageApi.updateItemImageIndex(itemId, type, oldIndex, newIndex)
+        }
+    }
+
+    override suspend fun getRemoteImages(itemId: UUID, type: ImageType): List<RemoteImageInfo> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.remoteImageApi
+                .getRemoteImages(itemId = itemId, type = type)
+                .content
+                .images
+                .orEmpty()
+        }
+
+    override suspend fun downloadRemoteImage(itemId: UUID, type: ImageType, imageUrl: String) {
+        withContext(Dispatchers.IO) {
+            jellyfinApi.remoteImageApi.downloadRemoteImage(
+                itemId = itemId,
+                type = type,
+                imageUrl = imageUrl,
+            )
         }
     }
 
