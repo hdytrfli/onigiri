@@ -250,8 +250,8 @@ private fun AdvancedRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 }
 
 /**
- * A labelled field: the label on top, the filled input with the icon *inside* it, and the hint
- * underneath.
+ * A labelled field: the label on top, then the filled input with the icon inside it and the hint as
+ * a placeholder while it is empty.
  */
 @Composable
 private fun IdentifyField(
@@ -301,14 +301,19 @@ private fun IdentifyField(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.width(MaterialTheme.spacings.small))
-                    Box(modifier = Modifier.weight(1f)) { inner() }
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text = hint,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color =
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            )
+                        }
+                        inner()
+                    }
                 }
             },
-        )
-        Text(
-            text = hint,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
     }
 }
