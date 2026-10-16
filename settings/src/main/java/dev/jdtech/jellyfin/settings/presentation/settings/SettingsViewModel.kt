@@ -676,9 +676,7 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         )
                                                         // Re-evaluate visibility now that the flag
                                                         // changed (the screen reloads before this).
-                                                        loadPreferences(
-                                                            lastIndexes,
-                                                        )
+                                                        loadPreferences(lastIndexes)
                                                     },
                                                     options = R.array.player_time_display_options,
                                                     optionValues =
