@@ -153,8 +153,8 @@ private fun EditImageSearchLayout(
                             },
                         ) { result ->
                             RemoteImageTile(
+                                type = type,
                                 result = result,
-                                ratio = searchImageAspectRatio(type),
                                 onClick = { onApply(result) },
                             )
                         }
@@ -165,7 +165,7 @@ private fun EditImageSearchLayout(
 }
 
 @Composable
-private fun RemoteImageTile(result: RemoteImageInfo, ratio: Float, onClick: () -> Unit) {
+private fun RemoteImageTile(type: ImageType, result: RemoteImageInfo, onClick: () -> Unit) {
     Column(
         modifier =
             Modifier.fillMaxWidth()
@@ -175,10 +175,10 @@ private fun RemoteImageTile(result: RemoteImageInfo, ratio: Float, onClick: () -
         AsyncImage(
             model = result.thumbnailUrl ?: result.url,
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = searchImageContentScale(type),
             modifier =
                 Modifier.fillMaxWidth()
-                    .aspectRatio(ratio)
+                    .aspectRatio(remoteImageAspectRatio(type, result))
                     .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         )
@@ -207,9 +207,30 @@ private fun remoteImageResolution(image: RemoteImageInfo): String =
     if (image.width != null && image.height != null) "${image.width}×${image.height}" else ""
 
 /**
- * The preview ratio for [type] in the results grid. Box is shown like Primary (a poster), since
- * provider box images are usually posters; everything else uses the editor's ratio.
+ * The preview ratio for a result. A banner keeps its own ratio (derived from the result's real
+ * dimensions); every other type uses the editor's shape. Box is shown like Primary (a poster),
+ * since provider box images are usually posters.
  */
+private fun remoteImageAspectRatio(type: ImageType, image: RemoteImageInfo): Float {
+    if (type == ImageType.BANNER) {
+        val width = image.width
+        val height = image.height
+        if (width != null && height != null && width > 0 && height > 0) {
+            return width.toFloat() / height.toFloat()
+        }
+    }
+    return searchImageAspectRatio(type)
+}
+
 private fun searchImageAspectRatio(type: ImageType): Float =
     if (type == ImageType.BOX) imageTypeAspectRatio(ImageType.PRIMARY)
     else imageTypeAspectRatio(type)
+
+/** Poster and square previews fill their container; wide previews are shown whole (no cropping). */
+private fun searchImageContentScale(type: ImageType): ContentScale =
+    when (type) {
+        ImageType.PRIMARY,
+        ImageType.BOX,
+        ImageType.DISC -> ContentScale.Crop
+        else -> ContentScale.Fit
+    }
