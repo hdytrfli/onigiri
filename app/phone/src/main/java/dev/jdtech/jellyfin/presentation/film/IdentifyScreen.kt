@@ -294,13 +294,6 @@ private fun IdentifyField(
                             ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.width(MaterialTheme.spacings.small))
                     Box(modifier = Modifier.weight(1f)) {
                         if (value.isEmpty()) {
                             Text(
@@ -312,6 +305,13 @@ private fun IdentifyField(
                         }
                         inner()
                     }
+                    Spacer(Modifier.width(MaterialTheme.spacings.small))
+                    Icon(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             },
         )
