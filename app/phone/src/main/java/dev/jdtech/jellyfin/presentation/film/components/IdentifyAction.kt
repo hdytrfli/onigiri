@@ -48,7 +48,7 @@ fun IdentifyAction(
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
             } else {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_database_search),
+                    painter = painterResource(CoreR.drawable.ic_text_search),
                     contentDescription = stringResource(CoreR.string.identify),
                 )
             }

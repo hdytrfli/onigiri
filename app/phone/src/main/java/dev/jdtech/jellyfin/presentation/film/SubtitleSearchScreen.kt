@@ -162,11 +162,6 @@ private fun SubtitleSearchScreenLayout(
                         contentAlignment = Alignment.CenterEnd,
                     ) {
                         Button(onClick = onSearch, enabled = !state.isSearching) {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_search),
-                                contentDescription = null,
-                            )
-                            Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
                             Text(text = stringResource(CoreR.string.search))
                         }
                     }

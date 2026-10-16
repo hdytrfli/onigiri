@@ -60,6 +60,10 @@ constructor(
         _state.update { it.copy(query = query) }
     }
 
+    fun setAdvanced(advanced: Boolean) {
+        _state.update { it.copy(advanced = advanced) }
+    }
+
     fun setYear(year: String) {
         _state.update { it.copy(year = year) }
     }

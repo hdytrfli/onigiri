@@ -8,6 +8,7 @@ data class IdentifyState(
     val imdbId: String = "",
     val tmdbId: String = "",
     val tvdbId: String = "",
+    val advanced: Boolean = false,
     val isSearching: Boolean = false,
     val results: List<RemoteSearchResult> = emptyList(),
     val error: Exception? = null,

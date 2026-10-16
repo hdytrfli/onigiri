@@ -149,5 +149,7 @@
     <string name="identify_overview">Overview</string>
     <string name="identify_error">Couldn\'t search remote providers</string>
     <string name="identify_empty">No results found</string>
+    <string name="identify_advanced">Advanced search</string>
+    <string name="identify_advanced_description">Add a year or provider IDs to narrow the results</string>
     <string name="downloading_at">Downloading at %1$d%%</string>
 </resources>
