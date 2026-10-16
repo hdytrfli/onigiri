@@ -33,7 +33,7 @@ fun SubtitleSearchAction(
     if (state.canManageSubtitles) {
         FilledTonalIconButton(onClick = onClick, modifier = modifier) {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_closed_caption),
+                painter = painterResource(CoreR.drawable.ic_case_sensitive),
                 contentDescription = stringResource(CoreR.string.search_subtitles),
             )
         }
