@@ -143,6 +143,9 @@ class PlayerActivity : BasePlayerActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         binding.playerView.player = viewModel.player
+        // How long the overlay stays up before hiding itself ("Never" is stored as -1).
+        binding.playerView.controllerShowTimeoutMs =
+            appPreferences.getValue(appPreferences.playerControlsTimeout).toIntOrNull() ?: 5000
         binding.playerView.setControllerVisibilityListener(
             PlayerView.ControllerVisibilityListener { visibility ->
                 if (visibility == View.GONE) {
@@ -476,7 +479,7 @@ class PlayerActivity : BasePlayerActivity() {
                 when (optionsTabs.selectedTabPosition) {
                     0 -> viewModel.switchToTrack(C.TRACK_TYPE_AUDIO, position - 1)
                     1 -> viewModel.switchToTrack(C.TRACK_TYPE_TEXT, position - 1)
-                    3 -> viewModel.selectSpeed(playerSpeeds[position])
+                    2 -> viewModel.selectSpeed(playerSpeeds[position])
                 }
                 // Keep the sheet open so several changes can be made in a row. Reflect the choice
                 // immediately, then resync with the player once it has applied the change.
@@ -489,8 +492,8 @@ class PlayerActivity : BasePlayerActivity() {
         optionsList.adapter = menuAdapter
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_audio))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_subtitles))
-        optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_offset))
         optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_speed))
+        optionsTabs.addTab(optionsTabs.newTab().setText(R.string.player_menu_tab_offset))
         val offsetTabSelected = androidx.compose.runtime.mutableStateOf(false)
         optionsOffset.setContent {
             FindroidTheme {
@@ -513,7 +516,7 @@ class PlayerActivity : BasePlayerActivity() {
         optionsTabs.addOnTabSelectedListener(
             object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab) {
-                    offsetTabSelected.value = tab.position == 2
+                    offsetTabSelected.value = tab.position == 3
                     menuAdapter.submit(optionsItems(tab.position))
                 }
 
@@ -737,7 +740,7 @@ class PlayerActivity : BasePlayerActivity() {
         when (tab) {
             0 -> trackItems(C.TRACK_TYPE_AUDIO, CoreR.drawable.ic_music)
             1 -> trackItems(C.TRACK_TYPE_TEXT, CoreR.drawable.ic_case_sensitive)
-            3 ->
+            2 ->
                 playerSpeeds.mapIndexed { index, speed ->
                     PlayerMenuItem(
                         title = playerSpeedTexts[index],

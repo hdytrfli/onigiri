@@ -64,6 +64,7 @@ fun IdentifyResultsScreen(
     imdbId: String,
     tmdbId: String,
     tvdbId: String,
+    series: Boolean = false,
     navigateBack: () -> Unit,
     onApplied: () -> Unit,
     viewModel: IdentifyViewModel = hiltViewModel(),
@@ -81,6 +82,7 @@ fun IdentifyResultsScreen(
             query = query.trim(),
             year = year.trim().toIntOrNull(),
             providerIds = providerIds,
+            series = series,
         )
     }
 

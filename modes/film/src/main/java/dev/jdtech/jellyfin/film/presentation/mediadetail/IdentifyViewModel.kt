@@ -86,17 +86,27 @@ constructor(
         query: String,
         year: Int?,
         providerIds: Map<String, String>,
+        series: Boolean = false,
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, results = emptyList(), error = null) }
             try {
                 val results =
-                    repository.searchRemoteMovies(
-                        itemId = itemId,
-                        name = query,
-                        year = year,
-                        providerIds = providerIds,
-                    )
+                    if (series) {
+                        repository.searchRemoteSeries(
+                            itemId = itemId,
+                            name = query,
+                            year = year,
+                            providerIds = providerIds,
+                        )
+                    } else {
+                        repository.searchRemoteMovies(
+                            itemId = itemId,
+                            name = query,
+                            year = year,
+                            providerIds = providerIds,
+                        )
+                    }
                 _state.update { it.copy(isSearching = false, results = results) }
             } catch (e: Exception) {
                 _state.update { it.copy(isSearching = false, error = e) }

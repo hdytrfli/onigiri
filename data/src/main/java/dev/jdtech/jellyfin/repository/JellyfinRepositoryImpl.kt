@@ -53,6 +53,8 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.RepeatMode
+import org.jellyfin.sdk.model.api.SeriesInfo
+import org.jellyfin.sdk.model.api.SeriesInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.SortOrder as ItemSortOrder
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
@@ -609,6 +611,37 @@ class JellyfinRepositoryImpl(
                 .getMovieRemoteSearchResults(
                     MovieInfoRemoteSearchQuery(
                         MovieInfo(
+                            name,
+                            null,
+                            null,
+                            null,
+                            null,
+                            providerIds,
+                            year,
+                            null,
+                            null,
+                            null,
+                            false,
+                        ),
+                        itemId,
+                        null,
+                        false,
+                    )
+                )
+                .content
+        }
+
+    override suspend fun searchRemoteSeries(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi
+                .getSeriesRemoteSearchResults(
+                    SeriesInfoRemoteSearchQuery(
+                        SeriesInfo(
                             name,
                             null,
                             null,

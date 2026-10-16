@@ -576,6 +576,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { personId ->
                     navigator.navigate(PersonRoute(personId = personId.toString()))
                 },
+            navigateToIdentify =
+                resumedAction { itemId ->
+                    navigator.navigate(IdentifyRoute(itemId = itemId.toString(), series = true))
+                },
         )
     }
     entry<SeasonRoute> { key ->
@@ -639,6 +643,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         imdbId = imdbId,
                         tmdbId = tmdbId,
                         tvdbId = tvdbId,
+                        series = key.series,
                     )
                 )
             },
@@ -652,6 +657,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             imdbId = key.imdbId,
             tmdbId = key.tmdbId,
             tvdbId = key.tvdbId,
+            series = key.series,
             navigateBack = dropUnlessResumed { navigator.goBack() },
             onApplied = {
                 // Return to the media detail page (form + results are on the stack).

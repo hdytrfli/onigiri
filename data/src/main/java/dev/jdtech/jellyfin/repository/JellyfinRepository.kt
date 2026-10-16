@@ -139,6 +139,14 @@ interface JellyfinRepository {
         providerIds: Map<String, String> = emptyMap(),
     ): List<RemoteSearchResult>
 
+    /** Searches remote metadata providers for series matching [name] (optionally [year]). */
+    suspend fun searchRemoteSeries(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String> = emptyMap(),
+    ): List<RemoteSearchResult>
+
     /** Applies the chosen remote search [result] to [itemId], replacing its metadata. */
     suspend fun applyRemoteSearchResult(
         itemId: UUID,

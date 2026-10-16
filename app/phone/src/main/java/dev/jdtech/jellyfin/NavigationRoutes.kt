@@ -46,7 +46,7 @@ data class CollectionRoute(val collectionId: String, val collectionName: String)
 
 @Serializable data class SubtitleSearchRoute(val itemId: String) : NavKey
 
-@Serializable data class IdentifyRoute(val itemId: String) : NavKey
+@Serializable data class IdentifyRoute(val itemId: String, val series: Boolean = false) : NavKey
 
 @Serializable
 data class IdentifyResultsRoute(
@@ -56,6 +56,7 @@ data class IdentifyResultsRoute(
     val imdbId: String,
     val tmdbId: String,
     val tvdbId: String,
+    val series: Boolean = false,
 ) : NavKey
 
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey

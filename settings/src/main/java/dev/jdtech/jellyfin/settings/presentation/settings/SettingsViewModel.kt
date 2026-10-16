@@ -789,6 +789,25 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                             ),
                                     ),
                                     PreferenceGroup(
+                                        nameStringResource = R.string.player_overlay,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.player_controls_timeout,
+                                                    descriptionStringRes =
+                                                        R.string.player_controls_timeout_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.playerControlsTimeout,
+                                                    options =
+                                                        R.array.player_controls_timeout_options,
+                                                    optionValues =
+                                                        R.array.player_controls_timeout_values,
+                                                )
+                                            ),
+                                    ),
+                                    PreferenceGroup(
                                         nameStringResource = R.string.seeking,
                                         preferences =
                                             listOf(

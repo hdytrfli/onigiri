@@ -51,6 +51,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
     val playerBrightness = Preference("pref_player_brightness", -1.0f)
 
+    // Player - overlay
+    val playerControlsTimeout = Preference("pref_player_controls_timeout", "5000")
+
     // Player - time display
     val playerTimeDisplay = Preference("pref_player_time_display", "duration")
     val playerTimeEndFormat = Preference("pref_player_time_end_format", "24")

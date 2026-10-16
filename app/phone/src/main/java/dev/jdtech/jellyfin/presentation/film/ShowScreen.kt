@@ -45,6 +45,7 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
@@ -67,6 +68,7 @@ fun ShowScreen(
     navigateHome: () -> Unit,
     navigateToItem: (item: FindroidItem) -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
+    navigateToIdentify: (itemId: UUID) -> Unit,
     viewModel: ShowViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -101,11 +103,18 @@ fun ShowScreen(
             }
             viewModel.onAction(action)
         },
+        onIdentify = navigateToIdentify,
+        onIdentifyApplied = { viewModel.loadShow(showId = showId) },
     )
 }
 
 @Composable
-private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
+private fun ShowScreenLayout(
+    state: ShowState,
+    onAction: (ShowAction) -> Unit,
+    onIdentify: (UUID) -> Unit = {},
+    onIdentifyApplied: () -> Unit = {},
+) {
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
@@ -256,6 +265,15 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
             hasHomeButton = true,
             onBackClick = { onAction(ShowAction.OnBackClick) },
             onHomeClick = { onAction(ShowAction.OnHomeClick) },
+            trailingContent = {
+                state.show?.let { show ->
+                    IdentifyAction(
+                        itemId = show.id,
+                        onClick = { onIdentify(show.id) },
+                        onApplied = onIdentifyApplied,
+                    )
+                }
+            },
         )
     }
 }
