@@ -148,8 +148,10 @@ class PlayerActivity : BasePlayerActivity() {
                 if (visibility == View.GONE) {
                     hideSystemUI()
                 }
+                updateOverlayGradient()
             }
         )
+        binding.playerView.post { updateOverlayGradient() }
 
         val playerControls = binding.playerView.findViewById<View>(R.id.player_controls)
         val lockedControls = binding.playerView.findViewById<View>(R.id.locked_player_view)
@@ -821,10 +823,6 @@ class PlayerActivity : BasePlayerActivity() {
             panel.translationX = panel.width.toFloat()
             panel.animate().translationX(0f).setDuration(200L).start()
         }
-        // The scrim is the same gradient as the player controls, so switch it on at full strength
-        // straight away: crossfading two identical gradients briefly lightens the result.
-        scrim.animate().cancel()
-        scrim.alpha = 1f
         fadePlayerControls(show = false)
     }
 
@@ -833,41 +831,51 @@ class PlayerActivity : BasePlayerActivity() {
             .animate()
             .translationX(panel.width.toFloat())
             .setDuration(200L)
-            .withEndAction { overlay.visibility = View.GONE }
+            .withEndAction {
+                overlay.visibility = View.GONE
+                updateOverlayGradient()
+            }
             .start()
-        // Hold the scrim at full strength while the controls fade back in, then drop it in a
-        // single step, so the gradient never dips during the transition.
-        fadePlayerControls(show = true) {
-            scrim.animate().cancel()
-            scrim.alpha = 0f
-        }
+        fadePlayerControls(show = true)
+    }
+
+    /**
+     * The gradient sits behind both the controls and the sheets, so it stays up while either is
+     * visible and only goes away once both are gone.
+     */
+    private fun updateOverlayGradient() {
+        val gradient = binding.playerView.findViewById<View>(R.id.player_overlay_gradient) ?: return
+        val controlsShown =
+            binding.playerView.findViewById<View>(R.id.exo_controller)?.visibility == View.VISIBLE
+        val sheetShown =
+            listOf(
+                    R.id.player_options_overlay,
+                    R.id.player_episodes_overlay,
+                    R.id.player_detail_overlay,
+                )
+                .any { findViewById<View>(it)?.visibility == View.VISIBLE }
+        gradient.visibility = if (controlsShown || sheetShown) View.VISIBLE else View.GONE
     }
 
     /**
      * Eases the player overlay (title, seek bar, buttons) out while a sheet is open, and back in.
      */
-    private fun fadePlayerControls(show: Boolean, onEnd: () -> Unit = {}) {
-        val controller = binding.playerView.findViewById<View>(R.id.exo_controller)
-        if (controller == null) {
-            onEnd()
-            return
-        }
+    private fun fadePlayerControls(show: Boolean) {
+        val controller = binding.playerView.findViewById<View>(R.id.exo_controller) ?: return
         controller.animate().cancel()
         if (show) {
             binding.playerView.showController()
             controller.alpha = 0f
-            controller.animate().alpha(1f).setDuration(200L).withEndAction { onEnd() }.start()
+            controller.animate().alpha(1f).setDuration(200L).start()
         } else {
             controller
                 .animate()
                 .alpha(0f)
                 .setDuration(200L)
-                .withEndAction {
-                    binding.playerView.hideController()
-                    onEnd()
-                }
+                .withEndAction { binding.playerView.hideController() }
                 .start()
         }
+        updateOverlayGradient()
     }
 
     /**

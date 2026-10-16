@@ -131,29 +131,17 @@ private fun IdentifyScreenLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    IdentifyCard {
-                        IdentifyField(
-                            label = stringResource(CoreR.string.identify_name),
-                            hint = stringResource(CoreR.string.identify_name_hint),
-                            icon = CoreR.drawable.ic_film,
-                            value = state.query,
-                            onValueChange = onQueryChange,
-                        )
-                        IdentifyDivider()
-                        AdvancedRow(
-                            checked = state.advanced,
-                            onCheckedChange = onAdvancedChange,
-                        )
-                    }
-
-                    // Last child of the column, so collapsing it adds no stray spacing.
+                IdentifyCard {
+                    IdentifyField(
+                        label = stringResource(CoreR.string.identify_name),
+                        hint = stringResource(CoreR.string.identify_name_hint),
+                        icon = CoreR.drawable.ic_film,
+                        value = state.query,
+                        onValueChange = onQueryChange,
+                    )
+                    // The advanced fields stay in the same group, right below the title.
                     AnimatedVisibility(visible = state.advanced) {
-                        IdentifyCard {
+                        Column {
                             IdentifyField(
                                 label = stringResource(CoreR.string.identify_year),
                                 hint = stringResource(CoreR.string.identify_year_field_hint),
@@ -162,7 +150,6 @@ private fun IdentifyScreenLayout(
                                 onValueChange = onYearChange,
                                 keyboardType = KeyboardType.Number,
                             )
-                            IdentifyDivider()
                             IdentifyField(
                                 label = stringResource(CoreR.string.identify_imdb),
                                 hint = stringResource(CoreR.string.identify_imdb_hint),
@@ -170,7 +157,6 @@ private fun IdentifyScreenLayout(
                                 value = state.imdbId,
                                 onValueChange = onImdbChange,
                             )
-                            IdentifyDivider()
                             IdentifyField(
                                 label = stringResource(CoreR.string.identify_tmdb),
                                 hint = stringResource(CoreR.string.identify_tmdb_hint),
@@ -179,7 +165,6 @@ private fun IdentifyScreenLayout(
                                 onValueChange = onTmdbChange,
                                 keyboardType = KeyboardType.Number,
                             )
-                            IdentifyDivider()
                             IdentifyField(
                                 label = stringResource(CoreR.string.identify_tvdb),
                                 hint = stringResource(CoreR.string.identify_tvdb_hint),
@@ -190,6 +175,12 @@ private fun IdentifyScreenLayout(
                             )
                         }
                     }
+                    // Only the advanced toggle is separated, so the fields read as one group.
+                    IdentifyDivider()
+                    AdvancedRow(
+                        checked = state.advanced,
+                        onCheckedChange = onAdvancedChange,
+                    )
                 }
             }
 
