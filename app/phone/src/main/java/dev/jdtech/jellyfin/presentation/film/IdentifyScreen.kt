@@ -158,17 +158,18 @@ private fun IdentifyScreenLayout(
                 }
             }
             item {
-                Button(
-                    onClick = onSearch,
-                    enabled = state.query.isNotBlank(),
+                Box(
                     modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd,
                 ) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_search),
-                        contentDescription = null,
-                    )
-                    Spacer(Modifier.width(MaterialTheme.spacings.small))
-                    Text(text = stringResource(CoreR.string.search))
+                    Button(onClick = onSearch, enabled = state.query.isNotBlank()) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_search),
+                            contentDescription = null,
+                        )
+                        Spacer(Modifier.width(MaterialTheme.spacings.small))
+                        Text(text = stringResource(CoreR.string.search))
+                    }
                 }
             }
         }

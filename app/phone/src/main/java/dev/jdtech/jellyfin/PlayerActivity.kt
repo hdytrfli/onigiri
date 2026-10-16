@@ -765,30 +765,18 @@ class PlayerActivity : BasePlayerActivity() {
         groups.forEachIndexed { index, group ->
             val format = group.mediaTrackGroup.getFormat(0)
             val language = languageDisplayName(format.language)
-            val flags = format.selectionFlags
-            val badge = buildList {
-                if (flags and C.SELECTION_FLAG_FORCED != 0) {
-                    add(getString(R.string.track_flag_forced))
-                }
-                if (flags and C.SELECTION_FLAG_DEFAULT != 0) {
-                    add(getString(R.string.track_flag_default))
-                }
-            }
-                .takeIf { it.isNotEmpty() }
-                ?.joinToString(" · ")
             // Prefer the structured language name; fall back to the source label only when the
             // language is unknown.
             val title = language ?: format.label ?: "Track ${index + 1}"
-            val metadata =
-                listOfNotNull(
-                        format.codecs?.takeIf { it.isNotBlank() },
-                        format.label?.takeIf { it.isNotBlank() && language != null },
-                    )
-                    .joinToString(" · ")
+            // The badge shows the simplified track format, which is always available.
+            val badge = prettyCodec(format.codecs)
+            // The source label carries details we cannot derive (e.g. "Songs only", "External").
+            // Only shown when the language is known, as the label is used as the title otherwise.
+            val label = format.label?.takeIf { it.isNotBlank() && language != null }
             items.add(
                 PlayerMenuItem(
                     title = title,
-                    subtitle = metadata.ifBlank { null },
+                    subtitle = label,
                     selected = group.isSelected,
                     iconRes = iconRes,
                     badge = badge,
@@ -806,6 +794,25 @@ class PlayerActivity : BasePlayerActivity() {
         if (code.isNullOrBlank() || code.equals("und", ignoreCase = true)) return null
         val name = Locale.forLanguageTag(code).displayLanguage
         return if (name.isBlank() || name.equals(code, ignoreCase = true)) null else name
+    }
+
+    /**
+     * Simplifies a raw codec string from the media (e.g. "hdmv_pgs_subtitle") into a short
+     * lowercase label for the track badge (e.g. "pgs"). Unknown codecs are passed through.
+     */
+    private fun prettyCodec(codec: String?): String? {
+        val value = codec?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return null
+        return when (value) {
+            "hdmv_pgs_subtitle",
+            "pgssub" -> "pgs"
+            "subrip" -> "srt"
+            "ssa" -> "ass"
+            "dvd_subtitle",
+            "dvdsub" -> "vobsub"
+            "eia_608" -> "cc"
+            "mp4a" -> "aac"
+            else -> value
+        }
     }
 
     private fun showOptionsSheet(overlay: View, panel: View, scrim: View) {

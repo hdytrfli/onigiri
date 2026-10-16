@@ -157,17 +157,18 @@ private fun SubtitleSearchScreenLayout(
                     }
                 }
                 item {
-                    Button(
-                        onClick = onSearch,
-                        enabled = !state.isSearching,
+                    Box(
                         modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd,
                     ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_search),
-                            contentDescription = null,
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                        Text(text = stringResource(CoreR.string.search))
+                        Button(onClick = onSearch, enabled = !state.isSearching) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_search),
+                                contentDescription = null,
+                            )
+                            Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                            Text(text = stringResource(CoreR.string.search))
+                        }
                     }
                 }
 

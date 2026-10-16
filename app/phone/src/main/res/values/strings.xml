@@ -7,8 +7,6 @@
     <string name="player_menu_tab_subtitles">Subtitles</string>
     <string name="player_menu_tab_speed">Speed</string>
     <string name="player_menu_tab_offset">Offset</string>
-    <string name="track_flag_forced">Forced</string>
-    <string name="track_flag_default">Default</string>
     <string name="player_subtitle_offset">Subtitle offset</string>
     <string name="player_subtitle_offset_by">Offsetting subtitle by</string>
     <string name="player_subtitle_offset_value">Offset subtitle by %1$s</string>
