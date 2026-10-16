@@ -77,6 +77,12 @@ private val ImageTypeOrder =
         ImageType.PROFILE,
     )
 
+/** Shared width for every 16:9 tile, so all 16:9 previews line up. */
+private val WideImageTileWidth = 280.dp
+
+/** Width of the per-tile overflow menu. */
+private val OverflowMenuWidth = 220.dp
+
 /**
  * Lets an admin view and edit an item's images, grouped by type: replace an image, delete one, and
  * add images to a type by searching the server's remote providers. Full-width, with each type
@@ -269,7 +275,7 @@ private fun ImageTile(
     type: ImageType,
     image: ImageInfo,
     baseUrl: String,
-    width: Dp?,
+    width: Dp,
     ratio: Float,
     enabled: Boolean,
     onReplace: () -> Unit,
@@ -280,7 +286,7 @@ private fun ImageTile(
     var menuOpen by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.tileWidth(width),
+        modifier = Modifier.width(width),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
     ) {
         AsyncImage(
@@ -321,17 +327,29 @@ private fun ImageTile(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = { menuOpen = false },
+                    modifier = Modifier.width(OverflowMenuWidth),
+                ) {
+                    // Header: the image type name, muted and not clickable.
                     DropdownMenuItem(
-                        text = { Text(stringResource(CoreR.string.replace)) },
+                        text = { Text(imageTypeLabel(type)) },
+                        enabled = false,
+                        onClick = {},
+                    )
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_rotate_ccw,
+                        label = stringResource(CoreR.string.replace),
                         enabled = enabled,
                         onClick = {
                             menuOpen = false
                             onReplace()
                         },
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(CoreR.string.delete)) },
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_trash,
+                        label = stringResource(CoreR.string.delete),
                         enabled = enabled,
                         onClick = {
                             menuOpen = false
@@ -339,8 +357,9 @@ private fun ImageTile(
                         },
                     )
                     if (onMakePrimary != null) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(CoreR.string.make_primary)) },
+                        MenuActionItem(
+                            icon = CoreR.drawable.ic_star,
+                            label = stringResource(CoreR.string.make_primary),
                             enabled = enabled && makePrimaryEnabled,
                             onClick = {
                                 menuOpen = false
@@ -354,17 +373,28 @@ private fun ImageTile(
     }
 }
 
+/** A single action row in the per-tile overflow menu, with a leading icon. */
+@Composable
+private fun MenuActionItem(icon: Int, label: String, enabled: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(label) },
+        leadingIcon = { Icon(painter = painterResource(icon), contentDescription = null) },
+        enabled = enabled,
+        onClick = onClick,
+    )
+}
+
 /** An empty slot that doubles as the "add" button: tapping it starts the search flow. */
 @Composable
 private fun PlaceholderTile(
-    width: Dp?,
+    width: Dp,
     ratio: Float,
     enabled: Boolean,
     onAdd: () -> Unit,
 ) {
     Box(
         modifier =
-            Modifier.tileWidth(width)
+            Modifier.width(width)
                 .aspectRatio(ratio)
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -381,10 +411,10 @@ private fun PlaceholderTile(
 
 /** A tile-sized placeholder with a centred spinner, shown while a remote image is downloading. */
 @Composable
-private fun BusyTile(width: Dp?, ratio: Float) {
+private fun BusyTile(width: Dp, ratio: Float) {
     Box(
         modifier =
-            Modifier.tileWidth(width)
+            Modifier.width(width)
                 .aspectRatio(ratio)
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -394,22 +424,16 @@ private fun BusyTile(width: Dp?, ratio: Float) {
     }
 }
 
-/** Applies the tile's fixed [width], or the full available width when it is null (logo/banner). */
-private fun Modifier.tileWidth(width: Dp?): Modifier =
-    if (width == null) this.fillMaxWidth() else this.width(width)
-
 /**
- * The tile width for [type]; null means "full width" (the wide logo/banner shapes). The 16:9 tiles
- * are deliberately generous: too big reads better than too small.
+ * The tile width for [type]: the poster/square types are 160dp, and every 16:9 type (including
+ * logo, banner and backdrop) shares one width so they line up.
  */
-private fun imageTileWidth(type: ImageType): Dp? =
+private fun imageTileWidth(type: ImageType): Dp =
     when (type) {
         ImageType.PRIMARY,
         ImageType.DISC,
         ImageType.BOX -> 160.dp
-        ImageType.LOGO,
-        ImageType.BANNER -> null
-        else -> 260.dp
+        else -> WideImageTileWidth
     }
 
 /** 16:9 previews are shown whole (Fit); the poster and square types fill their container (Crop). */
