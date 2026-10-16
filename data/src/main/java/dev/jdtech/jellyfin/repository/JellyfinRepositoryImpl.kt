@@ -602,6 +602,7 @@ class JellyfinRepositoryImpl(
         itemId: UUID,
         name: String,
         year: Int?,
+        providerIds: Map<String, String>,
     ): List<RemoteSearchResult> =
         withContext(Dispatchers.IO) {
             jellyfinApi.itemLookupApi
@@ -613,7 +614,7 @@ class JellyfinRepositoryImpl(
                             null,
                             null,
                             null,
-                            emptyMap(),
+                            providerIds,
                             year,
                             null,
                             null,

@@ -133,7 +133,16 @@
     <string name="subtitle_comment">Comment</string>
     <string name="identify">Identify</string>
     <string name="identify_search_hint">Title</string>
+    <string name="identify_name">Name</string>
+    <string name="identify_name_hint">e.g. The Matrix</string>
     <string name="identify_year_hint">Year (optional)</string>
+    <string name="identify_year_field_hint">e.g. 1999</string>
+    <string name="identify_imdb">IMDb ID</string>
+    <string name="identify_imdb_hint">e.g. tt0133093</string>
+    <string name="identify_tmdb">TMDb ID</string>
+    <string name="identify_tmdb_hint">e.g. 603</string>
+    <string name="identify_tvdb">TVDb ID</string>
+    <string name="identify_tvdb_hint">e.g. 169</string>
     <string name="identify_year">Year</string>
     <string name="identify_source">Source</string>
     <string name="identify_providers">Provider IDs</string>

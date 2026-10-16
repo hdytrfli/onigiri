@@ -15,6 +15,7 @@ data class PlayerMenuItem(
     val subtitle: String?,
     val selected: Boolean,
     val iconRes: Int? = null,
+    val badge: String? = null,
 )
 
 class PlayerMenuAdapter(
@@ -65,6 +66,14 @@ class PlayerMenuAdapter(
             if (item.selected) View.VISIBLE else View.INVISIBLE
 
         view.findViewById<TextView>(R.id.item_title).text = item.title
+
+        val badgeView = view.findViewById<TextView>(R.id.item_badge)
+        if (item.badge.isNullOrBlank()) {
+            badgeView.visibility = View.GONE
+        } else {
+            badgeView.visibility = View.VISIBLE
+            badgeView.text = item.badge
+        }
 
         val subtitleView = view.findViewById<TextView>(R.id.item_subtitle)
         if (item.subtitle.isNullOrBlank()) {

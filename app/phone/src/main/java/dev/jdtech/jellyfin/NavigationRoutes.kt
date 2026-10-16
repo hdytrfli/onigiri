@@ -48,6 +48,16 @@ data class CollectionRoute(val collectionId: String, val collectionName: String)
 
 @Serializable data class IdentifyRoute(val itemId: String) : NavKey
 
+@Serializable
+data class IdentifyResultsRoute(
+    val itemId: String,
+    val query: String,
+    val year: String,
+    val imdbId: String,
+    val tmdbId: String,
+    val tvdbId: String,
+) : NavKey
+
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey
 
 @Serializable data class SettingsFileEditRoute(val filePath: String) : NavKey

@@ -325,6 +325,7 @@ class JellyfinRepositoryOfflineImpl(
         itemId: UUID,
         name: String,
         year: Int?,
+        providerIds: Map<String, String>,
     ): List<RemoteSearchResult> = emptyList()
 
     override suspend fun applyRemoteSearchResult(

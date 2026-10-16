@@ -132,7 +132,12 @@ interface JellyfinRepository {
     suspend fun deleteSubtitle(itemId: UUID, index: Int)
 
     /** Searches remote metadata providers for movies matching [name] (optionally [year]). */
-    suspend fun searchRemoteMovies(itemId: UUID, name: String, year: Int?): List<RemoteSearchResult>
+    suspend fun searchRemoteMovies(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String> = emptyMap(),
+    ): List<RemoteSearchResult>
 
     /** Applies the chosen remote search [result] to [itemId], replacing its metadata. */
     suspend fun applyRemoteSearchResult(

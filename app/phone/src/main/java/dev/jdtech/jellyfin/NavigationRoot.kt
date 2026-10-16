@@ -70,6 +70,7 @@ import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
 import dev.jdtech.jellyfin.presentation.film.EpisodeScreen
 import dev.jdtech.jellyfin.presentation.film.FavoritesScreen
 import dev.jdtech.jellyfin.presentation.film.HomeScreen
+import dev.jdtech.jellyfin.presentation.film.IdentifyResultsScreen
 import dev.jdtech.jellyfin.presentation.film.IdentifyScreen
 import dev.jdtech.jellyfin.presentation.film.LibraryScreen
 import dev.jdtech.jellyfin.presentation.film.MediaScreen
@@ -629,6 +630,34 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         IdentifyScreen(
             itemId = UUID.fromString(key.itemId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
+            onSearch = { query, year, imdbId, tmdbId, tvdbId ->
+                navigator.navigate(
+                    IdentifyResultsRoute(
+                        itemId = key.itemId,
+                        query = query,
+                        year = year,
+                        imdbId = imdbId,
+                        tmdbId = tmdbId,
+                        tvdbId = tvdbId,
+                    )
+                )
+            },
+        )
+    }
+    entry<IdentifyResultsRoute> { key ->
+        IdentifyResultsScreen(
+            itemId = UUID.fromString(key.itemId),
+            query = key.query,
+            year = key.year,
+            imdbId = key.imdbId,
+            tmdbId = key.tmdbId,
+            tvdbId = key.tvdbId,
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onApplied = {
+                // Return to the media detail page (form + results are on the stack).
+                navigator.goBack()
+                navigator.goBack()
+            },
         )
     }
     entry<PersonRoute> { key ->

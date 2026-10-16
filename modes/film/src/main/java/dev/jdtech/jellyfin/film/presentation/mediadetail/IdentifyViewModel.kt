@@ -19,13 +19,25 @@ import org.jellyfin.sdk.model.api.RemoteSearchResult
  * result to replace its metadata.
  */
 @HiltViewModel
-class IdentifyViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class IdentifyViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val applyHolder: IdentifyApplyHolder,
+) : ViewModel() {
     private val _state = MutableStateFlow(IdentifyState())
     val state = _state.asStateFlow()
 
     private val eventsChannel = Channel<IdentifyEvent>()
     val events = eventsChannel.receiveAsFlow()
+
+    init {
+        viewModelScope.launch {
+            applyHolder.isApplying.collect { applying ->
+                _state.update { it.copy(isApplying = applying) }
+            }
+        }
+    }
 
     private var adminLoaded = false
 
@@ -52,9 +64,25 @@ class IdentifyViewModel @Inject constructor(private val repository: JellyfinRepo
         _state.update { it.copy(year = year) }
     }
 
-    fun search(itemId: UUID) {
-        val query = _state.value.query.trim()
-        if (query.isEmpty()) return
+    fun setImdbId(value: String) {
+        _state.update { it.copy(imdbId = value) }
+    }
+
+    fun setTmdbId(value: String) {
+        _state.update { it.copy(tmdbId = value) }
+    }
+
+    fun setTvdbId(value: String) {
+        _state.update { it.copy(tvdbId = value) }
+    }
+
+    /** Runs a search with explicit criteria (used by the results screen). */
+    fun search(
+        itemId: UUID,
+        query: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ) {
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, results = emptyList(), error = null) }
             try {
@@ -62,7 +90,8 @@ class IdentifyViewModel @Inject constructor(private val repository: JellyfinRepo
                     repository.searchRemoteMovies(
                         itemId = itemId,
                         name = query,
-                        year = _state.value.year.trim().toIntOrNull(),
+                        year = year,
+                        providerIds = providerIds,
                     )
                 _state.update { it.copy(isSearching = false, results = results) }
             } catch (e: Exception) {
@@ -72,16 +101,10 @@ class IdentifyViewModel @Inject constructor(private val repository: JellyfinRepo
     }
 
     fun apply(itemId: UUID, result: RemoteSearchResult) {
-        viewModelScope.launch {
-            _state.update { it.copy(isApplying = true, error = null) }
-            try {
-                repository.applyRemoteSearchResult(itemId = itemId, result = result)
-                _state.update { it.copy(isApplying = false) }
-                eventsChannel.send(IdentifyEvent.Applied)
-            } catch (e: Exception) {
-                _state.update { it.copy(isApplying = false, error = e) }
-            }
-        }
+        // Fire and forget so the caller can return to the media detail page immediately; the
+        // loading state is observed via the shared holder.
+        applyHolder.apply(itemId, result)
+        viewModelScope.launch { eventsChannel.send(IdentifyEvent.Applied) }
     }
 
     fun showInfo(result: RemoteSearchResult) {

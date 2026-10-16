@@ -765,12 +765,33 @@ class PlayerActivity : BasePlayerActivity() {
         groups.forEachIndexed { index, group ->
             val format = group.mediaTrackGroup.getFormat(0)
             val language = languageDisplayName(format.language)
+            val flags = format.selectionFlags
+            val badge = buildList {
+                if (flags and C.SELECTION_FLAG_FORCED != 0) {
+                    add(getString(R.string.track_flag_forced))
+                }
+                if (flags and C.SELECTION_FLAG_DEFAULT != 0) {
+                    add(getString(R.string.track_flag_default))
+                }
+            }
+                .takeIf { it.isNotEmpty() }
+                ?.joinToString(" · ")
+            // Prefer the structured language name; fall back to the source label only when the
+            // language is unknown.
+            val title = language ?: format.label ?: "Track ${index + 1}"
+            val metadata =
+                listOfNotNull(
+                        format.codecs?.takeIf { it.isNotBlank() },
+                        format.label?.takeIf { it.isNotBlank() && language != null },
+                    )
+                    .joinToString(" · ")
             items.add(
                 PlayerMenuItem(
-                    title = format.label ?: language ?: "Track ${index + 1}",
-                    subtitle = format.codecs,
+                    title = title,
+                    subtitle = metadata.ifBlank { null },
                     selected = group.isSelected,
                     iconRes = iconRes,
+                    badge = badge,
                 )
             )
         }

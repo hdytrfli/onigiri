@@ -133,6 +133,7 @@ fun MovieScreen(
         onDownloaderAction = { action -> downloaderViewModel.onAction(action) },
         onSubtitleSearch = navigateToSubtitleSearch,
         onIdentify = navigateToIdentify,
+        onIdentifyApplied = { viewModel.loadMovie(movieId = movieId) },
         onNavigateToDownloads = navigateToDownloads,
     )
 }
@@ -145,6 +146,7 @@ private fun MovieScreenLayout(
     onDownloaderAction: (DownloaderAction) -> Unit,
     onSubtitleSearch: (UUID) -> Unit = {},
     onIdentify: (UUID) -> Unit = {},
+    onIdentifyApplied: () -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
@@ -303,7 +305,11 @@ private fun MovieScreenLayout(
                         onClick = { onSubtitleSearch(movie.id) },
                     )
                     Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    IdentifyAction(itemId = movie.id, onClick = { onIdentify(movie.id) })
+                    IdentifyAction(
+                        itemId = movie.id,
+                        onClick = { onIdentify(movie.id) },
+                        onApplied = onIdentifyApplied,
+                    )
                 }
             },
         )

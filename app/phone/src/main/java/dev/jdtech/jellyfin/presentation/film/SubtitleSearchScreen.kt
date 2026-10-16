@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -153,21 +154,20 @@ private fun SubtitleSearchScreenLayout(
                             label = languageLabel(state.language, languageNames, languageValues),
                             onClick = { languagePickerOpen = true },
                         )
-                        HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
-                        ActionRow(
-                            iconRes = CoreR.drawable.ic_search,
-                            title = stringResource(CoreR.string.search),
-                            onClick = onSearch,
-                            enabled = !state.isSearching,
-                            trailing = {
-                                if (state.isSearching) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp,
-                                    )
-                                }
-                            },
+                    }
+                }
+                item {
+                    Button(
+                        onClick = onSearch,
+                        enabled = !state.isSearching,
+                        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                    ) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_search),
+                            contentDescription = null,
                         )
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                        Text(text = stringResource(CoreR.string.search))
                     }
                 }
 
