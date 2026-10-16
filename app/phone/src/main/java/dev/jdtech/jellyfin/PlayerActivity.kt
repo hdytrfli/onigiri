@@ -821,8 +821,6 @@ class PlayerActivity : BasePlayerActivity() {
             panel.translationX = panel.width.toFloat()
             panel.animate().translationX(0f).setDuration(200L).start()
         }
-        scrim.alpha = 0f
-        scrim.animate().alpha(1f).setDuration(200L).start()
         fadePlayerControls(show = false)
     }
 
@@ -833,7 +831,6 @@ class PlayerActivity : BasePlayerActivity() {
             .setDuration(200L)
             .withEndAction { overlay.visibility = View.GONE }
             .start()
-        scrim.animate().alpha(0f).setDuration(200L).start()
         fadePlayerControls(show = true)
     }
 
