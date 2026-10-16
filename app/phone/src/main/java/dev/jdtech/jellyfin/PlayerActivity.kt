@@ -774,8 +774,11 @@ class PlayerActivity : BasePlayerActivity() {
             // The badge shows the simplified track format, which is always available.
             val badge = prettyCodec(format.codecs)
             // The source label carries details we cannot derive (e.g. "Songs only", "External").
-            // Only shown when the language is known, as the label is used as the title otherwise.
-            val label = format.label?.takeIf { it.isNotBlank() && language != null }
+            // Shown only when the language is known, since the label becomes the title otherwise;
+            // falls back to a placeholder so every row keeps its second line.
+            val label =
+                format.label?.takeIf { it.isNotBlank() && language != null }
+                    ?: getString(R.string.track_unknown)
             items.add(
                 PlayerMenuItem(
                     title = title,

@@ -77,7 +77,9 @@ class PlayerMenuAdapter(
 
         val subtitleView = view.findViewById<TextView>(R.id.item_subtitle)
         if (item.subtitle.isNullOrBlank()) {
-            subtitleView.visibility = View.GONE
+            // Reserve the second line so every row keeps the same height, whether or not the track
+            // carries a source label.
+            subtitleView.visibility = View.INVISIBLE
         } else {
             subtitleView.visibility = View.VISIBLE
             subtitleView.text = item.subtitle
