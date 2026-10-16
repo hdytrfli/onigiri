@@ -67,6 +67,7 @@ import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
+import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
 import dev.jdtech.jellyfin.presentation.film.EpisodeScreen
 import dev.jdtech.jellyfin.presentation.film.FavoritesScreen
 import dev.jdtech.jellyfin.presentation.film.HomeScreen
@@ -557,6 +558,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { itemId ->
                     navigator.navigate(IdentifyRoute(itemId = itemId.toString()))
                 },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId.toString()))
+                },
             navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
         )
     }
@@ -580,6 +585,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { itemId ->
                     navigator.navigate(IdentifyRoute(itemId = itemId.toString(), series = true))
                 },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId.toString()))
+                },
         )
     }
     entry<SeasonRoute> { key ->
@@ -597,6 +606,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateToSeries =
                 resumedAction { seriesId ->
                     navigator.navigateOrReuse(ShowRoute(showId = seriesId.toString()))
+                },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId.toString()))
                 },
         )
     }
@@ -620,6 +633,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateToSubtitleSearch =
                 resumedAction { itemId ->
                     navigator.navigate(SubtitleSearchRoute(itemId = itemId.toString()))
+                },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId.toString()))
                 },
             navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
         )
@@ -664,6 +681,12 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigator.goBack()
                 navigator.goBack()
             },
+        )
+    }
+    entry<EditImagesRoute> { key ->
+        EditImagesScreen(
+            itemId = UUID.fromString(key.itemId),
+            navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }
     entry<PersonRoute> { key ->

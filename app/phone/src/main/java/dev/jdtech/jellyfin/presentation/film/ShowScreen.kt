@@ -45,6 +45,7 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
@@ -69,6 +70,7 @@ fun ShowScreen(
     navigateToItem: (item: FindroidItem) -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToIdentify: (itemId: UUID) -> Unit,
+    navigateToEditImages: (itemId: UUID) -> Unit,
     viewModel: ShowViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -110,6 +112,7 @@ fun ShowScreen(
         },
         onIdentify = navigateToIdentify,
         onIdentifyApplied = { viewModel.loadShow(showId = showId) },
+        onEditImages = navigateToEditImages,
     )
 }
 
@@ -119,6 +122,7 @@ private fun ShowScreenLayout(
     onAction: (ShowAction) -> Unit,
     onIdentify: (UUID) -> Unit = {},
     onIdentifyApplied: () -> Unit = {},
+    onEditImages: (UUID) -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -276,6 +280,11 @@ private fun ShowScreenLayout(
                         itemId = show.id,
                         onClick = { onIdentify(show.id) },
                         onApplied = onIdentifyApplied,
+                    )
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    EditImagesAction(
+                        itemId = show.id,
+                        onClick = { onEditImages(show.id) },
                     )
                 }
             },

@@ -50,6 +50,7 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
+import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
@@ -77,6 +78,7 @@ fun EpisodeScreen(
     navigateToSeason: (seasonId: UUID) -> Unit,
     navigateToShow: (seriesId: UUID) -> Unit,
     navigateToSubtitleSearch: (itemId: UUID) -> Unit,
+    navigateToEditImages: (itemId: UUID) -> Unit,
     navigateToDownloads: () -> Unit,
     viewModel: EpisodeViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
@@ -136,6 +138,7 @@ fun EpisodeScreen(
         },
         onDownloaderAction = { action -> downloaderViewModel.onAction(action) },
         onSubtitleSearch = navigateToSubtitleSearch,
+        onEditImages = navigateToEditImages,
         onNavigateToDownloads = navigateToDownloads,
     )
 }
@@ -147,6 +150,7 @@ private fun EpisodeScreenLayout(
     onAction: (EpisodeAction) -> Unit,
     onDownloaderAction: (DownloaderAction) -> Unit,
     onSubtitleSearch: (UUID) -> Unit = {},
+    onEditImages: (UUID) -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
@@ -352,6 +356,11 @@ private fun EpisodeScreenLayout(
                     SubtitleSearchAction(
                         itemId = episode.id,
                         onClick = { onSubtitleSearch(episode.id) },
+                    )
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    EditImagesAction(
+                        itemId = episode.id,
+                        onClick = { onEditImages(episode.id) },
                     )
                 }
             },

@@ -41,6 +41,7 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -61,6 +62,7 @@ fun SeasonScreen(
     navigateHome: () -> Unit,
     navigateToItem: (item: FindroidItem) -> Unit,
     navigateToSeries: (seriesId: UUID) -> Unit,
+    navigateToEditImages: (itemId: UUID) -> Unit,
     viewModel: SeasonViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -91,11 +93,16 @@ fun SeasonScreen(
             }
             viewModel.onAction(action)
         },
+        onEditImages = navigateToEditImages,
     )
 }
 
 @Composable
-private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> Unit) {
+private fun SeasonScreenLayout(
+    state: SeasonState,
+    onAction: (SeasonAction) -> Unit,
+    onEditImages: (UUID) -> Unit = {},
+) {
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
@@ -207,6 +214,14 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
             hasHomeButton = true,
             onBackClick = { onAction(SeasonAction.OnBackClick) },
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
+            trailingContent = {
+                state.season?.let { season ->
+                    EditImagesAction(
+                        itemId = season.id,
+                        onClick = { onEditImages(season.id) },
+                    )
+                }
+            },
         ) {
             Spacer(modifier = Modifier.width(4.dp))
             state.season?.let { season ->

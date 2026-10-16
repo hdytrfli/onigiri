@@ -48,6 +48,7 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
+import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
@@ -75,6 +76,7 @@ fun MovieScreen(
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToSubtitleSearch: (itemId: UUID) -> Unit,
     navigateToIdentify: (itemId: UUID) -> Unit,
+    navigateToEditImages: (itemId: UUID) -> Unit,
     navigateToDownloads: () -> Unit,
     viewModel: MovieViewModel = hiltViewModel(),
     downloaderViewModel: DownloaderViewModel = hiltViewModel(),
@@ -140,6 +142,7 @@ fun MovieScreen(
         onSubtitleSearch = navigateToSubtitleSearch,
         onIdentify = navigateToIdentify,
         onIdentifyApplied = { viewModel.loadMovie(movieId = movieId) },
+        onEditImages = navigateToEditImages,
         onNavigateToDownloads = navigateToDownloads,
     )
 }
@@ -153,6 +156,7 @@ private fun MovieScreenLayout(
     onSubtitleSearch: (UUID) -> Unit = {},
     onIdentify: (UUID) -> Unit = {},
     onIdentifyApplied: () -> Unit = {},
+    onEditImages: (UUID) -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
@@ -315,6 +319,11 @@ private fun MovieScreenLayout(
                         itemId = movie.id,
                         onClick = { onIdentify(movie.id) },
                         onApplied = onIdentifyApplied,
+                    )
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    EditImagesAction(
+                        itemId = movie.id,
+                        onClick = { onEditImages(movie.id) },
                     )
                 }
             },
