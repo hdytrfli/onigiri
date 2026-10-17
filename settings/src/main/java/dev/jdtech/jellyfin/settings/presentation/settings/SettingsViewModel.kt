@@ -70,7 +70,6 @@ constructor(
                                                     nameStringResource = R.string.app_language,
                                                     descriptionStringRes =
                                                         R.string.app_language_summary,
-                                                    iconDrawableId = R.drawable.ic_languages,
                                                     enabled =
                                                         Build.VERSION.SDK_INT >=
                                                             Build.VERSION_CODES.TIRAMISU,
@@ -86,7 +85,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_audio_language_summary,
-                                                    iconDrawableId = R.drawable.ic_speaker,
                                                     backendPreference =
                                                         appPreferences.preferredAudioLanguage,
                                                     options = R.array.languages,
@@ -100,7 +98,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_subtitle_language_summary,
-                                                    iconDrawableId = R.drawable.ic_closed_caption,
                                                     backendPreference =
                                                         appPreferences.preferredSubtitleLanguage,
                                                     options = R.array.languages,
@@ -154,7 +151,6 @@ constructor(
                                                     nameStringResource = R.string.offline_mode,
                                                     descriptionStringRes =
                                                         R.string.offline_mode_summary,
-                                                    iconDrawableId = R.drawable.ic_server_off,
                                                     onClick = {
                                                         viewModelScope.launch {
                                                             eventsChannel.send(
@@ -168,7 +164,6 @@ constructor(
                                                     nameStringResource = R.string.confirm_exit,
                                                     descriptionStringRes =
                                                         R.string.confirm_exit_summary,
-                                                    iconDrawableId = R.drawable.ic_exit,
                                                     backendPreference = appPreferences.confirmExit,
                                                 ),
                                             ),
@@ -496,272 +491,7 @@ constructor(
                                                                     ),
                                                             ),
                                                         ),
-                                                ),
-                                                PreferenceCategory(
-                                                    nameStringResource = R.string.mpv_subtitles,
-                                                    descriptionStringRes =
-                                                        R.string.mpv_subtitles_summary,
-                                                    onClick = {
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.NavigateToSettings(
-                                                                    listOf(
-                                                                        R.string
-                                                                            .settings_category_player,
-                                                                        it.nameStringResource,
-                                                                    )
-                                                                )
-                                                            )
-                                                        }
-                                                    },
-                                                    nestedPreferenceGroups =
-                                                        listOf(
-                                                            PreferenceGroup(
-                                                                nameStringResource =
-                                                                    R.string.mpv_sub_group_text,
-                                                                preferences =
-                                                                    listOf(
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_font_size,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_font_size_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubFontSize,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_font_size,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_font_size,
-                                                                        ),
-                                                                        PreferenceAction(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_font,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_font_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubFont,
-                                                                            formatValue = {
-                                                                                subtitleFontDisplayName(
-                                                                                    it
-                                                                                )
-                                                                            },
-                                                                            onClick = {
-                                                                                viewModelScope
-                                                                                    .launch {
-                                                                                        eventsChannel
-                                                                                            .send(
-                                                                                                SettingsEvent
-                                                                                                    .NavigateToSubtitleFont
-                                                                                            )
-                                                                                    }
-                                                                            },
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_font_weight,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_font_weight_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubFontWeight,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_font_weights,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_font_weight_values,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_color,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_color_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubColor,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_colors,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_colors_values,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_ass_override,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_ass_override_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubAssOverride,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_ass_override,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_ass_override_values,
-                                                                        ),
-                                                                    ),
-                                                            ),
-                                                            PreferenceGroup(
-                                                                nameStringResource =
-                                                                    R.string.mpv_sub_group_outline,
-                                                                preferences =
-                                                                    listOf(
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_enabled,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_enabled_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBorderEnabled,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_style,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_style_summary,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBorderEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBorderStyle,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_border_style,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_border_style_values,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_size,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_size_summary,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBorderEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBorderSize,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_border_size,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_border_size,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_color,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_color_summary,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBorderEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBorderColor,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_colors,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_colors_values,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_opacity,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_border_opacity_summary,
-                                                                            dependencies =
-                                                                                listOf(
-                                                                                    appPreferences
-                                                                                        .playerMpvSubBorderEnabled
-                                                                                ),
-                                                                            hideWhenDisabled = true,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBorderOpacity,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_sub_border_opacity,
-                                                                            optionValues =
-                                                                                R.array
-                                                                                    .mpv_sub_border_opacity_values,
-                                                                        ),
-                                                                    ),
-                                                            ),
-                                                            PreferenceGroup(
-                                                                nameStringResource =
-                                                                    R.string.mpv_sub_group_position,
-                                                                preferences =
-                                                                    listOf(
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_pos,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_pos_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubPosition,
-                                                                            options =
-                                                                                R.array.mpv_sub_pos,
-                                                                            optionValues =
-                                                                                R.array.mpv_sub_pos,
-                                                                        ),
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_use_margins,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_use_margins_summary,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubUseMargins,
-                                                                        ),
-                                                                    ),
-                                                            ),
-                                                        ),
-                                                ),
+                                                )
                                             ),
                                     ),
                                     PreferenceGroup(
@@ -1074,7 +804,197 @@ constructor(
                                             ),
                                     ),
                                 ),
-                        )
+                        ),
+                        PreferenceCategory(
+                            nameStringResource = R.string.mpv_subtitles,
+                            descriptionStringRes = R.string.mpv_subtitles_summary,
+                            iconDrawableId = R.drawable.ic_closed_caption,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(
+                                        SettingsEvent.NavigateToSettings(
+                                            listOf(it.nameStringResource)
+                                        )
+                                    )
+                                }
+                            },
+                            nestedPreferenceGroups =
+                                listOf(
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.mpv_sub_group_text,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_font_size,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_font_size_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubFontSize,
+                                                    options = R.array.mpv_sub_font_size,
+                                                    optionValues = R.array.mpv_sub_font_size,
+                                                ),
+                                                PreferenceAction(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_font,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_mpv_sub_font_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubFont,
+                                                    formatValue = { subtitleFontDisplayName(it) },
+                                                    onClick = {
+                                                        viewModelScope.launch {
+                                                            eventsChannel.send(
+                                                                SettingsEvent.NavigateToSubtitleFont
+                                                            )
+                                                        }
+                                                    },
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_font_weight,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_font_weight_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubFontWeight,
+                                                    options = R.array.mpv_sub_font_weights,
+                                                    optionValues =
+                                                        R.array.mpv_sub_font_weight_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_color,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_mpv_sub_color_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubColor,
+                                                    options = R.array.mpv_sub_colors,
+                                                    optionValues = R.array.mpv_sub_colors_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_ass_override,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_ass_override_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubAssOverride,
+                                                    options = R.array.mpv_sub_ass_override,
+                                                    optionValues =
+                                                        R.array.mpv_sub_ass_override_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.mpv_sub_group_outline,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_border_enabled,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_border_enabled_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubBorderEnabled,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_border_style,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_border_style_summary,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerMpvSubBorderEnabled
+                                                        ),
+                                                    hideWhenDisabled = true,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubBorderStyle,
+                                                    options = R.array.mpv_sub_border_style,
+                                                    optionValues =
+                                                        R.array.mpv_sub_border_style_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_border_size,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_border_size_summary,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerMpvSubBorderEnabled
+                                                        ),
+                                                    hideWhenDisabled = true,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubBorderSize,
+                                                    options = R.array.mpv_sub_border_size,
+                                                    optionValues = R.array.mpv_sub_border_size,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_border_color,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_border_color_summary,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerMpvSubBorderEnabled
+                                                        ),
+                                                    hideWhenDisabled = true,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubBorderColor,
+                                                    options = R.array.mpv_sub_colors,
+                                                    optionValues = R.array.mpv_sub_colors_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_border_opacity,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_border_opacity_summary,
+                                                    dependencies =
+                                                        listOf(
+                                                            appPreferences.playerMpvSubBorderEnabled
+                                                        ),
+                                                    hideWhenDisabled = true,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubBorderOpacity,
+                                                    options = R.array.mpv_sub_border_opacity,
+                                                    optionValues =
+                                                        R.array.mpv_sub_border_opacity_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.mpv_sub_group_position,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_pos,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_mpv_sub_pos_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubPosition,
+                                                    options = R.array.mpv_sub_pos,
+                                                    optionValues = R.array.mpv_sub_pos,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.pref_player_mpv_sub_use_margins,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_mpv_sub_use_margins_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerMpvSubUseMargins,
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
                     )
             ),
             PreferenceGroup(

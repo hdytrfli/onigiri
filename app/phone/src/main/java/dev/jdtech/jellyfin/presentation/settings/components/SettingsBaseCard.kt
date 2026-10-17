@@ -27,6 +27,9 @@ import dev.jdtech.jellyfin.settings.presentation.models.Preference
 /** Maximum fraction of a row's width its trailing value may take before it ellipsises. */
 private const val TRAILING_VALUE_MAX_WIDTH_FRACTION = 0.45f
 
+/** Alpha every part of a disabled row fades to, title and trailing text alike. */
+private const val DISABLED_ALPHA = 0.38f
+
 /**
  * One settings row: optional leading icon, title with its description underneath, and an optional
  * trailing value and/or trailing content. The title column always takes the remaining width so a
@@ -46,7 +49,7 @@ fun SettingsBaseCard(
 ) {
     val contentColor =
         contentColorFor(MaterialTheme.colorScheme.surface)
-            .copy(alpha = if (preference.enabled) 1.0f else 0.38f)
+            .copy(alpha = if (preference.enabled) 1.0f else DISABLED_ALPHA)
 
     if (onClick != null) {
         Surface(
@@ -84,6 +87,9 @@ private fun SettingsCardRow(
 ) {
     BoxWithConstraints {
         val trailingValueMaxWidth = maxWidth * TRAILING_VALUE_MAX_WIDTH_FRACTION
+        // The title fades through its Surface's content colour, so the trailing texts have to
+        // apply the same fade themselves to stay in step with it.
+        val textAlpha = if (preference.enabled) 1.0f else DISABLED_ALPHA
         Row(
             modifier = Modifier.padding(MaterialTheme.spacings.medium),
             verticalAlignment = Alignment.CenterVertically,
@@ -102,6 +108,7 @@ private fun SettingsCardRow(
                     Text(
                         text = stringResource(id = it),
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
                     )
                 }
             }
@@ -111,7 +118,7 @@ private fun SettingsCardRow(
                     text = value,
                     modifier = Modifier.widthIn(max = trailingValueMaxWidth),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.End,
