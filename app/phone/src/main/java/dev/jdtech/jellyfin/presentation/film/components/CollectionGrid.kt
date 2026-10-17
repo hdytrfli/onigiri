@@ -17,6 +17,7 @@ import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 
 @Composable
@@ -30,8 +31,8 @@ fun CollectionGrid(
         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
         modifier = Modifier.padding(innerPadding).fillMaxSize(),
         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+        horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+        verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
     ) {
         sections.forEach { section ->
             if (showSectionHeaders) {

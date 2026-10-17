@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.HomeItem
+import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
@@ -41,7 +41,8 @@ fun HomeView(
                 modifier = Modifier.align(Alignment.CenterStart),
                 style = MaterialTheme.typography.titleMedium,
             )
-            IconButton(
+            TooltipIconButton(
+                label = stringResource(CoreR.string.view_all),
                 onClick = {
                     onAction(
                         HomeAction.OnLibraryClick(

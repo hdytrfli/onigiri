@@ -27,6 +27,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
@@ -78,8 +79,8 @@ private fun FavoritesScreenLayout(
                     end = paddingEnd,
                     bottom = paddingBottom,
                 ),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
         ) {
             items(state.items, key = { it.id }) { item ->
                 ItemCard(

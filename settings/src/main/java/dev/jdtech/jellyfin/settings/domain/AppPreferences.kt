@@ -48,6 +48,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val gridPosterColumnsLandscape = Preference("pref_grid_poster_columns_landscape", "4")
     val gridThumbnailColumnsPortrait = Preference("pref_grid_thumbnail_columns_portrait", "3")
     val gridThumbnailColumnsLandscape = Preference("pref_grid_thumbnail_columns_landscape", "4")
+    val gridSpacing = Preference("pref_grid_spacing", "1")
 
     // Player
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -45,6 +45,7 @@ import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
+import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
@@ -52,6 +53,7 @@ import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
@@ -129,7 +131,10 @@ private fun LibraryScreenLayout(
             TopAppBar(
                 title = { Text(libraryName) },
                 navigationIcon = {
-                    IconButton(onClick = { onAction(LibraryAction.OnBackClick) }) {
+                    TooltipIconButton(
+                        label = stringResource(CoreR.string.back),
+                        onClick = { onAction(LibraryAction.OnBackClick) },
+                    ) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
                             contentDescription = null,
@@ -137,7 +142,10 @@ private fun LibraryScreenLayout(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showSortByDialog = true }) {
+                    TooltipIconButton(
+                        label = stringResource(CoreR.string.sort_by),
+                        onClick = { showSortByDialog = true },
+                    ) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_down_up),
                             contentDescription = null,
@@ -159,8 +167,8 @@ private fun LibraryScreenLayout(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding + innerPadding,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+                horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
                 items(count = items.itemCount, key = items.itemKey { it.id }) {
                     val item = items[it]

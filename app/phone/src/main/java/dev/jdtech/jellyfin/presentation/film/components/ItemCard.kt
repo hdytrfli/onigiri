@@ -37,6 +37,7 @@ fun ItemCard(
     onClick: (FindroidItem) -> Unit,
     modifier: Modifier = Modifier,
     fillWidth: Boolean = false,
+    showRemainingTime: Boolean = false,
 ) {
     val width =
         when (direction) {
@@ -62,11 +63,19 @@ fun ItemCard(
                     if (item.played) PlayedBadge()
                     item.unplayedItemCount?.takeIf { it > 0 }?.let { ItemCountBadge(it) }
                 }
-                if (direction == Direction.HORIZONTAL) {
+                if (direction == Direction.HORIZONTAL && !showRemainingTime) {
                     ProgressBar(
                         item = item,
                         modifier =
                             Modifier.align(Alignment.BottomStart)
+                                .padding(MaterialTheme.spacings.small),
+                    )
+                }
+                if (showRemainingTime && item.playbackPositionTicks > 0) {
+                    RemainingTimeBadge(
+                        item = item,
+                        modifier =
+                            Modifier.align(Alignment.BottomEnd)
                                 .padding(MaterialTheme.spacings.small),
                     )
                 }

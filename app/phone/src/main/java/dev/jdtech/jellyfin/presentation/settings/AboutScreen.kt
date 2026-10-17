@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +43,8 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import dev.jdtech.jellyfin.BuildConfig
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.TooltipFilledTonalIconButton
+import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
@@ -76,7 +76,10 @@ fun AboutScreen(navigateBack: () -> Unit) {
             TopAppBar(
                 title = { Text(text = stringResource(SettingsR.string.about)) },
                 navigationIcon = {
-                    IconButton(onClick = navigateBack) {
+                    TooltipIconButton(
+                        label = stringResource(CoreR.string.back),
+                        onClick = navigateBack,
+                    ) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
                             contentDescription = null,
@@ -129,7 +132,8 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                 horizontalArrangement =
                                     Arrangement.spacedBy(MaterialTheme.spacings.small)
                             ) {
-                                FilledTonalIconButton(
+                                TooltipFilledTonalIconButton(
+                                    label = stringResource(SettingsR.string.github),
                                     onClick = {
                                         try {
                                             uriHandler.openUri(
@@ -143,14 +147,15 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                                 )
                                                 .show()
                                         }
-                                    }
+                                    },
                                 ) {
                                     Icon(
                                         painter = painterResource(CoreR.drawable.ic_github),
                                         contentDescription = null,
                                     )
                                 }
-                                FilledTonalIconButton(
+                                TooltipFilledTonalIconButton(
+                                    label = stringResource(SettingsR.string.kofi),
                                     onClick = {
                                         try {
                                             uriHandler.openUri(
@@ -164,7 +169,7 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                                 )
                                                 .show()
                                         }
-                                    }
+                                    },
                                 ) {
                                     Icon(
                                         painter = painterResource(CoreR.drawable.ic_coffee),

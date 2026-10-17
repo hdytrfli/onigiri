@@ -24,8 +24,10 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.GridColumns
+import dev.jdtech.jellyfin.presentation.utils.GridGapBase
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalGridColumns
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
@@ -113,6 +115,7 @@ class MainActivity : AppCompatActivity() {
                                     thumbnailPortrait = state.gridThumbnailPortrait,
                                     thumbnailLandscape = state.gridThumbnailLandscape,
                                 ),
+                            LocalGridGap provides GridGapBase * state.gridGapScale,
                         ) {
                             NavigationRoot(
                                 hasServers = state.hasServers,

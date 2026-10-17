@@ -23,7 +23,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,8 +48,10 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyEvent
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
+import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
@@ -123,7 +124,10 @@ private fun IdentifyResultsLayout(
             TopAppBar(
                 title = { Text(stringResource(CoreR.string.identify)) },
                 navigationIcon = {
-                    IconButton(onClick = navigateBack) {
+                    TooltipIconButton(
+                        label = stringResource(CoreR.string.back),
+                        onClick = navigateBack,
+                    ) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
                             contentDescription = null,
@@ -157,9 +161,8 @@ private fun IdentifyResultsLayout(
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(MaterialTheme.spacings.default),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+                        horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                        verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {
                         items(items = state.results, key = { it.hashCode() }) { result ->
                             IdentifyResultCard(
@@ -210,7 +213,10 @@ private fun IdentifyResultCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            IconButton(onClick = onInfo) {
+            TooltipIconButton(
+                label = stringResource(CoreR.string.view_details),
+                onClick = onInfo,
+            ) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_info),
                     contentDescription = null,

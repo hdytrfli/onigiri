@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -38,8 +37,10 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.search.SearchAction
 import dev.jdtech.jellyfin.film.presentation.search.SearchState
+import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.delay
@@ -123,7 +124,10 @@ fun FilmSearchBar(
                     AnimatedContent(targetState = expanded, label = "search_to_back") {
                         targetExpanded ->
                         if (targetExpanded) {
-                            IconButton(onClick = { onExpand(false) }) {
+                            TooltipIconButton(
+                                label = stringResource(CoreR.string.back),
+                                onClick = { onExpand(false) },
+                            ) {
                                 Icon(
                                     painter = painterResource(CoreR.drawable.ic_arrow_left),
                                     contentDescription = null,
@@ -141,7 +145,10 @@ fun FilmSearchBar(
                     if (state.loading) {
                         Box(modifier = Modifier.size(32.dp)) { CircularProgressIndicator() }
                     } else if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
+                        TooltipIconButton(
+                            label = stringResource(CoreR.string.clear),
+                            onClick = { query = "" },
+                        ) {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_x),
                                 contentDescription = null,
@@ -165,8 +172,8 @@ fun FilmSearchBar(
                     end = safePadding.end + MaterialTheme.spacings.default,
                     bottom = safePadding.bottom + MaterialTheme.spacings.default,
                 ),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
+            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
         ) {
             items(items = state.items, key = { it.id }) { item ->
                 ItemCard(

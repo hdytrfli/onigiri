@@ -177,6 +177,12 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     options = R.array.grid_columns,
                                                     optionValues = R.array.grid_columns,
                                                 ),
+                                                PreferenceSelect(
+                                                    nameStringResource = R.string.grid_spacing,
+                                                    backendPreference = appPreferences.gridSpacing,
+                                                    options = R.array.grid_spacing_options,
+                                                    optionValues = R.array.grid_spacing_values,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(

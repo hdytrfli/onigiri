@@ -17,6 +17,7 @@
     <string name="grid_poster_landscape">Poster landscape</string>
     <string name="grid_thumbnail_portrait">Thumbnail portrait</string>
     <string name="grid_thumbnail_landscape">Thumbnail landscape</string>
+    <string name="grid_spacing">Grid spacing</string>
     <string name="settings_category_interface">Interface</string>
     <string name="settings_category_device">Device</string>
     <string name="settings_category_cache">Cache</string>
@@ -100,6 +101,8 @@
     <string name="subtitles">Subtitles</string>
     <string name="subtitles_summary">Customize subtitles appearance</string>
     <string name="privacy_policy">Privacy policy</string>
+    <string name="github">GitHub</string>
+    <string name="kofi">Ko-fi</string>
     <string name="amoled_theme">AMOLED dark theme</string>
     <string name="amoled_theme_summary">Use AMOLED theme with a pure black background</string>
     <string name="save">Save</string>

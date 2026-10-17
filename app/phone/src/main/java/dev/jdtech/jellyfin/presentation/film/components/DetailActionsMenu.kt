@@ -2,9 +2,10 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +22,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
+import dev.jdtech.jellyfin.presentation.components.TooltipFilledTonalIconButton
 import java.util.UUID
+
+/** Width of the detail actions menu, sized for the longest label. */
+private val DetailMenuWidth = 260.dp
+
+/** Corner radius of the detail actions menu, matching the player options sheet. */
+private val DetailMenuShape = RoundedCornerShape(28.dp)
 
 /** The item-kind dependent actions a detail page can offer in its overflow menu. */
 enum class DetailAction {
@@ -76,17 +84,25 @@ fun DetailActionsMenu(
     if (!showSubtitleSearch && !showIdentify && !showEditImages) return
 
     Box(modifier = modifier) {
-        FilledTonalIconButton(onClick = { menuOpen = true }) {
+        TooltipFilledTonalIconButton(
+            label = stringResource(CoreR.string.more_options),
+            onClick = { menuOpen = true },
+        ) {
             if (identifyState.isApplying) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
             } else {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_ellipsis),
+                    painter = painterResource(CoreR.drawable.ic_bolt),
                     contentDescription = stringResource(CoreR.string.more_options),
                 )
             }
         }
-        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+        DropdownMenu(
+            expanded = menuOpen,
+            onDismissRequest = { menuOpen = false },
+            modifier = Modifier.width(DetailMenuWidth),
+            shape = DetailMenuShape,
+        ) {
             if (showSubtitleSearch) {
                 MenuActionItem(
                     icon = CoreR.drawable.ic_case_sensitive,

@@ -50,6 +50,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import java.util.UUID
@@ -192,8 +193,7 @@ private fun SeasonScreenLayout(
                     Row(
                         modifier =
                             Modifier.fillMaxWidth().padding(start = paddingStart, end = paddingEnd),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(MaterialTheme.spacings.small * spacingScale),
+                        horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {
                         rowEpisodes.forEach { episode ->
                             EpisodeGridCard(

@@ -25,6 +25,7 @@ fun HomeSection(
     itemsPadding: PaddingValues,
     onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier,
+    showRemainingTime: Boolean = false,
 ) {
     Column(modifier = modifier) {
         Box(modifier = Modifier.fillMaxWidth().height(42.dp).padding(itemsPadding)) {
@@ -45,6 +46,7 @@ fun HomeSection(
                 direction = Direction.HORIZONTAL,
                 onClick = { onAction(HomeAction.OnItemClick(item)) },
                 fillWidth = true,
+                showRemainingTime = showRemainingTime,
             )
         }
     }

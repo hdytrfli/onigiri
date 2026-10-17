@@ -4,12 +4,22 @@ import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 
 /** The two tile shapes the app's grids use: a 2:3 poster or a 16:9 thumbnail. */
 enum class GridSize {
     POSTER,
     THUMBNAIL,
 }
+
+/** Base gap between grid cells, scaled by the "Layout grid" gap preference. */
+val GridGapBase = 12.dp
+
+/**
+ * The gap between grid cells. Provided once near the root of the UI so every grid (poster or
+ * thumbnail) uses the same spacing and reacts to the gap preference.
+ */
+val LocalGridGap = compositionLocalOf { GridGapBase }
 
 /**
  * The configured column counts for each [GridSize] and orientation. Provided once near the root of

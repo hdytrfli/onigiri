@@ -108,19 +108,22 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     TitlePrefs(portraitWidth, landscapeWidth, ratio, naive)
                 }
 
-            // Layout grid column counts: the two tile sizes, portrait and landscape.
+            // Layout grid column counts: the two tile sizes, portrait and landscape, plus the gap.
             val gridPrefs =
                 combine(
                     appPreferences.observe(appPreferences.gridPosterColumnsPortrait),
                     appPreferences.observe(appPreferences.gridPosterColumnsLandscape),
                     appPreferences.observe(appPreferences.gridThumbnailColumnsPortrait),
                     appPreferences.observe(appPreferences.gridThumbnailColumnsLandscape),
-                ) { posterPortrait, posterLandscape, thumbnailPortrait, thumbnailLandscape ->
+                    appPreferences.observe(appPreferences.gridSpacing),
+                ) { posterPortrait, posterLandscape, thumbnailPortrait, thumbnailLandscape, spacing
+                    ->
                     GridPrefs(
                         posterPortrait,
                         posterLandscape,
                         thumbnailPortrait,
                         thumbnailLandscape,
+                        spacing,
                     )
                 }
 
@@ -152,6 +155,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         gridPosterLandscape = gridPrefs.posterLandscape.toIntOrNull() ?: 4,
                         gridThumbnailPortrait = gridPrefs.thumbnailPortrait.toIntOrNull() ?: 3,
                         gridThumbnailLandscape = gridPrefs.thumbnailLandscape.toIntOrNull() ?: 4,
+                        gridGapScale = gridPrefs.spacing.toFloatOrNull() ?: 1f,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -184,6 +188,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val posterLandscape: String,
         val thumbnailPortrait: String,
         val thumbnailLandscape: String,
+        val spacing: String,
     )
 }
 
@@ -206,4 +211,5 @@ data class MainState(
     val gridPosterLandscape: Int = 4,
     val gridThumbnailPortrait: Int = 3,
     val gridThumbnailLandscape: Int = 4,
+    val gridGapScale: Float = 1f,
 )

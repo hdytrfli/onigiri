@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.components.TooltipFilledTonalIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 /**
@@ -83,24 +83,32 @@ fun DownloadButton(
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
-                FilledTonalIconButton(onClick = { cancelDialogOpen = true }) {
+                TooltipFilledTonalIconButton(
+                    label = stringResource(CoreR.string.cancel_download),
+                    onClick = { cancelDialogOpen = true },
+                ) {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_x),
-                        contentDescription = stringResource(CoreR.string.cancel_download),
+                        contentDescription = null,
                     )
                 }
             }
         }
         item.isDownloaded() -> {
-            FilledTonalIconButton(onClick = { deleteDialogOpen = true }, modifier = modifier) {
+            TooltipFilledTonalIconButton(
+                label = stringResource(CoreR.string.delete_download),
+                onClick = { deleteDialogOpen = true },
+                modifier = modifier,
+            ) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_trash),
-                    contentDescription = stringResource(CoreR.string.delete_download),
+                    contentDescription = null,
                 )
             }
         }
         item.canDownload -> {
-            FilledTonalIconButton(
+            TooltipFilledTonalIconButton(
+                label = stringResource(CoreR.string.download),
                 onClick = {
                     storageLocations = context.getExternalFilesDirs(null)
                     if (storageLocations.size > 1) {
@@ -114,7 +122,7 @@ fun DownloadButton(
             ) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),
-                    contentDescription = stringResource(CoreR.string.download),
+                    contentDescription = null,
                 )
             }
         }

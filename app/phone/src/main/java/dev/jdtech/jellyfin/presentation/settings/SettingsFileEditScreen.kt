@@ -10,7 +10,6 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsFileEditAction
@@ -89,11 +89,12 @@ private fun SettingsFileEditScreenLayout(
             TopAppBar(
                 title = { Text(stringResource(SettingsR.string.edit_file_title, fileName)) },
                 navigationIcon = {
-                    IconButton(
+                    TooltipIconButton(
+                        label = stringResource(CoreR.string.back),
                         onClick = {
                             if (isModified) showDiscardDialog = true
                             else onAction(SettingsFileEditAction.OnBackClick)
-                        }
+                        },
                     ) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
@@ -102,7 +103,8 @@ private fun SettingsFileEditScreenLayout(
                     }
                 },
                 actions = {
-                    IconButton(
+                    TooltipIconButton(
+                        label = stringResource(SettingsR.string.save),
                         onClick = {
                             val text = textFieldState.text.toString()
                             onAction(SettingsFileEditAction.OnSave(text))
