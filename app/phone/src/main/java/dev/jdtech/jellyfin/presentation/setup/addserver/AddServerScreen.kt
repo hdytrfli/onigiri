@@ -39,14 +39,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.setup.components.DiscoveredServerItem
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.setup.R as SetupR
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerAction
 import dev.jdtech.jellyfin.setup.presentation.addserver.AddServerEvent
@@ -99,22 +100,22 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
             verticalArrangement = Arrangement.Center,
             modifier =
                 Modifier.fillMaxHeight()
-                    .padding(horizontal = 24.dp)
-                    .widthIn(max = 480.dp)
+                    .padding(horizontal = MaterialTheme.spacings.default)
+                    .widthIn(max = Dimens.formMaxWidth)
                     .align(Alignment.Center)
                     .verticalScroll(scrollState),
         ) {
             Image(
                 painter = painterResource(id = CoreR.drawable.ic_banner),
                 contentDescription = null,
-                modifier = Modifier.width(250.dp).align(Alignment.CenterHorizontally),
+                modifier = Modifier.width(Dimens.logoWidth).align(Alignment.CenterHorizontally),
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
             Text(
                 text = stringResource(SetupR.string.add_server),
                 style = MaterialTheme.typography.headlineMedium,
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
             AnimatedVisibility(state.discoveredServers.isNotEmpty()) {
                 LazyRow {
                     items(state.discoveredServers) { discoveredServer ->
@@ -129,7 +130,7 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
             OutlinedTextField(
                 value = serverAddress,
                 leadingIcon = {
@@ -171,7 +172,7 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
         }
         IconButton(
             onClick = { onAction(AddServerAction.OnBackClick) },
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = MaterialTheme.spacings.small),
         ) {
             Icon(painter = painterResource(CoreR.drawable.ic_arrow_left), contentDescription = null)
         }

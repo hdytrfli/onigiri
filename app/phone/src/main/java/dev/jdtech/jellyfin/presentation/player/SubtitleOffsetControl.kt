@@ -62,7 +62,14 @@ fun SubtitleOffsetControl(
 
     Column(
         modifier =
-            modifier.fillMaxWidth().padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 4.dp),
+            modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 20.dp,
+                    top = MaterialTheme.spacings.small,
+                    end = 20.dp,
+                    bottom = MaterialTheme.spacings.extraSmall,
+                ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
     ) {

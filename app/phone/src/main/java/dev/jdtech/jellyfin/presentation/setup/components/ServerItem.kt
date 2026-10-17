@@ -22,9 +22,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -49,16 +49,24 @@ fun ServerItem(
                     },
                 )
     ) {
-        Row(modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)) {
+        Row(
+            modifier =
+                Modifier.padding(
+                    start = MaterialTheme.spacings.default,
+                    top = MaterialTheme.spacings.medium,
+                    end = MaterialTheme.spacings.medium,
+                    bottom = MaterialTheme.spacings.medium,
+                )
+        ) {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_server),
                 contentDescription = null,
                 modifier = Modifier.align(Alignment.CenterVertically),
             )
-            Spacer(modifier = Modifier.width(24.dp))
+            Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
             Column {
                 Text(text = name, style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
                 Text(
                     text = address,
                     style = MaterialTheme.typography.bodyMedium,

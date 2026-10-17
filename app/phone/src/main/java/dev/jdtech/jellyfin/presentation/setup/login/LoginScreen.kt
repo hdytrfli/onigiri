@@ -47,9 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.setup.R as SetupR
 import dev.jdtech.jellyfin.setup.presentation.login.LoginAction
 import dev.jdtech.jellyfin.setup.presentation.login.LoginEvent
@@ -111,27 +113,27 @@ private fun LoginScreenLayout(
             verticalArrangement = Arrangement.Center,
             modifier =
                 Modifier.fillMaxHeight()
-                    .padding(horizontal = 24.dp)
-                    .widthIn(max = 480.dp)
+                    .padding(horizontal = MaterialTheme.spacings.default)
+                    .widthIn(max = Dimens.formMaxWidth)
                     .align(Alignment.Center)
                     .verticalScroll(scrollState),
         ) {
             Image(
                 painter = painterResource(id = CoreR.drawable.ic_banner),
                 contentDescription = null,
-                modifier = Modifier.width(250.dp).align(Alignment.CenterHorizontally),
+                modifier = Modifier.width(Dimens.logoWidth).align(Alignment.CenterHorizontally),
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
             Text(
                 text = stringResource(SetupR.string.login),
                 style = MaterialTheme.typography.headlineMedium,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
             Text(
                 text = stringResource(SetupR.string.server_subtitle, state.serverName ?: ""),
                 style = MaterialTheme.typography.titleMedium,
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
             OutlinedTextField(
                 value = username,
                 leadingIcon = {
@@ -149,7 +151,7 @@ private fun LoginScreenLayout(
                 enabled = !state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
             OutlinedTextField(
                 value = password,
                 leadingIcon = {
@@ -201,7 +203,7 @@ private fun LoginScreenLayout(
             )
             AnimatedVisibility(state.quickConnectEnabled) {
                 Column {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         HorizontalDivider(
                             modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
@@ -215,7 +217,7 @@ private fun LoginScreenLayout(
                             modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
                     Box {
                         if (state.quickConnectCode != null) {
                             CircularProgressIndicator(
@@ -223,7 +225,7 @@ private fun LoginScreenLayout(
                                 modifier =
                                     Modifier.size(24.dp)
                                         .align(Alignment.CenterStart)
-                                        .offset(x = 8.dp),
+                                        .offset(x = MaterialTheme.spacings.small),
                             )
                         }
                         OutlinedButton(
@@ -246,13 +248,13 @@ private fun LoginScreenLayout(
         }
         IconButton(
             onClick = { onAction(LoginAction.OnBackClick) },
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = MaterialTheme.spacings.small),
         ) {
             Icon(painter = painterResource(CoreR.drawable.ic_arrow_left), contentDescription = null)
         }
         IconButton(
             onClick = { onAction(LoginAction.OnChangeServerClick) },
-            modifier = Modifier.align(Alignment.TopEnd).padding(end = 8.dp),
+            modifier = Modifier.align(Alignment.TopEnd).padding(end = MaterialTheme.spacings.small),
         ) {
             Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
         }

@@ -38,9 +38,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -75,7 +75,7 @@ fun SortByDialog(
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 540.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogMaxHeight),
             shape = MaterialTheme.shapes.extraLarge,
             colors =
                 CardDefaults.cardColors(

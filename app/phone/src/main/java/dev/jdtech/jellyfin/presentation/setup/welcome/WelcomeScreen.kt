@@ -22,10 +22,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.setup.R as SetupR
 import dev.jdtech.jellyfin.setup.presentation.welcome.WelcomeAction
 
@@ -47,7 +48,7 @@ fun WelcomeScreen(onContinueClick: () -> Unit) {
 
 @Composable
 private fun WelcomeScreenLayout(onAction: (WelcomeAction) -> Unit) {
-    RootLayout(padding = PaddingValues(horizontal = 24.dp)) {
+    RootLayout(padding = PaddingValues(horizontal = MaterialTheme.spacings.default)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.Center).verticalScroll(rememberScrollState()),
@@ -55,28 +56,28 @@ private fun WelcomeScreenLayout(onAction: (WelcomeAction) -> Unit) {
             Image(
                 painter = painterResource(id = CoreR.drawable.ic_banner),
                 contentDescription = null,
-                modifier = Modifier.width(250.dp),
+                modifier = Modifier.width(Dimens.logoWidth),
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
             Text(
                 text = stringResource(SetupR.string.welcome),
                 style = MaterialTheme.typography.headlineSmall,
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
             Text(
                 text = stringResource(SetupR.string.welcome_text),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(32.dp))
-            Column(modifier = Modifier.widthIn(max = 480.dp)) {
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
+            Column(modifier = Modifier.widthIn(max = Dimens.formMaxWidth)) {
                 OutlinedButton(
                     onClick = { onAction(WelcomeAction.OnLearnMoreClick) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(text = stringResource(SetupR.string.welcome_btn_learn_more))
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
                 Button(
                     onClick = { onAction(WelcomeAction.OnContinueClick) },
                     modifier = Modifier.fillMaxWidth(),

@@ -21,13 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
+import dev.jdtech.jellyfin.core.presentation.theme.Green
+import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -43,7 +44,7 @@ fun DownloaderCard(state: DownloaderState, onCancelClick: () -> Unit, onRetryCli
 
     val textColor =
         when (state.status) {
-            DownloadManager.STATUS_PAUSED -> Color.Yellow
+            DownloadManager.STATUS_PAUSED -> Yellow
             DownloadManager.STATUS_FAILED -> MaterialTheme.colorScheme.error
             else -> MaterialTheme.colorScheme.onSurface
         }
@@ -58,8 +59,8 @@ fun DownloaderCard(state: DownloaderState, onCancelClick: () -> Unit, onRetryCli
 
     val progressIndicatorColor =
         when (state.status) {
-            DownloadManager.STATUS_PAUSED -> Color.Yellow
-            DownloadManager.STATUS_SUCCESSFUL -> Color.Green
+            DownloadManager.STATUS_PAUSED -> Yellow
+            DownloadManager.STATUS_SUCCESSFUL -> Green
             DownloadManager.STATUS_FAILED -> MaterialTheme.colorScheme.error
             else -> ProgressIndicatorDefaults.linearColor
         }

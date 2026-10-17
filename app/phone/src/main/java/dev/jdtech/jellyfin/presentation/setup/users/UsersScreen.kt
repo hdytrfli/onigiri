@@ -34,10 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.setup.components.UserItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.setup.R as SetupR
 import dev.jdtech.jellyfin.setup.presentation.users.UsersAction
 import dev.jdtech.jellyfin.setup.presentation.users.UsersEvent
@@ -94,8 +96,8 @@ private fun UsersScreenLayout(
     RootLayout {
         Column(
             modifier =
-                Modifier.padding(horizontal = 24.dp)
-                    .widthIn(max = 480.dp)
+                Modifier.padding(horizontal = MaterialTheme.spacings.default)
+                    .widthIn(max = Dimens.formMaxWidth)
                     .fillMaxWidth()
                     .align(Alignment.Center)
         ) {
@@ -103,9 +105,9 @@ private fun UsersScreenLayout(
             Image(
                 painter = painterResource(id = CoreR.drawable.ic_banner),
                 contentDescription = null,
-                modifier = Modifier.width(250.dp).align(Alignment.CenterHorizontally),
+                modifier = Modifier.width(Dimens.logoWidth).align(Alignment.CenterHorizontally),
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
             Text(
                 text = stringResource(SetupR.string.users),
                 style = MaterialTheme.typography.headlineMedium,
@@ -114,7 +116,7 @@ private fun UsersScreenLayout(
                 text = stringResource(SetupR.string.server_subtitle, state.serverName ?: ""),
                 style = MaterialTheme.typography.titleMedium,
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
             if (state.users.isEmpty() && state.publicUsers.isEmpty()) {
                 Text(
                     text = stringResource(SetupR.string.users_no_users),
@@ -153,7 +155,7 @@ private fun UsersScreenLayout(
         if (showBack) {
             IconButton(
                 onClick = { onAction(UsersAction.OnBackClick) },
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = MaterialTheme.spacings.small),
             ) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_arrow_left),
@@ -163,7 +165,7 @@ private fun UsersScreenLayout(
         }
         IconButton(
             onClick = { onAction(UsersAction.OnChangeServerClick) },
-            modifier = Modifier.align(Alignment.TopEnd).padding(end = 8.dp),
+            modifier = Modifier.align(Alignment.TopEnd).padding(end = MaterialTheme.spacings.small),
         ) {
             Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
         }
@@ -171,7 +173,7 @@ private fun UsersScreenLayout(
             onClick = { onAction(UsersAction.OnAddClick) },
             icon = { Icon(painterResource(CoreR.drawable.ic_plus), contentDescription = null) },
             text = { Text(text = stringResource(SetupR.string.users_btn_add_user)) },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(MaterialTheme.spacings.default),
         )
 
         if (openDeleteDialog && selectedUser != null) {

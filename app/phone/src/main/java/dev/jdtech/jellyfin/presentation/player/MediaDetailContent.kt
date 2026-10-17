@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailState
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
@@ -160,7 +161,7 @@ private fun BackdropHeader(backdropUri: String, title: String?) {
             contentScale = ContentScale.Crop,
         )
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(Color.Black.copy(alpha = 0.1f))
+            drawRect(ScrimLight)
             drawRect(
                 brush =
                     Brush.verticalGradient(

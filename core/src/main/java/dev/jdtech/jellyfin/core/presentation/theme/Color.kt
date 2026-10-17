@@ -2,6 +2,24 @@ package dev.jdtech.jellyfin.core.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
+/** Brand red: backs the Material error role and the played/favourite accents. */
+val Red = Color(0xFFEB5757)
+
+/** Brand yellow: rating stars and the paused-download status. */
+val Yellow = Color(0xFFF2C94C)
+
+/** Brand green: the successful-download status. */
+val Green = Color(0xFF24B364)
+
+/** Translucent black ramp drawn over artwork (backdrops/posters). */
+val ScrimLight = Color.Black.copy(alpha = 0.1f)
+val ScrimMedium = Color.Black.copy(alpha = 0.5f)
+val ScrimStrong = Color.Black.copy(alpha = 0.6f)
+
+/** Foreground colours for content drawn over artwork. */
+val OnScrim = Color.White
+val OnScrimSecondary = Color.LightGray
+
 data object ColorDark {
     val primaryDark = Color(0xFFE6E6E6)
     val onPrimaryDark = Color(0xFF1A1A1A)
@@ -15,7 +33,7 @@ data object ColorDark {
     val onTertiaryDark = Color(0xFF1A1A1A)
     val tertiaryContainerDark = Color(0xFF2A2A2A)
     val onTertiaryContainerDark = Color(0xFFEDEDED)
-    val errorDark = Color(0xFFCF6679)
+    val errorDark = Red
     val onErrorDark = Color(0xFF1A1A1A)
     val errorContainerDark = Color(0xFF8C1D18)
     val onErrorContainerDark = Color(0xFFF2B8B5)
@@ -39,5 +57,3 @@ data object ColorDark {
     val surfaceContainerHighDark = Color(0xFF262626)
     val surfaceContainerHighestDark = Color(0xFF2E2E2E)
 }
-
-val Yellow = Color(0xFFF2C94C)

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Views-only colour resources. The authoritative Compose palette lives in
+    core/src/main/java/dev/jdtech/jellyfin/core/presentation/theme/Color.kt;
+    the Material role colours below mirror it and must keep the same values.
+-->
 <resources>
     <!-- Primary -->
     <color name="primary_dark">#E6E6E6</color>
@@ -12,25 +17,19 @@
     <color name="secondary_container_dark">#2A2A2A</color>
     <color name="on_secondary_container_dark">#EDEDED</color>
 
-
-    <color name="blue_300">#67b0ed</color>
-    <color name="blue_600">#2B82D9</color>
-    <color name="blue_800">#2060b4</color>
-    <color name="green_300">#71ca92</color>
-    <color name="green_500">#24B364</color>
-    <color name="green_800">#038043</color>
+    <!-- Surface -->
     <color name="neutral_1000">#121212</color>
     <color name="neutral_900">#121212</color>
-    <color name="neutral_800">#243342</color>
-    <color name="neutral_700">#374F67</color>
-    <color name="neutral_400">#5D82A7</color>
-    <color name="neutral_300">#A9BDD1</color>
-    <color name="neutral_200">#D7E0E9</color>
-    <color name="transparent_white_300">#4DFFFFFF</color>
-    <color name="transparent_black_300">#4D000000</color>
+
+    <!-- Error (mirrors ColorDark.errorDark / ColorDark.onErrorDark) -->
     <color name="red">#EB5757</color>
-    <color name="yellow">#F2C94C</color>
+    <color name="on_error_dark">#1A1A1A</color>
+
+    <!-- Extras without a Material role -->
+    <color name="neutral_800">#243342</color>
+    <color name="transparent_white_300">#4DFFFFFF</color>
     <color name="player_background">#AA000000</color>
+    <color name="player_text_secondary">#B3FFFFFF</color>
 
     <color name="logo_primary">#FF3DDC84</color>
     <color name="logo_secondary">#FF00A4DC</color>

@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/player_menu_tab_offset"
-        android:textColor="#B3FFFFFF"
+        android:textColor="@color/player_text_secondary"
         android:textSize="14sp" />
 
     <TextView
@@ -23,7 +23,7 @@
         android:paddingEnd="8dp"
         android:paddingBottom="2dp"
         android:text="0.0 s"
-        android:textColor="#FF1A1A1A"
+        android:textColor="@color/on_primary_dark"
         android:textSize="12sp"
         android:textStyle="bold" />
 

@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -201,7 +202,7 @@ private fun IdentifyScreenLayout(
 
             item {
                 Box(
-                    modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                    modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
                     contentAlignment = Alignment.CenterEnd,
                 ) {
                     Button(onClick = onSearch, enabled = state.query.isNotBlank()) {
@@ -217,7 +218,7 @@ private fun IdentifyScreenLayout(
 @Composable
 private fun IdentifyCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
-        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+        modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
         colors =
             CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {

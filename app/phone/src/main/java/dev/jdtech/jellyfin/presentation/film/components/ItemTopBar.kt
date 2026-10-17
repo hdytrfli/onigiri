@@ -12,10 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -46,8 +46,8 @@ fun ItemTopBar(
                 modifier = Modifier.alpha(0.7f),
                 colors =
                     IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.scrim,
+                        contentColor = OnScrim,
                     ),
             ) {
                 Icon(
@@ -62,8 +62,8 @@ fun ItemTopBar(
                 modifier = Modifier.alpha(0.7f),
                 colors =
                     IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.scrim,
+                        contentColor = OnScrim,
                     ),
             ) {
                 Icon(painter = painterResource(CoreR.drawable.ic_home), contentDescription = null)

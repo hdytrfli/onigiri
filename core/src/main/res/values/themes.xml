@@ -30,7 +30,7 @@
 
         <!-- Error -->
         <item name="colorError">@color/red</item>
-        <item name="colorOnError">@android:color/white</item>
+        <item name="colorOnError">@color/on_error_dark</item>
 
         <!-- Status bar -->
         <item name="android:statusBarColor">?attr/colorSurface</item>

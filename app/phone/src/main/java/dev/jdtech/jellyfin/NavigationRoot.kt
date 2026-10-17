@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -37,11 +38,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -54,6 +53,8 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
+import dev.jdtech.jellyfin.core.presentation.theme.ScrimMedium
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidCollection
@@ -90,6 +91,7 @@ import dev.jdtech.jellyfin.presentation.setup.login.LoginScreen
 import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
+import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.settings.R as SettingsR
@@ -329,9 +331,10 @@ private fun MainNavigation(
                             if (isRail) {
                                 // Match the top bar's top padding on the rail (first item only, so
                                 // the items keep their normal spacing).
-                                if (index == 0) Modifier.padding(top = 8.dp) else Modifier
+                                if (index == 0) Modifier.padding(top = MaterialTheme.spacings.small)
+                                else Modifier
                             } else {
-                                Modifier.padding(vertical = 8.dp)
+                                Modifier.padding(vertical = MaterialTheme.spacings.small)
                             },
                         enabled = item.enabled,
                         label = { Text(text = stringResource(item.title)) },
@@ -353,12 +356,14 @@ private fun MainNavigation(
                 // translucent background reveals the (light) navigation bar behind it.
                 SnackbarHost(
                     hostState = snackbarHostState,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
+                    modifier =
+                        Modifier.align(Alignment.BottomCenter)
+                            .padding(bottom = MaterialTheme.spacings.medium),
                 ) { data ->
                     Snackbar(
                         snackbarData = data,
-                        containerColor = Color.Black.copy(alpha = 0.5f),
-                        contentColor = Color.White,
+                        containerColor = ScrimMedium,
+                        contentColor = OnScrim,
                     )
                 }
             }

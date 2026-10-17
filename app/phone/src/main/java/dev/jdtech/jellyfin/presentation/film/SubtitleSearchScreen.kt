@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -57,6 +56,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.jdtech.jellyfin.models.FindroidMediaStream
@@ -158,7 +158,7 @@ private fun SubtitleSearchScreenLayout(
                 }
                 item {
                     Box(
-                        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                        modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
                         contentAlignment = Alignment.CenterEnd,
                     ) {
                         Button(onClick = onSearch, enabled = !state.isSearching) {
@@ -220,7 +220,7 @@ private fun SubtitleSearchScreenLayout(
                 } else {
                     // Plain empty/error state: no card, so it doesn't look like a list item.
                     item {
-                        Column(modifier = Modifier.widthIn(max = 640.dp)) {
+                        Column(modifier = Modifier.widthIn(max = Dimens.contentMaxWidth)) {
                             Text(
                                 text = stringResource(CoreR.string.available_subtitles),
                                 modifier = Modifier.padding(start = MaterialTheme.spacings.medium),
@@ -280,7 +280,7 @@ private fun SettingsSection(
     title: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(modifier = Modifier.widthIn(max = 640.dp)) {
+    Column(modifier = Modifier.widthIn(max = Dimens.contentMaxWidth)) {
         if (title != null) {
             Text(
                 text = title,
@@ -367,8 +367,8 @@ private fun LanguageDialogItem(name: String, selected: Boolean, onSelect: () -> 
 private fun SubtitleInfoDialog(info: RemoteSubtitleInfo, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier.width(480.dp).height(440.dp),
-            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier.width(Dimens.formMaxWidth).height(440.dp),
+            shape = MaterialTheme.shapes.extraLarge,
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Text(

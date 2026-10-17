@@ -173,7 +173,7 @@
 
         <LinearLayout
             android:id="@+id/player_options_panel"
-            android:layout_width="400dp"
+            android:layout_width="@dimen/player_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:background="@drawable/player_options_panel_background"
@@ -194,7 +194,7 @@
                 app:tabIndicatorFullWidth="false"
                 app:tabMode="fixed"
                 app:tabSelectedTextColor="@android:color/white"
-                app:tabTextColor="#B3FFFFFF" />
+                app:tabTextColor="@color/player_text_secondary" />
 
             <ListView
                 android:id="@+id/player_options_list"
@@ -226,7 +226,7 @@
 
         <LinearLayout
             android:id="@+id/player_episodes_panel"
-            android:layout_width="400dp"
+            android:layout_width="@dimen/player_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:background="@drawable/player_options_panel_background"
@@ -275,7 +275,7 @@
 
         <LinearLayout
             android:id="@+id/player_detail_panel"
-            android:layout_width="400dp"
+            android:layout_width="@dimen/player_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:background="@drawable/player_options_panel_background"

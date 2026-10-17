@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -24,6 +23,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
+import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
+import dev.jdtech.jellyfin.core.presentation.theme.OnScrimSecondary
+import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
+import dev.jdtech.jellyfin.core.presentation.theme.ScrimMedium
+import dev.jdtech.jellyfin.core.presentation.theme.ScrimStrong
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -35,9 +39,9 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
     val colorStops =
         arrayOf(
-            0.0f to Color.Black.copy(alpha = 0.1f),
-            0.5f to Color.Black.copy(alpha = 0.5f),
-            1f to Color.Black.copy(alpha = 0.6f),
+            0.0f to ScrimLight,
+            0.5f to ScrimMedium,
+            1f to ScrimStrong,
         )
 
     Box(
@@ -74,7 +78,7 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
                 }
             Text(
                 text = genres.joinToString(),
-                color = Color.LightGray,
+                color = OnScrimSecondary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
@@ -82,7 +86,7 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
             Text(
                 text = item.name,
                 modifier = Modifier,
-                color = Color.White,
+                color = OnScrim,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,
                 style = MaterialTheme.typography.titleLarge,
