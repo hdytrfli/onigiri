@@ -46,6 +46,21 @@
                 android:src="@drawable/ic_picture_in_picture_2"
                 app:tint="@android:color/white" />
 
+            <Space
+                android:id="@+id/space_stats"
+                android:layout_width="16dp"
+                android:layout_height="0dp" />
+
+            <ImageButton
+                android:id="@+id/btn_stats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/transparent_circle_background"
+                android:contentDescription="@string/player_controls_stats"
+                android:padding="16dp"
+                android:src="@drawable/ic_chart_no_axes_column"
+                app:tint="@android:color/white" />
+
         </LinearLayout>
 
         <LinearLayout

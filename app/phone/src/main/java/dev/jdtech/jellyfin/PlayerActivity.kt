@@ -61,6 +61,7 @@ import dev.jdtech.jellyfin.presentation.player.MediaDetailHeader
 import dev.jdtech.jellyfin.presentation.player.PlayerEpisodeAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuAdapter
 import dev.jdtech.jellyfin.presentation.player.PlayerMenuItem
+import dev.jdtech.jellyfin.presentation.player.PlayerStatsPanel
 import dev.jdtech.jellyfin.presentation.player.SubtitleOffsetControl
 import dev.jdtech.jellyfin.presentation.player.formatSubtitleOffset
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -210,6 +211,7 @@ class PlayerActivity : BasePlayerActivity() {
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
+        val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
         val gestureLockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_gesture_lock)
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
@@ -362,6 +364,8 @@ class PlayerActivity : BasePlayerActivity() {
                                 btnInfo.imageAlpha = 255
                                 pipButton.isEnabled = true
                                 pipButton.imageAlpha = 255
+                                statsButton.isEnabled = true
+                                statsButton.imageAlpha = 255
                             }
 
                             // Episodes
@@ -447,6 +451,9 @@ class PlayerActivity : BasePlayerActivity() {
 
         btnInfo.isEnabled = false
         btnInfo.imageAlpha = 75
+
+        statsButton.isEnabled = false
+        statsButton.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false
@@ -574,6 +581,28 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         pipButton.setOnClickListener { pictureInPicture() }
+
+        // Playback statistics: mpv's own counters in a panel below the top row of controls. The
+        // panel runs its own polling loop, so mpv is only read while the panel is on screen.
+        val statsComposeView = findViewById<ComposeView>(R.id.player_stats_compose)
+        val showStats = mutableStateOf(false)
+        statsComposeView.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnDetachedFromWindow
+        )
+        statsComposeView.setContent {
+            FindroidTheme {
+                if (showStats.value) {
+                    PlayerStatsPanel(
+                        loadStats = { viewModel.player.playbackStats() },
+                        onClick = { binding.playerView.showController() },
+                    )
+                }
+            }
+        }
+        statsButton.setOnClickListener {
+            showStats.value = !showStats.value
+            statsComposeView.isVisible = showStats.value
+        }
 
         // Set marker color
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(R.id.exo_progress)

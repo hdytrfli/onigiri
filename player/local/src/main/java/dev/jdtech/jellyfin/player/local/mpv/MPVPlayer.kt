@@ -1184,6 +1184,46 @@ class MPVPlayer(
     }
 
     /**
+     * Reads mpv's own playback counters for the stats overlay. Called on a timer while the overlay
+     * is open, so every value is one property read, and anything mpv does not report is left null
+     * instead of being defaulted to a zero that would read as a measurement.
+     */
+    fun playbackStats(): PlaybackStats {
+        if (isReleased) return PlaybackStats()
+
+        fun text(name: String): String? = runCatching {
+            mpvLib.getPropertyString(name)
+        }
+            .getOrNull()
+            ?.takeIf { it.isNotBlank() }
+
+        fun number(name: String): Double? = text(name)?.toDoubleOrNull()
+
+        fun count(name: String): Long = number(name)?.toLong() ?: 0L
+
+        val hardwareDecoder = text("hwdec-current")?.let { if (it == "no") "software" else it }
+
+        return PlaybackStats(
+            width = number("width")?.toInt() ?: 0,
+            height = number("height")?.toInt() ?: 0,
+            fps =
+                number("estimated-vf-fps")?.takeIf { it > 0 }
+                    ?: number("container-fps")?.takeIf { it > 0 },
+            videoCodec = text("video-codec"),
+            videoBitrate = number("video-bitrate")?.takeIf { it > 0 },
+            audioCodec = text("audio-codec"),
+            audioChannels = number("audio-params/channel-count")?.toInt()?.takeIf { it > 0 },
+            audioBitrate = number("audio-bitrate")?.takeIf { it > 0 },
+            hardwareDecoder = hardwareDecoder,
+            droppedFrames = count("frame-drop-count"),
+            decoderDroppedFrames = count("decoder-frame-drop-count"),
+            delayedFrames = count("vo-delayed-frame-count"),
+            avSyncSeconds = number("avsync"),
+            bufferSeconds = number("demuxer-cache-duration")?.takeIf { it > 0 },
+        )
+    }
+
+    /**
      * Attempts to set the playback parameters. Passing [PlaybackParameters.DEFAULT] resets the
      * player to the default, which means there is no speed or pitch adjustment.
      *

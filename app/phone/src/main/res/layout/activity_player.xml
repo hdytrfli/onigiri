@@ -54,6 +54,15 @@
 
     </LinearLayout>
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/player_stats_compose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="64dp"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/gesture_volume_layout"
         android:layout_width="54dp"
