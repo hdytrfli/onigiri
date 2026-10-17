@@ -374,6 +374,8 @@ class PlayerGestureHelper(
                     if (isControlsLocked) return false
                     // Disables volume/brightness gestures when gesture-locked
                     if (isVolumeBrightnessLocked) return false
+                    // The finger left over when a pinch ends is not a volume/brightness drag.
+                    if ((SystemClock.elapsedRealtime() - lastScaleEvent) <= 200) return false
 
                     if (abs(distanceY / distanceX) < 2) return false
 
@@ -504,7 +506,12 @@ class PlayerGestureHelper(
                                 Constants.ZOOM_SCALE_THRESHOLD
                         ) {
                             val enableZoom = scaleFactor > 1
-                            updateZoomMode(enableZoom)
+                            // Asking for the state the video is already in is ignored rather than
+                            // re-applied: the pinch is then not consumed as a zoom, and the finger
+                            // left behind would otherwise land on the volume/brightness gesture.
+                            if (enableZoom != isZoomEnabled) {
+                                updateZoomMode(enableZoom)
+                            }
                         }
                         return true
                     }
