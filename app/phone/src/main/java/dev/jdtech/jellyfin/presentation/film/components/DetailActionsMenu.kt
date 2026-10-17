@@ -79,6 +79,7 @@ fun DetailActionsMenu(
     Box(modifier = modifier) {
         IconButton(
             onClick = { menuOpen = true },
+            modifier = Modifier.detailTopBarAlpha(),
             colors = detailTopBarIconButtonColors(),
         ) {
             if (identifyState.isApplying) {

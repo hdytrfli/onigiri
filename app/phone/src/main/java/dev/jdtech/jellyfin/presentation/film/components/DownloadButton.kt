@@ -85,6 +85,7 @@ fun DownloadButton(
                 }
                 IconButton(
                     onClick = { cancelDialogOpen = true },
+                    modifier = Modifier.detailTopBarAlpha(),
                     colors = detailTopBarIconButtonColors(),
                 ) {
                     Icon(
@@ -97,7 +98,7 @@ fun DownloadButton(
         item.isDownloaded() -> {
             IconButton(
                 onClick = { deleteDialogOpen = true },
-                modifier = modifier,
+                modifier = modifier.detailTopBarAlpha(),
                 colors = detailTopBarIconButtonColors(),
             ) {
                 Icon(
@@ -117,7 +118,7 @@ fun DownloadButton(
                         onDownloadClick(selectedStorageIndex)
                     }
                 },
-                modifier = modifier,
+                modifier = modifier.detailTopBarAlpha(),
                 colors = detailTopBarIconButtonColors(),
             ) {
                 Icon(

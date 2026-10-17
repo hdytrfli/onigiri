@@ -32,6 +32,14 @@ fun detailTopBarIconButtonColors(): IconButtonColors =
         contentColor = OnScrim,
     )
 
+/**
+ * Opacity applied to every icon-only action in a detail top bar, matching the back/home buttons.
+ */
+private const val DetailTopBarIconAlpha = 0.7f
+
+/** Applies [DetailTopBarIconAlpha] so every detail top-bar icon button renders identically. */
+fun Modifier.detailTopBarAlpha(): Modifier = alpha(DetailTopBarIconAlpha)
+
 @Composable
 fun ItemTopBar(
     hasBackButton: Boolean,
@@ -55,7 +63,7 @@ fun ItemTopBar(
         if (hasBackButton) {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.alpha(0.7f),
+                modifier = Modifier.detailTopBarAlpha(),
                 colors = detailTopBarIconButtonColors(),
             ) {
                 Icon(
@@ -67,7 +75,7 @@ fun ItemTopBar(
         if (hasHomeButton) {
             IconButton(
                 onClick = onHomeClick,
-                modifier = Modifier.alpha(0.7f),
+                modifier = Modifier.detailTopBarAlpha(),
                 colors = detailTopBarIconButtonColors(),
             ) {
                 Icon(painter = painterResource(CoreR.drawable.ic_home), contentDescription = null)
