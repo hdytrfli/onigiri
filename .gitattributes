@@ -10,3 +10,9 @@ gradlew text eol=lf
 *.gradle text eol=lf
 gradle/*.toml text eol=lf
 gradle.properties text eol=lf
+
+# Bundled subtitle fonts must reach the APK byte for byte; with core.autocrlf=true
+# a re-normalisation would silently corrupt them.
+*.ttf binary
+*.otf binary
+*.ttc binary
