@@ -16,8 +16,8 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
-import dev.jdtech.jellyfin.settings.domain.GridId
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 
 @Composable
 fun CollectionGrid(
@@ -27,7 +27,7 @@ fun CollectionGrid(
     showSectionHeaders: Boolean = true,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
+        columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
         modifier = Modifier.padding(innerPadding).fillMaxSize(),
         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
@@ -57,6 +57,7 @@ fun CollectionGrid(
                         if (item is FindroidEpisode) Direction.HORIZONTAL else Direction.VERTICAL,
                     onClick = { onAction(CollectionAction.OnItemClick(item)) },
                     modifier = Modifier.animateItem(),
+                    fillWidth = true,
                 )
             }
         }

@@ -141,6 +141,45 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                             ),
                                     ),
                                     PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_layout_grid,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.grid_poster_portrait,
+                                                    backendPreference =
+                                                        appPreferences.gridPosterColumnsPortrait,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.grid_poster_landscape,
+                                                    backendPreference =
+                                                        appPreferences.gridPosterColumnsLandscape,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.grid_thumbnail_portrait,
+                                                    backendPreference =
+                                                        appPreferences.gridThumbnailColumnsPortrait,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.grid_thumbnail_landscape,
+                                                    backendPreference =
+                                                        appPreferences
+                                                            .gridThumbnailColumnsLandscape,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
                                         nameStringResource = R.string.backdrop,
                                         preferences =
                                             listOf(

@@ -3,8 +3,8 @@ package dev.jdtech.jellyfin.presentation.film.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,17 +16,18 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 
 @Composable
-fun ProgressBar(item: FindroidItem, width: Int, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+fun ProgressBar(item: FindroidItem, modifier: Modifier = Modifier) {
+    val fraction =
+        if (item.runtimeTicks > 0) {
+            (item.playbackPositionTicks.toFloat() / item.runtimeTicks).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+    Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier =
-                Modifier.height(4.dp)
-                    .width(
-                        item.playbackPositionTicks
-                            .div(item.runtimeTicks.toFloat())
-                            .times(width - 16)
-                            .dp
-                    )
+                Modifier.fillMaxWidth(fraction)
+                    .height(4.dp)
                     .clip(MaterialTheme.shapes.extraSmall)
                     .background(MaterialTheme.colorScheme.primary)
         )
@@ -36,5 +37,5 @@ fun ProgressBar(item: FindroidItem, width: Int, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 private fun ProgressBarPreview() {
-    FindroidTheme { ProgressBar(item = dummyMovie, width = 142) }
+    FindroidTheme { ProgressBar(item = dummyMovie) }
 }

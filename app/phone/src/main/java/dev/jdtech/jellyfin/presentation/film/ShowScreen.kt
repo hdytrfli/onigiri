@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +43,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
+import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
@@ -56,6 +55,8 @@ import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.utils.getShowDateString
 import java.util.UUID
@@ -239,18 +240,17 @@ private fun ShowScreenLayout(
                         )
                         Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
                     }
-                    LazyRow(
-                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(MaterialTheme.spacings.default),
-                    ) {
-                        items(items = state.seasons, key = { item -> item.id }) { season ->
-                            ItemCard(
-                                item = season,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(ShowAction.NavigateToItem(season)) },
-                            )
-                        }
+                    GridRows(
+                        items = state.seasons,
+                        columns = gridColumns(GridSize.POSTER),
+                        modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
+                    ) { season ->
+                        ItemCard(
+                            item = season,
+                            direction = Direction.VERTICAL,
+                            onClick = { onAction(ShowAction.NavigateToItem(season)) },
+                            fillWidth = true,
+                        )
                     }
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                 }

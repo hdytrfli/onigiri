@@ -32,10 +32,8 @@ import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.domain.GridId
 
 @Composable
 fun DownloadsScreen(
@@ -70,7 +68,6 @@ private fun DownloadsScreenLayout(state: CollectionState, onAction: (CollectionA
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(CoreR.string.title_download)) },
-                actions = { GridSettingsButton(gridId = GridId.POSTERS) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )

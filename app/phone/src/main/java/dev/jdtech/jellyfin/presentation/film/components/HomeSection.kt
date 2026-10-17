@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.HomeSection
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 
 @Composable
 fun HomeSection(
@@ -36,17 +35,17 @@ fun HomeSection(
             )
         }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-        LazyRow(
-            contentPadding = itemsPadding,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-        ) {
-            items(section.items, key = { it.id }) { item ->
-                ItemCard(
-                    item = item,
-                    direction = Direction.HORIZONTAL,
-                    onClick = { onAction(HomeAction.OnItemClick(item)) },
-                )
-            }
+        GridRows(
+            items = section.items,
+            columns = gridColumns(GridSize.THUMBNAIL),
+            modifier = Modifier.padding(itemsPadding),
+        ) { item ->
+            ItemCard(
+                item = item,
+                direction = Direction.HORIZONTAL,
+                onClick = { onAction(HomeAction.OnItemClick(item)) },
+                fillWidth = true,
+            )
         }
     }
 }

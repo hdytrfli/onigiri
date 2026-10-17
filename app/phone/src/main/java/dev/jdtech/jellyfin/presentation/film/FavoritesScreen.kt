@@ -22,15 +22,13 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.settings.domain.GridId
 
 @Composable
 fun FavoritesScreen(
@@ -71,7 +69,7 @@ private fun FavoritesScreenLayout(
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
+            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
             modifier = Modifier.fillMaxSize(),
             contentPadding =
                 PaddingValues(
@@ -89,6 +87,7 @@ private fun FavoritesScreenLayout(
                     direction = Direction.VERTICAL,
                     onClick = { onItemClick(item) },
                     modifier = Modifier.animateItem(),
+                    fillWidth = true,
                 )
             }
         }
@@ -102,12 +101,6 @@ private fun FavoritesScreenLayout(
             onSearchClick = onSearchClick,
             onUserClick = onSettingsClick,
             modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
-            trailingActions = {
-                GridSettingsButton(
-                    gridId = GridId.POSTERS,
-                    style = GridSettingsButtonStyle.SURFACE,
-                )
-            },
         )
     }
 }

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,7 +26,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -41,9 +39,9 @@ import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.search.SearchAction
 import dev.jdtech.jellyfin.film.presentation.search.SearchState
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.settings.domain.GridId
 import kotlinx.coroutines.delay
 
 @Composable
@@ -140,19 +138,14 @@ fun FilmSearchBar(
                     }
                 },
                 trailingIcon = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (state.loading) {
-                            Box(modifier = Modifier.size(32.dp)) { CircularProgressIndicator() }
-                        } else if (query.isNotEmpty()) {
-                            IconButton(onClick = { query = "" }) {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_x),
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                        if (expanded) {
-                            GridSettingsButton(gridId = GridId.POSTERS)
+                    if (state.loading) {
+                        Box(modifier = Modifier.size(32.dp)) { CircularProgressIndicator() }
+                    } else if (query.isNotEmpty()) {
+                        IconButton(onClick = { query = "" }) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_x),
+                                contentDescription = null,
+                            )
                         }
                     }
                 },
@@ -163,7 +156,7 @@ fun FilmSearchBar(
         modifier = modifier.padding(start = searchBarPaddingStart, end = searchBarPaddingEnd),
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
+            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
             modifier = Modifier.fillMaxSize(),
             contentPadding =
                 PaddingValues(
@@ -181,6 +174,7 @@ fun FilmSearchBar(
                     direction = Direction.VERTICAL,
                     onClick = { onAction(SearchAction.OnItemClick(item)) },
                     modifier = Modifier.animateItem(),
+                    fillWidth = true,
                 )
             }
         }

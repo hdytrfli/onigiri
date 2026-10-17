@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -44,11 +42,14 @@ import dev.jdtech.jellyfin.film.presentation.person.PersonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidPerson
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import java.util.UUID
 
@@ -146,18 +147,17 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-                            LazyRow(
-                                contentPadding = itemsPadding,
-                                horizontalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.default),
-                            ) {
-                                items(state.starredInMovies, key = { it.id }) { item ->
-                                    ItemCard(
-                                        item = item,
-                                        direction = Direction.VERTICAL,
-                                        onClick = { onAction(PersonAction.NavigateToItem(item)) },
-                                    )
-                                }
+                            GridRows(
+                                items = state.starredInMovies,
+                                columns = gridColumns(GridSize.POSTER),
+                                modifier = Modifier.padding(itemsPadding),
+                            ) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(PersonAction.NavigateToItem(item)) },
+                                    fillWidth = true,
+                                )
                             }
                         }
                     }
@@ -170,18 +170,17 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-                            LazyRow(
-                                contentPadding = itemsPadding,
-                                horizontalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.default),
-                            ) {
-                                items(state.starredInShows, key = { it.id }) { item ->
-                                    ItemCard(
-                                        item = item,
-                                        direction = Direction.VERTICAL,
-                                        onClick = { onAction(PersonAction.NavigateToItem(item)) },
-                                    )
-                                }
+                            GridRows(
+                                items = state.starredInShows,
+                                columns = gridColumns(GridSize.POSTER),
+                                modifier = Modifier.padding(itemsPadding),
+                            ) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(PersonAction.NavigateToItem(item)) },
+                                    fillWidth = true,
+                                )
                             }
                         }
                     }

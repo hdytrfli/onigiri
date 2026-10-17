@@ -47,15 +47,14 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -138,7 +137,6 @@ private fun LibraryScreenLayout(
                     }
                 },
                 actions = {
-                    GridSettingsButton(gridId = GridId.POSTERS)
                     IconButton(onClick = { showSortByDialog = true }) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_down_up),
@@ -158,7 +156,7 @@ private fun LibraryScreenLayout(
                 modifier = Modifier.fillMaxWidth().padding(contentPadding + innerPadding),
             )
             LazyVerticalGrid(
-                columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
+                columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding + innerPadding,
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
@@ -172,6 +170,7 @@ private fun LibraryScreenLayout(
                             direction = Direction.VERTICAL,
                             onClick = { onAction(LibraryAction.OnItemClick(item)) },
                             modifier = Modifier.animateItem(),
+                            fillWidth = true,
                         )
                     }
                 }

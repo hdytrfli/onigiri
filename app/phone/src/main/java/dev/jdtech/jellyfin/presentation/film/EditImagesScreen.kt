@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,7 +40,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,18 +50,18 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImagesViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
+import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageInfo
 import org.jellyfin.sdk.model.api.ImageType
 
-/** The types shown as three equal columns on one row, left to right. */
-private val TripleRowImageTypes = listOf(ImageType.THUMB, ImageType.LOGO, ImageType.ART)
+/** The types shown together in the editor's "Misc..." section, left to right. */
+private val MiscImageTypes = listOf(ImageType.THUMB, ImageType.LOGO, ImageType.ART)
 
 /** Width of the per-tile overflow menu. */
 private val OverflowMenuWidth = 220.dp
@@ -82,9 +78,10 @@ private sealed interface ImageSlot {
 }
 
 /**
- * Lets an admin view and edit an item's images. Only five types are offered, laid out as fixed
- * rows: Primary on its own, Backdrop as a scrollable strip, and Thumb/Logo/Art as three equal
- * columns. The empty placeholder tile (not an "Add" button) starts the remote provider search.
+ * Lets an admin view and edit an item's images. Primary is shown on its own, then the Backdrop
+ * grid, then a "Misc..." grid with Thumb/Logo/Art. Each grid uses the configured column count for
+ * its tile shape (a poster, or a 16:9 thumbnail while the item is an episode). The empty
+ * placeholder tile (not an "Add" button) starts the remote provider search.
  */
 @Composable
 fun EditImagesScreen(
@@ -150,81 +147,73 @@ private fun EditImagesScreenLayout(
                 CircularProgressIndicator()
             }
         } else {
-            BoxWithConstraints(
+            val isEpisode = state.kind == BaseItemKind.EPISODE
+            // An episode's Primary is a 16:9 still; every other item's is a poster.
+            val primarySize = if (isEpisode) GridSize.THUMBNAIL else GridSize.POSTER
+            val backdropSlots =
+                imageSlots(
+                    type = ImageType.BACKDROP,
+                    images = state.images.filter { it.imageType == ImageType.BACKDROP },
+                    downloading = state.downloadingType == ImageType.BACKDROP,
+                )
+            val backdropBusy = state.busyKey?.startsWith("${ImageType.BACKDROP.name}:") == true
+
+            Column(
                 modifier =
                     Modifier.fillMaxSize()
                         .padding(innerPadding)
                         .padding(horizontal = MaterialTheme.spacings.default)
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = MaterialTheme.spacings.default),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
-                val gap = MaterialTheme.spacings.medium
-                // Each area derives its tile width from its own configured column count, so the
-                // backdrop strip and the Thumb/Logo/Art row keep lining up.
-                val primaryWidth = areaTileWidth(maxWidth, gap, gridColumnsFor(GridId.EDIT_PRIMARY))
-                val backdropWidth =
-                    areaTileWidth(maxWidth, gap, gridColumnsFor(GridId.EDIT_BACKDROP))
-                val thumbRowWidth =
-                    areaTileWidth(maxWidth, gap, gridColumnsFor(GridId.EDIT_THUMB_ROW))
-                val isEpisode = state.kind == BaseItemKind.EPISODE
-                val thumb = stringResource(CoreR.string.image_type_thumb)
-                val logo = stringResource(CoreR.string.image_type_logo)
-                val art = stringResource(CoreR.string.image_type_art)
-                val tripleRowTitle = "$thumb / $logo / $art"
-
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(vertical = MaterialTheme.spacings.default),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
-                ) {
-                    // Primary, on its own row at its own (poster, or 16:9 for an episode) size.
-                    EditorSectionHeader(
-                        title = stringResource(CoreR.string.image_type_primary),
-                        gridId = GridId.EDIT_PRIMARY,
-                    )
+                EditorSectionHeader(stringResource(CoreR.string.image_type_primary))
+                GridRows(items = listOf(ImageType.PRIMARY), columns = gridColumns(primarySize)) {
+                    type ->
                     SingleTypeTile(
-                        type = ImageType.PRIMARY,
+                        type = type,
                         itemId = itemId,
                         state = state,
-                        width = primaryWidth,
                         isEpisode = isEpisode,
                         showLabel = false,
                         onEditImage = onEditImage,
                         onDelete = onDelete,
                         onMakePrimary = onMakePrimary,
                     )
-                    // Backdrop, the only scrolling row (it can hold many images).
-                    EditorSectionHeader(
-                        title = stringResource(CoreR.string.image_type_backdrop),
-                        gridId = GridId.EDIT_BACKDROP,
-                    )
-                    BackdropRow(
+                }
+
+                EditorSectionHeader(stringResource(CoreR.string.image_type_backdrop))
+                GridRows(
+                    items = backdropSlots,
+                    columns = gridColumns(GridSize.THUMBNAIL),
+                ) { slot ->
+                    ImageSlotTile(
+                        slot = slot,
                         itemId = itemId,
-                        state = state,
-                        width = backdropWidth,
+                        baseUrl = state.baseUrl,
+                        ratio = imageTypeAspectRatio(ImageType.BACKDROP),
+                        enabled = !backdropBusy,
+                        showLabel = false,
                         onEditImage = onEditImage,
                         onDelete = onDelete,
                         onMakePrimary = onMakePrimary,
                     )
-                    // Thumb, Logo and Art as three equal columns on one row.
-                    EditorSectionHeader(title = tripleRowTitle, gridId = GridId.EDIT_THUMB_ROW)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(gap),
-                    ) {
-                        TripleRowImageTypes.forEach { type ->
-                            SingleTypeTile(
-                                type = type,
-                                itemId = itemId,
-                                state = state,
-                                width = thumbRowWidth,
-                                isEpisode = isEpisode,
-                                onEditImage = onEditImage,
-                                onDelete = onDelete,
-                                onMakePrimary = onMakePrimary,
-                            )
-                        }
-                    }
+                }
+
+                EditorSectionHeader(stringResource(CoreR.string.misc))
+                GridRows(
+                    items = MiscImageTypes,
+                    columns = gridColumns(GridSize.THUMBNAIL),
+                ) { type ->
+                    SingleTypeTile(
+                        type = type,
+                        itemId = itemId,
+                        state = state,
+                        isEpisode = isEpisode,
+                        onEditImage = onEditImage,
+                        onDelete = onDelete,
+                        onMakePrimary = onMakePrimary,
+                    )
                 }
             }
         }
@@ -233,30 +222,22 @@ private fun EditImagesScreenLayout(
     state.error?.let { error -> ErrorDialog(exception = error, onDismissRequest = onDismissError) }
 }
 
-/** The tile width for an area laid out as [columns] equal columns with [gap] between them. */
-private fun areaTileWidth(maxWidth: Dp, gap: Dp, columns: Int): Dp =
-    (maxWidth - gap * (columns - 1)) / columns
-
-/** An editor area's title row with its grid-settings button, matching the app's section headers. */
+/** An editor area's title, matching the app's section headers. */
 @Composable
-private fun EditorSectionHeader(title: String, gridId: GridId) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = title,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        GridSettingsButton(gridId = gridId)
-    }
+private fun EditorSectionHeader(title: String) {
+    Text(
+        text = title,
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.titleMedium,
+    )
 }
 
-/** One type's tile (its image, or the add/busy placeholder) at a fixed [width]. */
+/** One type's tile (its image, or the add/busy placeholder), filling its grid cell. */
 @Composable
 private fun SingleTypeTile(
     type: ImageType,
     itemId: UUID,
     state: EditImagesState,
-    width: Dp,
     isEpisode: Boolean = false,
     showLabel: Boolean = true,
     onEditImage: (ImageType) -> Unit,
@@ -274,7 +255,6 @@ private fun SingleTypeTile(
                 slot = slot,
                 itemId = itemId,
                 baseUrl = state.baseUrl,
-                width = width,
                 ratio = imageTypeAspectRatio(type, isEpisode),
                 enabled = !busy,
                 showLabel = showLabel,
@@ -283,42 +263,6 @@ private fun SingleTypeTile(
                 onMakePrimary = onMakePrimary,
             )
         }
-}
-
-/** The backdrop row: a horizontally scrollable strip with an always-present trailing add tile. */
-@Composable
-private fun BackdropRow(
-    itemId: UUID,
-    state: EditImagesState,
-    width: Dp,
-    onEditImage: (ImageType) -> Unit,
-    onDelete: (ImageType, Int?) -> Unit,
-    onMakePrimary: (ImageType, Int) -> Unit,
-) {
-    val type = ImageType.BACKDROP
-    val busy = state.busyKey?.startsWith("${type.name}:") == true
-    val slots =
-        imageSlots(
-            type = type,
-            images = state.images.filter { it.imageType == type },
-            downloading = state.downloadingType == type,
-        )
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
-        itemsIndexed(items = slots, key = { _, slot -> slot.listKey() }) { _, slot ->
-            ImageSlotTile(
-                slot = slot,
-                itemId = itemId,
-                baseUrl = state.baseUrl,
-                width = width,
-                ratio = imageTypeAspectRatio(type),
-                enabled = !busy,
-                showLabel = false,
-                onEditImage = onEditImage,
-                onDelete = onDelete,
-                onMakePrimary = onMakePrimary,
-            )
-        }
-    }
 }
 
 /**
@@ -346,21 +290,12 @@ private fun imageSlots(
             )
     }
 
-/** A stable list key for a slot, so the backdrop strip keeps item state across mutations. */
-private fun ImageSlot.listKey(): Any =
-    when (this) {
-        is ImageSlot.Existing -> image.imageIndex ?: image.hashCode()
-        is ImageSlot.Add -> "add"
-        is ImageSlot.Busy -> "busy"
-    }
-
 /** One cell: the type label, then the slot's preview or placeholder. */
 @Composable
 private fun ImageSlotTile(
     slot: ImageSlot,
     itemId: UUID,
     baseUrl: String,
-    width: Dp,
     ratio: Float,
     enabled: Boolean,
     showLabel: Boolean = true,
@@ -370,7 +305,7 @@ private fun ImageSlotTile(
 ) {
     val label = imageTypeLabel(slot.type)
     Column(
-        modifier = Modifier.width(width),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
     ) {
         // The label row is always present so that tiles with a hidden label stay aligned.

@@ -40,8 +40,6 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -50,9 +48,9 @@ import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 
@@ -112,7 +110,7 @@ private fun SeasonScreenLayout(
 
     val lazyListState = rememberLazyListState()
 
-    val gridColumns = gridColumnsFor(GridId.EPISODES)
+    val episodeColumns = gridColumns(GridSize.THUMBNAIL)
 
     val spacingScale = LocalContentSpacingScale.current
 
@@ -189,7 +187,7 @@ private fun SeasonScreenLayout(
                         Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                 }
-                items(state.episodes.chunked(gridColumns)) { rowEpisodes ->
+                items(state.episodes.chunked(episodeColumns)) { rowEpisodes ->
                     Row(
                         modifier =
                             Modifier.fillMaxWidth().padding(start = paddingStart, end = paddingEnd),
@@ -203,7 +201,7 @@ private fun SeasonScreenLayout(
                                 modifier = Modifier.weight(1f),
                             )
                         }
-                        repeat(gridColumns - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
+                        repeat(episodeColumns - rowEpisodes.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
             }
@@ -215,10 +213,6 @@ private fun SeasonScreenLayout(
             onBackClick = { onAction(SeasonAction.OnBackClick) },
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
-                GridSettingsButton(
-                    gridId = GridId.EPISODES,
-                    style = GridSettingsButtonStyle.FILLED_TONAL,
-                )
                 state.season?.let { season ->
                     EditImagesAction(
                         itemId = season.id,

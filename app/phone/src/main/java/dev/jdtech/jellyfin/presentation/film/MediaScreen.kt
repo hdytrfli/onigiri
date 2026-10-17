@@ -32,15 +32,13 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FilmSearchBar
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.settings.domain.GridId
 
 @Composable
 fun MediaScreen(
@@ -102,7 +100,7 @@ private fun MediaScreenLayout(
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(gridColumnsFor(GridId.LIBRARIES)),
+            columns = GridCells.Fixed(gridColumns(GridSize.THUMBNAIL)),
             modifier = Modifier.fillMaxSize(),
             contentPadding =
                 PaddingValues(
@@ -120,6 +118,7 @@ private fun MediaScreenLayout(
                     direction = Direction.HORIZONTAL,
                     onClick = { onAction(MediaAction.OnItemClick(library)) },
                     modifier = Modifier.animateItem(),
+                    fillWidth = true,
                 )
             }
         }
@@ -145,12 +144,6 @@ private fun MediaScreenLayout(
             onSearchClick = { onSearchExpand(true) },
             onUserClick = onSettingsClick,
             modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
-            trailingActions = {
-                GridSettingsButton(
-                    gridId = GridId.LIBRARIES,
-                    style = GridSettingsButtonStyle.SURFACE,
-                )
-            },
         )
 
         if (state.error != null && showErrorDialog) {

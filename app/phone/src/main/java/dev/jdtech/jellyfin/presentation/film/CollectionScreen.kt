@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,8 +53,7 @@ import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
+import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -64,9 +61,10 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 
 @Composable
@@ -166,18 +164,17 @@ private fun CollectionDetailLayout(
                     Spacer(Modifier.height(MaterialTheme.spacings.medium))
                 }
                 if (state.items.isNotEmpty()) {
-                    LazyRow(
-                        contentPadding = itemsPadding,
-                        horizontalArrangement =
-                            Arrangement.spacedBy(MaterialTheme.spacings.default),
-                    ) {
-                        items(state.items, key = { it.id }) { item ->
-                            ItemCard(
-                                item = item,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(CollectionAction.OnItemClick(item)) },
-                            )
-                        }
+                    GridRows(
+                        items = state.items,
+                        columns = gridColumns(GridSize.POSTER),
+                        modifier = Modifier.padding(itemsPadding),
+                    ) { item ->
+                        ItemCard(
+                            item = item,
+                            direction = Direction.VERTICAL,
+                            onClick = { onAction(CollectionAction.OnItemClick(item)) },
+                            fillWidth = true,
+                        )
                     }
                 }
                 Spacer(Modifier.height(paddingBottom))
@@ -189,10 +186,6 @@ private fun CollectionDetailLayout(
             hasHomeButton = false,
             onBackClick = { onAction(CollectionAction.OnBackClick) },
             trailingContent = {
-                GridSettingsButton(
-                    gridId = GridId.POSTERS,
-                    style = GridSettingsButtonStyle.FILLED_TONAL,
-                )
                 state.collection?.let { collection ->
                     EditImagesAction(
                         itemId = collection.id,
@@ -229,7 +222,6 @@ fun CollectionScreenLayout(
                         )
                     }
                 },
-                actions = { GridSettingsButton(gridId = GridId.POSTERS) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )

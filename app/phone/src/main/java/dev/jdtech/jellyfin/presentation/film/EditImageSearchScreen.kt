@@ -47,11 +47,10 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchEvent
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchState
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.domain.GridId
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
 import org.jellyfin.sdk.model.api.ImageType
@@ -99,14 +98,10 @@ private fun EditImageSearchLayout(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    // A poster-shaped result and a wide (16:9) result are different tile shapes, so they keep
-    // separate column settings.
-    val gridId =
-        if (isPosterShapedSearchResult(type, isEpisode)) {
-            GridId.IMAGE_POSTERS
-        } else {
-            GridId.IMAGE_WIDE
-        }
+    // A poster-shaped result and a wide (16:9) result are different tile shapes, so they use the
+    // matching grid size.
+    val gridSize =
+        if (isPosterShapedSearchResult(type, isEpisode)) GridSize.POSTER else GridSize.THUMBNAIL
 
     Scaffold(
         modifier =
@@ -124,7 +119,6 @@ private fun EditImageSearchLayout(
                         )
                     }
                 },
-                actions = { GridSettingsButton(gridId = gridId) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
@@ -150,7 +144,7 @@ private fun EditImageSearchLayout(
                     )
                 else ->
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(gridColumnsFor(gridId)),
+                        columns = GridCells.Fixed(gridColumns(gridSize)),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
                         horizontalArrangement =
                             Arrangement.spacedBy(MaterialTheme.spacings.default),

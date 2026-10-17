@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +24,8 @@ import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 
 @Composable
 fun HomeView(
@@ -64,17 +63,17 @@ fun HomeView(
             }
         }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-        LazyRow(
-            contentPadding = itemsPadding,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
-        ) {
-            items(view.view.items, key = { it.id }) { item ->
-                ItemCard(
-                    item = item,
-                    direction = Direction.VERTICAL,
-                    onClick = { onAction(HomeAction.OnItemClick(item)) },
-                )
-            }
+        GridRows(
+            items = view.view.items,
+            columns = gridColumns(GridSize.POSTER),
+            modifier = Modifier.padding(itemsPadding),
+        ) { item ->
+            ItemCard(
+                item = item,
+                direction = Direction.VERTICAL,
+                onClick = { onAction(HomeAction.OnItemClick(item)) },
+                fillWidth = true,
+            )
         }
     }
 }

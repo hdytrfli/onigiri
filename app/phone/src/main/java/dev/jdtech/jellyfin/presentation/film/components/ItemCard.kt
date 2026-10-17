@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -35,6 +36,7 @@ fun ItemCard(
     direction: Direction,
     onClick: (FindroidItem) -> Unit,
     modifier: Modifier = Modifier,
+    fillWidth: Boolean = false,
 ) {
     val width =
         when (direction) {
@@ -44,7 +46,7 @@ fun ItemCard(
     Column(
         modifier =
             modifier
-                .width(width.dp)
+                .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(width.dp))
                 .clip(MaterialTheme.shapes.small)
                 .clickable(onClick = { onClick(item) })
     ) {
@@ -63,7 +65,6 @@ fun ItemCard(
                 if (direction == Direction.HORIZONTAL) {
                     ProgressBar(
                         item = item,
-                        width = width,
                         modifier =
                             Modifier.align(Alignment.BottomStart)
                                 .padding(MaterialTheme.spacings.small),

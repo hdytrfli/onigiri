@@ -43,19 +43,11 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val titlePlayerWidth = Preference("pref_title_player_width", "0.2")
     val titleImageRatio = Preference("pref_title_image_ratio", "2")
 
-    /**
-     * Column count (1..8) for [gridId] while portrait. Backed by
-     * `pref_grid_columns_<group>_portrait`.
-     */
-    fun gridColumnsPortrait(gridId: GridId) =
-        Preference("pref_grid_columns_${gridId.key}_portrait", gridId.defaultPortrait.toString())
-
-    /**
-     * Column count (1..8) for [gridId] while landscape. Backed by
-     * `pref_grid_columns_<group>_landscape`.
-     */
-    fun gridColumnsLandscape(gridId: GridId) =
-        Preference("pref_grid_columns_${gridId.key}_landscape", gridId.defaultLandscape.toString())
+    // Layout grid (1..8 columns). "Poster" is the 2:3 poster shape; "thumbnail" is the 16:9 shape.
+    val gridPosterColumnsPortrait = Preference("pref_grid_poster_columns_portrait", "2")
+    val gridPosterColumnsLandscape = Preference("pref_grid_poster_columns_landscape", "4")
+    val gridThumbnailColumnsPortrait = Preference("pref_grid_thumbnail_columns_portrait", "3")
+    val gridThumbnailColumnsLandscape = Preference("pref_grid_thumbnail_columns_landscape", "4")
 
     // Player
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)

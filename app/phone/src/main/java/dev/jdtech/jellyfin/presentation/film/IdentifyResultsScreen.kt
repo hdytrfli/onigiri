@@ -49,11 +49,10 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyEvent
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
-import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.domain.GridId
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
 import org.jellyfin.sdk.model.api.RemoteSearchResult
@@ -131,7 +130,6 @@ private fun IdentifyResultsLayout(
                         )
                     }
                 },
-                actions = { GridSettingsButton(gridId = GridId.IMAGE_POSTERS) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
@@ -157,7 +155,7 @@ private fun IdentifyResultsLayout(
                     )
                 else ->
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(gridColumnsFor(GridId.IMAGE_POSTERS)),
+                        columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
                         horizontalArrangement =
                             Arrangement.spacedBy(MaterialTheme.spacings.default),
