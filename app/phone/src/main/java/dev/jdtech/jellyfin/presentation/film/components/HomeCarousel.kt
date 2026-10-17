@@ -39,22 +39,24 @@ fun HomeCarousel(
     itemsPadding: PaddingValues,
     onAction: (HomeAction) -> Unit,
 ) {
-    val pagerState = rememberPagerState(pageCount = { items.size })
+    val itemCount = items.size.coerceAtLeast(1)
+
+    // An effectively unbounded pager indexed modulo the item count, so swiping and the
+    // auto-scroll keep moving forward and wrap last -> first (and back) with no jump.
+    val pagerState =
+        rememberPagerState(
+            initialPage = (Int.MAX_VALUE / 2).let { it - it % itemCount },
+            pageCount = { Int.MAX_VALUE },
+        )
     val pagerIsDragged by pagerState.interactionSource.collectIsDraggedAsState()
 
     val autoScrollDelay = 5000L
 
-    if (!pagerIsDragged) {
+    if (items.size > 1 && !pagerIsDragged) {
         LaunchedEffect(pagerState) {
             while (true) {
                 delay(autoScrollDelay)
-                val nextPage =
-                    if (pagerState.canScrollForward) {
-                        pagerState.currentPage + 1
-                    } else {
-                        0
-                    }
-                pagerState.animateScrollToPage(nextPage)
+                pagerState.animateScrollToPage(pagerState.currentPage + 1)
             }
         }
     }
@@ -65,8 +67,9 @@ fun HomeCarousel(
         pageSize = dynamicPageSize,
         pageSpacing = MaterialTheme.spacings.medium,
     ) { page ->
-        val item = items[page]
-        HomeCarouselItem(item = item, onAction = onAction)
+        items.getOrNull(page % itemCount)?.let { item ->
+            HomeCarouselItem(item = item, onAction = onAction)
+        }
     }
 }
 

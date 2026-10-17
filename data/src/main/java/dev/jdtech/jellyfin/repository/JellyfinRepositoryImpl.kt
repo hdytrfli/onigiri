@@ -234,7 +234,7 @@ class JellyfinRepositoryImpl(
             jellyfinApi.suggestionsApi
                 .getSuggestions(
                     jellyfinApi.userId!!,
-                    limit = 6,
+                    limit = 12,
                     type = listOf(BaseItemKind.MOVIE, BaseItemKind.SERIES),
                 )
                 .content

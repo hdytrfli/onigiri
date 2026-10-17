@@ -207,21 +207,20 @@ private fun EditImagesScreenLayout(
                     }
                 }
 
-                EditorArea(stringResource(CoreR.string.misc)) {
-                    GridRows(
-                        items = MiscImageTypes,
-                        columns = gridColumns(GridSize.THUMBNAIL),
-                    ) { type ->
-                        SingleTypeTile(
-                            type = type,
-                            itemId = itemId,
-                            state = state,
-                            isEpisode = isEpisode,
-                            onEditImage = onEditImage,
-                            onDelete = onDelete,
-                            onMakePrimary = onMakePrimary,
-                        )
-                    }
+                // No section label here: the Thumb/Logo/Art tiles already carry their own names.
+                GridRows(
+                    items = MiscImageTypes,
+                    columns = gridColumns(GridSize.THUMBNAIL),
+                ) { type ->
+                    SingleTypeTile(
+                        type = type,
+                        itemId = itemId,
+                        state = state,
+                        isEpisode = isEpisode,
+                        onEditImage = onEditImage,
+                        onDelete = onDelete,
+                        onMakePrimary = onMakePrimary,
+                    )
                 }
             }
         }
