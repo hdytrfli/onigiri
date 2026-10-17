@@ -17,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +50,7 @@ import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
+import dev.jdtech.jellyfin.presentation.film.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
@@ -167,53 +167,58 @@ private fun EditImagesScreenLayout(
                         .padding(vertical = MaterialTheme.spacings.default),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
-                EditorSectionHeader(stringResource(CoreR.string.image_type_primary))
-                GridRows(items = listOf(ImageType.PRIMARY), columns = gridColumns(primarySize)) {
-                    type ->
-                    SingleTypeTile(
-                        type = type,
-                        itemId = itemId,
-                        state = state,
-                        isEpisode = isEpisode,
-                        showLabel = false,
-                        onEditImage = onEditImage,
-                        onDelete = onDelete,
-                        onMakePrimary = onMakePrimary,
-                    )
+                EditorArea(stringResource(CoreR.string.image_type_primary)) {
+                    GridRows(
+                        items = listOf(ImageType.PRIMARY),
+                        columns = gridColumns(primarySize),
+                    ) { type ->
+                        SingleTypeTile(
+                            type = type,
+                            itemId = itemId,
+                            state = state,
+                            isEpisode = isEpisode,
+                            showLabel = false,
+                            onEditImage = onEditImage,
+                            onDelete = onDelete,
+                            onMakePrimary = onMakePrimary,
+                        )
+                    }
                 }
 
-                EditorSectionHeader(stringResource(CoreR.string.image_type_backdrop))
-                GridRows(
-                    items = backdropSlots,
-                    columns = gridColumns(GridSize.THUMBNAIL),
-                ) { slot ->
-                    ImageSlotTile(
-                        slot = slot,
-                        itemId = itemId,
-                        baseUrl = state.baseUrl,
-                        ratio = imageTypeAspectRatio(ImageType.BACKDROP),
-                        enabled = !backdropBusy,
-                        showLabel = false,
-                        onEditImage = onEditImage,
-                        onDelete = onDelete,
-                        onMakePrimary = onMakePrimary,
-                    )
+                EditorArea(stringResource(CoreR.string.image_type_backdrop)) {
+                    GridRows(
+                        items = backdropSlots,
+                        columns = gridColumns(GridSize.THUMBNAIL),
+                    ) { slot ->
+                        ImageSlotTile(
+                            slot = slot,
+                            itemId = itemId,
+                            baseUrl = state.baseUrl,
+                            ratio = imageTypeAspectRatio(ImageType.BACKDROP),
+                            enabled = !backdropBusy,
+                            showLabel = false,
+                            onEditImage = onEditImage,
+                            onDelete = onDelete,
+                            onMakePrimary = onMakePrimary,
+                        )
+                    }
                 }
 
-                EditorSectionHeader(stringResource(CoreR.string.misc))
-                GridRows(
-                    items = MiscImageTypes,
-                    columns = gridColumns(GridSize.THUMBNAIL),
-                ) { type ->
-                    SingleTypeTile(
-                        type = type,
-                        itemId = itemId,
-                        state = state,
-                        isEpisode = isEpisode,
-                        onEditImage = onEditImage,
-                        onDelete = onDelete,
-                        onMakePrimary = onMakePrimary,
-                    )
+                EditorArea(stringResource(CoreR.string.misc)) {
+                    GridRows(
+                        items = MiscImageTypes,
+                        columns = gridColumns(GridSize.THUMBNAIL),
+                    ) { type ->
+                        SingleTypeTile(
+                            type = type,
+                            itemId = itemId,
+                            state = state,
+                            isEpisode = isEpisode,
+                            onEditImage = onEditImage,
+                            onDelete = onDelete,
+                            onMakePrimary = onMakePrimary,
+                        )
+                    }
                 }
             }
         }
@@ -222,14 +227,13 @@ private fun EditImagesScreenLayout(
     state.error?.let { error -> ErrorDialog(exception = error, onDismissRequest = onDismissError) }
 }
 
-/** An editor area's title, matching the app's section headers. */
+/** A titled editor area: a plain section header above its content, matching the app's sections. */
 @Composable
-private fun EditorSectionHeader(title: String) {
-    Text(
-        text = title,
-        modifier = Modifier.fillMaxWidth(),
-        style = MaterialTheme.typography.titleMedium,
-    )
+private fun EditorArea(title: String, content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
+        content()
+    }
 }
 
 /** One type's tile (its image, or the add/busy placeholder), filling its grid cell. */
@@ -440,17 +444,6 @@ private fun ImagePreview(
             }
         }
     }
-}
-
-/** A single action row in the per-tile overflow menu, with a trailing icon. */
-@Composable
-private fun MenuActionItem(icon: Int, label: String, enabled: Boolean, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(label) },
-        trailingIcon = { Icon(painter = painterResource(icon), contentDescription = null) },
-        enabled = enabled,
-        onClick = onClick,
-    )
 }
 
 /** An empty slot that doubles as the "add" button: tapping it starts the search flow. */

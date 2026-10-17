@@ -48,15 +48,15 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.DetailAction
+import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
-import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
-import dev.jdtech.jellyfin.presentation.film.components.SubtitleSearchAction
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -352,14 +352,11 @@ private fun EpisodeScreenLayout(
                         onNavigateToDownloads = onNavigateToDownloads,
                     )
                     Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    SubtitleSearchAction(
+                    DetailActionsMenu(
                         itemId = episode.id,
-                        onClick = { onSubtitleSearch(episode.id) },
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    EditImagesAction(
-                        itemId = episode.id,
-                        onClick = { onEditImages(episode.id) },
+                        actions = setOf(DetailAction.SUBTITLE_SEARCH, DetailAction.EDIT_IMAGES),
+                        onSubtitleSearch = { onSubtitleSearch(episode.id) },
+                        onEditImages = { onEditImages(episode.id) },
                     )
                 }
             },

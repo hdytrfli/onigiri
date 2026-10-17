@@ -51,8 +51,9 @@ import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
+import dev.jdtech.jellyfin.presentation.film.components.DetailAction
+import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -187,9 +188,10 @@ private fun CollectionDetailLayout(
             onBackClick = { onAction(CollectionAction.OnBackClick) },
             trailingContent = {
                 state.collection?.let { collection ->
-                    EditImagesAction(
+                    DetailActionsMenu(
                         itemId = collection.id,
-                        onClick = { onEditImages(collection.id) },
+                        actions = setOf(DetailAction.EDIT_IMAGES),
+                        onEditImages = { onEditImages(collection.id) },
                     )
                 }
             },

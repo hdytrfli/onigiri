@@ -46,17 +46,16 @@ import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.DetailAction
+import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
-import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
-import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
-import dev.jdtech.jellyfin.presentation.film.components.SubtitleSearchAction
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -309,20 +308,18 @@ private fun MovieScreenLayout(
                         onNavigateToDownloads = onNavigateToDownloads,
                     )
                     Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    SubtitleSearchAction(
+                    DetailActionsMenu(
                         itemId = movie.id,
-                        onClick = { onSubtitleSearch(movie.id) },
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    IdentifyAction(
-                        itemId = movie.id,
-                        onClick = { onIdentify(movie.id) },
-                        onApplied = onIdentifyApplied,
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    EditImagesAction(
-                        itemId = movie.id,
-                        onClick = { onEditImages(movie.id) },
+                        actions =
+                            setOf(
+                                DetailAction.SUBTITLE_SEARCH,
+                                DetailAction.IDENTIFY,
+                                DetailAction.EDIT_IMAGES,
+                            ),
+                        onSubtitleSearch = { onSubtitleSearch(movie.id) },
+                        onIdentify = { onIdentify(movie.id) },
+                        onIdentifyApplied = onIdentifyApplied,
+                        onEditImages = { onEditImages(movie.id) },
                     )
                 }
             },

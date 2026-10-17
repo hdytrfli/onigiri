@@ -38,7 +38,8 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
+import dev.jdtech.jellyfin.presentation.film.components.DetailAction
+import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -214,9 +215,10 @@ private fun SeasonScreenLayout(
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
                 state.season?.let { season ->
-                    EditImagesAction(
+                    DetailActionsMenu(
                         itemId = season.id,
-                        onClick = { onEditImages(season.id) },
+                        actions = setOf(DetailAction.EDIT_IMAGES),
+                        onEditImages = { onEditImages(season.id) },
                     )
                 }
             },

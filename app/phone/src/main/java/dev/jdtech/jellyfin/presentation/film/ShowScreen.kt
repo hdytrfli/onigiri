@@ -41,10 +41,10 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.DetailAction
+import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
-import dev.jdtech.jellyfin.presentation.film.components.IdentifyAction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
@@ -275,15 +275,12 @@ private fun ShowScreenLayout(
             onHomeClick = { onAction(ShowAction.OnHomeClick) },
             trailingContent = {
                 state.show?.let { show ->
-                    IdentifyAction(
+                    DetailActionsMenu(
                         itemId = show.id,
-                        onClick = { onIdentify(show.id) },
-                        onApplied = onIdentifyApplied,
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    EditImagesAction(
-                        itemId = show.id,
-                        onClick = { onEditImages(show.id) },
+                        actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
+                        onIdentify = { onIdentify(show.id) },
+                        onIdentifyApplied = onIdentifyApplied,
+                        onEditImages = { onEditImages(show.id) },
                     )
                 }
             },
