@@ -36,6 +36,7 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
+import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
 
@@ -271,6 +272,8 @@ class JellyfinRepositoryOfflineImpl(
             database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
         }
     }
+
+    override suspend fun getPlaybackSession(): SessionInfoDto? = null
 
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {

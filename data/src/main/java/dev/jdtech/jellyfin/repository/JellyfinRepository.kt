@@ -23,6 +23,7 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
+import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
 
@@ -107,6 +108,12 @@ interface JellyfinRepository {
     suspend fun postPlaybackStop(itemId: UUID, positionTicks: Long, playedPercentage: Int)
 
     suspend fun postPlaybackProgress(itemId: UUID, positionTicks: Long, isPaused: Boolean)
+
+    /**
+     * Our own playback session as the server sees it, for the player's stats overlay. Null when the
+     * server reports no session for this device.
+     */
+    suspend fun getPlaybackSession(): SessionInfoDto?
 
     suspend fun markAsFavorite(itemId: UUID)
 

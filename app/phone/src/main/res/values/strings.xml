@@ -58,4 +58,14 @@
     <string name="player_stats_kbps">%1$s kbps</string>
     <string name="player_stats_channels">%1$d ch</string>
     <string name="player_stats_seconds">%1$s s</string>
+    <string name="player_stats_stream">Stream</string>
+    <string name="player_stats_target">Target</string>
+    <string name="player_stats_encode">Encode</string>
+    <string name="player_stats_reason">Reason</string>
+    <string name="player_stats_direct_play">Direct play</string>
+    <string name="player_stats_direct_stream">Direct stream</string>
+    <string name="player_stats_remux">Remux</string>
+    <string name="player_stats_transcode">Transcode</string>
+    <string name="player_stats_codec_direct">%1$s (direct)</string>
+    <string name="player_stats_fps_value">%1$s fps</string>
 </resources>

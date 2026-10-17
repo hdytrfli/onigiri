@@ -24,6 +24,7 @@ import dev.jdtech.jellyfin.player.core.domain.models.PlayerItem
 import dev.jdtech.jellyfin.player.core.domain.models.Trickplay
 import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.player.local.domain.PlaylistManager
+import dev.jdtech.jellyfin.player.local.domain.StreamInfo
 import dev.jdtech.jellyfin.player.local.domain.TrackSelectionStore
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
 import dev.jdtech.jellyfin.repository.JellyfinRepository
@@ -35,6 +36,7 @@ import kotlin.math.ceil
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +47,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
+import org.jellyfin.sdk.model.api.SessionInfoDto
+import org.jellyfin.sdk.model.api.TranscodeReason
 import timber.log.Timber
 
 @HiltViewModel
@@ -75,6 +79,13 @@ constructor(
 
     private val eventsChannel = Channel<PlayerEvents>()
     val eventsChannelFlow = eventsChannel.receiveAsFlow()
+
+    private val _streamInfo = MutableStateFlow<StreamInfo?>(null)
+
+    /** How the server is delivering the current stream, for the stats overlay. */
+    val streamInfo = _streamInfo.asStateFlow()
+
+    private var streamInfoJob: Job? = null
 
     data class UiState(
         val currentItemTitle: String,
@@ -310,6 +321,47 @@ constructor(
         player.removeListener(this)
         player.release()
     }
+
+    /**
+     * Refreshes the server's view of our session for the stats overlay. It changes rarely, so this
+     * runs on a slow timer while the overlay is open, and a failure keeps the previous reading.
+     */
+    fun refreshStreamInfo() {
+        if (streamInfoJob?.isActive == true) return
+
+        streamInfoJob = viewModelScope.launch {
+            _streamInfo.value =
+                runCatching { repository.getPlaybackSession() }.getOrNull()?.toStreamInfo()
+        }
+    }
+
+    /** Reads the session the way Jellyfin Web's own stats panel reads it. */
+    private fun SessionInfoDto.toStreamInfo(): StreamInfo {
+        val transcode = transcodingInfo
+
+        return StreamInfo(
+            playMethod =
+                when {
+                    transcode == null -> StreamInfo.PlayMethod.DIRECT_PLAY
+                    (transcode.isVideoDirect || transcode.videoCodec == null) &&
+                        transcode.isAudioDirect -> StreamInfo.PlayMethod.REMUX
+                    transcode.isVideoDirect -> StreamInfo.PlayMethod.DIRECT_STREAM
+                    else -> StreamInfo.PlayMethod.TRANSCODE
+                },
+            videoCodec = transcode?.videoCodec,
+            audioCodec = transcode?.audioCodec,
+            videoIsDirect = transcode?.isVideoDirect == true,
+            audioIsDirect = transcode?.isAudioDirect == true,
+            bitrate = transcode?.bitrate,
+            audioChannels = transcode?.audioChannels,
+            framerate = transcode?.framerate,
+            reasons = transcode?.transcodeReasons.orEmpty().map { it.toDisplayName() },
+        )
+    }
+
+    /** `VIDEO_CODEC_NOT_SUPPORTED` reads as "Video codec not supported". */
+    private fun TranscodeReason.toDisplayName(): String =
+        name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercaseChar() }
 
     fun updatePlaybackProgress() {
         Timber.d("Updating playback progress")

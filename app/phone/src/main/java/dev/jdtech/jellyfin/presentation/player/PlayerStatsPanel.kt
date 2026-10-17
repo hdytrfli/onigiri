@@ -26,12 +26,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.player.local.domain.StreamInfo
 import dev.jdtech.jellyfin.player.local.mpv.PlaybackStats
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import kotlinx.coroutines.delay
 
 /** How often mpv is polled for the panel. */
 private const val SAMPLE_INTERVAL_MS = 500L
+
+/** How many mpv readings pass between refreshes of the server's view of the session (~4s). */
+private const val SESSION_REFRESH_TICKS = 8
 
 /** Stands in for a reading mpv did not provide, so the panel never changes shape. */
 private const val NO_VALUE = "—"
@@ -53,6 +57,8 @@ private val LABEL_WIDTH = 78.dp
 @Composable
 fun PlayerStatsPanel(
     loadStats: () -> PlaybackStats,
+    streamInfo: StreamInfo?,
+    onRefreshStream: () -> Unit,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     sampleIntervalMs: Long = SAMPLE_INTERVAL_MS,
@@ -60,11 +66,18 @@ fun PlayerStatsPanel(
     var stats by remember { mutableStateOf(PlaybackStats()) }
 
     LaunchedEffect(sampleIntervalMs) {
+        var tick = 0
         while (true) {
             // Read on the main thread: an mpv property read is cheap, and staying on the same
             // thread as the player's teardown means a reading can never race the native handle
             // being destroyed.
             stats = loadStats()
+            // How the server is delivering the stream barely changes, and costs a request to ask,
+            // so it is refreshed far less often than mpv's counters.
+            if (tick % SESSION_REFRESH_TICKS == 0) {
+                onRefreshStream()
+            }
+            tick++
             delay(sampleIntervalMs)
         }
     }
@@ -145,12 +158,46 @@ fun PlayerStatsPanel(
                     stringResource(R.string.player_stats_seconds, decimal(it, 1))
                 } ?: NO_VALUE,
         )
+        StatsRow(
+            label = stringResource(R.string.player_stats_stream),
+            value = streamInfo?.playMethod?.let { stringResource(it.labelRes()) } ?: NO_VALUE,
+        )
+
+        val stream = streamInfo
+        if (stream != null) {
+            StatsRowOrNothing(
+                label = R.string.player_stats_target,
+                parts =
+                    listOfNotNull(
+                        stream.videoCodec?.let { codecValue(it, stream.videoIsDirect) },
+                        stream.audioCodec?.let { codecValue(it, stream.audioIsDirect) },
+                        stream.audioChannels?.let {
+                            stringResource(R.string.player_stats_channels, it)
+                        },
+                        stream.bitrate?.let {
+                            stringResource(R.string.player_stats_mbps, decimal(it / 1_000_000.0, 1))
+                        },
+                    ),
+            )
+            stream.framerate?.let {
+                StatsRow(
+                    label = stringResource(R.string.player_stats_encode),
+                    value =
+                        stringResource(R.string.player_stats_fps_value, decimal(it.toDouble(), 0)),
+                )
+            }
+        }
+        StatsRowOrNothing(
+            label = R.string.player_stats_reason,
+            parts = stream?.reasons.orEmpty(),
+            maxLines = 2,
+        )
     }
 }
 
 /** A label/value line, e.g. `Codec h264 (High)`. */
 @Composable
-private fun StatsRow(label: String, value: String) {
+private fun StatsRow(label: String, value: String, maxLines: Int = 1) {
     Row {
         Text(
             text = label,
@@ -162,11 +209,40 @@ private fun StatsRow(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodySmall,
             color = Color.White,
-            maxLines = 1,
+            maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
         )
     }
 }
+
+/** Drops the row entirely when there is nothing to put in it, so the panel stays tight. */
+@Composable
+private fun StatsRowOrNothing(label: Int, parts: List<String>, maxLines: Int = 1) {
+    if (parts.isEmpty()) return
+    StatsRow(
+        label = stringResource(label),
+        value = parts.joinToString(VALUE_SEPARATOR),
+        maxLines = maxLines,
+    )
+}
+
+/** `H264`, or `H264 (direct)` while the server passes that stream through untouched. */
+@Composable
+private fun codecValue(codec: String, isDirect: Boolean): String =
+    if (isDirect) {
+        stringResource(R.string.player_stats_codec_direct, codec.uppercase())
+    } else {
+        codec.uppercase()
+    }
+
+/** The play method, worded the way Jellyfin's own clients word it. */
+private fun StreamInfo.PlayMethod.labelRes(): Int =
+    when (this) {
+        StreamInfo.PlayMethod.DIRECT_PLAY -> R.string.player_stats_direct_play
+        StreamInfo.PlayMethod.DIRECT_STREAM -> R.string.player_stats_direct_stream
+        StreamInfo.PlayMethod.REMUX -> R.string.player_stats_remux
+        StreamInfo.PlayMethod.TRANSCODE -> R.string.player_stats_transcode
+    }
 
 /** `aac · 2 ch`, or null when there is no audio track to describe. */
 @Composable

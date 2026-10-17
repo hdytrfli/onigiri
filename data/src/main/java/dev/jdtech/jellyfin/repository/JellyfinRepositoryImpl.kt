@@ -59,6 +59,7 @@ import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.RepeatMode
 import org.jellyfin.sdk.model.api.SeriesInfo
 import org.jellyfin.sdk.model.api.SeriesInfoRemoteSearchQuery
+import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.SortOrder as ItemSortOrder
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
@@ -507,6 +508,14 @@ class JellyfinRepositoryImpl(
             }
         }
     }
+
+    override suspend fun getPlaybackSession(): SessionInfoDto? =
+        withContext(Dispatchers.IO) {
+            // Without our own device id the query would answer with every session on the server,
+            // including other users', so don't ask at all.
+            val deviceId = jellyfinApi.jellyfin.deviceInfo?.id ?: return@withContext null
+            jellyfinApi.sessionApi.getSessions(deviceId = deviceId).content.firstOrNull()
+        }
 
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {

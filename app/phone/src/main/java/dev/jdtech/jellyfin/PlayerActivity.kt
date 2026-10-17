@@ -599,10 +599,13 @@ class PlayerActivity : BasePlayerActivity() {
             ViewCompositionStrategy.DisposeOnDetachedFromWindow
         )
         statsComposeView.setContent {
+            val streamInfo by viewModel.streamInfo.collectAsStateWithLifecycle()
             FindroidTheme {
                 if (showStats.value && !statsSuppressed.value) {
                     PlayerStatsPanel(
                         loadStats = { viewModel.player.playbackStats() },
+                        streamInfo = streamInfo,
+                        onRefreshStream = { viewModel.refreshStreamInfo() },
                         onClick = { binding.playerView.showController() },
                     )
                 }
