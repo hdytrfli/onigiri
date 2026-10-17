@@ -8,6 +8,7 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.abs
 
 /**
  * Subtitle fonts for the mpv player.
@@ -20,16 +21,48 @@ import java.nio.ByteOrder
  * Fontconfig caches the directories it has scanned, so [clearFontconfigCache] is called whenever a
  * font is added or removed. Without it a newly copied font stays invisible until the OS decides to
  * drop the cache.
+ *
+ * Every bundled font is a *variable* font, which is what makes a weight setting possible: mpv has
+ * no weight option, but fontconfig's lookup pattern does carry one, so [weightAliases] hands the
+ * player a name per weight that fonts.conf rewrites into "family + weight". The offered weights sit
+ * between regular and bold, where every bundled font has a real face to land on.
  */
 object SubtitleFonts {
 
     /** mpv's own default, resolved to Roboto by the `sans-serif` alias written in fonts.conf. */
     const val DEFAULT_FAMILY = "sans-serif"
 
+    /** The weight every font has, and the one mpv uses when nothing else is asked for. */
+    const val DEFAULT_WEIGHT = 400
+
+    /**
+     * The weights offered, all of which every bundled font carries. The names are the ones
+     * fontconfig knows, and also the ones variable fonts use for their named instances, so the
+     * aliases written into fonts.conf and fontconfig's own instance lookup land on the same face.
+     */
+    private val weightSteps =
+        listOf(
+            400 to "Regular",
+            500 to "Medium",
+            600 to "SemiBold",
+            700 to "Bold",
+        )
+
+    /** fontconfig's own name for a weight, as used by the `fonts.conf` aliases. */
+    private val fontconfigWeights =
+        mapOf(
+            500 to "medium",
+            600 to "demibold",
+            700 to "bold",
+        )
+
     private const val FONTS_DIR_NAME = "fonts"
     private const val ASSET_DIR = "subtitle-fonts"
 
-    /** Fonts the user can pick, and the file used to render their preview. */
+    /** The name [family] is asked for at [weight], and what fontconfig should make of it. */
+    data class WeightAlias(val alias: String, val family: String, val fontconfigWeight: String)
+
+    /** Fonts the user can pick, and the file the family is loaded from. */
     data class Font(
         val family: String,
         val displayName: String,
@@ -38,25 +71,47 @@ object SubtitleFonts {
         val removable: Boolean = false,
     )
 
-    private data class Bundled(val family: String, val assets: List<String>)
+    /** A font we ship: the label we show, and the asset files it is unpacked from. */
+    private data class Bundled(val name: String, val assets: List<String>)
 
-    /** Fonts shipped in the APK, under the SIL Open Font License in the same asset directory. */
+    /**
+     * Fonts shipped in the APK: one variable upright file per family, so every one of them covers
+     * the full weight range. All under the SIL Open Font License, shipped in the `licenses/`
+     * directory next to them.
+     */
     private val bundled =
         listOf(
-            Bundled(
-                family = "Geist",
-                assets =
-                    listOf(
-                        "Geist-Regular.ttf",
-                        "Geist-Italic.ttf",
-                        "Geist-Bold.ttf",
-                        "Geist-BoldItalic.ttf",
-                    ),
-            ),
-            Bundled(
-                family = "Geist Mono",
-                assets = listOf("GeistMono-Regular.ttf", "GeistMono-Bold.ttf"),
-            ),
+            Bundled("Geist", listOf("Geist-Variable.ttf")),
+            Bundled("Geist Mono", listOf("GeistMono-Variable.ttf")),
+            Bundled("Inter", listOf("Inter-Variable.ttf")),
+            Bundled("Roboto", listOf("Roboto-Variable.ttf")),
+            Bundled("Open Sans", listOf("OpenSans-Variable.ttf")),
+            Bundled("Noto Sans", listOf("NotoSans-Variable.ttf")),
+            Bundled("Source Sans 3", listOf("SourceSans3-Variable.ttf")),
+            Bundled("IBM Plex Sans", listOf("IBMPlexSans-Variable.ttf")),
+            Bundled("Work Sans", listOf("WorkSans-Variable.ttf")),
+            Bundled("DM Sans", listOf("DMSans-Variable.ttf")),
+            Bundled("Figtree", listOf("Figtree-Variable.ttf")),
+            Bundled("Archivo", listOf("Archivo-Variable.ttf")),
+            Bundled("Rubik", listOf("Rubik-Variable.ttf")),
+            Bundled("Montserrat", listOf("Montserrat-Variable.ttf")),
+            Bundled("Lexend", listOf("Lexend-Variable.ttf")),
+            Bundled("Atkinson Hyperlegible Next", listOf("AtkinsonHyperlegibleNext-Variable.ttf")),
+            Bundled("Libre Baskerville", listOf("LibreBaskerville-Variable.ttf")),
+        )
+
+    /**
+     * Files earlier versions copied into the mpv font directory. They are deleted on sight, because
+     * a static face would win over the variable file that replaced it.
+     */
+    private val replacedAssets =
+        listOf(
+            "Geist-Regular.ttf",
+            "Geist-Italic.ttf",
+            "Geist-Bold.ttf",
+            "Geist-BoldItalic.ttf",
+            "GeistMono-Regular.ttf",
+            "GeistMono-Bold.ttf",
         )
 
     /**
@@ -100,7 +155,9 @@ object SubtitleFonts {
         val dir = fontsDir(context)
         for (font in bundled) {
             val file = File(dir, font.assets.first())
-            if (file.exists()) add(Font(font.family, font.family, file))
+            if (!file.exists()) continue
+            // fontconfig matches on the family the file declares, not on our own label.
+            add(Font(familyNameOf(file) ?: font.name, font.name, file))
         }
 
         for (font in systemFonts()) add(font)
@@ -117,12 +174,51 @@ object SubtitleFonts {
         return fonts.values.toList()
     }
 
-    /** Copies the bundled fonts into the mpv font directory if they are missing or incomplete. */
+    /** The label shown for [weight]. */
+    fun weightLabel(weight: Int): String =
+        weightSteps.firstOrNull { it.first == weight }?.second ?: weight.toString()
+
+    /**
+     * The `sub-font` value that renders [family] at [weight], see [weightAliases]. The weight is
+     * snapped to the nearest one we write an alias for, so a value left over from an earlier
+     * version can never ask fontconfig for a name it cannot resolve.
+     */
+    fun fontOption(family: String, weight: Int): String {
+        if (family == DEFAULT_FAMILY) return family
+        val nearest = weightSteps.minByOrNull { abs(it.first - weight) } ?: return family
+        return if (nearest.first == DEFAULT_WEIGHT) family else alias(family, nearest.first)
+    }
+
+    /**
+     * The names [fontOption] can ask for, and what fontconfig should make of each. mpv has no
+     * weight option, but fontconfig's lookup pattern does carry one, so the player writes these
+     * into fonts.conf as "family + weight" rewrites.
+     */
+    fun weightAliases(context: Context): List<WeightAlias> =
+        available(context).flatMap { font ->
+            if (font.family == DEFAULT_FAMILY) {
+                emptyList()
+            } else {
+                weightSteps.mapNotNull { (weight, _) ->
+                    // Regular is the bare family name, so it needs no alias.
+                    val fontconfigWeight = fontconfigWeights[weight] ?: return@mapNotNull null
+                    WeightAlias(alias(font.family, weight), font.family, fontconfigWeight)
+                }
+            }
+        }
+
+    private fun alias(family: String, weight: Int): String = "$family ${weightLabel(weight)}"
+
+    /**
+     * Copies the bundled fonts into the mpv font directory if they are missing or incomplete, and
+     * drops the static files the variable ones replaced.
+     */
     fun ensureBundled(context: Context) {
         val dir = fontsDir(context)
         if (!dir.exists() && !dir.mkdirs()) return
 
-        var copied = false
+        var changed = replacedAssets.count { File(dir, it).delete() } > 0
+
         for (font in bundled) {
             for (asset in font.assets) {
                 val target = File(dir, asset)
@@ -134,14 +230,14 @@ object SubtitleFonts {
                 }
                     .isSuccess
                 if (ok) {
-                    copied = true
+                    changed = true
                 } else {
                     target.delete()
                 }
             }
         }
 
-        if (copied) clearFontconfigCache(context)
+        if (changed) clearFontconfigCache(context)
     }
 
     /**
@@ -197,7 +293,8 @@ object SubtitleFonts {
             null
         }
 
-    private fun readFamilyName(raf: RandomAccessFile): String? {
+    /** Where a table starts, or null when the font has no table with that tag. */
+    private fun tableOffset(raf: RandomAccessFile, tag: Long): Long? {
         val tableDir =
             if (raf.readUInt32(0) == TTC_TAG) {
                 // First font of a collection, after the tag, version and font count.
@@ -206,12 +303,14 @@ object SubtitleFonts {
                 0L
             }
 
-        val numTables = raf.readUInt16(tableDir + 4)
-        val nameTable =
-            (0 until numTables).firstNotNullOfOrNull { index ->
-                val record = tableDir + 12 + index * 16L
-                if (raf.readUInt32(record) == NAME_TAG) raf.readUInt32(record + 8) else null
-            } ?: return null
+        return (0 until raf.readUInt16(tableDir + 4)).firstNotNullOfOrNull { index ->
+            val record = tableDir + 12 + index * 16L
+            if (raf.readUInt32(record) == tag) raf.readUInt32(record + 8) else null
+        }
+    }
+
+    private fun readFamilyName(raf: RandomAccessFile): String? {
+        val nameTable = tableOffset(raf, NAME_TAG) ?: return null
 
         val count = raf.readUInt16(nameTable + 2)
         val stringOffset = nameTable + raf.readUInt16(nameTable + 4)

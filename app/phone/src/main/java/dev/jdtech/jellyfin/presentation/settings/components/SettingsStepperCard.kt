@@ -1,27 +1,18 @@
 package dev.jdtech.jellyfin.presentation.settings.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
@@ -39,55 +30,37 @@ fun SettingsStepperCard(
 ) {
     val range = preference.valueRange
     val value = preference.value?.toIntOrNull()?.coerceIn(range) ?: range.first
-    val contentColor =
-        MaterialTheme.colorScheme.onSurface.copy(alpha = if (preference.enabled) 1f else 0.38f)
 
-    Row(
-        modifier = modifier.padding(MaterialTheme.spacings.medium),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(preference.nameStringResource),
-                style = MaterialTheme.typography.titleMedium,
-                color = contentColor,
-            )
-            preference.descriptionStringRes?.let {
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-                Text(
-                    text = stringResource(id = it),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    SettingsBaseCard(
+        preference = preference,
+        modifier = modifier,
+        trailing = {
+            IconButton(
+                onClick = { onUpdate((value - 1).coerceAtLeast(range.first).toString()) },
+                enabled = preference.enabled && value > range.first,
+            ) {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_minus_fat),
+                    contentDescription = null,
                 )
             }
-        }
-        Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
-        IconButton(
-            onClick = { onUpdate((value - 1).coerceAtLeast(range.first).toString()) },
-            enabled = preference.enabled && value > range.first,
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_minus_fat),
-                contentDescription = null,
+            Text(
+                text = value.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(min = 24.dp),
             )
-        }
-        Text(
-            text = value.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            color = contentColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(min = 24.dp),
-        )
-        IconButton(
-            onClick = { onUpdate((value + 1).coerceAtMost(range.last).toString()) },
-            enabled = preference.enabled && value < range.last,
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_plus),
-                contentDescription = null,
-            )
-        }
-    }
+            IconButton(
+                onClick = { onUpdate((value + 1).coerceAtMost(range.last).toString()) },
+                enabled = preference.enabled && value < range.last,
+            ) {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_plus),
+                    contentDescription = null,
+                )
+            }
+        },
+    )
 }
 
 @Preview

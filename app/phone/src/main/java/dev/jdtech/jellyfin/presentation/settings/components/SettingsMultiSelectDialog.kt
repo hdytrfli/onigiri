@@ -93,12 +93,12 @@ private fun SettingsMultiSelectDialogItem(
         modifier =
             Modifier.fillMaxWidth()
                 .clickable { onCheckedChange(option.first) }
-                .padding(horizontal = MaterialTheme.spacings.default),
+                .padding(horizontal = MaterialTheme.spacings.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = checked, onCheckedChange = { _ -> onCheckedChange(option.first) })
         Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
-        Text(text = option.second, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = option.second)
     }
 }
 

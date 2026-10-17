@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.presentation.settings.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,11 +43,7 @@ fun SettingsSelectDialog(
             HorizontalDivider()
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            state = lazyListState,
-            contentPadding = PaddingValues(bottom = MaterialTheme.spacings.default),
-        ) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
             items(items = options, key = { it.first ?: "null" }) { option ->
                 SettingsSelectDialogItem(
                     option = option,
@@ -70,12 +65,12 @@ private fun SettingsSelectDialogItem(
         modifier =
             Modifier.fillMaxWidth()
                 .clickable { onSelect(option.first) }
-                .padding(horizontal = MaterialTheme.spacings.default),
+                .padding(horizontal = MaterialTheme.spacings.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = isSelected, onClick = { onSelect(option.first) })
         Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
-        Text(text = option.second, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = option.second)
     }
 }
 

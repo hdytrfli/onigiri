@@ -63,8 +63,6 @@ class MPVPlayer(
     private val subColor: String = "#FFFFFFFF",
     private val subPos: String = "100",
     private val subUseMargins: String = "yes",
-    private val subBold: String = "no",
-    private val subItalic: String = "no",
     private val subBorderSize: String = "0",
     private val subBorderColor: String = "#FF000000",
     private val subBackColor: String = "#FF000000",
@@ -96,8 +94,6 @@ class MPVPlayer(
         subColor = builder.subColor,
         subPos = builder.subPos,
         subUseMargins = builder.subUseMargins,
-        subBold = builder.subBold,
-        subItalic = builder.subItalic,
         subBorderSize = builder.subBorderSize,
         subBorderColor = builder.subBorderColor,
         subBackColor = builder.subBackColor,
@@ -145,12 +141,6 @@ class MPVPlayer(
             private set
 
         var subUseMargins: String = "yes"
-            private set
-
-        var subBold: String = "no"
-            private set
-
-        var subItalic: String = "no"
             private set
 
         var subBorderSize: String = "0"
@@ -209,10 +199,6 @@ class MPVPlayer(
         fun setSubPos(subPos: String) = apply { this.subPos = subPos }
 
         fun setSubUseMargins(subUseMargins: String) = apply { this.subUseMargins = subUseMargins }
-
-        fun setSubBold(subBold: String) = apply { this.subBold = subBold }
-
-        fun setSubItalic(subItalic: String) = apply { this.subItalic = subItalic }
 
         fun setSubBorderSize(subBorderSize: String) = apply { this.subBorderSize = subBorderSize }
 
@@ -281,8 +267,6 @@ class MPVPlayer(
         mpvLib.setOptionString("sub-pos", subPos)
         mpvLib.setOptionString("sub-use-margins", subUseMargins)
         mpvLib.setOptionString("sub-ass-force-margins", subUseMargins)
-        mpvLib.setOptionString("sub-bold", subBold)
-        mpvLib.setOptionString("sub-italic", subItalic)
         mpvLib.setOptionString("sub-outline-size", subBorderSize)
         mpvLib.setOptionString("sub-outline-color", subBorderColor)
         mpvLib.setOptionString("sub-back-color", subBackColor)
@@ -363,43 +347,61 @@ class MPVPlayer(
         writeFontsConf(context, configDir)
     }
 
+    /**
+     * Writes the fontconfig configuration mpv is pointed at: the directories to scan, the aliases
+     * for the generic families, then one rewrite per weight the font picker can ask for. mpv has no
+     * weight option, and fontconfig only carries a weight on its lookup pattern, so the names
+     * [SubtitleFonts] builds become "family + weight" here.
+     */
     private fun writeFontsConf(context: Context, configDir: File) {
         val cacheDir = File(context.cacheDir, "fontconfig")
         if (!cacheDir.exists()) cacheDir.mkdirs()
 
-        val config =
-            """
-            <fontconfig>
-                <dir>/system/fonts/</dir>
-                <dir>/product/fonts/</dir>
-                <dir>${SubtitleFonts.fontsDir(context).path}</dir>
-
-                <cachedir>${cacheDir.path}</cachedir>
-
-                <alias>
-                    <family>serif</family>
-                    <prefer><family>Noto Serif</family></prefer>
-                </alias>
-
-                <alias>
-                    <family>sans-serif</family>
-                    <prefer>
-                        <family>Roboto</family>
-                        <family>Noto Sans</family>
-                    </prefer>
-                </alias>
-
-                <alias>
-                    <family>monospace</family>
-                    <prefer><family>Droid Sans Mono</family></prefer>
-                </alias>
-
-            </fontconfig>
-        """
-                .trimIndent()
+        val config = buildList {
+            add("<fontconfig>")
+            add("    <dir>/system/fonts/</dir>")
+            add("    <dir>/product/fonts/</dir>")
+            add("    <dir>${SubtitleFonts.fontsDir(context).path}</dir>")
+            add("")
+            add("    <cachedir>${cacheDir.path}</cachedir>")
+            add("")
+            add("    <alias>")
+            add("        <family>serif</family>")
+            add("        <prefer><family>Noto Serif</family></prefer>")
+            add("    </alias>")
+            add("")
+            add("    <alias>")
+            add("        <family>sans-serif</family>")
+            add("        <prefer>")
+            add("            <family>Roboto</family>")
+            add("            <family>Noto Sans</family>")
+            add("        </prefer>")
+            add("    </alias>")
+            add("")
+            add("    <alias>")
+            add("        <family>monospace</family>")
+            add("        <prefer><family>Droid Sans Mono</family></prefer>")
+            add("    </alias>")
+            add("")
+            for (alias in SubtitleFonts.weightAliases(context)) {
+                add("    <match target=\"pattern\">")
+                add("        <test name=\"family\"><string>${alias.alias}</string></test>")
+                add(
+                    "        <edit name=\"family\" mode=\"assign\" binding=\"strong\">" +
+                        "<string>${alias.family}</string></edit>"
+                )
+                add(
+                    "        <edit name=\"weight\" mode=\"assign\" binding=\"strong\">" +
+                        "<const>${alias.fontconfigWeight}</const></edit>"
+                )
+                add("    </match>")
+            }
+            add("</fontconfig>")
+        }
+            .joinToString("\n")
 
         // Rewrite whenever the contents change, so installs created by an older version still pick
-        // up the subtitle font directory.
+        // up the subtitle font directory and a changed set of weight aliases.
         val configFile = File(configDir, "fonts.conf")
         try {
             if (!configFile.exists() || configFile.readText() != config) {

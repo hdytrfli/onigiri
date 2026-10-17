@@ -36,21 +36,7 @@ constructor(
     private val _state =
         MutableStateFlow(
             SubtitleFontState(
-                selectedFamily = appPreferences.getValue(appPreferences.playerMpvSubFont),
-                style =
-                    SubtitleFontStyle(
-                        bold = appPreferences.getValue(appPreferences.playerMpvSubBold),
-                        italic = appPreferences.getValue(appPreferences.playerMpvSubItalic),
-                        color = appPreferences.getValue(appPreferences.playerMpvSubColor),
-                        fontSize = appPreferences.getValue(appPreferences.playerMpvSubFontSize),
-                        borderEnabled =
-                            appPreferences.getValue(appPreferences.playerMpvSubBorderEnabled),
-                        borderStyle =
-                            appPreferences.getValue(appPreferences.playerMpvSubBorderStyle),
-                        borderColor =
-                            appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
-                        borderSize = appPreferences.getValue(appPreferences.playerMpvSubBorderSize),
-                    ),
+                selectedFamily = appPreferences.getValue(appPreferences.playerMpvSubFont)
             )
         )
     val state = _state.asStateFlow()

@@ -50,6 +50,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_language,
+                            descriptionStringRes = R.string.settings_category_language_summary,
                             iconDrawableId = R.drawable.ic_languages,
                             onClick = {
                                 viewModelScope.launch {
@@ -67,6 +68,8 @@ constructor(
                                             listOf(
                                                 PreferenceAppLanguage(
                                                     nameStringResource = R.string.app_language,
+                                                    descriptionStringRes =
+                                                        R.string.app_language_summary,
                                                     iconDrawableId = R.drawable.ic_languages,
                                                     enabled =
                                                         Build.VERSION.SDK_INT >=
@@ -80,6 +83,9 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.settings_preferred_audio_language,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_preferred_audio_language_summary,
                                                     iconDrawableId = R.drawable.ic_speaker,
                                                     backendPreference =
                                                         appPreferences.preferredAudioLanguage,
@@ -91,6 +97,9 @@ constructor(
                                                     nameStringResource =
                                                         R.string
                                                             .settings_preferred_subtitle_language,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_preferred_subtitle_language_summary,
                                                     iconDrawableId = R.drawable.ic_closed_caption,
                                                     backendPreference =
                                                         appPreferences.preferredSubtitleLanguage,
@@ -117,6 +126,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_interface,
+                            descriptionStringRes = R.string.settings_category_interface_summary,
                             iconDrawableId = R.drawable.ic_layout_dashboard,
                             onClick = {
                                 viewModelScope.launch {
@@ -142,6 +152,8 @@ constructor(
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.offline_mode,
+                                                    descriptionStringRes =
+                                                        R.string.offline_mode_summary,
                                                     iconDrawableId = R.drawable.ic_server_off,
                                                     onClick = {
                                                         viewModelScope.launch {
@@ -154,6 +166,8 @@ constructor(
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.confirm_exit,
+                                                    descriptionStringRes =
+                                                        R.string.confirm_exit_summary,
                                                     iconDrawableId = R.drawable.ic_exit,
                                                     backendPreference = appPreferences.confirmExit,
                                                 ),
@@ -198,6 +212,8 @@ constructor(
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.grid_spacing,
+                                                    descriptionStringRes =
+                                                        R.string.grid_spacing_summary,
                                                     backendPreference = appPreferences.gridSpacing,
                                                     options = R.array.grid_spacing_options,
                                                     optionValues = R.array.grid_spacing_values,
@@ -211,6 +227,8 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.backdrop_portrait_ratio,
+                                                    descriptionStringRes =
+                                                        R.string.backdrop_portrait_ratio_summary,
                                                     backendPreference =
                                                         appPreferences.backdropPortraitRatio,
                                                     options = R.array.backdrop_ratios,
@@ -219,6 +237,8 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.backdrop_landscape_ratio,
+                                                    descriptionStringRes =
+                                                        R.string.backdrop_landscape_ratio_summary,
                                                     backendPreference =
                                                         appPreferences.backdropLandscapeRatio,
                                                     options = R.array.backdrop_ratios,
@@ -233,6 +253,8 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.title_portrait_width,
+                                                    descriptionStringRes =
+                                                        R.string.title_portrait_width_summary,
                                                     backendPreference =
                                                         appPreferences.titlePortraitWidth,
                                                     options = R.array.title_width_options,
@@ -241,6 +263,8 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.title_landscape_width,
+                                                    descriptionStringRes =
+                                                        R.string.title_landscape_width_summary,
                                                     backendPreference =
                                                         appPreferences.titleLandscapeWidth,
                                                     options = R.array.title_width_options_low,
@@ -249,6 +273,8 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.title_player_width,
+                                                    descriptionStringRes =
+                                                        R.string.title_player_width_summary,
                                                     backendPreference =
                                                         appPreferences.titlePlayerWidth,
                                                     options = R.array.title_width_options_low,
@@ -256,6 +282,8 @@ constructor(
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.title_image_ratio,
+                                                    descriptionStringRes =
+                                                        R.string.title_image_ratio_summary,
                                                     backendPreference =
                                                         appPreferences.titleImageRatio,
                                                     options = R.array.title_ratio_options,
@@ -277,21 +305,29 @@ constructor(
                                             listOf(
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.home_suggestions,
+                                                    descriptionStringRes =
+                                                        R.string.home_suggestions_summary,
                                                     backendPreference =
                                                         appPreferences.homeSuggestions,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.home_continue_watching,
+                                                    descriptionStringRes =
+                                                        R.string.home_continue_watching_summary,
                                                     backendPreference =
                                                         appPreferences.homeContinueWatching,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.home_next_up,
+                                                    descriptionStringRes =
+                                                        R.string.home_next_up_summary,
                                                     backendPreference = appPreferences.homeNextUp,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.home_latest,
+                                                    descriptionStringRes =
+                                                        R.string.home_latest_summary,
                                                     backendPreference = appPreferences.homeLatest,
                                                 ),
                                             ),
@@ -317,6 +353,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_player,
+                            descriptionStringRes = R.string.settings_category_player_summary,
                             iconDrawableId = R.drawable.ic_play,
                             onClick = {
                                 viewModelScope.launch {
@@ -359,6 +396,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_hwdec,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_hwdec_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvHwdec,
@@ -372,6 +412,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_vo,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_vo_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvVo,
@@ -385,6 +428,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_ao,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_ao_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvAo,
@@ -405,6 +451,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .edit_file_title,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_edit_conf_summary,
                                                                             filePath =
                                                                                 "mpv/mpv.conf",
                                                                             onClick = {
@@ -425,6 +474,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .edit_file_title,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_edit_input_summary,
                                                                             filePath =
                                                                                 "mpv/input.conf",
                                                                             onClick = {
@@ -473,6 +525,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_font_size,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_font_size_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubFontSize,
@@ -487,6 +542,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_font,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_font_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubFont,
@@ -509,7 +567,27 @@ constructor(
                                                                         PreferenceSelect(
                                                                             nameStringResource =
                                                                                 R.string
+                                                                                    .pref_player_mpv_sub_font_weight,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_font_weight_summary,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubFontWeight,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_sub_font_weights,
+                                                                            optionValues =
+                                                                                R.array
+                                                                                    .mpv_sub_font_weight_values,
+                                                                        ),
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
                                                                                     .pref_player_mpv_sub_color,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_color_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubColor,
@@ -520,26 +598,13 @@ constructor(
                                                                                 R.array
                                                                                     .mpv_sub_colors_values,
                                                                         ),
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_bold,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubBold,
-                                                                        ),
-                                                                        PreferenceSwitch(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_sub_italic,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvSubItalic,
-                                                                        ),
                                                                         PreferenceSelect(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_ass_override,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_ass_override_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubAssOverride,
@@ -561,6 +626,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_enabled,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_enabled_summary,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvSubBorderEnabled,
@@ -569,6 +637,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_style,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_style_summary,
                                                                             dependencies =
                                                                                 listOf(
                                                                                     appPreferences
@@ -589,6 +660,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_size,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_size_summary,
                                                                             dependencies =
                                                                                 listOf(
                                                                                     appPreferences
@@ -609,6 +683,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_color,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_color_summary,
                                                                             dependencies =
                                                                                 listOf(
                                                                                     appPreferences
@@ -629,6 +706,9 @@ constructor(
                                                                             nameStringResource =
                                                                                 R.string
                                                                                     .pref_player_mpv_sub_border_opacity,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_border_opacity_summary,
                                                                             dependencies =
                                                                                 listOf(
                                                                                     appPreferences
@@ -691,6 +771,8 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.pref_player_time_display,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_time_display_summary,
                                                     backendPreference =
                                                         appPreferences.playerTimeDisplay,
                                                     onUpdate = { value ->
@@ -709,6 +791,9 @@ constructor(
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.pref_player_time_end_format,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_time_end_format_summary,
                                                     dependencies =
                                                         listOf(appPreferences.playerTimeShowFinish),
                                                     hideWhenDisabled = true,
@@ -809,6 +894,8 @@ constructor(
                                                 PreferenceLongInput(
                                                     nameStringResource =
                                                         R.string.seek_back_increment,
+                                                    descriptionStringRes =
+                                                        R.string.seek_back_increment_summary,
                                                     backendPreference =
                                                         appPreferences.playerSeekBackInc,
                                                     suffixRes = R.string.ms,
@@ -816,6 +903,8 @@ constructor(
                                                 PreferenceLongInput(
                                                     nameStringResource =
                                                         R.string.seek_forward_increment,
+                                                    descriptionStringRes =
+                                                        R.string.seek_forward_increment_summary,
                                                     backendPreference =
                                                         appPreferences.playerSeekForwardInc,
                                                     suffixRes = R.string.ms,
@@ -850,6 +939,9 @@ constructor(
                                                     nameStringResource =
                                                         R.string
                                                             .pref_player_media_segments_skip_button_type,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_media_segments_skip_button_type_summary,
                                                     dependencies =
                                                         listOf(
                                                             appPreferences
@@ -866,6 +958,9 @@ constructor(
                                                     nameStringResource =
                                                         R.string
                                                             .pref_player_media_segments_skip_button_duration,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_media_segments_skip_button_duration_summary,
                                                     dependencies =
                                                         listOf(
                                                             appPreferences
@@ -890,6 +985,9 @@ constructor(
                                                     nameStringResource =
                                                         R.string
                                                             .pref_player_media_segments_auto_skip_mode,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_media_segments_auto_skip_mode_summary,
                                                     dependencies =
                                                         listOf(
                                                             appPreferences
@@ -906,6 +1004,9 @@ constructor(
                                                     nameStringResource =
                                                         R.string
                                                             .pref_player_media_segments_auto_skip_type,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_media_segments_auto_skip_type_summary,
                                                     dependencies =
                                                         listOf(
                                                             appPreferences
@@ -922,6 +1023,9 @@ constructor(
                                                     nameStringResource =
                                                         R.string
                                                             .pref_player_media_segments_next_episode_threshold,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_media_segments_next_episode_threshold_summary,
                                                     backendPreference =
                                                         appPreferences
                                                             .playerMediaSegmentsNextEpisodeThreshold,
@@ -978,6 +1082,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.users,
+                            descriptionStringRes = R.string.users_summary,
                             iconDrawableId = R.drawable.ic_user,
                             onClick = {
                                 viewModelScope.launch {
@@ -992,6 +1097,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_servers,
+                            descriptionStringRes = R.string.settings_category_servers_summary,
                             iconDrawableId = R.drawable.ic_server,
                             onClick = {
                                 viewModelScope.launch {
@@ -1006,6 +1112,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.title_download,
+                            descriptionStringRes = R.string.title_download_summary,
                             iconDrawableId = R.drawable.ic_download,
                             onClick = {
                                 viewModelScope.launch {
@@ -1024,11 +1131,15 @@ constructor(
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.download_mobile_data,
+                                                    descriptionStringRes =
+                                                        R.string.download_mobile_data_summary,
                                                     backendPreference =
                                                         appPreferences.downloadOverMobileData,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.download_roaming,
+                                                    descriptionStringRes =
+                                                        R.string.download_roaming_summary,
                                                     dependencies =
                                                         listOf(
                                                             appPreferences.downloadOverMobileData
@@ -1047,6 +1158,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_network,
+                            descriptionStringRes = R.string.settings_category_network_summary,
                             iconDrawableId = R.drawable.ic_network,
                             onClick = {
                                 viewModelScope.launch {
@@ -1065,6 +1177,8 @@ constructor(
                                                 PreferenceLongInput(
                                                     nameStringResource =
                                                         R.string.settings_request_timeout,
+                                                    descriptionStringRes =
+                                                        R.string.settings_request_timeout_summary,
                                                     backendPreference =
                                                         appPreferences.requestTimeout,
                                                     suffixRes = R.string.ms,
@@ -1072,6 +1186,8 @@ constructor(
                                                 PreferenceLongInput(
                                                     nameStringResource =
                                                         R.string.settings_connect_timeout,
+                                                    descriptionStringRes =
+                                                        R.string.settings_connect_timeout_summary,
                                                     backendPreference =
                                                         appPreferences.connectTimeout,
                                                     suffixRes = R.string.ms,
@@ -1079,6 +1195,8 @@ constructor(
                                                 PreferenceLongInput(
                                                     nameStringResource =
                                                         R.string.settings_socket_timeout,
+                                                    descriptionStringRes =
+                                                        R.string.settings_socket_timeout_summary,
                                                     backendPreference =
                                                         appPreferences.socketTimeout,
                                                     suffixRes = R.string.ms,
@@ -1094,6 +1212,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.settings_category_cache,
+                            descriptionStringRes = R.string.settings_category_cache_summary,
                             iconDrawableId = R.drawable.ic_hard_drive,
                             onClick = {
                                 viewModelScope.launch {
@@ -1138,6 +1257,7 @@ constructor(
                     listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.about,
+                            descriptionStringRes = R.string.about_summary,
                             iconDrawableId = R.drawable.ic_info,
                             onClick = {
                                 viewModelScope.launch {

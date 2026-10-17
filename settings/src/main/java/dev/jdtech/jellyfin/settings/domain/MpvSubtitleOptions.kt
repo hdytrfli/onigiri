@@ -43,15 +43,19 @@ object MpvSubtitleOptions {
                 appPreferences.getValue(appPreferences.playerMpvSubBorderColor),
                 appPreferences.getValue(appPreferences.playerMpvSubBorderOpacity),
             )
+        // The weight travels inside the family name, because mpv has no weight option of its own.
+        val font = appPreferences.getValue(appPreferences.playerMpvSubFont)
+        val weight =
+            appPreferences.getValue(appPreferences.playerMpvSubFontWeight).toIntOrNull()
+                ?: SubtitleFonts.DEFAULT_WEIGHT
+
         return mapOf(
-            "sub-font" to appPreferences.getValue(appPreferences.playerMpvSubFont),
+            "sub-font" to SubtitleFonts.fontOption(font, weight),
             "sub-font-size" to appPreferences.getValue(appPreferences.playerMpvSubFontSize),
             "sub-color" to appPreferences.getValue(appPreferences.playerMpvSubColor),
             "sub-pos" to appPreferences.getValue(appPreferences.playerMpvSubPosition),
             "sub-use-margins" to useMargins,
             "sub-ass-force-margins" to useMargins,
-            "sub-bold" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubBold)),
-            "sub-italic" to yesNo(appPreferences.getValue(appPreferences.playerMpvSubItalic)),
             "sub-outline-size" to borderSize,
             "sub-outline-color" to borderColor,
             "sub-back-color" to "#00000000",

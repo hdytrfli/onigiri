@@ -5,15 +5,12 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,22 +35,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,9 +53,6 @@ import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
-
-/** mpv's `sub-border-style` value that draws an opaque box behind the text. */
-private const val BORDER_STYLE_OPAQUE_BOX = "opaque-box"
 
 @Composable
 fun SubtitleFontScreen(
@@ -96,7 +80,6 @@ fun SubtitleFontScreen(
     SubtitleFontScreenLayout(
         fonts = state.fonts,
         selectedFamily = state.selectedFamily,
-        style = state.style,
         onBack = navigateBack,
         onSelect = viewModel::selectFont,
         onDelete = viewModel::deleteFont,
@@ -109,7 +92,6 @@ fun SubtitleFontScreen(
 private fun SubtitleFontScreenLayout(
     fonts: List<SubtitleFonts.Font>,
     selectedFamily: String,
-    style: SubtitleFontStyle,
     onBack: () -> Unit,
     onSelect: (SubtitleFonts.Font) -> Unit,
     onDelete: (SubtitleFonts.Font) -> Unit,
@@ -159,13 +141,6 @@ private fun SubtitleFontScreenLayout(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
-                SubtitlePreviewCard(
-                    font = fonts.firstOrNull { it.family == selectedFamily },
-                    style = style,
-                    modifier = Modifier.widthIn(max = Dimens.contentMaxWidth),
-                )
-            }
             if (defaultFonts.isNotEmpty()) {
                 item {
                     FontGroup(
@@ -248,103 +223,6 @@ private fun SubtitleFontScreenLayout(
                 )
             }
         }
-    }
-}
-
-/**
- * Preview of the subtitle style over a dark 16:9 box. mpv sizes its subtitles against a 720px-tall
- * frame, so font/border sizes are scaled by the box height; colours are applied as-is (the border
- * colour fills an opaque box, or casts an outline-like shadow otherwise).
- */
-@Composable
-private fun SubtitlePreviewCard(
-    font: SubtitleFonts.Font?,
-    style: SubtitleFontStyle,
-    modifier: Modifier = Modifier,
-) {
-    val density = LocalDensity.current
-    val sampleText = stringResource(R.string.subtitle_font_preview_sample)
-
-    val fontFamily =
-        remember(font?.file) {
-            font?.file?.let { file ->
-                runCatching { FontFamily(Typeface.createFromFile(file)) }.getOrNull()
-            } ?: FontFamily.SansSerif
-        }
-
-    val subtitleColor =
-        remember(style.color) { parseSubtitleColor(style.color) }
-            ?: MaterialTheme.colorScheme.onSurface
-    val outlineColor = remember(style.borderColor) { parseSubtitleColor(style.borderColor) }
-
-    BoxWithConstraints(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .aspectRatio(16f / 9f)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
-        contentAlignment = Alignment.Center,
-    ) {
-        val frameHeight = maxWidth.value * 9f / 16f
-
-        val textSize =
-            with(density) {
-                (style.fontSize.toFloatOrNull() ?: 28f)
-                    .div(720f)
-                    .times(frameHeight)
-                    .coerceIn(6f, frameHeight * 0.5f)
-                    .dp
-                    .toSp()
-            }
-        val outlineSize =
-            (style.borderSize.toFloatOrNull() ?: 0f)
-                .div(720f)
-                .times(frameHeight)
-                .coerceIn(0f, frameHeight * 0.15f)
-
-        val opaqueBoxColor =
-            if (style.borderEnabled && style.borderStyle == BORDER_STYLE_OPAQUE_BOX) {
-                outlineColor
-            } else {
-                null
-            }
-
-        Text(
-            text = sampleText,
-            style =
-                TextStyle(
-                    fontFamily = fontFamily,
-                    fontWeight = if (style.bold) FontWeight.Bold else FontWeight.Normal,
-                    fontStyle = if (style.italic) FontStyle.Italic else FontStyle.Normal,
-                    fontSize = textSize,
-                    color = subtitleColor,
-                    shadow =
-                        if (style.borderEnabled && outlineColor != null && opaqueBoxColor == null) {
-                            Shadow(
-                                color = outlineColor,
-                                offset = Offset.Zero,
-                                blurRadius = with(density) { outlineSize.dp.toPx() },
-                            )
-                        } else {
-                            null
-                        },
-                ),
-            textAlign = TextAlign.Center,
-            modifier =
-                Modifier.padding(MaterialTheme.spacings.medium)
-                    .then(
-                        if (opaqueBoxColor != null) {
-                            Modifier.background(opaqueBoxColor, MaterialTheme.shapes.extraSmall)
-                                .padding(
-                                    horizontal = outlineSize.dp,
-                                    vertical = (outlineSize / 2f).dp,
-                                )
-                        } else {
-                            Modifier
-                        }
-                    ),
-        )
     }
 }
 
@@ -432,18 +310,6 @@ private fun FontRow(
     }
 }
 
-/** Parses an mpv `#RRGGBB`/`#AARRGGBB` colour into a Compose [Color], or null when malformed. */
-private fun parseSubtitleColor(value: String): Color? {
-    val hex = value.removePrefix("#")
-    val argb =
-        when (hex.length) {
-            6 -> "FF$hex"
-            8 -> hex
-            else -> return null
-        }
-    return runCatching { Color(argb.toLong(16)) }.getOrNull()
-}
-
 @PreviewScreenSizes
 @Composable
 private fun SubtitleFontScreenLayoutPreview() {
@@ -456,17 +322,6 @@ private fun SubtitleFontScreenLayoutPreview() {
                     SubtitleFonts.Font("Geist Mono", "Geist Mono", file = null),
                 ),
             selectedFamily = "sans-serif",
-            style =
-                SubtitleFontStyle(
-                    bold = false,
-                    italic = false,
-                    color = "#FFFFFFFF",
-                    fontSize = "28",
-                    borderEnabled = true,
-                    borderStyle = BORDER_STYLE_OPAQUE_BOX,
-                    borderColor = "#FF000000",
-                    borderSize = "3",
-                ),
             onBack = {},
             onSelect = {},
             onDelete = {},

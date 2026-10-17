@@ -191,8 +191,6 @@ constructor(
                 .setSubColor(subOptions.getValue("sub-color"))
                 .setSubPos(subOptions.getValue("sub-pos"))
                 .setSubUseMargins(subOptions.getValue("sub-use-margins"))
-                .setSubBold(subOptions.getValue("sub-bold"))
-                .setSubItalic(subOptions.getValue("sub-italic"))
                 .setSubBorderSize(subOptions.getValue("sub-outline-size"))
                 .setSubBorderColor(subOptions.getValue("sub-outline-color"))
                 .setSubBackColor(subOptions.getValue("sub-back-color"))

@@ -275,4 +275,16 @@
         <item>10000</item>
         <item>-1</item>
     </string-array>
+    <string-array name="mpv_sub_font_weights">
+        <item>Regular</item>
+        <item>Medium</item>
+        <item>SemiBold</item>
+        <item>Bold</item>
+    </string-array>
+    <string-array name="mpv_sub_font_weight_values">
+        <item>400</item>
+        <item>500</item>
+        <item>600</item>
+        <item>700</item>
+    </string-array>
 </resources>

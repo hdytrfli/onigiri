@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,20 +36,27 @@ fun BaseDialog(
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogMaxHeight),
+            modifier =
+                Modifier.widthIn(max = Dimens.dialogMaxWidth)
+                    .fillMaxWidth()
+                    .heightIn(max = Dimens.dialogCompactMaxHeight),
             shape = MaterialTheme.shapes.extraLarge,
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
         ) {
-            Column(modifier = Modifier.padding(top = MaterialTheme.spacings.default)) {
+            Column {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
                 Text(
                     text = title,
                     modifier =
-                        Modifier.padding(horizontal = MaterialTheme.spacings.default)
-                            .fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.headlineSmall,
+                        Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-                content(PaddingValues(horizontal = MaterialTheme.spacings.default))
+                content(PaddingValues(horizontal = MaterialTheme.spacings.medium))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
             }
         }
     }
@@ -63,15 +72,14 @@ fun BaseDialog(
 ) {
     BaseDialog(title = title, onDismiss = onDismiss) { contentPadding ->
         content(contentPadding)
-        Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
+        Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
         Row(
-            modifier = Modifier.padding(horizontal = MaterialTheme.spacings.default).fillMaxWidth(),
+            modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium).fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
         ) {
             negativeButton()
             positiveButton()
         }
-        Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
     }
 }
 

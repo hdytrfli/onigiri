@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsFileEditAction
@@ -136,21 +137,26 @@ private fun SettingsFileEditScreenLayout(
     }
 
     if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text(stringResource(SettingsR.string.discard_changes_dialog_title)) },
-            text = { Text(stringResource(SettingsR.string.discard_changes_dialog_text)) },
-            confirmButton = {
-                TextButton(onClick = { onAction(SettingsFileEditAction.OnBackClick) }) {
-                    Text(stringResource(CoreR.string.discard))
-                }
-            },
-            dismissButton = {
+        BaseDialog(
+            title = stringResource(SettingsR.string.discard_changes_dialog_title),
+            onDismiss = { showDiscardDialog = false },
+            negativeButton = {
                 TextButton(onClick = { showDiscardDialog = false }) {
                     Text(stringResource(CoreR.string.cancel))
                 }
             },
-        )
+            positiveButton = {
+                TextButton(onClick = { onAction(SettingsFileEditAction.OnBackClick) }) {
+                    Text(stringResource(CoreR.string.discard))
+                }
+            },
+        ) { contentPadding ->
+            Text(
+                text = stringResource(SettingsR.string.discard_changes_dialog_text),
+                modifier = Modifier.padding(contentPadding),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
