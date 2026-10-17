@@ -221,15 +221,6 @@ private fun EditImagesScreenLayout(
     state.error?.let { error -> ErrorDialog(exception = error, onDismissRequest = onDismissError) }
 }
 
-/** A titled editor area: a plain section header above its content, matching the app's sections. */
-@Composable
-private fun EditorArea(title: String, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium)
-        content()
-    }
-}
-
 /** One type's tile (its image, or the add/busy placeholder), filling its grid cell. */
 @Composable
 private fun SingleTypeTile(

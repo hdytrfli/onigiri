@@ -14,6 +14,7 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceIntInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceLongInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -131,12 +132,22 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     backendPreference =
                                                         appPreferences.hideStatusBar,
                                                 ),
-                                                PreferenceSelect(
-                                                    nameStringResource = R.string.content_spacing,
-                                                    backendPreference =
-                                                        appPreferences.contentSpacing,
-                                                    options = R.array.content_spacing_options,
-                                                    optionValues = R.array.content_spacing_values,
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.offline_mode,
+                                                    iconDrawableId = R.drawable.ic_server_off,
+                                                    onClick = {
+                                                        viewModelScope.launch {
+                                                            eventsChannel.send(
+                                                                SettingsEvent.RestartActivity
+                                                            )
+                                                        }
+                                                    },
+                                                    backendPreference = appPreferences.offlineMode,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.confirm_exit,
+                                                    iconDrawableId = R.drawable.ic_exit,
+                                                    backendPreference = appPreferences.confirmExit,
                                                 ),
                                             ),
                                     ),
@@ -144,38 +155,38 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                         nameStringResource = R.string.settings_group_layout_grid,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
+                                                PreferenceStepper(
                                                     nameStringResource =
                                                         R.string.grid_poster_portrait,
+                                                    descriptionStringRes =
+                                                        R.string.grid_poster_portrait_summary,
                                                     backendPreference =
                                                         appPreferences.gridPosterColumnsPortrait,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceStepper(
                                                     nameStringResource =
                                                         R.string.grid_poster_landscape,
+                                                    descriptionStringRes =
+                                                        R.string.grid_poster_landscape_summary,
                                                     backendPreference =
                                                         appPreferences.gridPosterColumnsLandscape,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceStepper(
                                                     nameStringResource =
                                                         R.string.grid_thumbnail_portrait,
+                                                    descriptionStringRes =
+                                                        R.string.grid_thumbnail_portrait_summary,
                                                     backendPreference =
                                                         appPreferences.gridThumbnailColumnsPortrait,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceStepper(
                                                     nameStringResource =
                                                         R.string.grid_thumbnail_landscape,
+                                                    descriptionStringRes =
+                                                        R.string.grid_thumbnail_landscape_summary,
                                                     backendPreference =
                                                         appPreferences
                                                             .gridThumbnailColumnsLandscape,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.grid_spacing,
@@ -287,28 +298,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     backendPreference =
                                                         appPreferences.displayExtraInfo,
                                                 )
-                                            )
-                                    ),
-                                    PreferenceGroup(
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.offline_mode,
-                                                    iconDrawableId = R.drawable.ic_server_off,
-                                                    onClick = {
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.RestartActivity
-                                                            )
-                                                        }
-                                                    },
-                                                    backendPreference = appPreferences.offlineMode,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.confirm_exit,
-                                                    iconDrawableId = R.drawable.ic_exit,
-                                                    backendPreference = appPreferences.confirmExit,
-                                                ),
                                             )
                                     ),
                                 ),
@@ -1225,6 +1214,19 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                         ),
                                                 )
                                             }
+                                            is PreferenceStepper -> {
+                                                preference.copy(
+                                                    enabled =
+                                                        preference.enabled &&
+                                                            preference.dependencies.all {
+                                                                appPreferences.getValue(it)
+                                                            },
+                                                    value =
+                                                        appPreferences.getValue(
+                                                            preference.backendPreference
+                                                        ),
+                                                )
+                                            }
                                             is PreferenceIntInput -> {
                                                 preference.copy(
                                                     enabled =
@@ -1332,6 +1334,11 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                             action.preference.value,
                         )
                     is PreferenceMultiSelect ->
+                        appPreferences.setValue(
+                            action.preference.backendPreference,
+                            action.preference.value,
+                        )
+                    is PreferenceStepper ->
                         appPreferences.setValue(
                             action.preference.backendPreference,
                             action.preference.value,

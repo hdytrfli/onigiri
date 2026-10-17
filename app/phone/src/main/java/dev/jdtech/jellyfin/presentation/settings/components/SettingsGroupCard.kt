@@ -28,6 +28,7 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceIntInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceLongInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsAction
 
@@ -79,6 +80,14 @@ fun SettingsGroupCard(
                             onUpdate = { value ->
                                 onAction(SettingsAction.OnUpdate(preference.copy(value = value)))
                                 preference.onUpdate(value)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    is PreferenceStepper ->
+                        SettingsStepperCard(
+                            preference = preference,
+                            onUpdate = { value ->
+                                onAction(SettingsAction.OnUpdate(preference.copy(value = value)))
                             },
                             modifier = Modifier.fillMaxWidth(),
                         )

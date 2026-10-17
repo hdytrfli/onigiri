@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.settings.domain.Constants
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -85,17 +86,10 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                 combine(
                     appPreferences.observe(appPreferences.backdropPortraitRatio),
                     appPreferences.observe(appPreferences.backdropLandscapeRatio),
-                    appPreferences.observe(appPreferences.contentSpacing),
                     appPreferences.observe(appPreferences.confirmExit),
                     appPreferences.observe(appPreferences.hideStatusBar),
-                ) { portraitRatio, landscapeRatio, contentSpacing, confirmExit, hideStatusBar ->
-                    InterfacePrefs(
-                        portraitRatio,
-                        landscapeRatio,
-                        contentSpacing,
-                        confirmExit,
-                        hideStatusBar,
-                    )
+                ) { portraitRatio, landscapeRatio, confirmExit, hideStatusBar ->
+                    InterfacePrefs(portraitRatio, landscapeRatio, confirmExit, hideStatusBar)
                 }
 
             val titlePrefs =
@@ -144,7 +138,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                             interfacePrefs.portraitRatio.toFloatOrNull() ?: 1.5f,
                         backdropLandscapeRatio =
                             interfacePrefs.landscapeRatio.toFloatOrNull() ?: 2.3333333f,
-                        contentSpacingScale = interfacePrefs.contentSpacing.toFloatOrNull() ?: 1f,
+                        contentSpacingScale = Constants.CONTENT_SPACING_SCALE,
                         confirmExit = interfacePrefs.confirmExit,
                         hideStatusBar = interfacePrefs.hideStatusBar,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
@@ -178,7 +172,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
     private data class InterfacePrefs(
         val portraitRatio: String,
         val landscapeRatio: String,
-        val contentSpacing: String,
         val confirmExit: Boolean,
         val hideStatusBar: Boolean,
     )
@@ -200,7 +193,7 @@ data class MainState(
     val isOfflineMode: Boolean = false,
     val backdropPortraitRatio: Float = 1.5f,
     val backdropLandscapeRatio: Float = 2.3333333f,
-    val contentSpacingScale: Float = 1f,
+    val contentSpacingScale: Float = Constants.CONTENT_SPACING_SCALE,
     val titlePortraitWidth: Float = 0.7f,
     val titleLandscapeWidth: Float = 0.3f,
     val titleImageRatio: Float = 2f,

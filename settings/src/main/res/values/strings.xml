@@ -14,9 +14,13 @@
     <string name="settings_category_appearance">Appearance</string>
     <string name="settings_group_layout_grid">Layout grid</string>
     <string name="grid_poster_portrait">Poster portrait</string>
+    <string name="grid_poster_portrait_summary">Posters shown per row in portrait orientation</string>
     <string name="grid_poster_landscape">Poster landscape</string>
+    <string name="grid_poster_landscape_summary">Posters shown per row in landscape orientation</string>
     <string name="grid_thumbnail_portrait">Thumbnail portrait</string>
+    <string name="grid_thumbnail_portrait_summary">Thumbnails shown per row in portrait orientation</string>
     <string name="grid_thumbnail_landscape">Thumbnail landscape</string>
+    <string name="grid_thumbnail_landscape_summary">Thumbnails shown per row in landscape orientation</string>
     <string name="grid_spacing">Grid spacing</string>
     <string name="settings_category_interface">Interface</string>
     <string name="settings_category_device">Device</string>
@@ -86,7 +90,6 @@
     <string name="backdrop">Backdrop</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
-    <string name="content_spacing">Content spacing</string>
     <string name="naive_title_overlay">Naive title overlay</string>
     <string name="naive_title_overlay_summary">Apply a white overlay to title images. May look wrong for some titles.</string>
     <string name="title_image">Title image</string>

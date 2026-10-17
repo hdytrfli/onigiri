@@ -36,7 +36,6 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val displayExtraInfo = Preference("pref_display_extra_info", false)
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2.3333333")
-    val contentSpacing = Preference("pref_content_spacing", "1.25")
     val naiveTitleOverlay = Preference("pref_naive_title_overlay", false)
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.3")
