@@ -157,6 +157,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // General
     val confirmExit = Preference("pref_confirm_exit", true)
 
+    /** Offers the playback statistics button, and with it the stats overlay, in the player. */
+    val playerStats = Preference("pref_player_stats", true)
+
     // Migrations
     val mpvMigrated = Preference("mpv_migrated", false)
 

@@ -164,6 +164,8 @@
     <string name="settings_preferred_subtitle_language_summary">Preferred language for subtitles</string>
     <string name="settings_category_interface_summary">Appearance, layout and home screen options</string>
     <string name="confirm_exit_summary">Ask before closing the app with the back button</string>
+    <string name="pref_player_stats">Playback statistics</string>
+    <string name="pref_player_stats_summary">Show a stats button in the player</string>
     <string name="grid_spacing_summary">Amount of space between items in the grids</string>
     <string name="backdrop_portrait_ratio_summary">Aspect ratio of backdrops, portrait</string>
     <string name="backdrop_landscape_ratio_summary">Aspect ratio of backdrops, landscape</string>

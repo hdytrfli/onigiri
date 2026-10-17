@@ -39,7 +39,7 @@ private const val NO_VALUE = "—"
 /** Separator between the parts of one row, e.g. `aac · 2 ch`. */
 private const val VALUE_SEPARATOR = " · "
 
-private val PANEL_WIDTH = 260.dp
+private val PANEL_WIDTH = 300.dp
 private val PANEL_CORNER = 12.dp
 private val LABEL_WIDTH = 78.dp
 

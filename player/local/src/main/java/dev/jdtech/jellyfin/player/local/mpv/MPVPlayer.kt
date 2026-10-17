@@ -256,6 +256,13 @@ class MPVPlayer(
         mpvLib.setOptionString("hwdec", hwDec)
         mpvLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")
 
+        // Audio
+        // mpv reads its audio clock as "position minus speed times the audio output delay", so that
+        // delay is exactly how much A/V error it invents for itself whenever the playback speed
+        // changes - and it answers an invented error by dropping frames. Half the 200 ms default;
+        // the demuxer cache is deep enough that the audio decoder never runs dry for it.
+        mpvLib.setOptionString("audio-buffer", "0.1")
+
         // TLS
         mpvLib.setOptionString("tls-verify", "no")
 

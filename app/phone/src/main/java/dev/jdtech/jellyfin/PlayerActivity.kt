@@ -99,6 +99,10 @@ class PlayerActivity : BasePlayerActivity() {
     private var wasZoom: Boolean = false
     private var skipButtonTimeoutExpired: Boolean = true
 
+    /** Whether the stats overlay is switched on, and whether PiP is temporarily hiding it. */
+    private val showStats = mutableStateOf(false)
+    private val statsSuppressed = mutableStateOf(false)
+
     private lateinit var skipSegmentButton: Button
     private lateinit var playerTimeRight: TextView
 
@@ -464,6 +468,12 @@ class PlayerActivity : BasePlayerActivity() {
             pipSpace.isVisible = false
         }
 
+        if (!appPreferences.getValue(appPreferences.playerStats)) {
+            val statsSpace = binding.playerView.findViewById<Space>(R.id.space_stats)
+            statsButton.isVisible = false
+            statsSpace.isVisible = false
+        }
+
         val optionsOverlay = findViewById<FrameLayout>(R.id.player_options_overlay)
         val optionsScrim = findViewById<View>(R.id.player_options_scrim)
         val optionsPanel = findViewById<View>(R.id.player_options_panel)
@@ -585,13 +595,12 @@ class PlayerActivity : BasePlayerActivity() {
         // Playback statistics: mpv's own counters in a panel below the top row of controls. The
         // panel runs its own polling loop, so mpv is only read while the panel is on screen.
         val statsComposeView = findViewById<ComposeView>(R.id.player_stats_compose)
-        val showStats = mutableStateOf(false)
         statsComposeView.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnDetachedFromWindow
         )
         statsComposeView.setContent {
             FindroidTheme {
-                if (showStats.value) {
+                if (showStats.value && !statsSuppressed.value) {
                     PlayerStatsPanel(
                         loadStats = { viewModel.player.playbackStats() },
                         onClick = { binding.playerView.showController() },
@@ -976,6 +985,8 @@ class PlayerActivity : BasePlayerActivity() {
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.isInPictureInPictureMode = isInPictureInPictureMode
+        // The stats box is unreadable at PiP size, so it follows the controls out of the way.
+        statsSuppressed.value = isInPictureInPictureMode
         when (isInPictureInPictureMode) {
             true -> {
                 binding.playerView.useController = false

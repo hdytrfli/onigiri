@@ -166,6 +166,12 @@ constructor(
                                                         R.string.confirm_exit_summary,
                                                     backendPreference = appPreferences.confirmExit,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.pref_player_stats,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_stats_summary,
+                                                    backendPreference = appPreferences.playerStats,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(

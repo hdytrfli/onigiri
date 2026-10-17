@@ -38,6 +38,10 @@ import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 
+/** Hold-to-speed-up ramp: the number of steps, and the delay between them (~300 ms in total). */
+private const val SPEED_RAMP_STEPS = 20
+private const val SPEED_RAMP_STEP_MS = 15L
+
 class PlayerGestureHelper(
     private val appPreferences: AppPreferences,
     private val activity: PlayerActivity,
@@ -67,6 +71,10 @@ class PlayerGestureHelper(
 
     private var playbackSpeedIncrease: Float = 2f
     private var lastPlaybackSpeed: Float = 0f
+
+    /** The speed a running ramp is heading for, so an interrupted ramp resumes from there. */
+    private var rampingSpeed: Float? = null
+    private var speedRampCallback: Runnable? = null
 
     private val screenWidth = Resources.getSystem().displayMetrics.widthPixels
     private val screenHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -142,14 +150,53 @@ class PlayerGestureHelper(
     private fun enableSpeedIncrease() {
         playerView.player?.let {
             if (it.isPlaying) {
-                lastPlaybackSpeed = it.playbackParameters.speed
-                it.setPlaybackSpeed(playbackSpeedIncrease)
+                lastPlaybackSpeed = rampingSpeed ?: it.playbackParameters.speed
+                rampPlaybackSpeed(playbackSpeedIncrease)
                 activity.binding.progressScrubberTrickplay.visibility = View.GONE
                 activity.binding.progressScrubberText.text =
                     playerView.context.getString(R.string.player_controls_fast_forward)
                 activity.binding.progressScrubberLayout.visibility = View.VISIBLE
             }
         }
+    }
+
+    /**
+     * Moves the playback speed to [target] in [SPEED_RAMP_STEPS] steps instead of one jump.
+     *
+     * mpv works its audio clock out as "audio position minus speed times the audio output delay",
+     * so one jump makes it believe the audio moved by that whole delay (200 ms or so) and it drops
+     * video frames to catch up, which reads as a skip. Stepping the change keeps each correction
+     * down to a frame or so, spread out rather than in one bite.
+     */
+    private fun rampPlaybackSpeed(target: Float) {
+        val player = playerView.player ?: return
+        speedRampCallback?.let(playerView::removeCallbacks)
+
+        val from = rampingSpeed ?: player.playbackParameters.speed
+        if (from == target) {
+            rampingSpeed = null
+            speedRampCallback = null
+            return
+        }
+
+        var step = 0
+        val callback =
+            object : Runnable {
+                override fun run() {
+                    step++
+                    val speed = from + (target - from) * step / SPEED_RAMP_STEPS
+                    rampingSpeed = speed
+                    player.setPlaybackSpeed(speed)
+                    if (step < SPEED_RAMP_STEPS) {
+                        playerView.postDelayed(this, SPEED_RAMP_STEP_MS)
+                    } else {
+                        rampingSpeed = null
+                        speedRampCallback = null
+                    }
+                }
+            }
+        speedRampCallback = callback
+        callback.run()
     }
 
     /** Applies [value] (0..1) to the player window's brightness (app-local, remembered). */
@@ -519,7 +566,7 @@ class PlayerGestureHelper(
             lastPlaybackSpeed > 0 &&
                 (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL)
         ) {
-            playerView.player?.setPlaybackSpeed(lastPlaybackSpeed)
+            rampPlaybackSpeed(lastPlaybackSpeed)
             lastPlaybackSpeed = 0f
             activity.binding.progressScrubberLayout.visibility = View.GONE
         }
