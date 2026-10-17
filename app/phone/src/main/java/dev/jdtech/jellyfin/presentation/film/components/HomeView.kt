@@ -1,8 +1,8 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
@@ -35,11 +36,16 @@ fun HomeView(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        Box(modifier = Modifier.fillMaxWidth().height(42.dp).padding(itemsPadding)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(42.dp).padding(itemsPadding),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 text = stringResource(FilmR.string.latest_library, view.view.name),
-                modifier = Modifier.align(Alignment.CenterStart),
+                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             IconButton(
                 onClick = {
@@ -53,11 +59,10 @@ fun HomeView(
                             )
                         )
                     )
-                },
-                modifier = Modifier.align(Alignment.CenterEnd),
+                }
             ) {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_arrow_right),
+                    painter = painterResource(CoreR.drawable.ic_arrow_up_right),
                     contentDescription = null,
                 )
             }
