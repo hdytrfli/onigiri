@@ -20,20 +20,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,98 +79,97 @@ fun HomeHeader(
 
         Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
             AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
-                HeaderAction(
-                    label = stringResource(CoreR.string.error_loading_data),
+                Surface(
                     onClick = onErrorClick,
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                    shape = CircleShape,
                     color = MaterialTheme.colorScheme.errorContainer,
                 ) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_alert_circle),
-                        contentDescription = null,
-                    )
+                    Box {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_alert_circle),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.align(Alignment.Center),
+                        )
+                    }
                 }
             }
 
             AnimatedVisibility(visible = isLoading || isError, enter = fadeIn(), exit = fadeOut()) {
-                HeaderAction(
-                    label = stringResource(R.string.refresh),
+                Surface(
                     onClick = onRetryClick,
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
                     enabled = !isLoading,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
-                    if (isLoading) {
-                        val rotation =
-                            rememberInfiniteTransition(label = "loading")
-                                .animateFloat(
-                                    initialValue = 0f,
-                                    targetValue = 360f,
-                                    animationSpec =
-                                        infiniteRepeatable(tween(1000, easing = LinearEasing)),
-                                    label = "rotation",
-                                )
-                                .value
+                    Box {
+                        if (isLoading) {
+                            val rotation =
+                                rememberInfiniteTransition(label = "loading")
+                                    .animateFloat(
+                                        initialValue = 0f,
+                                        targetValue = 360f,
+                                        animationSpec =
+                                            infiniteRepeatable(tween(1000, easing = LinearEasing)),
+                                        label = "rotation",
+                                    )
+                                    .value
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_loader_circle),
+                                contentDescription = null,
+                                modifier = Modifier.align(Alignment.Center).rotate(rotation),
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                                contentDescription = stringResource(R.string.refresh),
+                                modifier = Modifier.align(Alignment.Center),
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (!isOfflineMode) {
+                Surface(
+                    onClick = onSearchClick,
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Icon(
-                            painter = painterResource(CoreR.drawable.ic_loader_circle),
-                            contentDescription = null,
-                            modifier = Modifier.rotate(rotation),
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                            painter = painterResource(CoreR.drawable.ic_search),
                             contentDescription = null,
                         )
                     }
                 }
             }
 
-            if (!isOfflineMode) {
-                HeaderAction(
-                    label = stringResource(CoreR.string.search),
-                    onClick = onSearchClick,
+            Surface(
+                onClick = onUserClick,
+                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_search),
+                        painter = painterResource(CoreR.drawable.ic_user),
                         contentDescription = null,
                     )
                 }
             }
-
-            HeaderAction(
-                label = stringResource(CoreR.string.title_settings),
-                onClick = onUserClick,
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_user),
-                    contentDescription = null,
-                )
-            }
         }
-    }
-}
-
-/** A circular icon action in the header that reveals [label] on long press. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HeaderAction(
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-    enabled: Boolean = true,
-    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    content: @Composable () -> Unit,
-) {
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-        tooltip = { PlainTooltip { Text(label) } },
-        state = rememberTooltipState(),
-    ) {
-        Surface(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            shape = CircleShape,
-            color = color,
-            content = { Box(contentAlignment = Alignment.Center) { content() } },
-        )
     }
 }
 

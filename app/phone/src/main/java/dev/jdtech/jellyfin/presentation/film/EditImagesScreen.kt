@@ -19,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,9 +49,9 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImagesViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
-import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.MenuActionItem
+import dev.jdtech.jellyfin.presentation.film.components.MenuWidth
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
@@ -62,9 +63,6 @@ import org.jellyfin.sdk.model.api.ImageType
 
 /** The types shown together in the editor's "Misc..." section, left to right. */
 private val MiscImageTypes = listOf(ImageType.THUMB, ImageType.LOGO, ImageType.ART)
-
-/** Width of the per-tile overflow menu. */
-private val OverflowMenuWidth = 220.dp
 
 /** One cell in the editor: an existing image, an "add" placeholder, or a busy placeholder. */
 private sealed interface ImageSlot {
@@ -127,10 +125,7 @@ private fun EditImagesScreenLayout(
             TopAppBar(
                 title = { Text(stringResource(CoreR.string.edit_images)) },
                 navigationIcon = {
-                    TooltipIconButton(
-                        label = stringResource(CoreR.string.back),
-                        onClick = navigateBack,
-                    ) {
+                    IconButton(onClick = navigateBack) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
                             contentDescription = null,
@@ -399,21 +394,17 @@ private fun ImagePreview(
             )
         }
         Box {
-            TooltipIconButton(
-                label = stringResource(CoreR.string.more_options),
-                onClick = { menuOpen = true },
-                enabled = enabled,
-            ) {
+            IconButton(onClick = { menuOpen = true }, enabled = enabled) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_ellipsis),
-                    contentDescription = null,
+                    contentDescription = stringResource(CoreR.string.more_options),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             DropdownMenu(
                 expanded = menuOpen,
                 onDismissRequest = { menuOpen = false },
-                modifier = Modifier.width(OverflowMenuWidth),
+                modifier = Modifier.width(MenuWidth),
             ) {
                 // A backdrop is multi-image: adding an image appends, so "Replace" is misleading.
                 if (type != ImageType.BACKDROP) {

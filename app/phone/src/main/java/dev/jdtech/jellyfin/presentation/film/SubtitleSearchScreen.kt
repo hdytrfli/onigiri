@@ -29,6 +29,7 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -60,7 +61,6 @@ import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
-import dev.jdtech.jellyfin.presentation.components.TooltipIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
@@ -125,10 +125,7 @@ private fun SubtitleSearchScreenLayout(
             TopAppBar(
                 title = { Text(stringResource(CoreR.string.search_subtitles)) },
                 navigationIcon = {
-                    TooltipIconButton(
-                        label = stringResource(CoreR.string.back),
-                        onClick = navigateBack,
-                    ) {
+                    IconButton(onClick = navigateBack) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
                             contentDescription = null,
@@ -486,14 +483,10 @@ private fun ExistingSubtitleRow(
                 } else {
                     // Always shown, so deletable and non-deletable rows have the same height.
                     // When it can't be deleted it's disabled and drawn muted.
-                    TooltipIconButton(
-                        label = stringResource(CoreR.string.delete),
-                        onClick = onDelete,
-                        enabled = canDelete,
-                    ) {
+                    IconButton(onClick = onDelete, enabled = canDelete) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_trash),
-                            contentDescription = null,
+                            contentDescription = stringResource(CoreR.string.delete),
                             tint =
                                 if (canDelete) {
                                     MaterialTheme.colorScheme.onSurfaceVariant
@@ -520,10 +513,7 @@ private fun RemoteSubtitleRow(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TooltipIconButton(
-                label = stringResource(CoreR.string.subtitle_details),
-                onClick = onInfo,
-            ) {
+            IconButton(onClick = onInfo) {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_info),
                     contentDescription = null,
@@ -535,14 +525,10 @@ private fun RemoteSubtitleRow(
                 if (isDownloading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    TooltipIconButton(
-                        label = stringResource(CoreR.string.download),
-                        onClick = onDownload,
-                        enabled = result.id != null,
-                    ) {
+                    IconButton(onClick = onDownload, enabled = result.id != null) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),
-                            contentDescription = null,
+                            contentDescription = stringResource(CoreR.string.download),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

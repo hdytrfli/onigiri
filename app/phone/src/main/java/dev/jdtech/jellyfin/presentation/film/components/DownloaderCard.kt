@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -29,7 +30,6 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.theme.Green
 import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.models.UiText
-import dev.jdtech.jellyfin.presentation.components.TooltipFilledTonalIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import kotlin.math.roundToInt
@@ -119,10 +119,7 @@ fun DownloaderCard(state: DownloaderState, onCancelClick: () -> Unit, onRetryCli
                 when (state.status) {
                     DownloadManager.STATUS_PENDING,
                     DownloadManager.STATUS_RUNNING -> {
-                        TooltipFilledTonalIconButton(
-                            label = stringResource(CoreR.string.cancel_download),
-                            onClick = onCancelClick,
-                        ) {
+                        FilledTonalIconButton(onClick = onCancelClick) {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_x),
                                 contentDescription = null,
@@ -130,10 +127,7 @@ fun DownloaderCard(state: DownloaderState, onCancelClick: () -> Unit, onRetryCli
                         }
                     }
                     DownloadManager.STATUS_FAILED -> {
-                        TooltipFilledTonalIconButton(
-                            label = stringResource(CoreR.string.retry),
-                            onClick = onRetryClick,
-                        ) {
+                        FilledTonalIconButton(onClick = onRetryClick) {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_rotate_ccw),
                                 contentDescription = null,
