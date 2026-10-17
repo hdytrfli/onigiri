@@ -43,17 +43,19 @@
     <string name="subtitle_font_note">Applies to subtitles that use the default style. Styled (ASS/SSA) subtitles keep the font embedded in the file.</string>
     <string name="player_controls_stats">Playback statistics</string>
     <string name="player_stats_video">Video</string>
+    <string name="player_stats_fps">FPS</string>
     <string name="player_stats_codec">Codec</string>
+    <string name="player_stats_bitrate">Bitrate</string>
     <string name="player_stats_audio">Audio</string>
+    <string name="player_stats_audio_bitrate">Audio bitrate</string>
     <string name="player_stats_decoder">Decoder</string>
     <string name="player_stats_dropped">Dropped</string>
     <string name="player_stats_dropped_detail">vo %1$d · dec %2$d · delayed %3$d</string>
     <string name="player_stats_sync">A-V sync</string>
     <string name="player_stats_buffer">Buffer</string>
-    <string name="player_stats_graph">Dropped frames</string>
     <string name="player_stats_resolution">%1$d×%2$d</string>
-    <string name="player_stats_fps">%1$s fps</string>
     <string name="player_stats_mbps">%1$s Mbps</string>
+    <string name="player_stats_kbps">%1$s kbps</string>
     <string name="player_stats_channels">%1$d ch</string>
     <string name="player_stats_seconds">%1$s s</string>
 </resources>

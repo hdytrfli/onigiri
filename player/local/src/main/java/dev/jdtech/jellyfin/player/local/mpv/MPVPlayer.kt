@@ -245,6 +245,13 @@ class MPVPlayer(
         mpvLib.setOptionString("gpu-context", "android")
         mpvLib.setOptionString("opengl-es", "yes")
 
+        // Let the audio follow the video instead of the other way round. In mpv's default "audio"
+        // mode the video is re-timed against the audio clock and frames are dropped whenever that
+        // clock moves - most visibly when a hold-to-speed-up gesture drops back to normal speed and
+        // the scaletempo2 filter is taken back out of the audio chain. display-resample bends the
+        // audio to the video instead, so the transition costs no frames.
+        mpvLib.setOptionString("video-sync", "display-resample")
+
         // Hardware video decoding
         mpvLib.setOptionString("hwdec", hwDec)
         mpvLib.setOptionString("hwdec-codecs", "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1")

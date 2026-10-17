@@ -1,14 +1,11 @@
 package dev.jdtech.jellyfin.presentation.player
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,8 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -35,23 +30,25 @@ import dev.jdtech.jellyfin.player.local.mpv.PlaybackStats
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import kotlinx.coroutines.delay
 
-/** How often mpv is polled for the panel, and how many readings the graph keeps. */
+/** How often mpv is polled for the panel. */
 private const val SAMPLE_INTERVAL_MS = 500L
-private const val SAMPLE_COUNT = 60
 
-/** Separator between the parts of one row, e.g. `h264 (High) · 5.2 Mbps`. */
+/** Stands in for a reading mpv did not provide, so the panel never changes shape. */
+private const val NO_VALUE = "—"
+
+/** Separator between the parts of one row, e.g. `aac · 2 ch`. */
 private const val VALUE_SEPARATOR = " · "
 
+private val PANEL_WIDTH = 260.dp
 private val PANEL_CORNER = 12.dp
-private val LABEL_WIDTH = 62.dp
-private val GRAPH_WIDTH = 220.dp
-private val GRAPH_HEIGHT = 28.dp
-private val BAR_GAP = 1.dp
+private val LABEL_WIDTH = 78.dp
 
 /**
- * mpv's playback statistics: what is being decoded, how, and how many frames were lost getting to
- * the screen. [loadStats] is polled while the panel is on screen; the frame-drop graph keeps a
- * rolling window of [sampleCount] readings and right-aligns them so the newest lands at the end.
+ * mpv's playback statistics: what is being decoded, how, and how well it is keeping up.
+ *
+ * The panel is a fixed-size table - every row is always present and reads [NO_VALUE] when mpv has
+ * nothing to report - so the box neither resizes nor reflows as readings come and go. [loadStats]
+ * is polled only while the panel is on screen.
  */
 @Composable
 fun PlayerStatsPanel(
@@ -59,26 +56,15 @@ fun PlayerStatsPanel(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     sampleIntervalMs: Long = SAMPLE_INTERVAL_MS,
-    sampleCount: Int = SAMPLE_COUNT,
 ) {
     var stats by remember { mutableStateOf(PlaybackStats()) }
-    var droppedPerSample by remember { mutableStateOf<List<Int>>(emptyList()) }
 
-    LaunchedEffect(sampleIntervalMs, sampleCount) {
-        // The first reading only sets the baseline: the counters are totals since the file loaded,
-        // so graphing the first value would draw every drop so far as if it just happened.
-        var previousTotal = -1L
+    LaunchedEffect(sampleIntervalMs) {
         while (true) {
             // Read on the main thread: an mpv property read is cheap, and staying on the same
             // thread as the player's teardown means a reading can never race the native handle
             // being destroyed.
-            val sample = loadStats()
-            if (previousTotal >= 0L) {
-                val delta = (sample.totalDroppedFrames - previousTotal).coerceAtLeast(0L)
-                droppedPerSample = (droppedPerSample + delta.toInt()).takeLast(sampleCount)
-            }
-            previousTotal = sample.totalDroppedFrames
-            stats = sample
+            stats = loadStats()
             delay(sampleIntervalMs)
         }
     }
@@ -88,6 +74,7 @@ fun PlayerStatsPanel(
     Column(
         modifier =
             modifier
+                .width(PANEL_WIDTH)
                 .clip(RoundedCornerShape(PANEL_CORNER))
                 .background(colorResource(CoreR.color.player_background))
                 .then(
@@ -101,91 +88,67 @@ fun PlayerStatsPanel(
                         )
                     }
                 )
-                .padding(MaterialTheme.spacings.small),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+                .padding(MaterialTheme.spacings.medium),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
     ) {
-        StatsRowOrNothing(
-            label = R.string.player_stats_video,
-            parts =
-                listOfNotNull(
-                    if (stats.width > 0 && stats.height > 0) {
-                        stringResource(R.string.player_stats_resolution, stats.width, stats.height)
-                    } else {
-                        null
-                    },
-                    stats.fps?.let { stringResource(R.string.player_stats_fps, decimal(it, 2)) },
-                ),
+        StatsRow(
+            label = stringResource(R.string.player_stats_video),
+            value =
+                if (stats.width > 0 && stats.height > 0) {
+                    stringResource(R.string.player_stats_resolution, stats.width, stats.height)
+                } else {
+                    NO_VALUE
+                },
         )
-        StatsRowOrNothing(
-            label = R.string.player_stats_codec,
-            parts =
-                listOfNotNull(
-                    stats.videoCodec,
-                    stats.videoBitrate?.let {
-                        stringResource(R.string.player_stats_mbps, decimal(it / 1_000_000, 1))
-                    },
-                ),
+        StatsRow(
+            label = stringResource(R.string.player_stats_fps),
+            value = stats.fps?.let { decimal(it, 2) } ?: NO_VALUE,
         )
-        StatsRowOrNothing(
-            label = R.string.player_stats_audio,
-            parts =
-                listOfNotNull(
-                    stats.audioCodec,
-                    stats.audioChannels?.let { stringResource(R.string.player_stats_channels, it) },
-                    stats.audioBitrate?.let {
-                        stringResource(R.string.player_stats_mbps, decimal(it / 1_000_000, 1))
-                    },
-                ),
+        StatsRow(
+            label = stringResource(R.string.player_stats_codec),
+            value = stats.videoCodec ?: NO_VALUE,
         )
-        stats.hardwareDecoder?.let {
-            StatsRow(label = stringResource(R.string.player_stats_decoder), value = it)
-        }
-        StatsRowOrNothing(
-            label = R.string.player_stats_dropped,
-            parts =
-                listOfNotNull(
-                    stats.totalDroppedFrames.toString(),
-                    if (stats.totalDroppedFrames > 0 || stats.delayedFrames > 0) {
-                        stringResource(
-                            R.string.player_stats_dropped_detail,
-                            stats.droppedFrames,
-                            stats.decoderDroppedFrames,
-                            stats.delayedFrames,
-                        )
-                    } else {
-                        null
-                    },
-                ),
+        StatsRow(
+            label = stringResource(R.string.player_stats_bitrate),
+            value =
+                stats.videoBitrate?.let {
+                    stringResource(R.string.player_stats_mbps, decimal(it / 1_000_000, 1))
+                } ?: NO_VALUE,
         )
-        stats.avSyncSeconds?.let {
-            StatsRow(
-                label = stringResource(R.string.player_stats_sync),
-                value = stringResource(R.string.player_stats_seconds, decimal(it, 3)),
-            )
-        }
-        stats.bufferSeconds?.let {
-            StatsRow(
-                label = stringResource(R.string.player_stats_buffer),
-                value = stringResource(R.string.player_stats_seconds, decimal(it, 1)),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-
-        Text(
-            text = stringResource(R.string.player_stats_graph),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        StatsRow(
+            label = stringResource(R.string.player_stats_audio),
+            value = audioValue(stats) ?: NO_VALUE,
         )
-        FrameDropGraph(
-            droppedPerSample = droppedPerSample,
-            sampleCount = sampleCount,
-            modifier = Modifier.width(GRAPH_WIDTH).height(GRAPH_HEIGHT),
+        StatsRow(
+            label = stringResource(R.string.player_stats_audio_bitrate),
+            value =
+                stats.audioBitrate?.let {
+                    stringResource(R.string.player_stats_kbps, decimal(it / 1_000, 0))
+                } ?: NO_VALUE,
+        )
+        StatsRow(
+            label = stringResource(R.string.player_stats_decoder),
+            value = stats.hardwareDecoder ?: NO_VALUE,
+        )
+        StatsRow(label = stringResource(R.string.player_stats_dropped), value = droppedValue(stats))
+        StatsRow(
+            label = stringResource(R.string.player_stats_sync),
+            value =
+                stats.avSyncSeconds?.let {
+                    stringResource(R.string.player_stats_seconds, decimal(it, 3))
+                } ?: NO_VALUE,
+        )
+        StatsRow(
+            label = stringResource(R.string.player_stats_buffer),
+            value =
+                stats.bufferSeconds?.let {
+                    stringResource(R.string.player_stats_seconds, decimal(it, 1))
+                } ?: NO_VALUE,
         )
     }
 }
 
-/** A label/value line, e.g. `Codec h264 (High) · 5.2 Mbps`. */
+/** A label/value line, e.g. `Codec h264 (High)`. */
 @Composable
 private fun StatsRow(label: String, value: String) {
     Row {
@@ -205,45 +168,35 @@ private fun StatsRow(label: String, value: String) {
     }
 }
 
-/** Drops the row entirely when mpv reported none of its [parts], so the panel stays tight. */
+/** `aac · 2 ch`, or null when there is no audio track to describe. */
 @Composable
-private fun StatsRowOrNothing(label: Int, parts: List<String>) {
-    if (parts.isEmpty()) return
-    StatsRow(label = stringResource(label), value = parts.joinToString(VALUE_SEPARATOR))
-}
+private fun audioValue(stats: PlaybackStats): String? {
+    if (stats.audioCodec == null && stats.audioChannels == null) return null
 
-/**
- * Frame drops over time, one bar per reading, newest on the right. Bars are scaled against the
- * worst reading in the window so a single dropped frame is still visible.
- */
-@Composable
-private fun FrameDropGraph(droppedPerSample: List<Int>, sampleCount: Int, modifier: Modifier) {
-    val barColor = MaterialTheme.colorScheme.error
-    val axisColor = MaterialTheme.colorScheme.outlineVariant
-
-    Canvas(modifier = modifier) {
-        drawLine(
-            color = axisColor,
-            start = Offset(0f, size.height),
-            end = Offset(size.width, size.height),
-            strokeWidth = 1f,
+    return listOfNotNull(
+            stats.audioCodec,
+            stats.audioChannels?.let { stringResource(R.string.player_stats_channels, it) },
         )
-
-        val slotWidth = size.width / sampleCount
-        val barWidth = (slotWidth - BAR_GAP.toPx()).coerceAtLeast(1f)
-        val tallest = droppedPerSample.maxOrNull() ?: 0
-        val firstSlot = sampleCount - droppedPerSample.size
-        droppedPerSample.forEachIndexed { index, dropped ->
-            if (dropped <= 0) return@forEachIndexed
-            val barHeight = size.height * dropped.toFloat() / tallest
-            drawRect(
-                color = barColor,
-                topLeft = Offset((firstSlot + index) * slotWidth, size.height - barHeight),
-                size = Size(barWidth, barHeight),
-            )
-        }
-    }
+        .joinToString(VALUE_SEPARATOR)
 }
+
+/** The drop total, with the per-counter breakdown as soon as any counter is non-zero. */
+@Composable
+private fun droppedValue(stats: PlaybackStats): String =
+    listOfNotNull(
+            stats.totalDroppedFrames.toString(),
+            if (stats.totalDroppedFrames > 0 || stats.delayedFrames > 0) {
+                stringResource(
+                    R.string.player_stats_dropped_detail,
+                    stats.droppedFrames,
+                    stats.decoderDroppedFrames,
+                    stats.delayedFrames,
+                )
+            } else {
+                null
+            },
+        )
+        .joinToString(VALUE_SEPARATOR)
 
 /** Formats [value] to [digits] decimals. */
 private fun decimal(value: Double, digits: Int): String = "%.${digits}f".format(value)
