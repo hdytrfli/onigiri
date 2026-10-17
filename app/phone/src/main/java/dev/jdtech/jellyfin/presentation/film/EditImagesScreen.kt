@@ -165,41 +165,38 @@ private fun EditImagesScreenLayout(
                         .padding(vertical = MaterialTheme.spacings.default),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
-                EditorArea(stringResource(CoreR.string.image_type_primary)) {
-                    GridRows(
-                        items = listOf(ImageType.PRIMARY),
-                        columns = gridColumns(primarySize),
-                    ) { type ->
-                        SingleTypeTile(
-                            type = type,
-                            itemId = itemId,
-                            state = state,
-                            isEpisode = isEpisode,
-                            showLabel = false,
-                            onEditImage = onEditImage,
-                            onDelete = onDelete,
-                            onMakePrimary = onMakePrimary,
-                        )
-                    }
+                // Labels sit above each tile, the same way the thumb/logo/art row does.
+                GridRows(
+                    items = listOf(ImageType.PRIMARY),
+                    columns = gridColumns(primarySize),
+                ) { type ->
+                    SingleTypeTile(
+                        type = type,
+                        itemId = itemId,
+                        state = state,
+                        isEpisode = isEpisode,
+                        onEditImage = onEditImage,
+                        onDelete = onDelete,
+                        onMakePrimary = onMakePrimary,
+                    )
                 }
 
-                EditorArea(stringResource(CoreR.string.image_type_backdrop)) {
-                    GridRows(
-                        items = backdropSlots,
-                        columns = gridColumns(GridSize.THUMBNAIL),
-                    ) { slot ->
-                        ImageSlotTile(
-                            slot = slot,
-                            itemId = itemId,
-                            baseUrl = state.baseUrl,
-                            ratio = imageTypeAspectRatio(ImageType.BACKDROP),
-                            enabled = !backdropBusy,
-                            showLabel = false,
-                            onEditImage = onEditImage,
-                            onDelete = onDelete,
-                            onMakePrimary = onMakePrimary,
-                        )
-                    }
+                GridRows(
+                    items = backdropSlots,
+                    columns = gridColumns(GridSize.THUMBNAIL),
+                ) { slot ->
+                    ImageSlotTile(
+                        slot = slot,
+                        itemId = itemId,
+                        baseUrl = state.baseUrl,
+                        ratio = imageTypeAspectRatio(ImageType.BACKDROP),
+                        enabled = !backdropBusy,
+                        // Only the first backdrop names the row; the rest stay label-less.
+                        showLabel = slot == backdropSlots.firstOrNull(),
+                        onEditImage = onEditImage,
+                        onDelete = onDelete,
+                        onMakePrimary = onMakePrimary,
+                    )
                 }
 
                 // No section label here: the Thumb/Logo/Art tiles already carry their own names.
