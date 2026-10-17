@@ -23,7 +23,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.GridSettings
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalGridSettings
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
@@ -103,6 +105,32 @@ class MainActivity : AppCompatActivity() {
                                     portraitWidth = state.titlePortraitWidth,
                                     landscapeWidth = state.titleLandscapeWidth,
                                     ratio = state.titleImageRatio,
+                                ),
+                            LocalGridSettings provides
+                                GridSettings(
+                                    columnCount = { gridId, isLandscape ->
+                                        val columns = state.gridColumns[gridId]
+                                        when {
+                                            columns == null ->
+                                                if (isLandscape) {
+                                                    gridId.defaultLandscape
+                                                } else {
+                                                    gridId.defaultPortrait
+                                                }
+                                            isLandscape -> columns.second
+                                            else -> columns.first
+                                        }
+                                    },
+                                    onColumnsChange = { gridId, portrait, landscape ->
+                                        appPreferences.setValue(
+                                            appPreferences.gridColumnsPortrait(gridId),
+                                            portrait.toString(),
+                                        )
+                                        appPreferences.setValue(
+                                            appPreferences.gridColumnsLandscape(gridId),
+                                            landscape.toString(),
+                                        )
+                                    },
                                 ),
                         ) {
                             NavigationRoot(

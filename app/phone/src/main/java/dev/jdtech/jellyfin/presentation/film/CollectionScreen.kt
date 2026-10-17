@@ -54,6 +54,7 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -63,6 +64,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
+import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 
 @Composable
@@ -207,6 +209,7 @@ fun CollectionScreenLayout(
                         )
                     }
                 },
+                actions = { GridSettingsButton(gridId = GridId.POSTERS) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )

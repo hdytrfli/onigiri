@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
@@ -11,12 +12,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
+import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
+import dev.jdtech.jellyfin.settings.domain.GridId
 
 @Composable
 fun CollectionGrid(
@@ -26,7 +27,7 @@ fun CollectionGrid(
     showSectionHeaders: Boolean = true,
 ) {
     LazyVerticalGrid(
-        columns = GridCellsAdaptiveWithMinColumns(minSize = 160.dp, minColumns = 2),
+        columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
         modifier = Modifier.padding(innerPadding).fillMaxSize(),
         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),

@@ -173,12 +173,6 @@
         <item>1.25</item>
         <item>1.5</item>
     </string-array>
-    <string-array name="season_grid_columns">
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
     <string-array name="title_width_options">
         <item>40%</item>
         <item>50%</item>

@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -49,6 +50,7 @@ fun HomeHeader(
     onSearchClick: () -> Unit,
     onUserClick: () -> Unit,
     modifier: Modifier = Modifier,
+    trailingActions: @Composable RowScope.() -> Unit = {},
 ) {
     val isOfflineMode = LocalOfflineMode.current
 
@@ -78,6 +80,8 @@ fun HomeHeader(
         Spacer(Modifier.width(MaterialTheme.spacings.medium))
 
         Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
+            trailingActions()
+
             AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
                 Surface(
                     onClick = onErrorClick,

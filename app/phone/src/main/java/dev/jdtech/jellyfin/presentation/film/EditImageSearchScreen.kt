@@ -47,8 +47,11 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchEvent
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchState
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
+import dev.jdtech.jellyfin.settings.domain.GridId
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
 import org.jellyfin.sdk.model.api.ImageType
@@ -93,14 +96,6 @@ private fun EditImageSearchLayout(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    // Posters (Primary) get a denser grid than the other types; the others keep a larger preview.
-    val columns =
-        when {
-            type == ImageType.PRIMARY && isLandscape -> 8
-            type == ImageType.PRIMARY -> 5
-            isLandscape -> 4
-            else -> 3
-        }
 
     Scaffold(
         modifier =
@@ -118,6 +113,7 @@ private fun EditImageSearchLayout(
                         )
                     }
                 },
+                actions = { GridSettingsButton(gridId = GridId.IMAGES) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
@@ -143,7 +139,7 @@ private fun EditImageSearchLayout(
                     )
                 else ->
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(columns),
+                        columns = GridCells.Fixed(gridColumnsFor(GridId.IMAGES)),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
                         horizontalArrangement =
                             Arrangement.spacedBy(MaterialTheme.spacings.default),

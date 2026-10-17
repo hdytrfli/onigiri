@@ -36,14 +36,26 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val displayExtraInfo = Preference("pref_display_extra_info", false)
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2.3333333")
-    val seasonGridColumnsPortrait = Preference("pref_season_grid_columns_portrait", "3")
-    val seasonGridColumnsLandscape = Preference("pref_season_grid_columns_landscape", "4")
     val contentSpacing = Preference("pref_content_spacing", "1.25")
     val naiveTitleOverlay = Preference("pref_naive_title_overlay", false)
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.3")
     val titlePlayerWidth = Preference("pref_title_player_width", "0.2")
     val titleImageRatio = Preference("pref_title_image_ratio", "2")
+
+    /**
+     * Column count (1..8) for [gridId] while portrait. Backed by
+     * `pref_grid_columns_<group>_portrait`.
+     */
+    fun gridColumnsPortrait(gridId: GridId) =
+        Preference("pref_grid_columns_${gridId.key}_portrait", gridId.defaultPortrait.toString())
+
+    /**
+     * Column count (1..8) for [gridId] while landscape. Backed by
+     * `pref_grid_columns_<group>_landscape`.
+     */
+    fun gridColumnsLandscape(gridId: GridId) =
+        Preference("pref_grid_columns_${gridId.key}_landscape", gridId.defaultLandscape.toString())
 
     // Player
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)

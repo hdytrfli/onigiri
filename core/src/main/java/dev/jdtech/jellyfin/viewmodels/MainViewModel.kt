@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.settings.domain.GridId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -108,12 +109,31 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     TitlePrefs(portraitWidth, landscapeWidth, ratio, naive)
                 }
 
+            // One portrait/landscape pair per grid group, in GridId order.
+            val gridPrefs =
+                GridId.entries.flatMap { gridId ->
+                    listOf(
+                        appPreferences.observe(appPreferences.gridColumnsPortrait(gridId)),
+                        appPreferences.observe(appPreferences.gridColumnsLandscape(gridId)),
+                    )
+                }
+            val gridColumns =
+                combine(*gridPrefs.toTypedArray()) { values ->
+                    GridId.entries.associateWith { gridId ->
+                        val index = GridId.entries.indexOf(gridId) * 2
+                        val portrait = values[index].toIntOrNull() ?: gridId.defaultPortrait
+                        val landscape = values[index + 1].toIntOrNull() ?: gridId.defaultLandscape
+                        portrait to landscape
+                    }
+                }
+
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.offlineMode),
                     interfacePrefs,
                     titlePrefs,
-                ) { flags, offlineMode, interfacePrefs, titlePrefs ->
+                    gridColumns,
+                ) { flags, offlineMode, interfacePrefs, titlePrefs, gridColumns ->
                     MainState(
                         isLoading = false,
                         hasServers = flags.hasServers,
@@ -131,6 +151,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
                         naiveTitleOverlay = titlePrefs.naive,
+                        gridColumns = gridColumns,
                     )
                 }
                 .collect { mainState -> _state.emit(mainState) }
@@ -174,4 +195,5 @@ data class MainState(
     val naiveTitleOverlay: Boolean = false,
     val confirmExit: Boolean = false,
     val hideStatusBar: Boolean = false,
+    val gridColumns: Map<GridId, Pair<Int, Int>> = emptyMap(),
 )

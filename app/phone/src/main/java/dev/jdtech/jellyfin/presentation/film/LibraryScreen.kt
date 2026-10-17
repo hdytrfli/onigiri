@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -47,13 +47,15 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
+import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
+import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -136,6 +138,7 @@ private fun LibraryScreenLayout(
                     }
                 },
                 actions = {
+                    GridSettingsButton(gridId = GridId.POSTERS)
                     IconButton(onClick = { showSortByDialog = true }) {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_down_up),
@@ -155,7 +158,7 @@ private fun LibraryScreenLayout(
                 modifier = Modifier.fillMaxWidth().padding(contentPadding + innerPadding),
             )
             LazyVerticalGrid(
-                columns = GridCellsAdaptiveWithMinColumns(minSize = 160.dp, minColumns = 2),
+                columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding + innerPadding,
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),

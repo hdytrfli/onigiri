@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,7 +21,6 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyCollections
 import dev.jdtech.jellyfin.film.presentation.media.MediaAction
 import dev.jdtech.jellyfin.film.presentation.media.MediaState
@@ -34,11 +32,14 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FilmSearchBar
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.settings.domain.GridId
 
 @Composable
 fun MediaScreen(
@@ -98,20 +99,9 @@ private fun MediaScreenLayout(
 
     var showErrorDialog by rememberSaveable { mutableStateOf(false) }
 
-    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val minColumnSize =
-        when {
-            windowSizeClass.isWidthAtLeastBreakpoint(
-                WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
-            ) -> 320.dp
-            windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) ->
-                240.dp
-            else -> 160.dp
-        }
-
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = minColumnSize),
+            columns = GridCells.Fixed(gridColumnsFor(GridId.LIBRARIES)),
             modifier = Modifier.fillMaxSize(),
             contentPadding =
                 PaddingValues(
@@ -154,6 +144,7 @@ private fun MediaScreenLayout(
             onSearchClick = { onSearchExpand(true) },
             onUserClick = onSettingsClick,
             modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
+            trailingActions = { GridSettingsButton(gridId = GridId.LIBRARIES) },
         )
 
         if (state.error != null && showErrorDialog) {

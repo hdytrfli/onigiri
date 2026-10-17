@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +22,14 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.GridCellsAdaptiveWithMinColumns
+import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.settings.domain.GridId
 
 @Composable
 fun FavoritesScreen(
@@ -67,7 +70,7 @@ private fun FavoritesScreenLayout(
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
-            columns = GridCellsAdaptiveWithMinColumns(minSize = 160.dp, minColumns = 2),
+            columns = GridCells.Fixed(gridColumnsFor(GridId.POSTERS)),
             modifier = Modifier.fillMaxSize(),
             contentPadding =
                 PaddingValues(
@@ -98,6 +101,7 @@ private fun FavoritesScreenLayout(
             onSearchClick = onSearchClick,
             onUserClick = onSettingsClick,
             modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
+            trailingActions = { GridSettingsButton(gridId = GridId.POSTERS) },
         )
     }
 }

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.repository.JellyfinRepository
-import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,12 +12,8 @@ import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ItemFields
 
 @HiltViewModel
-class SeasonViewModel
-@Inject
-constructor(
-    private val repository: JellyfinRepository,
-    private val appPreferences: AppPreferences,
-) : ViewModel() {
+class SeasonViewModel @Inject constructor(private val repository: JellyfinRepository) :
+    ViewModel() {
     private val _state = MutableStateFlow(SeasonState())
     val state = _state.asStateFlow()
 
@@ -35,18 +30,10 @@ constructor(
                         seasonId = seasonId,
                         fields = listOf(ItemFields.OVERVIEW),
                     )
-                val gridColumnsPortrait =
-                    appPreferences.getValue(appPreferences.seasonGridColumnsPortrait).toIntOrNull()
-                        ?: 3
-                val gridColumnsLandscape =
-                    appPreferences.getValue(appPreferences.seasonGridColumnsLandscape).toIntOrNull()
-                        ?: 4
                 _state.emit(
                     _state.value.copy(
                         season = season,
                         episodes = episodes,
-                        gridColumnsPortrait = gridColumnsPortrait,
-                        gridColumnsLandscape = gridColumnsLandscape,
                     )
                 )
             } catch (e: Exception) {

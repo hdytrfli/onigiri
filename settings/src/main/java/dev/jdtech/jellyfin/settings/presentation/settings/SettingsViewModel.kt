@@ -138,22 +138,6 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     options = R.array.content_spacing_options,
                                                     optionValues = R.array.content_spacing_values,
                                                 ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.season_grid_columns_portrait,
-                                                    backendPreference =
-                                                        appPreferences.seasonGridColumnsPortrait,
-                                                    options = R.array.season_grid_columns,
-                                                    optionValues = R.array.season_grid_columns,
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.season_grid_columns_landscape,
-                                                    backendPreference =
-                                                        appPreferences.seasonGridColumnsLandscape,
-                                                    options = R.array.season_grid_columns,
-                                                    optionValues = R.array.season_grid_columns,
-                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(

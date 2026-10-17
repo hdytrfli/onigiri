@@ -88,8 +88,6 @@
     <string name="title_landscape_width">Landscape width</string>
     <string name="title_player_width">Player width</string>
     <string name="title_image_ratio">Title image ratio</string>
-    <string name="season_grid_columns_portrait">Portrait grid columns</string>
-    <string name="season_grid_columns_landscape">Landscape grid columns</string>
     <string name="mb">MB</string>
     <string name="ms">ms</string>
     <string name="seconds">s</string>

@@ -170,4 +170,7 @@
     <string name="image_type_menu">Menu</string>
     <string name="image_type_profile">Profile</string>
     <string name="image_type_screenshot">Screenshot</string>
+    <string name="grid_layout">Grid layout</string>
+    <string name="portrait">Portrait</string>
+    <string name="landscape">Landscape</string>
 </resources>

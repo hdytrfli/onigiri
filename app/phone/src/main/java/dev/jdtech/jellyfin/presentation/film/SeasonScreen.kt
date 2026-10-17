@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import android.content.Intent
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -42,6 +40,7 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -50,7 +49,9 @@ import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.gridColumnsFor
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.settings.domain.GridId
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 
@@ -110,8 +111,7 @@ private fun SeasonScreenLayout(
 
     val lazyListState = rememberLazyListState()
 
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val gridColumns = if (isLandscape) state.gridColumnsLandscape else state.gridColumnsPortrait
+    val gridColumns = gridColumnsFor(GridId.EPISODES)
 
     val spacingScale = LocalContentSpacingScale.current
 
@@ -214,6 +214,7 @@ private fun SeasonScreenLayout(
             onBackClick = { onAction(SeasonAction.OnBackClick) },
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
+                GridSettingsButton(gridId = GridId.EPISODES)
                 state.season?.let { season ->
                     EditImagesAction(
                         itemId = season.id,
