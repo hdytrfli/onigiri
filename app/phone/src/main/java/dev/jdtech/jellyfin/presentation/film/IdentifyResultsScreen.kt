@@ -131,7 +131,7 @@ private fun IdentifyResultsLayout(
                         )
                     }
                 },
-                actions = { GridSettingsButton(gridId = GridId.IMAGES) },
+                actions = { GridSettingsButton(gridId = GridId.IMAGE_POSTERS) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
@@ -157,7 +157,7 @@ private fun IdentifyResultsLayout(
                     )
                 else ->
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(gridColumnsFor(GridId.IMAGES)),
+                        columns = GridCells.Fixed(gridColumnsFor(GridId.IMAGE_POSTERS)),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
                         horizontalArrangement =
                             Arrangement.spacedBy(MaterialTheme.spacings.default),

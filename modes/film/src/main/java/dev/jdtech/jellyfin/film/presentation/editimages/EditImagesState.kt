@@ -27,12 +27,16 @@ fun imageBusyKey(type: ImageType, index: Int?): String = "${type.name}:${index ?
 
 /**
  * The preferred aspect ratio (width / height) for [type] in the editor. The poster (Primary) and
- * square (Disc, Box) shapes are kept; everything else is shown at 16:9.
+ * square (Disc, Box) shapes are kept; everything else is shown at 16:9. An episode's Primary image
+ * is a 16:9 still rather than a poster, so [isEpisode] flips that one case.
  */
-fun imageTypeAspectRatio(type: ImageType): Float =
-    when (type) {
-        ImageType.PRIMARY -> 2f / 3f
-        ImageType.DISC,
-        ImageType.BOX -> 1f
-        else -> 16f / 9f
+fun imageTypeAspectRatio(type: ImageType, isEpisode: Boolean = false): Float =
+    if (type == ImageType.PRIMARY) {
+        if (isEpisode) 16f / 9f else 2f / 3f
+    } else {
+        when (type) {
+            ImageType.DISC,
+            ImageType.BOX -> 1f
+            else -> 16f / 9f
+        }
     }

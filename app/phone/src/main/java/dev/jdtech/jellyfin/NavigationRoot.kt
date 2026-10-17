@@ -532,6 +532,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             collectionName = key.collectionName,
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId.toString()))
+                },
         )
     }
     entry<FavoritesRoute> {
@@ -695,8 +699,14 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             itemId = UUID.fromString(key.itemId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
             navigateToImageSearch =
-                resumedAction { type ->
-                    navigator.navigate(EditImageSearchRoute(itemId = key.itemId, type = type.name))
+                resumedAction { type, isEpisode ->
+                    navigator.navigate(
+                        EditImageSearchRoute(
+                            itemId = key.itemId,
+                            type = type.name,
+                            isEpisode = isEpisode,
+                        )
+                    )
                 },
         )
     }
@@ -704,6 +714,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         EditImageSearchScreen(
             itemId = UUID.fromString(key.itemId),
             type = ImageType.valueOf(key.type),
+            isEpisode = key.isEpisode,
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }

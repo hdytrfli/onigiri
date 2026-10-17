@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +21,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -30,24 +33,28 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
+    titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
+    padding: Dp = MaterialTheme.spacings.default,
+    maxWidth: Dp? = null,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogMaxHeight),
+            modifier =
+                Modifier.then(if (maxWidth != null) Modifier.widthIn(max = maxWidth) else Modifier)
+                    .fillMaxWidth()
+                    .heightIn(max = Dimens.dialogMaxHeight),
             shape = MaterialTheme.shapes.extraLarge,
         ) {
-            Column(modifier = Modifier.padding(top = MaterialTheme.spacings.default)) {
+            Column(modifier = Modifier.padding(top = padding)) {
                 Text(
                     text = title,
-                    modifier =
-                        Modifier.padding(horizontal = MaterialTheme.spacings.default)
-                            .fillMaxWidth(),
+                    modifier = Modifier.padding(horizontal = padding).fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = titleStyle,
                 )
                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-                content(PaddingValues(horizontal = MaterialTheme.spacings.default))
+                content(PaddingValues(horizontal = padding))
             }
         }
     }

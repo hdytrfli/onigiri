@@ -54,7 +54,9 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -73,6 +75,7 @@ fun CollectionScreen(
     collectionName: String,
     onItemClick: (item: FindroidItem) -> Unit,
     navigateBack: () -> Unit,
+    navigateToEditImages: (itemId: UUID) -> Unit,
     viewModel: CollectionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,11 +90,16 @@ fun CollectionScreen(
                 is CollectionAction.OnBackClick -> navigateBack()
             }
         },
+        onEditImages = navigateToEditImages,
     )
 }
 
 @Composable
-private fun CollectionDetailLayout(state: CollectionState, onAction: (CollectionAction) -> Unit) {
+private fun CollectionDetailLayout(
+    state: CollectionState,
+    onAction: (CollectionAction) -> Unit,
+    onEditImages: (UUID) -> Unit = {},
+) {
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
@@ -180,6 +188,18 @@ private fun CollectionDetailLayout(state: CollectionState, onAction: (Collection
             hasBackButton = true,
             hasHomeButton = false,
             onBackClick = { onAction(CollectionAction.OnBackClick) },
+            trailingContent = {
+                GridSettingsButton(
+                    gridId = GridId.POSTERS,
+                    style = GridSettingsButtonStyle.FILLED_TONAL,
+                )
+                state.collection?.let { collection ->
+                    EditImagesAction(
+                        itemId = collection.id,
+                        onClick = { onEditImages(collection.id) },
+                    )
+                }
+            },
         )
     }
 }

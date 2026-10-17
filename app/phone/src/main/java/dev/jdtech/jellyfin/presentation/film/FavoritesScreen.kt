@@ -23,6 +23,7 @@ import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -101,7 +102,12 @@ private fun FavoritesScreenLayout(
             onSearchClick = onSearchClick,
             onUserClick = onSettingsClick,
             modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
-            trailingActions = { GridSettingsButton(gridId = GridId.POSTERS) },
+            trailingActions = {
+                GridSettingsButton(
+                    gridId = GridId.POSTERS,
+                    style = GridSettingsButtonStyle.SURFACE,
+                )
+            },
         )
     }
 }

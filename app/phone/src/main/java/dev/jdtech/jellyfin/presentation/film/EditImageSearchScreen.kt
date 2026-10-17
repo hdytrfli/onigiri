@@ -65,6 +65,7 @@ import org.jellyfin.sdk.model.api.RemoteImageInfo
 fun EditImageSearchScreen(
     itemId: UUID,
     type: ImageType,
+    isEpisode: Boolean,
     navigateBack: () -> Unit,
     viewModel: EditImageSearchViewModel = hiltViewModel(),
 ) {
@@ -80,6 +81,7 @@ fun EditImageSearchScreen(
 
     EditImageSearchLayout(
         type = type,
+        isEpisode = isEpisode,
         state = state,
         onApply = { result -> viewModel.apply(itemId, type, result) },
         navigateBack = navigateBack,
@@ -90,12 +92,21 @@ fun EditImageSearchScreen(
 @Composable
 private fun EditImageSearchLayout(
     type: ImageType,
+    isEpisode: Boolean,
     state: EditImageSearchState,
     onApply: (RemoteImageInfo) -> Unit,
     navigateBack: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    // A poster-shaped result and a wide (16:9) result are different tile shapes, so they keep
+    // separate column settings.
+    val gridId =
+        if (isPosterShapedSearchResult(type, isEpisode)) {
+            GridId.IMAGE_POSTERS
+        } else {
+            GridId.IMAGE_WIDE
+        }
 
     Scaffold(
         modifier =
@@ -113,7 +124,7 @@ private fun EditImageSearchLayout(
                         )
                     }
                 },
-                actions = { GridSettingsButton(gridId = GridId.IMAGES) },
+                actions = { GridSettingsButton(gridId = gridId) },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
             )
@@ -139,7 +150,7 @@ private fun EditImageSearchLayout(
                     )
                 else ->
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(gridColumnsFor(GridId.IMAGES)),
+                        columns = GridCells.Fixed(gridColumnsFor(gridId)),
                         contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
                         horizontalArrangement =
                             Arrangement.spacedBy(MaterialTheme.spacings.default),
@@ -156,6 +167,7 @@ private fun EditImageSearchLayout(
                         ) { result ->
                             RemoteImageTile(
                                 type = type,
+                                isEpisode = isEpisode,
                                 result = result,
                                 onClick = { onApply(result) },
                             )
@@ -167,7 +179,12 @@ private fun EditImageSearchLayout(
 }
 
 @Composable
-private fun RemoteImageTile(type: ImageType, result: RemoteImageInfo, onClick: () -> Unit) {
+private fun RemoteImageTile(
+    type: ImageType,
+    isEpisode: Boolean,
+    result: RemoteImageInfo,
+    onClick: () -> Unit,
+) {
     Column(
         modifier =
             Modifier.fillMaxWidth()
@@ -180,7 +197,7 @@ private fun RemoteImageTile(type: ImageType, result: RemoteImageInfo, onClick: (
             contentScale = searchImageContentScale(type),
             modifier =
                 Modifier.fillMaxWidth()
-                    .aspectRatio(remoteImageAspectRatio(type, result))
+                    .aspectRatio(remoteImageAspectRatio(type, result, isEpisode))
                     .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         )
@@ -213,7 +230,11 @@ private fun remoteImageResolution(image: RemoteImageInfo): String =
  * dimensions); every other type uses the editor's shape. Box is shown like Primary (a poster),
  * since provider box images are usually posters.
  */
-private fun remoteImageAspectRatio(type: ImageType, image: RemoteImageInfo): Float {
+private fun remoteImageAspectRatio(
+    type: ImageType,
+    image: RemoteImageInfo,
+    isEpisode: Boolean,
+): Float {
     if (type == ImageType.BANNER) {
         val width = image.width
         val height = image.height
@@ -221,12 +242,20 @@ private fun remoteImageAspectRatio(type: ImageType, image: RemoteImageInfo): Flo
             return width.toFloat() / height.toFloat()
         }
     }
-    return searchImageAspectRatio(type)
+    return searchImageAspectRatio(type, isEpisode)
 }
 
-private fun searchImageAspectRatio(type: ImageType): Float =
+private fun searchImageAspectRatio(type: ImageType, isEpisode: Boolean): Float =
     if (type == ImageType.BOX) imageTypeAspectRatio(ImageType.PRIMARY)
-    else imageTypeAspectRatio(type)
+    else imageTypeAspectRatio(type, isEpisode)
+
+/** Whether a result of [type] uses the poster shape rather than a wide (16:9) one. */
+private fun isPosterShapedSearchResult(type: ImageType, isEpisode: Boolean): Boolean =
+    when (type) {
+        ImageType.PRIMARY -> !isEpisode
+        ImageType.BOX -> true
+        else -> false
+    }
 
 /** Poster and square previews fill their container; wide previews are shown whole (no cropping). */
 private fun searchImageContentScale(type: ImageType): ContentScale =

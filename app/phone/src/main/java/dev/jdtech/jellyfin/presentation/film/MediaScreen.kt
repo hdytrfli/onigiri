@@ -33,6 +33,7 @@ import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FilmSearchBar
 import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -144,7 +145,12 @@ private fun MediaScreenLayout(
             onSearchClick = { onSearchExpand(true) },
             onUserClick = onSettingsClick,
             modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
-            trailingActions = { GridSettingsButton(gridId = GridId.LIBRARIES) },
+            trailingActions = {
+                GridSettingsButton(
+                    gridId = GridId.LIBRARIES,
+                    style = GridSettingsButtonStyle.SURFACE,
+                )
+            },
         )
 
         if (state.error != null && showErrorDialog) {

@@ -50,7 +50,12 @@ data class CollectionRoute(val collectionId: String, val collectionName: String)
 
 @Serializable data class EditImagesRoute(val itemId: String) : NavKey
 
-@Serializable data class EditImageSearchRoute(val itemId: String, val type: String) : NavKey
+@Serializable
+data class EditImageSearchRoute(
+    val itemId: String,
+    val type: String,
+    val isEpisode: Boolean = false,
+) : NavKey
 
 @Serializable
 data class IdentifyResultsRoute(

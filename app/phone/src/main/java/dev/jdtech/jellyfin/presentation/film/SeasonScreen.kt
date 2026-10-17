@@ -41,6 +41,7 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.EditImagesAction
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
 import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButton
+import dev.jdtech.jellyfin.presentation.film.components.GridSettingsButtonStyle
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -214,7 +215,10 @@ private fun SeasonScreenLayout(
             onBackClick = { onAction(SeasonAction.OnBackClick) },
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
-                GridSettingsButton(gridId = GridId.EPISODES)
+                GridSettingsButton(
+                    gridId = GridId.EPISODES,
+                    style = GridSettingsButtonStyle.FILLED_TONAL,
+                )
                 state.season?.let { season ->
                     EditImagesAction(
                         itemId = season.id,

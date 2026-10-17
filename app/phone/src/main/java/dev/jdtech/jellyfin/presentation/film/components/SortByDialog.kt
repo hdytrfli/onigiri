@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -75,7 +76,10 @@ fun SortByDialog(
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
-            modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogMaxHeight),
+            modifier =
+                Modifier.widthIn(max = Dimens.dialogMaxWidth)
+                    .fillMaxWidth()
+                    .heightIn(max = Dimens.dialogCompactMaxHeight),
             shape = MaterialTheme.shapes.extraLarge,
             colors =
                 CardDefaults.cardColors(
@@ -83,18 +87,17 @@ fun SortByDialog(
                 ),
         ) {
             Column {
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
+                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
                 Text(
                     text = stringResource(CoreR.string.sort_by),
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = MaterialTheme.spacings.default),
-                    style = MaterialTheme.typography.headlineSmall,
+                        Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
                 SingleChoiceSegmentedButtonRow(
                     modifier =
-                        Modifier.padding(horizontal = MaterialTheme.spacings.default).fillMaxWidth()
+                        Modifier.padding(horizontal = MaterialTheme.spacings.medium).fillMaxWidth()
                 ) {
                     orderOptions.forEachIndexed { index, order ->
                         SegmentedButton(
@@ -160,7 +163,7 @@ private fun SortByDialogItem(
         modifier =
             Modifier.fillMaxWidth()
                 .clickable { onSelect(option.first) }
-                .padding(horizontal = MaterialTheme.spacings.default),
+                .padding(horizontal = MaterialTheme.spacings.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = isSelected, onClick = { onSelect(option.first) })
