@@ -85,6 +85,7 @@ import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
+import dev.jdtech.jellyfin.presentation.settings.SubtitleFontScreen
 import dev.jdtech.jellyfin.presentation.setup.addresses.ServerAddressesScreen
 import dev.jdtech.jellyfin.presentation.setup.addserver.AddServerScreen
 import dev.jdtech.jellyfin.presentation.setup.login.LoginScreen
@@ -744,6 +745,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateToServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
             navigateToUsers = dropUnlessResumed { navigator.navigate(UsersRoute) },
             navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
+            navigateToSubtitleFont = dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }
@@ -754,6 +756,9 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         )
     }
     entry<AboutRoute> { AboutScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
+    entry<SubtitleFontRoute> {
+        SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
+    }
 }
 
 private fun navigateToItem(navigator: Navigator, item: FindroidItem) {

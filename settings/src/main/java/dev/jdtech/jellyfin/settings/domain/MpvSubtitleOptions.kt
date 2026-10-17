@@ -44,6 +44,7 @@ object MpvSubtitleOptions {
                 appPreferences.getValue(appPreferences.playerMpvSubBorderOpacity),
             )
         return mapOf(
+            "sub-font" to appPreferences.getValue(appPreferences.playerMpvSubFont),
             "sub-font-size" to appPreferences.getValue(appPreferences.playerMpvSubFontSize),
             "sub-color" to appPreferences.getValue(appPreferences.playerMpvSubColor),
             "sub-pos" to appPreferences.getValue(appPreferences.playerMpvSubPosition),

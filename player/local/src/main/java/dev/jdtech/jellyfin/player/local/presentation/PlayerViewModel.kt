@@ -186,6 +186,7 @@ constructor(
                 .setVideoOutput(appPreferences.getValue(appPreferences.playerMpvVo))
                 .setAudioOutput(appPreferences.getValue(appPreferences.playerMpvAo))
                 .setHwDec(appPreferences.getValue(appPreferences.playerMpvHwdec))
+                .setSubFont(subOptions.getValue("sub-font"))
                 .setSubFontSize(subOptions.getValue("sub-font-size"))
                 .setSubColor(subOptions.getValue("sub-color"))
                 .setSubPos(subOptions.getValue("sub-pos"))

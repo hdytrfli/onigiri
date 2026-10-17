@@ -30,4 +30,15 @@
     <string name="player_screen_unlocked">Screen unlocked</string>
     <string name="player_controls_info">Media details</string>
     <string name="other_episodes">Other episodes</string>
+    <string name="subtitle_font_title">Subtitle font</string>
+    <string name="subtitle_font_preview_sample">The quick brown fox jumps over the lazy dog</string>
+    <string name="subtitle_font_section_default">Default</string>
+    <string name="subtitle_font_section_bundled">Bundled</string>
+    <string name="subtitle_font_section_system">System</string>
+    <string name="subtitle_font_section_imported">Imported</string>
+    <string name="subtitle_font_import">Load font file…</string>
+    <string name="subtitle_font_import_error">That file isn\'t a usable font</string>
+    <string name="subtitle_font_selected">Selected</string>
+    <string name="subtitle_font_delete">Delete font</string>
+    <string name="subtitle_font_note">Applies to subtitles that use the default style. Styled (ASS/SSA) subtitles keep the font embedded in the file.</string>
 </resources>

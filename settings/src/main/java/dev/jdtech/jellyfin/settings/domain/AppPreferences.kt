@@ -71,6 +71,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Player - mpv subtitles (applied as mpv sub-* options at playback start)
     val playerMpvSubFontSize = Preference("pref_player_mpv_sub_font_size", "28")
+    val playerMpvSubFont = Preference("pref_player_mpv_sub_font", SubtitleFonts.DEFAULT_FAMILY)
     val playerMpvSubColor = Preference("pref_player_mpv_sub_color", "#FFFFFFFF")
     val playerMpvSubPosition = Preference("pref_player_mpv_sub_pos", "100")
     val playerMpvSubUseMargins = Preference("pref_player_mpv_sub_use_margins", true)

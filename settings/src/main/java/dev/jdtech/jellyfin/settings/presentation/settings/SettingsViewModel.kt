@@ -1,11 +1,15 @@
 package dev.jdtech.jellyfin.settings.presentation.settings
 
+import android.content.Context
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.jdtech.jellyfin.settings.R
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceAction
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceAppLanguage
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceFileEdit
@@ -24,8 +28,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val appPreferences: AppPreferences) :
-    ViewModel() {
+class SettingsViewModel
+@Inject
+constructor(
+    private val appPreferences: AppPreferences,
+    @ApplicationContext private val context: Context,
+) : ViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state = _state.asStateFlow()
 
@@ -474,6 +482,29 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                                             optionValues =
                                                                                 R.array
                                                                                     .mpv_sub_font_size,
+                                                                        ),
+                                                                        PreferenceAction(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_sub_font,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvSubFont,
+                                                                            formatValue = {
+                                                                                subtitleFontDisplayName(
+                                                                                    it
+                                                                                )
+                                                                            },
+                                                                            onClick = {
+                                                                                viewModelScope
+                                                                                    .launch {
+                                                                                        eventsChannel
+                                                                                            .send(
+                                                                                                SettingsEvent
+                                                                                                    .NavigateToSubtitleFont
+                                                                                            )
+                                                                                    }
+                                                                            },
                                                                         ),
                                                                         PreferenceSelect(
                                                                             nameStringResource =
@@ -1118,6 +1149,17 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
             ),
         )
 
+    /**
+     * The value shown in the subtitle-font row: the display name of the selected family, falling
+     * back to the raw family name for fonts whose display name is the family itself.
+     */
+    private fun subtitleFontDisplayName(family: String?): String? =
+        when (family) {
+            null -> null
+            SubtitleFonts.DEFAULT_FAMILY -> context.getString(R.string.subtitle_font_default)
+            else -> family
+        }
+
     fun loadPreferences(indexes: List<Int> = emptyList()) {
         lastIndexes = indexes
         viewModelScope.launch {
@@ -1250,6 +1292,21 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                                     value =
                                                         appPreferences.getValue(
                                                             preference.backendPreference
+                                                        ),
+                                                )
+                                            }
+                                            is PreferenceAction -> {
+                                                preference.copy(
+                                                    enabled =
+                                                        preference.enabled &&
+                                                            preference.dependencies.all {
+                                                                appPreferences.getValue(it)
+                                                            },
+                                                    value =
+                                                        preference.formatValue(
+                                                            appPreferences.getValue(
+                                                                preference.backendPreference
+                                                            )
                                                         ),
                                                 )
                                             }

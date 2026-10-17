@@ -56,6 +56,7 @@ fun SettingsScreen(
     navigateToServers: () -> Unit,
     navigateToUsers: () -> Unit,
     navigateToAbout: () -> Unit,
+    navigateToSubtitleFont: () -> Unit,
     navigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -73,6 +74,7 @@ fun SettingsScreen(
             is SettingsEvent.NavigateToUsers -> navigateToUsers()
             is SettingsEvent.NavigateToServers -> navigateToServers()
             is SettingsEvent.NavigateToAbout -> navigateToAbout()
+            is SettingsEvent.NavigateToSubtitleFont -> navigateToSubtitleFont()
             is SettingsEvent.LaunchIntent -> {
                 try {
                     context.startActivity(event.intent)

@@ -136,7 +136,9 @@
     <string name="mpv_sub_group_text">Text</string>
     <string name="mpv_sub_group_outline">Outline</string>
     <string name="mpv_sub_group_position">Position</string>
+    <string name="pref_player_mpv_sub_font">Font</string>
     <string name="pref_player_mpv_sub_font_size">Font size</string>
+    <string name="subtitle_font_default">Default (Roboto)</string>
     <string name="pref_player_mpv_sub_color">Text color</string>
     <string name="pref_player_mpv_sub_bold">Bold</string>
     <string name="pref_player_mpv_sub_italic">Italic</string>

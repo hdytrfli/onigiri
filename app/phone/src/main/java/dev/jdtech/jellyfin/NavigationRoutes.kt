@@ -73,3 +73,5 @@ data class IdentifyResultsRoute(
 @Serializable data class SettingsFileEditRoute(val filePath: String) : NavKey
 
 @Serializable data object AboutRoute : NavKey
+
+@Serializable data object SubtitleFontRoute : NavKey

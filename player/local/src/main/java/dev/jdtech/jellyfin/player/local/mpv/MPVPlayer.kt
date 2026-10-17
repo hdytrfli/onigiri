@@ -34,6 +34,7 @@ import androidx.media3.common.util.Clock
 import androidx.media3.common.util.ListenerSet
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.Util
+import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
 import dev.jdtech.mpv.MPVLib
 import dev.jdtech.mpv.MPVLib.MpvEvent
 import dev.jdtech.mpv.MPVLib.MpvFormat
@@ -57,6 +58,7 @@ class MPVPlayer(
     videoOutput: String = "gpu-next",
     audioOutput: String = "aaudio",
     hwDec: String = "mediacodec",
+    private val subFont: String = "sans-serif",
     private val subFontSize: String = "28",
     private val subColor: String = "#FFFFFFFF",
     private val subPos: String = "100",
@@ -89,6 +91,7 @@ class MPVPlayer(
         videoOutput = builder.videoOutput,
         audioOutput = builder.audioOutput,
         hwDec = builder.hwDec,
+        subFont = builder.subFont,
         subFontSize = builder.subFontSize,
         subColor = builder.subColor,
         subPos = builder.subPos,
@@ -131,6 +134,7 @@ class MPVPlayer(
         var hwDec: String = "mediacodec"
             private set
 
+        var subFont: String = "sans-serif"
         var subFontSize: String = "28"
             private set
 
@@ -196,6 +200,8 @@ class MPVPlayer(
 
         fun setHwDec(hwDec: String) = apply { this.hwDec = hwDec }
 
+        fun setSubFont(subFont: String) = apply { this.subFont = subFont }
+
         fun setSubFontSize(subFontSize: String) = apply { this.subFontSize = subFontSize }
 
         fun setSubColor(subColor: String) = apply { this.subColor = subColor }
@@ -232,7 +238,7 @@ class MPVPlayer(
     }
 
     init {
-        val configDir = File(context.filesDir, "mpv")
+        val configDir = SubtitleFonts.configDir(context)
         val cacheDir = File(context.cacheDir, "mpv")
 
         setupDirectories(context, configDir, cacheDir)
@@ -268,6 +274,8 @@ class MPVPlayer(
 
         // Subs
         mpvLib.setOptionString("sub-scale-with-window", "yes")
+        // Only set when a font is chosen: mpv's own default goes through the sans-serif alias.
+        if (subFont.isNotBlank()) mpvLib.setOptionString("sub-font", subFont)
         mpvLib.setOptionString("sub-font-size", subFontSize)
         mpvLib.setOptionString("sub-color", subColor)
         mpvLib.setOptionString("sub-pos", subPos)
@@ -350,13 +358,12 @@ class MPVPlayer(
         if (!configDir.exists()) configDir.mkdirs()
         if (!cacheDir.exists()) cacheDir.mkdirs()
 
+        // Unpack the bundled subtitle fonts before mpv (and libass) starts.
+        SubtitleFonts.ensureBundled(context)
         writeFontsConf(context, configDir)
     }
 
     private fun writeFontsConf(context: Context, configDir: File) {
-        val configFile = File(configDir, "fonts.conf")
-        if (configFile.exists()) return
-
         val cacheDir = File(context.cacheDir, "fontconfig")
         if (!cacheDir.exists()) cacheDir.mkdirs()
 
@@ -365,6 +372,7 @@ class MPVPlayer(
             <fontconfig>
                 <dir>/system/fonts/</dir>
                 <dir>/product/fonts/</dir>
+                <dir>${SubtitleFonts.fontsDir(context).path}</dir>
 
                 <cachedir>${cacheDir.path}</cachedir>
 
@@ -390,8 +398,13 @@ class MPVPlayer(
         """
                 .trimIndent()
 
+        // Rewrite whenever the contents change, so installs created by an older version still pick
+        // up the subtitle font directory.
+        val configFile = File(configDir, "fonts.conf")
         try {
-            configFile.writeText(config)
+            if (!configFile.exists() || configFile.readText() != config) {
+                configFile.writeText(config)
+            }
         } catch (e: IOException) {
             Timber.w("Failed to write fonts.conf: $e")
         }
