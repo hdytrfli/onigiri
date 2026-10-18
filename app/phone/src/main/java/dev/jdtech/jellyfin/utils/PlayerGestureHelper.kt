@@ -97,9 +97,8 @@ class PlayerGestureHelper(
             playerView.context,
             object : GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                    playerView.apply {
-                        if (!isControllerFullyVisible) showController() else hideController()
-                    }
+                    if (!playerView.isControllerFullyVisible) activity.showPlayerControls()
+                    else activity.hidePlayerControls()
 
                     return true
                 }
@@ -716,6 +715,8 @@ class PlayerGestureHelper(
         playerView.setOnTouchListener { _, event ->
             if (playerView.useController) {
                 currentNumberOfPointers = event.pointerCount
+                // Interacting with the video keeps the overlay up.
+                if (playerView.isControllerFullyVisible) activity.keepPlayerControlsVisible()
                 when (event.pointerCount) {
                     1 -> {
                         tapGestureDetector.onTouchEvent(event)
