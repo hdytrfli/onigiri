@@ -92,8 +92,6 @@
     <string name="backdrop">Backdrop</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
-    <string name="naive_title_overlay">Naive title overlay</string>
-    <string name="naive_title_overlay_summary">White overlay on title images, may look wrong</string>
     <string name="title_image">Title image</string>
     <string name="title_portrait_width">Portrait width</string>
     <string name="title_landscape_width">Landscape width</string>

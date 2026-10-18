@@ -7,8 +7,6 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.media.AudioManager
 import android.os.Build
@@ -190,13 +188,6 @@ class PlayerActivity : BasePlayerActivity() {
             appPreferences.getValue(appPreferences.titleImageRatio).toFloatOrNull() ?: 2f
         videoLogoImageView.maxWidth = logoMaxWidth
         videoLogoImageView.maxHeight = (logoMaxWidth / logoRatio).toInt()
-        // Apply the naive white overlay when enabled.
-        videoLogoImageView.colorFilter =
-            if (appPreferences.getValue(appPreferences.naiveTitleOverlay)) {
-                PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
-            } else {
-                null
-            }
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
         val videoEpisodeNameTextView =

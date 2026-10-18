@@ -290,14 +290,6 @@ constructor(
                                                     options = R.array.title_ratio_options,
                                                     optionValues = R.array.title_ratio_values,
                                                 ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.naive_title_overlay,
-                                                    descriptionStringRes =
-                                                        R.string.naive_title_overlay_summary,
-                                                    backendPreference =
-                                                        appPreferences.naiveTitleOverlay,
-                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(

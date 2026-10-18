@@ -97,9 +97,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.titlePortraitWidth),
                     appPreferences.observe(appPreferences.titleLandscapeWidth),
                     appPreferences.observe(appPreferences.titleImageRatio),
-                    appPreferences.observe(appPreferences.naiveTitleOverlay),
-                ) { portraitWidth, landscapeWidth, ratio, naive ->
-                    TitlePrefs(portraitWidth, landscapeWidth, ratio, naive)
+                ) { portraitWidth, landscapeWidth, ratio ->
+                    TitlePrefs(portraitWidth, landscapeWidth, ratio)
                 }
 
             // Layout grid column counts: the two tile sizes, portrait and landscape, plus the gap.
@@ -144,7 +143,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
-                        naiveTitleOverlay = titlePrefs.naive,
                         gridPosterPortrait = gridPrefs.posterPortrait.toIntOrNull() ?: 2,
                         gridPosterLandscape = gridPrefs.posterLandscape.toIntOrNull() ?: 4,
                         gridThumbnailPortrait = gridPrefs.thumbnailPortrait.toIntOrNull() ?: 3,
@@ -166,7 +164,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val portraitWidth: String,
         val landscapeWidth: String,
         val ratio: String,
-        val naive: Boolean,
     )
 
     private data class InterfacePrefs(
@@ -197,7 +194,6 @@ data class MainState(
     val titlePortraitWidth: Float = 0.7f,
     val titleLandscapeWidth: Float = 0.3f,
     val titleImageRatio: Float = 2f,
-    val naiveTitleOverlay: Boolean = false,
     val confirmExit: Boolean = false,
     val hideStatusBar: Boolean = false,
     val gridPosterPortrait: Int = 2,

@@ -29,7 +29,6 @@ import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.LocalGridColumns
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
-import dev.jdtech.jellyfin.presentation.utils.LocalNaiveTitleOverlay
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
@@ -101,7 +100,6 @@ class MainActivity : AppCompatActivity() {
                                 ),
                             LocalContentSpacingScale provides state.contentSpacingScale,
                             LocalHideStatusBar provides state.hideStatusBar,
-                            LocalNaiveTitleOverlay provides state.naiveTitleOverlay,
                             LocalTitleImageConfig provides
                                 TitleImageConfig(
                                     portraitWidth = state.titlePortraitWidth,
