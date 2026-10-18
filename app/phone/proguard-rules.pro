@@ -23,6 +23,11 @@
 # Keep class names of all classes for easy debugging (and fix navigation route checking)
 -keepnames class dev.jdtech.jellyfin.** { *; }
 
+# mpv-android's MPVLib talks to libplayer.so through JNI by member name, and unlike the previous
+# dev.jdtech.mpv:libmpv it ships no consumer ProGuard rules of its own. Same rule the reference
+# app uses; without it R8 renames the native methods and the callbacks the .so looks up by name.
+-keep,allowoptimization class is.xyz.mpv.** { public protected *; }
+
 # These classes are from okhttp and are not used in Android
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
