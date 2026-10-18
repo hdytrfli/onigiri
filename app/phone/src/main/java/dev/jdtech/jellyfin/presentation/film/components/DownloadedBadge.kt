@@ -18,7 +18,7 @@ fun DownloadedBadge(modifier: Modifier = Modifier) {
         Icon(
             painter = painterResource(CoreR.drawable.ic_download),
             contentDescription = "",
-            tint = MaterialTheme.colorScheme.onPrimary,
+            tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(16.dp).align(Alignment.Center),
         )
     }

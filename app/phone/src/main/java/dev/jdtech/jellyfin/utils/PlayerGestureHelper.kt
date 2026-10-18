@@ -552,6 +552,12 @@ class PlayerGestureHelper(
      * filtered values, which is what made the zoom imprecise.
      */
     private fun pinchZoomBySpan(event: MotionEvent) {
+        // The locks the pinch has always honoured. The free zoom bypassed them because it no longer
+        // goes through the scale detector that checked them.
+        if (isControlsLocked || isVolumeBrightnessLocked) {
+            pinchSpan = 0f
+            return
+        }
         if (event.pointerCount < 2) {
             pinchSpan = 0f
             return
