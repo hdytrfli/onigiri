@@ -1722,17 +1722,22 @@ class MPVPlayer(
             )
         mpvLib.setPropertyDouble("video-zoom", dynamicZoom)
 
-        // The OSD update is also what makes mpv redraw a paused frame: without it the new zoom
-        // only shows up when something else causes a redraw, which is why mpv's own zoom (which
-        // prints its level) feels immediate while paused and a bare property write does not.
-        mpvLib.command(
-            arrayOf(
-                "show-text",
-                "${(2.0.pow(dynamicZoom) * 100).roundToInt()}%",
-                OSD_ZOOM_DURATION_MS,
-            )
-        )
+        // Paused, mpv applies the value but does not redraw the frozen frame; an OSD update is what
+        // forces one. It carries no text on purpose: text is laid out in the video's coordinate
+        // space and drifts off screen once zoomed, whereas an empty message still redraws and costs
+        // a layout of nothing. Only while paused, since playing video redraws on its own.
+        if (mpvLib.getPropertyBoolean("paused") == true) {
+            mpvLib.command(arrayOf("show-text", "", OSD_ZOOM_DURATION_MS))
+        }
+
+        // mpv's own OSD was the redraw nudge here, but it lays its text out in the video's
+        // coordinate space, so it drifts off screen once zoomed - and re-laying it out on every
+        // pinches update cost smoothness while playing. The app shows the level in its own pill.
     }
+
+    /** The zoom level as a percentage, for the app's overlay. */
+    val zoomPercent: Int
+        get() = (2.0.pow(dynamicZoom) * 100).roundToInt()
 
     /** Shifts subtitle timing by [seconds] (positive = subtitles appear later). */
     fun setSubtitleDelay(seconds: Double) {

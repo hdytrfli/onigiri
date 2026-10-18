@@ -73,6 +73,9 @@ class PlayerGestureHelper(
     /** Distance between the fingers at the last touch event, for the free zoom pinch. */
     private var pinchSpan = 0f
 
+    /** Last level shown in the pill, so it is only repainted when the percent changes. */
+    private var lastZoomPercent = -1
+
     private var playbackSpeedIncrease: Float = 2f
     private var lastPlaybackSpeed: Float = 0f
 
@@ -570,13 +573,25 @@ class PlayerGestureHelper(
             MotionEvent.ACTION_POINTER_DOWN,
             MotionEvent.ACTION_MOVE -> {
                 if (pinchSpan > 0f && span > 0f) {
-                    (playerView.player as? MPVPlayer)?.zoomBy(span / pinchSpan)
+                    (playerView.player as? MPVPlayer)?.let { player ->
+                        player.zoomBy(span / pinchSpan)
+                        // Only when the whole percent changes: the event stream is far too fast to
+                        // repaint the pill for every one of them.
+                        val percent = player.zoomPercent
+                        if (percent != lastZoomPercent) {
+                            lastZoomPercent = percent
+                            activity.showPlayerOverlayMessage("$percent%")
+                        }
+                    }
                 }
                 pinchSpan = span
                 // The finger left over when this pinch ends must not become a swipe either.
                 lastScaleEvent = SystemClock.elapsedRealtime()
             }
-            else -> pinchSpan = 0f
+            else -> {
+                pinchSpan = 0f
+                lastZoomPercent = -1
+            }
         }
     }
 

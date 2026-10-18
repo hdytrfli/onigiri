@@ -924,7 +924,7 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     /** Briefly shows [message] in the same pill used for the seek/fast-forward overlay. */
-    private fun showPlayerOverlayMessage(message: String) {
+    internal fun showPlayerOverlayMessage(message: String) {
         binding.progressScrubberTrickplay.visibility = View.GONE
         binding.progressScrubberText.text = message
         binding.progressScrubberLayout.visibility = View.VISIBLE
