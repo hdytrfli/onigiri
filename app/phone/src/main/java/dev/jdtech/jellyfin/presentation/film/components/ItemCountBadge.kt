@@ -15,7 +15,6 @@ fun ItemCountBadge(unplayedItemCount: Int, modifier: Modifier = Modifier) {
     BaseBadge(modifier = modifier) {
         Text(
             text = unplayedItemCount.toString(),
-            color = MaterialTheme.colorScheme.onPrimary,
             style = MaterialTheme.typography.labelMedium,
             modifier =
                 Modifier.align(Alignment.Center)
