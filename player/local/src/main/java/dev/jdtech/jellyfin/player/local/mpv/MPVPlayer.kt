@@ -50,9 +50,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-/** How long the zoom level stays on screen after the last pinch update. */
-private const val OSD_ZOOM_DURATION_MS = "700"
-
 /** How far dynamic zoom goes: 1.585 in mpv's log2 scale is three times the fitted size. */
 private const val DYNAMIC_ZOOM_MAX = 1.585
 
@@ -1714,6 +1711,10 @@ class MPVPlayer(
      * video-zoom is a scalar in log2 - 1.0 doubles the size - so the factor is the same on both
      * axes and the picture stays centred. Unlike panscan or video-crop it is a display transform,
      * not a change to the video chain, which is what makes it smooth to drag.
+     *
+     * No redraw nudge is needed: mpv repaints a paused frame for this property by itself. The level
+     * is shown by the app's own overlay, not mpv's OSD, whose text is laid out in the video's
+     * coordinate space and so drifts off screen once zoomed.
      */
     fun zoomBy(factor: Float) {
         if (factor <= 0f) return
@@ -1724,18 +1725,6 @@ class MPVPlayer(
                 DYNAMIC_ZOOM_MAX,
             )
         MPVLib.setPropertyDouble("video-zoom", dynamicZoom)
-
-        // Paused, mpv applies the value but does not redraw the frozen frame; an OSD update is what
-        // forces one. It carries no text on purpose: text is laid out in the video's coordinate
-        // space and drifts off screen once zoomed, whereas an empty message still redraws and costs
-        // a layout of nothing. Only while paused, since playing video redraws on its own.
-        if (MPVLib.getPropertyBoolean("paused") == true) {
-            MPVLib.command("show-text", "", OSD_ZOOM_DURATION_MS)
-        }
-
-        // mpv's own OSD was the redraw nudge here, but it lays its text out in the video's
-        // coordinate space, so it drifts off screen once zoomed - and re-laying it out on every
-        // pinches update cost smoothness while playing. The app shows the level in its own pill.
     }
 
     /** The zoom level as a percentage, for the app's overlay. */

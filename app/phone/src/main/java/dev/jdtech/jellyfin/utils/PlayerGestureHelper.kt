@@ -512,19 +512,12 @@ class PlayerGestureHelper(
                             abs(scaleFactor - Constants.ZOOM_SCALE_BASE) >
                                 Constants.ZOOM_SCALE_THRESHOLD
                         ) {
-                            if (appPreferences.getValue(appPreferences.playerGesturesDynamicZoom)) {
-                                // Free zoom: the video follows the fingers, and the pinch never
-                                // switches the fill on or off.
-                                (playerView.player as? MPVPlayer)?.zoomBy(scaleFactor)
-                            } else {
-                                val enableZoom = scaleFactor > 1
-                                // Asking for the state the video is already in is ignored rather
-                                // than re-applied: the pinch is then not consumed as a zoom, and
-                                // the finger left behind would otherwise land on the
-                                // volume/brightness gesture.
-                                if (enableZoom != isZoomEnabled) {
-                                    updateZoomMode(enableZoom)
-                                }
+                            val enableZoom = scaleFactor > 1
+                            // Asking for the state the video is already in is ignored rather than
+                            // re-applied: the pinch is then not consumed as a zoom, and the finger
+                            // left behind would otherwise land on the volume/brightness gesture.
+                            if (enableZoom != isZoomEnabled) {
+                                updateZoomMode(enableZoom)
                             }
                         }
                         return true
@@ -553,6 +546,9 @@ class PlayerGestureHelper(
      * bypasses ScaleGestureDetector, which withholds every event until the fingers have spread past
      * a hidden slop - that is the dead zone felt at the start of a pinch - and then reports
      * filtered values, which is what made the zoom imprecise.
+     *
+     * This is the whole of the pinch while free zoom is on; ScaleGestureDetector is only fed when
+     * the setting is off, where the pinch toggles the fill rather than following the fingers.
      */
     private fun pinchZoomBySpan(event: MotionEvent) {
         // The locks the pinch has always honoured. The free zoom bypassed them because it no longer
