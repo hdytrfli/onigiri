@@ -50,6 +50,12 @@ import timber.log.Timber
 /** How far dynamic zoom goes: 3 in mpv's log2 scale is 8x the fitted size. */
 private const val DYNAMIC_ZOOM_MAX = 3.0
 
+/** Zooming out below the fit is allowed, as far as half size. */
+private const val DYNAMIC_ZOOM_MIN = -1.0
+
+/** Finger movement is amplified a little, which is what makes the pinch feel responsive. */
+private const val DYNAMIC_ZOOM_GAIN = 1.2
+
 class MPVPlayer(
     context: Context,
     private val audioAttributes: AudioAttributes = AudioAttributes.DEFAULT,
@@ -1704,7 +1710,11 @@ class MPVPlayer(
     fun zoomBy(factor: Float) {
         if (factor <= 0f) return
 
-        dynamicZoom = (dynamicZoom + log2(factor.toDouble())).coerceIn(0.0, DYNAMIC_ZOOM_MAX)
+        dynamicZoom =
+            (dynamicZoom + log2(factor.toDouble()) * DYNAMIC_ZOOM_GAIN).coerceIn(
+                DYNAMIC_ZOOM_MIN,
+                DYNAMIC_ZOOM_MAX,
+            )
         mpvLib.setPropertyDouble("video-zoom", dynamicZoom)
     }
 

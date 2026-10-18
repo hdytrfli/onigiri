@@ -35,6 +35,7 @@ import dev.jdtech.jellyfin.player.local.R
 import dev.jdtech.jellyfin.player.local.mpv.MPVPlayer
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import kotlin.math.abs
+import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 
@@ -68,6 +69,9 @@ class PlayerGestureHelper(
     private var swipeGestureProgressOpen = false
 
     private var lastScaleEvent: Long = 0
+
+    /** Distance between the fingers at the last touch event, for the free zoom pinch. */
+    private var pinchSpan = 0f
 
     private var playbackSpeedIncrease: Float = 2f
     private var lastPlaybackSpeed: Float = 0f
@@ -541,6 +545,35 @@ class PlayerGestureHelper(
         isZoomEnabled = enabled
     }
 
+    /**
+     * Zooms by how far the two fingers have moved apart since the last event. This deliberately
+     * bypasses ScaleGestureDetector, which withholds every event until the fingers have spread past
+     * a hidden slop - that is the dead zone felt at the start of a pinch - and then reports
+     * filtered values, which is what made the zoom imprecise.
+     */
+    private fun pinchZoomBySpan(event: MotionEvent) {
+        if (event.pointerCount < 2) {
+            pinchSpan = 0f
+            return
+        }
+
+        val dx = (event.getX(0) - event.getX(1)).toDouble()
+        val dy = (event.getY(0) - event.getY(1)).toDouble()
+        val span = sqrt(dx * dx + dy * dy).toFloat()
+        when (event.actionMasked) {
+            MotionEvent.ACTION_POINTER_DOWN,
+            MotionEvent.ACTION_MOVE -> {
+                if (pinchSpan > 0f && span > 0f) {
+                    (playerView.player as? MPVPlayer)?.zoomBy(span / pinchSpan)
+                }
+                pinchSpan = span
+                // The finger left over when this pinch ends must not become a swipe either.
+                lastScaleEvent = SystemClock.elapsedRealtime()
+            }
+            else -> pinchSpan = 0f
+        }
+    }
+
     private fun releaseAction(event: MotionEvent) {
         if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
             activity.binding.gestureVolumeLayout.apply {
@@ -679,8 +712,11 @@ class PlayerGestureHelper(
                             seekGestureDetector.onTouchEvent(event)
                     }
                     2 -> {
-                        if (appPreferences.getValue(appPreferences.playerGesturesZoom))
+                        if (appPreferences.getValue(appPreferences.playerGesturesDynamicZoom)) {
+                            pinchZoomBySpan(event)
+                        } else if (appPreferences.getValue(appPreferences.playerGesturesZoom)) {
                             zoomGestureDetector.onTouchEvent(event)
+                        }
                     }
                 }
             }
