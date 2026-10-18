@@ -86,7 +86,7 @@ private val playerSpeeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
 private val playerSpeedTexts = listOf("0.5x", "0.75x", "1x", "1.25x", "1.5x", "1.75x", "2x")
 
 /** How long the player overlay takes to fade in or out. */
-private const val OVERLAY_FADE_DURATION_MS = 400L
+private const val OVERLAY_FADE_DURATION_MS = 300L
 
 /** Material's standard easing: the overlay settles into place rather than stopping dead. */
 private val OverlayFadeInInterpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
@@ -173,10 +173,15 @@ class PlayerActivity : BasePlayerActivity() {
                 if (visibility == View.GONE) {
                     hideSystemUI()
                 } else {
+                    // Every show fades, whether it came from a tap or from media3 itself.
+                    fadePlayerControlsIn()
                     schedulePlayerControlsHide()
                 }
             }
         )
+        // The controller starts out visible in the layout, which is not a visibility change, so the
+        // clock for its first hide is started here.
+        schedulePlayerControlsHide()
 
         val playerControls = binding.playerView.findViewById<View>(R.id.player_controls)
         val lockedControls = binding.playerView.findViewById<View>(R.id.locked_player_view)
@@ -914,11 +919,19 @@ class PlayerActivity : BasePlayerActivity() {
      * show goes through here so the overlay always arrives the same way.
      */
     internal fun showPlayerControls() {
+        binding.playerView.showController()
+        // media3 reports visibility changes only, and an overlay that is already visible does not
+        // change, so the clock is restarted here as well as from the listener.
+        schedulePlayerControlsHide()
+    }
+
+    /**
+     * Fades the overlay in, from nothing, so its first visible frame is not a full-opacity flash.
+     */
+    private fun fadePlayerControlsIn() {
         val controller = overlayController() ?: return
         controller.animate().cancel()
-        // From nothing, so the overlay's first visible frame is not a flash of full opacity.
         controller.alpha = 0f
-        binding.playerView.showController()
         controller
             .animate()
             .alpha(1f)
