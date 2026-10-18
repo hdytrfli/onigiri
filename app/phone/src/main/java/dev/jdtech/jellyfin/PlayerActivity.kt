@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
+import androidx.media3.common.Player
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
@@ -182,6 +183,7 @@ class PlayerActivity : BasePlayerActivity() {
         // The controller starts out visible in the layout, which is not a visibility change, so the
         // clock for its first hide is started here.
         schedulePlayerControlsHide()
+        viewModel.player.addListener(controlsClockListener)
 
         val playerControls = binding.playerView.findViewById<View>(R.id.player_controls)
         val lockedControls = binding.playerView.findViewById<View>(R.id.locked_player_view)
@@ -971,6 +973,18 @@ class PlayerActivity : BasePlayerActivity() {
         }
     }
 
+    /**
+     * Play and pause arrive from anywhere - a headset button, the keyboard, the media session - and
+     * media3 shows the overlay for them without any touch. Restart the clock on those, so an
+     * overlay that appears for a pause still leaves on its own.
+     */
+    private val controlsClockListener =
+        object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (binding.playerView.isControllerFullyVisible) schedulePlayerControlsHide()
+            }
+        }
+
     /** The whole overlay, faded in and out as one piece. */
     private fun overlayController(): View? = binding.playerView.findViewById(R.id.exo_controller)
 
@@ -1073,6 +1087,7 @@ class PlayerActivity : BasePlayerActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.player.removeListener(controlsClockListener)
         // These locks are process-wide; reset them so a fresh player starts unlocked and the
         // buttons' icons match the state.
         isControlsLocked = false
