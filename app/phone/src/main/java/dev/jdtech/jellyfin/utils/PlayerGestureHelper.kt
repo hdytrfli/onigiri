@@ -161,7 +161,7 @@ class PlayerGestureHelper(
                 rampPlaybackSpeed(playbackSpeedIncrease)
                 activity.binding.progressScrubberTrickplay.visibility = View.GONE
                 activity.binding.progressScrubberText.text =
-                    playerView.context.getString(R.string.player_controls_fast_forward)
+                    playerView.context.getString(R.string.player_speed_up)
                 activity.binding.progressScrubberLayout.visibility = View.VISIBLE
             }
         }
@@ -529,8 +529,8 @@ class PlayerGestureHelper(
             .apply { isQuickScaleEnabled = false }
 
     /**
-     * Fixes the shared fast-forward/seek indicator text size so both states share the same
-     * placement and size.
+     * Fixes the shared speed-up/seek indicator text size so both states share the same placement
+     * and size.
      */
     private fun applyOverlayTextSize() {
         activity.binding.progressScrubberText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)

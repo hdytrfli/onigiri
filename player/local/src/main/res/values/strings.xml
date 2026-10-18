@@ -12,6 +12,7 @@
     <string name="player_controls_rewind">Rewind</string>
     <string name="player_controls_exit">Exit player</string>
     <string name="player_controls_fast_forward">Fast forward</string>
+    <string name="player_speed_up">Speed up</string>
     <string name="player_controls_skip_forward">Skip forward</string>
     <string name="player_trickplay">Trickplay</string>
     <string name="player_controls_progress">Progress bar</string>

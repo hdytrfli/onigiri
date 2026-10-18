@@ -914,7 +914,7 @@ class PlayerActivity : BasePlayerActivity() {
         addHeaderView(view, null, false)
     }
 
-    /** Briefly shows [message] in the same pill used for the seek/fast-forward overlay. */
+    /** Briefly shows [message] in the same pill used for the seek/speed-up overlay. */
     internal fun showPlayerOverlayMessage(message: String) {
         binding.progressScrubberTrickplay.visibility = View.GONE
         binding.progressScrubberText.text = message
