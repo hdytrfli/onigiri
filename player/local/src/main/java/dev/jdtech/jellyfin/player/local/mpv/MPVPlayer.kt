@@ -52,8 +52,8 @@ import timber.log.Timber
 /** How long the zoom level stays on screen after the last pinch update. */
 private const val OSD_ZOOM_DURATION_MS = "700"
 
-/** How far dynamic zoom goes: 3 in mpv's log2 scale is 8x the fitted size. */
-private const val DYNAMIC_ZOOM_MAX = 3.0
+/** How far dynamic zoom goes: 1.585 in mpv's log2 scale is three times the fitted size. */
+private const val DYNAMIC_ZOOM_MAX = 1.585
 
 /** Zooming out below the fit is allowed, as far as half size. */
 private const val DYNAMIC_ZOOM_MIN = -1.0
