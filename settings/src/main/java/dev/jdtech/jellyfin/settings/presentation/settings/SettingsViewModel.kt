@@ -572,6 +572,16 @@ constructor(
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
+                                                        R.string.player_dynamic_zoom,
+                                                    descriptionStringRes =
+                                                        R.string.player_dynamic_zoom_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.playerGesturesZoom),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesDynamicZoom,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
                                                         R.string.player_gestures_seek,
                                                     descriptionStringRes =
                                                         R.string.player_gestures_seek_summary,

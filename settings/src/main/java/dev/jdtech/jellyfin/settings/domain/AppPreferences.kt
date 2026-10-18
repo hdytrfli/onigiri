@@ -94,6 +94,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerGesturesChapterSkip = Preference("pref_player_gestures_chapter_skip", false)
     val playerGesturesStartMaximized = Preference("pref_player_start_maximized", false)
 
+    /** Pinch to zoom the video freely, instead of the pinch filling the screen. */
+    val playerGesturesDynamicZoom = Preference("pref_player_dynamic_zoom", false)
+
     // Player - seeking
     val playerSeekBackInc = Preference("pref_player_seek_back_inc", 5_000L)
     val playerSeekForwardInc = Preference("pref_player_seek_forward_inc", 5_000L)

@@ -505,12 +505,19 @@ class PlayerGestureHelper(
                             abs(scaleFactor - Constants.ZOOM_SCALE_BASE) >
                                 Constants.ZOOM_SCALE_THRESHOLD
                         ) {
-                            val enableZoom = scaleFactor > 1
-                            // Asking for the state the video is already in is ignored rather than
-                            // re-applied: the pinch is then not consumed as a zoom, and the finger
-                            // left behind would otherwise land on the volume/brightness gesture.
-                            if (enableZoom != isZoomEnabled) {
-                                updateZoomMode(enableZoom)
+                            if (appPreferences.getValue(appPreferences.playerGesturesDynamicZoom)) {
+                                // Free zoom: the video follows the fingers, and the pinch never
+                                // switches the fill on or off.
+                                (playerView.player as? MPVPlayer)?.zoomBy(scaleFactor)
+                            } else {
+                                val enableZoom = scaleFactor > 1
+                                // Asking for the state the video is already in is ignored rather
+                                // than re-applied: the pinch is then not consumed as a zoom, and
+                                // the finger left behind would otherwise land on the
+                                // volume/brightness gesture.
+                                if (enableZoom != isZoomEnabled) {
+                                    updateZoomMode(enableZoom)
+                                }
                             }
                         }
                         return true

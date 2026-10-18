@@ -41,10 +41,14 @@ import dev.jdtech.mpv.MPVLib.MpvFormat
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.math.log2
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
+
+/** How far dynamic zoom goes: 3 in mpv's log2 scale is 8x the fitted size. */
+private const val DYNAMIC_ZOOM_MAX = 3.0
 
 class MPVPlayer(
     context: Context,
@@ -75,6 +79,9 @@ class MPVPlayer(
     private var audioFocusCallback: () -> Unit = {}
     private lateinit var audioFocusRequest: AudioFocusRequestCompat
     private val handler: Handler = Handler(context.mainLooper)
+
+    /** Free zoom, in mpv's log2 scale; 0 is the fitted size. */
+    private var dynamicZoom = 0.0
 
     private constructor(
         builder: Builder
@@ -244,6 +251,10 @@ class MPVPlayer(
         mpvLib.setOptionString("ao", audioOutput)
         mpvLib.setOptionString("gpu-context", "android")
         mpvLib.setOptionString("opengl-es", "yes")
+
+        // Dynamic zoom pans from the centre unless told otherwise.
+        mpvLib.setOptionString("video-align-x", "0")
+        mpvLib.setOptionString("video-align-y", "0")
 
         // Let the audio follow the video instead of the other way round. In mpv's default "audio"
         // mode the video is re-timed against the audio clock and frames are dropped whenever that
@@ -963,7 +974,13 @@ class MPVPlayer(
             .build()
     }
 
+    private fun resetDynamicZoom() {
+        dynamicZoom = 0.0
+        mpvLib.setPropertyDouble("video-zoom", 0.0)
+    }
+
     private fun resetInternalState() {
+        resetDynamicZoom()
         isPlayerReady = false
         isSeekable = false
         playbackState = STATE_IDLE
@@ -1674,6 +1691,21 @@ class MPVPlayer(
             mpvLib.setOptionString("sub-use-margins", subUseMargins)
             mpvLib.setOptionString("sub-ass-force-margins", subUseMargins)
         }
+    }
+
+    /**
+     * Zooms the video by [factor] relative to where it is now, for a pinch that follows the
+     * fingers.
+     *
+     * video-zoom is a scalar in log2 - 1.0 doubles the size - so the factor is the same on both
+     * axes and the picture stays centred. Unlike panscan or video-crop it is a display transform,
+     * not a change to the video chain, which is what makes it smooth to drag.
+     */
+    fun zoomBy(factor: Float) {
+        if (factor <= 0f) return
+
+        dynamicZoom = (dynamicZoom + log2(factor.toDouble())).coerceIn(0.0, DYNAMIC_ZOOM_MAX)
+        mpvLib.setPropertyDouble("video-zoom", dynamicZoom)
     }
 
     /** Shifts subtitle timing by [seconds] (positive = subtitles appear later). */
