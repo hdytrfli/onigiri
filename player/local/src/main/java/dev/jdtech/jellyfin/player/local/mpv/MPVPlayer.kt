@@ -42,10 +42,15 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.log2
+import kotlin.math.pow
+import kotlin.math.roundToInt
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
+
+/** How long the zoom level stays on screen after the last pinch update. */
+private const val OSD_ZOOM_DURATION_MS = "700"
 
 /** How far dynamic zoom goes: 3 in mpv's log2 scale is 8x the fitted size. */
 private const val DYNAMIC_ZOOM_MAX = 3.0
@@ -1716,6 +1721,17 @@ class MPVPlayer(
                 DYNAMIC_ZOOM_MAX,
             )
         mpvLib.setPropertyDouble("video-zoom", dynamicZoom)
+
+        // The OSD update is also what makes mpv redraw a paused frame: without it the new zoom
+        // only shows up when something else causes a redraw, which is why mpv's own zoom (which
+        // prints its level) feels immediate while paused and a bare property write does not.
+        mpvLib.command(
+            arrayOf(
+                "show-text",
+                "${(2.0.pow(dynamicZoom) * 100).roundToInt()}%",
+                OSD_ZOOM_DURATION_MS,
+            )
+        )
     }
 
     /** Shifts subtitle timing by [seconds] (positive = subtitles appear later). */
