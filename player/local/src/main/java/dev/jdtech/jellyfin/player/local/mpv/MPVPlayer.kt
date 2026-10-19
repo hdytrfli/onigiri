@@ -50,6 +50,14 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
+/**
+ * Audio follows the video rather than the other way round. In mpv's default "audio" mode the video
+ * is re-timed against the audio clock and frames are dropped whenever that clock moves - most
+ * visibly when a speed boost drops back to normal and the scaletempo2 filter leaves the audio
+ * chain. display-resample bends the audio to the video instead, so the transition costs no frames.
+ */
+private const val VIDEO_SYNC = "display-resample"
+
 /** How far dynamic zoom goes: 1.585 in mpv's log2 scale is three times the fitted size. */
 private const val DYNAMIC_ZOOM_MAX = 1.585
 
@@ -265,12 +273,7 @@ class MPVPlayer(
         MPVLib.setOptionString("video-align-x", "0")
         MPVLib.setOptionString("video-align-y", "0")
 
-        // Let the audio follow the video instead of the other way round. In mpv's default "audio"
-        // mode the video is re-timed against the audio clock and frames are dropped whenever that
-        // clock moves - most visibly when a hold-to-speed-up gesture drops back to normal speed and
-        // the scaletempo2 filter is taken back out of the audio chain. display-resample bends the
-        // audio to the video instead, so the transition costs no frames.
-        MPVLib.setOptionString("video-sync", "display-resample")
+        MPVLib.setOptionString("video-sync", VIDEO_SYNC)
 
         // Hardware video decoding
         MPVLib.setOptionString("hwdec", hwDec)
@@ -609,6 +612,7 @@ class MPVPlayer(
                     }
                 }
                 MpvEvent.MPV_EVENT_FILE_LOADED -> {
+                    applyVideoSync()
                     isSeekable = MPVLib.getPropertyBoolean("seekable") == true
                     currentDurationMs =
                         (MPVLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND))?.toLong()
@@ -983,6 +987,15 @@ class MPVPlayer(
             .addIf(COMMAND_SEEK_BACK, isCurrentMediaItemSeekable && !isPlayingAd)
             .addIf(COMMAND_SEEK_FORWARD, isCurrentMediaItemSeekable && !isPlayingAd)
             .build()
+    }
+
+    /**
+     * Applies the sync mode again once a file has loaded. An `mpv.conf` takes precedence over the
+     * options set before `init()`, so an entry there would otherwise quietly undo the mode that
+     * keeps a speed boost from costing frames.
+     */
+    private fun applyVideoSync() {
+        MPVLib.setPropertyString("video-sync", VIDEO_SYNC)
     }
 
     private fun resetDynamicZoom() {

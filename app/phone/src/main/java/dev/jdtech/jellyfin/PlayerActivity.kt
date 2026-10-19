@@ -19,6 +19,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.PathInterpolator
 import android.widget.AbsListView
 import android.widget.Button
 import android.widget.FrameLayout
@@ -41,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
+import androidx.media3.common.Player
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
@@ -83,6 +85,15 @@ var isVolumeBrightnessLocked: Boolean = false
 
 private val playerSpeeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
 private val playerSpeedTexts = listOf("0.5x", "0.75x", "1x", "1.25x", "1.5x", "1.75x", "2x")
+
+/** How long the player overlay takes to fade in or out. */
+private const val OVERLAY_FADE_DURATION_MS = 300L
+
+/** Material's standard easing: the overlay settles into place rather than stopping dead. */
+private val OverlayFadeInInterpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
+
+/** Material's accelerate easing: the overlay gets out of the way instead of lingering. */
+private val OverlayFadeOutInterpolator = PathInterpolator(0.4f, 0f, 1f, 1f)
 
 @AndroidEntryPoint
 class PlayerActivity : BasePlayerActivity() {
@@ -127,6 +138,11 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private val handler = Handler(Looper.getMainLooper())
+
+    /** How long the overlay stays up, from the player settings; 0 means it never hides itself. */
+    private var overlayTimeoutMs = 5000L
+
+    private val hidePlayerControlsAction = Runnable { hidePlayerControls() }
     private val skipButtonTimeout = Runnable {
         if (!binding.playerView.isControllerFullyVisible) {
             skipSegmentButton.isVisible = false
@@ -146,16 +162,28 @@ class PlayerActivity : BasePlayerActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         binding.playerView.player = viewModel.player
-        // How long the overlay stays up before hiding itself ("Never" is stored as -1).
-        binding.playerView.controllerShowTimeoutMs =
-            appPreferences.getValue(appPreferences.playerControlsTimeout).toIntOrNull() ?: 5000
+        // How long the overlay stays up before hiding itself ("Never" is stored as -1). The fade
+        // does the hiding, so media3's own timeout is off and this drives it instead.
+        overlayTimeoutMs =
+            (appPreferences.getValue(appPreferences.playerControlsTimeout).toIntOrNull() ?: 5000)
+                .coerceAtLeast(0)
+                .toLong()
+        binding.playerView.controllerShowTimeoutMs = 0
         binding.playerView.setControllerVisibilityListener(
             PlayerView.ControllerVisibilityListener { visibility ->
                 if (visibility == View.GONE) {
                     hideSystemUI()
+                } else {
+                    // Every show fades, whether it came from a tap or from media3 itself.
+                    fadePlayerControlsIn()
+                    schedulePlayerControlsHide()
                 }
             }
         )
+        // The controller starts out visible in the layout, which is not a visibility change, so the
+        // clock for its first hide is started here.
+        schedulePlayerControlsHide()
+        viewModel.player.addListener(controlsClockListener)
 
         val playerControls = binding.playerView.findViewById<View>(R.id.player_controls)
         val lockedControls = binding.playerView.findViewById<View>(R.id.locked_player_view)
@@ -597,7 +625,7 @@ class PlayerActivity : BasePlayerActivity() {
                         loadStats = { viewModel.player.playbackStats() },
                         streamInfo = streamInfo,
                         onRefreshStream = { viewModel.refreshStreamInfo() },
-                        onClick = { binding.playerView.showController() },
+                        onClick = { showPlayerControls() },
                     )
                 }
             }
@@ -888,17 +916,77 @@ class PlayerActivity : BasePlayerActivity() {
         binding.playerView.hideController()
     }
 
-    /** Eases the player overlay (title, seek bar, buttons) out while a sheet is open. */
-    private fun hidePlayerControls() {
-        val controller = binding.playerView.findViewById<View>(R.id.exo_controller) ?: return
+    /**
+     * Fades the player overlay (title, seek bar, buttons) in, and restarts its hide clock. Every
+     * show goes through here so the overlay always arrives the same way.
+     */
+    internal fun showPlayerControls() {
+        binding.playerView.showController()
+        // media3 reports visibility changes only, and an overlay that is already visible does not
+        // change, so the clock is restarted here as well as from the listener.
+        schedulePlayerControlsHide()
+    }
+
+    /**
+     * Fades the overlay in, from nothing, so its first visible frame is not a full-opacity flash.
+     */
+    private fun fadePlayerControlsIn() {
+        val controller = overlayController() ?: return
+        controller.animate().cancel()
+        controller.alpha = 0f
+        controller
+            .animate()
+            .alpha(1f)
+            .setDuration(OVERLAY_FADE_DURATION_MS)
+            .setInterpolator(OverlayFadeInInterpolator)
+            .start()
+    }
+
+    /**
+     * Fades the player overlay out and only then hides it, so it goes slowly enough to read as one
+     * movement. Used by the hide gesture and when a sheet takes the screen.
+     */
+    internal fun hidePlayerControls() {
+        val controller = overlayController() ?: return
+        handler.removeCallbacks(hidePlayerControlsAction)
         controller.animate().cancel()
         controller
             .animate()
             .alpha(0f)
-            .setDuration(200L)
-            .withEndAction { binding.playerView.hideController() }
+            .setDuration(OVERLAY_FADE_DURATION_MS)
+            .setInterpolator(OverlayFadeOutInterpolator)
+            .withEndAction {
+                binding.playerView.hideController()
+                // Ready for the next fade in, which starts from nothing again.
+                controller.alpha = 1f
+            }
             .start()
     }
+
+    /** Restarts the overlay's hide clock, for the interactions that should keep it up. */
+    internal fun keepPlayerControlsVisible() = schedulePlayerControlsHide()
+
+    private fun schedulePlayerControlsHide() {
+        handler.removeCallbacks(hidePlayerControlsAction)
+        if (overlayTimeoutMs > 0) {
+            handler.postDelayed(hidePlayerControlsAction, overlayTimeoutMs)
+        }
+    }
+
+    /**
+     * Play and pause arrive from anywhere - a headset button, the keyboard, the media session - and
+     * media3 shows the overlay for them without any touch. Restart the clock on those, so an
+     * overlay that appears for a pause still leaves on its own.
+     */
+    private val controlsClockListener =
+        object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (binding.playerView.isControllerFullyVisible) schedulePlayerControlsHide()
+            }
+        }
+
+    /** The whole overlay, faded in and out as one piece. */
+    private fun overlayController(): View? = binding.playerView.findViewById(R.id.exo_controller)
 
     /**
      * Reparents [view] into this list as a non-selectable header so it scrolls together with the
@@ -999,6 +1087,7 @@ class PlayerActivity : BasePlayerActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.player.removeListener(controlsClockListener)
         // These locks are process-wide; reset them so a fresh player starts unlocked and the
         // buttons' icons match the state.
         isControlsLocked = false

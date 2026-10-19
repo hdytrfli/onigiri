@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +17,6 @@ fun DownloadedBadge(modifier: Modifier = Modifier) {
         Icon(
             painter = painterResource(CoreR.drawable.ic_download),
             contentDescription = "",
-            tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(16.dp).align(Alignment.Center),
         )
     }
