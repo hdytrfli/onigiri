@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.components
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -167,8 +166,7 @@ private fun AppButtonImpl(
                 .background(containerColor)
                 .clickable(
                     interactionSource = interactionSource,
-                    indication =
-                        if (effect == AppButtonEffect.Ripple) LocalIndication.current else null,
+                    indication = null,
                     enabled = enabled,
                     onClick = onClick,
                 ),
@@ -241,12 +239,11 @@ enum class AppButtonVariant {
 }
 
 /**
- * How a button responds to a press. [Tint] is the default; the ripple is available, not default.
+ * How a button responds to a press. [Tint] is the default; there is no ripple anywhere in the app.
  */
 enum class AppButtonEffect {
     None,
     Tint,
-    Ripple,
 }
 
 /** Opacity of a disabled button's content. */
