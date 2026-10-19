@@ -11,6 +11,14 @@ data class LibraryState(
     val items: Flow<PagingData<FindroidItem>> = emptyFlow(),
     val sortBy: SortBy = SortBy.NAME,
     val sortOrder: SortOrder = SortOrder.ASCENDING,
+    val displayFields: Set<ListDisplayField> =
+        setOf(
+            ListDisplayField.Year,
+            ListDisplayField.CommunityRating,
+            ListDisplayField.AgeRating,
+        ),
+    val searchQuery: String = "",
+    val searchExpanded: Boolean = false,
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )

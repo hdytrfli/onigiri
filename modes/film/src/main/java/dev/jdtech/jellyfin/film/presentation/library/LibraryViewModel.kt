@@ -11,6 +11,8 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -26,15 +28,25 @@ constructor(
     private val _state = MutableStateFlow(LibraryState())
     val state = _state.asStateFlow()
 
-    lateinit var parentId: UUID
+    var parentId: UUID? = null
     lateinit var libraryType: CollectionType
 
     lateinit var sortBy: SortBy
     lateinit var sortOrder: SortOrder
 
-    fun setup(parentId: UUID, libraryType: CollectionType) {
+    private var searchQuery: String = ""
+    private var searchJob: Job? = null
+
+    fun setup(parentId: UUID?, libraryType: CollectionType) {
         this.parentId = parentId
         this.libraryType = libraryType
+        _state.value =
+            _state.value.copy(
+                displayFields =
+                    ListDisplayField.fromKeys(
+                        appPreferences.getValue(appPreferences.listDisplayFields)
+                    )
+            )
     }
 
     fun loadItems() {
@@ -72,6 +84,7 @@ constructor(
                                 else sortBy, // Jellyfin uses a different enum for sorting series by
                             // data played
                             sortOrder = sortOrder,
+                            searchTerm = searchQuery.ifBlank { null },
                         )
                         .cachedIn(viewModelScope)
                 _state.emit(_state.value.copy(items = items))
@@ -107,7 +120,44 @@ constructor(
                     loadItems()
                 }
             }
+            is LibraryAction.ToggleDisplayField -> {
+                val fields = _state.value.displayFields.toMutableSet()
+                if (!fields.add(action.field)) {
+                    fields.remove(action.field)
+                }
+                appPreferences.setValue(
+                    appPreferences.listDisplayFields,
+                    fields.map { it.key }.toSet(),
+                )
+                _state.value = _state.value.copy(displayFields = fields)
+            }
+            is LibraryAction.SetSearchQuery -> {
+                searchQuery = action.query
+                _state.value = _state.value.copy(searchQuery = action.query)
+                searchJob?.cancel()
+                searchJob = viewModelScope.launch {
+                    delay(SEARCH_DEBOUNCE_MS)
+                    loadItems()
+                }
+            }
+            is LibraryAction.ToggleSearch -> {
+                val expanded = !_state.value.searchExpanded
+                if (!expanded) {
+                    searchQuery = ""
+                    searchJob?.cancel()
+                    loadItems()
+                }
+                _state.value =
+                    _state.value.copy(
+                        searchExpanded = expanded,
+                        searchQuery = if (expanded) _state.value.searchQuery else "",
+                    )
+            }
             else -> Unit
         }
+    }
+
+    private companion object {
+        const val SEARCH_DEBOUNCE_MS = 300L
     }
 }

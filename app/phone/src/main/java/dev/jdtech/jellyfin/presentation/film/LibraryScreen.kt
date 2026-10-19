@@ -24,8 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -41,10 +45,16 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.film.presentation.library.LibraryAction
 import dev.jdtech.jellyfin.film.presentation.library.LibraryState
 import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppOptionRow
+import dev.jdtech.jellyfin.presentation.components.AppTextField
+import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
@@ -63,11 +73,12 @@ import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun LibraryScreen(
-    libraryId: UUID,
-    libraryName: String,
+    libraryId: UUID?,
+    libraryName: String?,
     libraryType: CollectionType,
     onItemClick: (item: FindroidItem) -> Unit,
     navigateBack: () -> Unit,
+    showTopBar: Boolean = true,
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -84,6 +95,7 @@ fun LibraryScreen(
 
     LibraryScreenLayout(
         libraryName = libraryName,
+        showTopBar = showTopBar,
         state = state,
         onAction = { action ->
             when (action) {
@@ -99,7 +111,8 @@ fun LibraryScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LibraryScreenLayout(
-    libraryName: String,
+    libraryName: String?,
+    showTopBar: Boolean,
     state: LibraryState,
     onAction: (LibraryAction) -> Unit,
 ) {
@@ -121,6 +134,14 @@ private fun LibraryScreenLayout(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var showSortByDialog by remember { mutableStateOf(false) }
+    var showDisplayDialog by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(state.searchExpanded) {
+        if (state.searchExpanded) {
+            focusRequester.requestFocus()
+        }
+    }
 
     Scaffold(
         modifier =
@@ -128,38 +149,96 @@ private fun LibraryScreenLayout(
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(libraryName) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = { onAction(LibraryAction.OnBackClick) },
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                actions = {
-                    AppIconButton(
-                        onClick = { showSortByDialog = true },
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
+            if (showTopBar) {
+                TopAppBar(
+                    title = { Text(libraryName.orEmpty()) },
+                    navigationIcon = {
+                        AppIconButton(
+                            onClick = { onAction(LibraryAction.OnBackClick) },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                    },
+                    actions = {
+                        AppIconButton(
+                            onClick = { onAction(LibraryAction.ToggleSearch) },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_search),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                        AppIconButton(
+                            onClick = { showDisplayDialog = true },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_info),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                        AppIconButton(
+                            onClick = { showSortByDialog = true },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_arrow_down_up),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                    },
+                    windowInsets = topBarWindowInsets(),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { innerPadding ->
         Column {
+            if (state.searchExpanded) {
+                AppTextField(
+                    value = state.searchQuery,
+                    onValueChange = { onAction(LibraryAction.SetSearchQuery(it)) },
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(
+                                start = MaterialTheme.spacings.default,
+                                top = MaterialTheme.spacings.small,
+                                end = MaterialTheme.spacings.default,
+                            )
+                            .focusRequester(focusRequester),
+                    hint = stringResource(CoreR.string.search),
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_search),
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        if (state.searchQuery.isNotEmpty()) {
+                            AppIconButton(
+                                onClick = { onAction(LibraryAction.SetSearchQuery("")) },
+                                size = AppButtonSize.Decorator,
+                                variant = AppButtonVariant.Ghost,
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_x),
+                                        contentDescription = null,
+                                    )
+                                },
+                            )
+                        }
+                    },
+                )
+            }
             ErrorGroup(
                 loadStates = items.loadState,
                 onRefresh = { items.refresh() },
@@ -181,6 +260,10 @@ private fun LibraryScreenLayout(
                             onClick = { onAction(LibraryAction.OnItemClick(item)) },
                             modifier = Modifier.animateItem(),
                             fillWidth = true,
+                            showYear = ListDisplayField.Year in state.displayFields,
+                            showCommunityRating =
+                                ListDisplayField.CommunityRating in state.displayFields,
+                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
                         )
                     }
                 }
@@ -197,6 +280,51 @@ private fun LibraryScreenLayout(
             },
             onDismissRequest = { showSortByDialog = false },
         )
+    }
+
+    if (showDisplayDialog) {
+        DisplayInfoDialog(
+            fields = state.displayFields,
+            onToggle = { onAction(LibraryAction.ToggleDisplayField(it)) },
+            onDismiss = { showDisplayDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun DisplayInfoDialog(
+    fields: Set<ListDisplayField>,
+    onToggle: (ListDisplayField) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    BaseDialog(
+        title = stringResource(CoreR.string.display_info),
+        onDismiss = onDismiss,
+        negativeButton = {},
+        positiveButton = {
+            AppButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            AppOptionRow(
+                text = stringResource(CoreR.string.display_year),
+                onClick = { onToggle(ListDisplayField.Year) },
+                selected = ListDisplayField.Year in fields,
+                role = Role.Checkbox,
+            )
+            AppOptionRow(
+                text = stringResource(CoreR.string.display_rating),
+                onClick = { onToggle(ListDisplayField.CommunityRating) },
+                selected = ListDisplayField.CommunityRating in fields,
+                role = Role.Checkbox,
+            )
+            AppOptionRow(
+                text = stringResource(CoreR.string.display_age_rating),
+                onClick = { onToggle(ListDisplayField.AgeRating) },
+                selected = ListDisplayField.AgeRating in fields,
+                role = Role.Checkbox,
+            )
+        }
     }
 }
 
@@ -241,6 +369,7 @@ private fun LibraryScreenLayoutPreview() {
     FindroidTheme {
         LibraryScreenLayout(
             libraryName = "Movies",
+            showTopBar = true,
             state = LibraryState(items = items),
             onAction = {},
         )

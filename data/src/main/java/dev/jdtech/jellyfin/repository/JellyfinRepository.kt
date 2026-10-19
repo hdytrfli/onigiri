@@ -10,6 +10,7 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.FindroidSource
+import dev.jdtech.jellyfin.models.RecommendationCategory
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import java.util.UUID
@@ -52,6 +53,7 @@ interface JellyfinRepository {
         sortOrder: SortOrder = SortOrder.ASCENDING,
         startIndex: Int? = null,
         limit: Int? = null,
+        searchTerm: String? = null,
     ): List<FindroidItem>
 
     suspend fun getItemsPaging(
@@ -60,6 +62,7 @@ interface JellyfinRepository {
         recursive: Boolean = false,
         sortBy: SortBy = SortBy.defaultValue,
         sortOrder: SortOrder = SortOrder.ASCENDING,
+        searchTerm: String? = null,
     ): Flow<PagingData<FindroidItem>>
 
     suspend fun getPerson(personId: UUID): FindroidPerson
@@ -79,6 +82,8 @@ interface JellyfinRepository {
     suspend fun getResumeItems(): List<FindroidItem>
 
     suspend fun getLatestMedia(parentId: UUID): List<FindroidItem>
+
+    suspend fun getMovieRecommendations(parentId: UUID? = null): List<RecommendationCategory>
 
     suspend fun getSeasons(seriesId: UUID, offline: Boolean = false): List<FindroidSeason>
 

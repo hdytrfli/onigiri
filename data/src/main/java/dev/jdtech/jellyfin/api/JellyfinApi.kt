@@ -14,6 +14,7 @@ import org.jellyfin.sdk.api.client.extensions.itemLookupApi
 import org.jellyfin.sdk.api.client.extensions.itemsApi
 import org.jellyfin.sdk.api.client.extensions.mediaInfoApi
 import org.jellyfin.sdk.api.client.extensions.mediaSegmentsApi
+import org.jellyfin.sdk.api.client.extensions.moviesApi
 import org.jellyfin.sdk.api.client.extensions.playStateApi
 import org.jellyfin.sdk.api.client.extensions.quickConnectApi
 import org.jellyfin.sdk.api.client.extensions.remoteImageApi
@@ -72,6 +73,7 @@ class JellyfinApi(
     val itemLookupApi = api.itemLookupApi
     val mediaInfoApi = api.mediaInfoApi
     val mediaSegmentsApi = api.mediaSegmentsApi
+    val moviesApi = api.moviesApi
     val playStateApi = api.playStateApi
     val quickConnectApi = api.quickConnectApi
     val remoteImageApi = api.remoteImageApi

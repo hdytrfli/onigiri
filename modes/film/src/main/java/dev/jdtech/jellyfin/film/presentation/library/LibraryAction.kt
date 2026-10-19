@@ -10,4 +10,10 @@ sealed interface LibraryAction {
     data object OnBackClick : LibraryAction
 
     data class ChangeSorting(val sortBy: SortBy, val sortOrder: SortOrder) : LibraryAction
+
+    data class ToggleDisplayField(val field: ListDisplayField) : LibraryAction
+
+    data class SetSearchQuery(val query: String) : LibraryAction
+
+    data object ToggleSearch : LibraryAction
 }

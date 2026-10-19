@@ -34,6 +34,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val homeNextUp = Preference<Boolean>("home_next_up", true)
     val homeLatest = Preference<Boolean>("home_latest", true)
     val displayExtraInfo = Preference("pref_display_extra_info", false)
+
+    /** Which metadata the movie/show list cards show: release year, rating, age rating. */
+    val listDisplayFields = Preference("pref_list_display_fields", setOf("year", "rating", "age"))
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2.3333333")
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
