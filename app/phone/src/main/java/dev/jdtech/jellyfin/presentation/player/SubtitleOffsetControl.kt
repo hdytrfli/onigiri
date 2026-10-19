@@ -92,7 +92,7 @@ fun SubtitleOffsetControl(
                     Box(
                         modifier =
                             Modifier.width(4.dp)
-                                .height(26.dp)
+                                .height(16.dp)
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(Color.White)
                     )

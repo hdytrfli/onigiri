@@ -166,12 +166,19 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             paint.style = Paint.Style.STROKE
         }
 
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = HANDLE_WIDTH_DP * density
+        paint.style = Paint.Style.FILL
         paint.color = scrubberColor
-        // Vertical rounded "line" handle, matching the Compose slider's thumb.
-        val handleHalf = HANDLE_HEIGHT_DP / 2f * density
-        canvas.drawLine(playedX, centerY - handleHalf, playedX, centerY + handleHalf, paint)
+        // An explicit pill-shaped rect: a round-capped line gets its caps clipped by the View.
+        val handleHalfWidth = HANDLE_WIDTH_DP / 2f * density
+        val handleHalfHeight = HANDLE_HEIGHT_DP / 2f * density
+        val handle =
+            RectF(
+                playedX - handleHalfWidth,
+                centerY - handleHalfHeight,
+                playedX + handleHalfWidth,
+                centerY + handleHalfHeight,
+            )
+        canvas.drawRoundRect(handle, handleHalfWidth, handleHalfWidth, paint)
     }
 }
 
@@ -180,4 +187,4 @@ private const val SEEK_TOLERANCE_MS = 1_000L
 
 /** Handle size in dp: a rounded vertical line, matching the Compose slider thumb. */
 private const val HANDLE_WIDTH_DP = 4f
-private const val HANDLE_HEIGHT_DP = 26f
+private const val HANDLE_HEIGHT_DP = 16f
