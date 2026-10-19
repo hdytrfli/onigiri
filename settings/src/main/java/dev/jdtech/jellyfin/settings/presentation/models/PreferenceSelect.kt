@@ -4,6 +4,14 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
 
+/**
+ * The leading icon a select dialog shows on its option rows; the UI layer maps it to a drawable.
+ */
+enum class SelectOptionIcon {
+    Audio,
+    Subtitle,
+}
+
 data class PreferenceSelect(
     @param:StringRes override val nameStringResource: Int,
     @param:StringRes override val descriptionStringRes: Int? = null,
@@ -17,4 +25,5 @@ data class PreferenceSelect(
     val optionValues: Int,
     val optionsIncludeNull: Boolean = false,
     val value: String? = null,
+    val optionIcon: SelectOptionIcon? = null,
 ) : Preference

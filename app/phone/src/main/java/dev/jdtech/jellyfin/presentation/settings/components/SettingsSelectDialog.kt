@@ -30,6 +30,7 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
+import dev.jdtech.jellyfin.settings.presentation.models.SelectOptionIcon
 
 @Composable
 fun SettingsSelectDialog(
@@ -40,10 +41,16 @@ fun SettingsSelectDialog(
 ) {
     val lazyListState = rememberLazyListState()
 
+    val optionIcon =
+        when (preference.optionIcon) {
+            SelectOptionIcon.Audio -> CoreR.drawable.ic_music
+            SelectOptionIcon.Subtitle -> CoreR.drawable.ic_case_sensitive
+            null -> null
+        }
+
     BaseDialog(
         title = stringResource(preference.nameStringResource),
         description = preference.descriptionStringRes?.let { stringResource(it) },
-        titleBackground = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismiss = onDismissRequest,
     ) {
         if (lazyListState.canScrollBackward) {
@@ -55,7 +62,7 @@ fun SettingsSelectDialog(
                 SettingsSelectDialogItem(
                     option = option,
                     isSelected = option.first == preference.value,
-                    iconDrawableId = preference.iconDrawableId,
+                    iconDrawableId = optionIcon,
                     onSelect = onUpdate,
                 )
             }
@@ -82,7 +89,7 @@ private fun SettingsSelectDialogItem(
                     role = Role.RadioButton,
                     onClick = { onSelect(option.first) },
                 )
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (iconDrawableId != null) {
@@ -120,7 +127,7 @@ private fun SettingsSelectDialogPreview() {
             preference =
                 PreferenceSelect(
                     nameStringResource = SettingsR.string.settings_preferred_audio_language,
-                    iconDrawableId = CoreR.drawable.ic_speaker,
+                    optionIcon = SelectOptionIcon.Audio,
                     backendPreference = Preference("", ""),
                     options = SettingsR.array.languages,
                     optionValues = SettingsR.array.languages_values,

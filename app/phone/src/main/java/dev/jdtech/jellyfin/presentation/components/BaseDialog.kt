@@ -34,7 +34,6 @@ fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
     description: String? = null,
-    titleBackground: Color = Color.Transparent,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -50,12 +49,7 @@ fun BaseDialog(
                 ),
         ) {
             Column {
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .background(titleBackground)
-                            .padding(horizontal = 12.dp, vertical = 16.dp)
-                ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium)
                     if (!description.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))

@@ -20,6 +20,7 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
+import dev.jdtech.jellyfin.settings.presentation.models.SelectOptionIcon
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +86,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_audio_language_summary,
-                                                    iconDrawableId = R.drawable.ic_speaker,
+                                                    optionIcon = SelectOptionIcon.Audio,
                                                     backendPreference =
                                                         appPreferences.preferredAudioLanguage,
                                                     options = R.array.languages,
@@ -99,7 +100,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_subtitle_language_summary,
-                                                    iconDrawableId = R.drawable.ic_closed_caption,
+                                                    optionIcon = SelectOptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.preferredSubtitleLanguage,
                                                     options = R.array.languages,
