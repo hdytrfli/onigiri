@@ -9,7 +9,7 @@ import dev.jdtech.jellyfin.core.presentation.theme.Spacings
 
 @Composable
 fun FindroidTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = darkScheme, shapes = appShapes(LocalCornerRadius.current)) {
+    MaterialTheme(colorScheme = darkScheme, shapes = shapes) {
         CompositionLocalProvider(
             LocalContentColor provides contentColorFor(MaterialTheme.colorScheme.background),
             LocalSpacings provides Spacings,

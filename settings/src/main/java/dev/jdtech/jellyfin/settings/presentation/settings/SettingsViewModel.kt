@@ -140,15 +140,6 @@ constructor(
                                         nameStringResource = R.string.settings_category_appearance,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource = R.string.corner_radius,
-                                                    descriptionStringRes =
-                                                        R.string.corner_radius_summary,
-                                                    backendPreference =
-                                                        appPreferences.interfaceCornerRadius,
-                                                    options = R.array.corner_radius_options,
-                                                    optionValues = R.array.corner_radius_values,
-                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.hide_status_bar,
                                                     descriptionStringRes =

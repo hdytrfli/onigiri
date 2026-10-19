@@ -88,16 +88,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.backdropLandscapeRatio),
                     appPreferences.observe(appPreferences.confirmExit),
                     appPreferences.observe(appPreferences.hideStatusBar),
-                    appPreferences.observe(appPreferences.interfaceCornerRadius),
-                ) { portraitRatio, landscapeRatio, confirmExit, hideStatusBar, interfaceCornerRadius
-                    ->
-                    InterfacePrefs(
-                        portraitRatio,
-                        landscapeRatio,
-                        confirmExit,
-                        hideStatusBar,
-                        interfaceCornerRadius,
-                    )
+                ) { portraitRatio, landscapeRatio, confirmExit, hideStatusBar ->
+                    InterfacePrefs(portraitRatio, landscapeRatio, confirmExit, hideStatusBar)
                 }
 
             val titlePrefs =
@@ -148,7 +140,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         contentSpacingScale = Constants.CONTENT_SPACING_SCALE,
                         confirmExit = interfacePrefs.confirmExit,
                         hideStatusBar = interfacePrefs.hideStatusBar,
-                        interfaceCornerRadius = interfacePrefs.cornerRadius,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
@@ -180,7 +171,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val landscapeRatio: String,
         val confirmExit: Boolean,
         val hideStatusBar: Boolean,
-        val cornerRadius: String,
     )
 
     private data class GridPrefs(
@@ -206,7 +196,6 @@ data class MainState(
     val titleImageRatio: Float = 2f,
     val confirmExit: Boolean = false,
     val hideStatusBar: Boolean = false,
-    val interfaceCornerRadius: String = "default",
     val gridPosterPortrait: Int = 2,
     val gridPosterLandscape: Int = 4,
     val gridThumbnailPortrait: Int = 3,

@@ -20,10 +20,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import dev.jdtech.jellyfin.presentation.theme.CornerRadius
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
-import dev.jdtech.jellyfin.presentation.theme.LocalCornerRadius
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.GridColumns
 import dev.jdtech.jellyfin.presentation.utils.GridGapBase
@@ -78,55 +76,51 @@ class MainActivity : AppCompatActivity() {
                 onDispose {}
             }
 
-            CompositionLocalProvider(
-                LocalCornerRadius provides CornerRadius.fromId(state.interfaceCornerRadius)
-            ) {
-                FindroidTheme {
-                    if (!state.isLoading) {
-                        // When the status bar is hidden, consume its inset (including the display
-                        // cutout, which only becomes non-zero once the bar is gone) for the whole
-                        // app so no screen or the nav rail reserves that space.
-                        Box(
-                            modifier =
-                                if (state.hideStatusBar) {
-                                    Modifier.consumeWindowInsets(
-                                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                        ) {
-                            CompositionLocalProvider(
-                                LocalOfflineMode provides state.isOfflineMode,
-                                LocalBackdropRatios provides
-                                    BackdropRatios(
-                                        portrait = state.backdropPortraitRatio,
-                                        landscape = state.backdropLandscapeRatio,
-                                    ),
-                                LocalContentSpacingScale provides state.contentSpacingScale,
-                                LocalHideStatusBar provides state.hideStatusBar,
-                                LocalTitleImageConfig provides
-                                    TitleImageConfig(
-                                        portraitWidth = state.titlePortraitWidth,
-                                        landscapeWidth = state.titleLandscapeWidth,
-                                        ratio = state.titleImageRatio,
-                                    ),
-                                LocalGridColumns provides
-                                    GridColumns(
-                                        posterPortrait = state.gridPosterPortrait,
-                                        posterLandscape = state.gridPosterLandscape,
-                                        thumbnailPortrait = state.gridThumbnailPortrait,
-                                        thumbnailLandscape = state.gridThumbnailLandscape,
-                                    ),
-                                LocalGridGap provides GridGapBase * state.gridGapScale,
-                            ) {
-                                NavigationRoot(
-                                    hasServers = state.hasServers,
-                                    hasCurrentServer = state.hasCurrentServer,
-                                    hasCurrentUser = state.hasCurrentUser,
-                                    confirmExit = state.confirmExit,
+            FindroidTheme {
+                if (!state.isLoading) {
+                    // When the status bar is hidden, consume its inset (including the display
+                    // cutout, which only becomes non-zero once the bar is gone) for the whole app
+                    // so no screen or the nav rail reserves that space.
+                    Box(
+                        modifier =
+                            if (state.hideStatusBar) {
+                                Modifier.consumeWindowInsets(
+                                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
                                 )
+                            } else {
+                                Modifier
                             }
+                    ) {
+                        CompositionLocalProvider(
+                            LocalOfflineMode provides state.isOfflineMode,
+                            LocalBackdropRatios provides
+                                BackdropRatios(
+                                    portrait = state.backdropPortraitRatio,
+                                    landscape = state.backdropLandscapeRatio,
+                                ),
+                            LocalContentSpacingScale provides state.contentSpacingScale,
+                            LocalHideStatusBar provides state.hideStatusBar,
+                            LocalTitleImageConfig provides
+                                TitleImageConfig(
+                                    portraitWidth = state.titlePortraitWidth,
+                                    landscapeWidth = state.titleLandscapeWidth,
+                                    ratio = state.titleImageRatio,
+                                ),
+                            LocalGridColumns provides
+                                GridColumns(
+                                    posterPortrait = state.gridPosterPortrait,
+                                    posterLandscape = state.gridPosterLandscape,
+                                    thumbnailPortrait = state.gridThumbnailPortrait,
+                                    thumbnailLandscape = state.gridThumbnailLandscape,
+                                ),
+                            LocalGridGap provides GridGapBase * state.gridGapScale,
+                        ) {
+                            NavigationRoot(
+                                hasServers = state.hasServers,
+                                hasCurrentServer = state.hasCurrentServer,
+                                hasCurrentUser = state.hasCurrentUser,
+                                confirmExit = state.confirmExit,
+                            )
                         }
                     }
                 }

@@ -6,6 +6,4 @@
     <dimen name="overview_media_width">150dp</dimen>
     <dimen name="person_detail_overview_height">72dp</dimen>
     <dimen name="player_panel_width">400dp</dimen>
-    <!-- Matches CornerRadius.Default; XML cannot read the Compose preference (see HANDOVER 5b). -->
-    <dimen name="radius_rounded">10dp</dimen>
 </resources>
