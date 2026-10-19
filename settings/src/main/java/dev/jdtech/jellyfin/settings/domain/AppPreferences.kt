@@ -36,6 +36,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val displayExtraInfo = Preference("pref_display_extra_info", false)
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2.3333333")
+
+    /** Corner radius for cards, tiles, badges and rounded buttons; see [CornerRadius]. */
+    val interfaceCornerRadius = Preference("pref_interface_corner_radius", "default")
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.3")
     val titlePlayerWidth = Preference("pref_title_player_width", "0.2")

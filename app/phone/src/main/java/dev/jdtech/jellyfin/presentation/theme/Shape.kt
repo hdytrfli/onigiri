@@ -1,7 +1,12 @@
 package dev.jdtech.jellyfin.presentation.theme
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
-import androidx.compose.ui.unit.dp
 
-val shapes = Shapes(extraSmall = RoundedCornerShape(10.dp), small = RoundedCornerShape(10.dp))
+/**
+ * The theme's shapes all read the one corner radius so every card, tile, badge and control follows
+ * the Interface setting. `extraLarge` is left alone: it is the dialog container, which is excluded.
+ */
+fun appShapes(cornerRadius: CornerRadius): Shapes {
+    val shape = cornerRadius.shape
+    return Shapes(extraSmall = shape, small = shape, medium = shape, large = shape)
+}

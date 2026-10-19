@@ -171,6 +171,18 @@
         <item>1.5</item>
         <item>2</item>
     </string-array>
+    <string-array name="corner_radius_options">
+        <item>@string/corner_radius_small</item>
+        <item>@string/corner_radius_default</item>
+        <item>@string/corner_radius_large</item>
+        <item>@string/corner_radius_pill</item>
+    </string-array>
+    <string-array name="corner_radius_values">
+        <item>small</item>
+        <item>default</item>
+        <item>large</item>
+        <item>pill</item>
+    </string-array>
     <string-array name="title_width_options">
         <item>40%</item>
         <item>50%</item>

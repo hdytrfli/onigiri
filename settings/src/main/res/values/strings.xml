@@ -90,6 +90,12 @@
     <string name="extra_info">Display Extra Info</string>
     <string name="extra_info_summary">Detailed audio, video and subtitle information</string>
     <string name="backdrop">Backdrop</string>
+    <string name="corner_radius">Corner radius</string>
+    <string name="corner_radius_summary">How round the cards, tiles and buttons are</string>
+    <string name="corner_radius_small">Small</string>
+    <string name="corner_radius_default">Default</string>
+    <string name="corner_radius_large">Large</string>
+    <string name="corner_radius_pill">Pill</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="title_image">Title image</string>
