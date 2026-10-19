@@ -1,32 +1,19 @@
 package dev.jdtech.jellyfin.presentation.settings.components
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
@@ -58,63 +45,15 @@ fun SettingsSelectDialog(
 
         LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
             items(items = options, key = { it.first ?: "null" }) { option ->
-                SettingsSelectDialogItem(
-                    option = option,
-                    isSelected = option.first == preference.value,
+                AppOptionRow(
+                    text = option.second,
+                    onClick = { onUpdate(option.first) },
+                    selected = option.first == preference.value,
                     iconDrawableId = optionIcon,
-                    onSelect = onUpdate,
+                    role = Role.RadioButton,
                 )
             }
         }
-    }
-}
-
-/**
- * One option row, styled like the player sheet's track list: a leading icon, the label, and a
- * trailing check mark that only shows for the current selection.
- */
-@Composable
-private fun SettingsSelectDialogItem(
-    option: Pair<String?, String>,
-    isSelected: Boolean,
-    iconDrawableId: Int?,
-    onSelect: (String?) -> Unit,
-) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .selectable(
-                    selected = isSelected,
-                    role = Role.RadioButton,
-                    onClick = { onSelect(option.first) },
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (iconDrawableId != null) {
-            Icon(
-                painter = painterResource(iconDrawableId),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
-        }
-
-        Text(
-            text = option.second,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
-        )
-
-        Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
-
-        Icon(
-            painter = painterResource(CoreR.drawable.ic_check),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp).alpha(if (isSelected) 1f else 0f),
-            tint = MaterialTheme.colorScheme.primary,
-        )
     }
 }
 

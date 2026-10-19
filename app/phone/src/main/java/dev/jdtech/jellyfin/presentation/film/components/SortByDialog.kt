@@ -4,17 +4,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,19 +24,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
+import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -116,49 +110,18 @@ fun SortByDialog(
             }
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
                 items(options) { option ->
-                    SortByDialogItem(
-                        option = option,
-                        isSelected = option.first == selectedOption,
-                        onSelect = {
+                    AppOptionRow(
+                        text = option.second,
+                        onClick = {
                             selectedOption = option.first
                             onUpdate(selectedOption, selectedOrder)
                         },
+                        selected = option.first == selectedOption,
+                        role = Role.RadioButton,
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun SortByDialogItem(
-    option: Pair<SortBy, String>,
-    isSelected: Boolean,
-    onSelect: (SortBy) -> Unit,
-) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .selectable(
-                    selected = isSelected,
-                    role = Role.RadioButton,
-                    onClick = { onSelect(option.first) },
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = option.second,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
-        )
-        Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
-        Icon(
-            painter = painterResource(CoreR.drawable.ic_check),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp).alpha(if (isSelected) 1f else 0f),
-            tint = MaterialTheme.colorScheme.primary,
-        )
     }
 }
 
