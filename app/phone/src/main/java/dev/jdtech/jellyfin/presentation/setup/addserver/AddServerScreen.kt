@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +43,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.setup.components.DiscoveredServerItem
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
@@ -132,19 +132,16 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                 }
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-            OutlinedTextField(
+            AppTextField(
                 value = serverAddress,
-                leadingIcon = {
+                onValueChange = { serverAddress = it },
+                label = stringResource(SetupR.string.edit_text_server_address_hint),
+                leadingContent = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_server),
                         contentDescription = null,
                     )
                 },
-                onValueChange = { serverAddress = it },
-                label = {
-                    Text(text = stringResource(SetupR.string.edit_text_server_address_hint))
-                },
-                singleLine = true,
                 keyboardOptions =
                     KeyboardOptions(
                         autoCorrectEnabled = false,
@@ -154,14 +151,7 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                 keyboardActions = KeyboardActions(onGo = { doConnect() }),
                 isError = state.error != null,
                 enabled = !state.isLoading,
-                supportingText = {
-                    if (state.error != null) {
-                        Text(
-                            text = state.error!!.joinToString { it.asString(context.resources) },
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                },
+                supportingText = state.error?.joinToString { it.asString(context.resources) },
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
             )
             LoadingButton(

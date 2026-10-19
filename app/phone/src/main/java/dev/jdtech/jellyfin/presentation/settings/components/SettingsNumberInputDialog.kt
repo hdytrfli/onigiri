@@ -1,11 +1,9 @@
 package dev.jdtech.jellyfin.presentation.settings.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,13 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
@@ -74,11 +71,7 @@ fun SettingsNumberInputDialog(
     onDismissRequest: () -> Unit,
     suffix: String? = null,
 ) {
-    var textFieldValue by remember {
-        mutableStateOf(
-            TextFieldValue(text = initialValue, selection = TextRange(initialValue.length))
-        )
-    }
+    var text by remember { mutableStateOf(initialValue) }
 
     val focusRequester = remember { FocusRequester() }
 
@@ -97,25 +90,20 @@ fun SettingsNumberInputDialog(
             }
         },
         positiveButton = {
-            AppButton(onClick = { onUpdate(textFieldValue.text) }) {
+            AppButton(onClick = { onUpdate(text) }) {
                 Text(text = stringResource(SettingsR.string.save))
             }
         },
     ) { contentPadding ->
         Column(modifier = Modifier.padding(contentPadding)) {
-            OutlinedTextField(
-                value = textFieldValue,
-                onValueChange = {
-                    if (it.text.isEmpty() || it.text.matches(pattern)) {
-                        textFieldValue = it
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                suffix = { suffix?.let { Text(text = it) } },
+            AppTextField(
+                value = text,
+                onValueChange = { if (it.isEmpty() || it.matches(pattern)) text = it },
+                modifier = Modifier.focusRequester(focusRequester),
+                trailingText = suffix,
                 keyboardOptions =
                     KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { onUpdate(textFieldValue.text) }),
-                singleLine = true,
+                keyboardActions = KeyboardActions(onDone = { onUpdate(text) }),
             )
         }
     }

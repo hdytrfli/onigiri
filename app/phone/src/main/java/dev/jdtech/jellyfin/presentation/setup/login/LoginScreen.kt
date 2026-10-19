@@ -24,7 +24,6 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,8 +46,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -135,17 +136,16 @@ private fun LoginScreenLayout(
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
-            OutlinedTextField(
+            AppTextField(
                 value = username,
-                leadingIcon = {
+                onValueChange = { username = it },
+                label = stringResource(SetupR.string.edit_text_username_hint),
+                leadingContent = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_user),
                         contentDescription = null,
                     )
                 },
-                onValueChange = { username = it },
-                label = { Text(text = stringResource(SetupR.string.edit_text_username_hint)) },
-                singleLine = true,
                 keyboardOptions =
                     KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Next),
                 isError = state.error != null,
@@ -153,17 +153,20 @@ private fun LoginScreenLayout(
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-            OutlinedTextField(
+            AppTextField(
                 value = password,
-                leadingIcon = {
+                onValueChange = { password = it },
+                label = stringResource(SetupR.string.edit_text_password_hint),
+                leadingContent = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_lock),
                         contentDescription = null,
                     )
                 },
-                trailingIcon = {
+                trailingContent = {
                     AppIconButton(
                         onClick = { passwordVisible = !passwordVisible },
+                        size = AppButtonSize.Decorator,
                         variant = AppButtonVariant.Ghost,
                         content = {
                             Icon(
@@ -175,9 +178,6 @@ private fun LoginScreenLayout(
                         },
                     )
                 },
-                onValueChange = { password = it },
-                label = { Text(text = stringResource(SetupR.string.edit_text_password_hint)) },
-                singleLine = true,
                 keyboardOptions =
                     KeyboardOptions(
                         autoCorrectEnabled = false,
@@ -190,14 +190,7 @@ private fun LoginScreenLayout(
                     else PasswordVisualTransformation(),
                 isError = state.error != null,
                 enabled = !state.isLoading,
-                supportingText = {
-                    if (state.error != null) {
-                        Text(
-                            text = state.error!!.asString(),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                },
+                supportingText = state.error?.asString(),
                 modifier = Modifier.fillMaxWidth(),
             )
             LoadingButton(
