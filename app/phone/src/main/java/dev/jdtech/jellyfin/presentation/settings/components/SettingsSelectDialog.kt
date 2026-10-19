@@ -10,14 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.drawableRes
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference
+import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
-import dev.jdtech.jellyfin.settings.presentation.models.SelectOptionIcon
 
 @Composable
 fun SettingsSelectDialog(
@@ -28,12 +28,7 @@ fun SettingsSelectDialog(
 ) {
     val lazyListState = rememberLazyListState()
 
-    val optionIcon =
-        when (preference.optionIcon) {
-            SelectOptionIcon.Audio -> CoreR.drawable.ic_music
-            SelectOptionIcon.Subtitle -> CoreR.drawable.ic_case_sensitive
-            null -> null
-        }
+    val optionIcon = preference.optionIcon?.drawableRes()
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
@@ -65,7 +60,7 @@ private fun SettingsSelectDialogPreview() {
             preference =
                 PreferenceSelect(
                     nameStringResource = SettingsR.string.settings_preferred_audio_language,
-                    optionIcon = SelectOptionIcon.Audio,
+                    optionIcon = OptionIcon.Audio,
                     backendPreference = Preference("", ""),
                     options = SettingsR.array.languages,
                     optionValues = SettingsR.array.languages_values,

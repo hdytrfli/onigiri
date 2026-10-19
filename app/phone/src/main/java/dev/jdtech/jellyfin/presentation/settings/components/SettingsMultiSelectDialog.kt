@@ -18,9 +18,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.drawableRes
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference
+import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 
 @Composable
@@ -69,6 +71,7 @@ fun SettingsMultiSelectDialog(
                     },
                     selected = checked,
                     role = Role.Checkbox,
+                    iconDrawableId = preference.optionIcon?.drawableRes(),
                 )
             }
         }
@@ -90,6 +93,7 @@ private fun SettingsMultiSelectDialogPreview() {
                     backendPreference = Preference("", emptySet()),
                     options = SettingsR.array.media_segments_type,
                     optionValues = SettingsR.array.media_segments_type_values,
+                    optionIcon = OptionIcon.Segment,
                 ),
             options = listOf("a" to "Option A", "b" to "Option B", "c" to "Option C"),
             onUpdate = {},

@@ -11,8 +11,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.drawableRes
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 
 @Composable
 fun StorageSelectionDialog(
@@ -32,6 +34,7 @@ fun StorageSelectionDialog(
                     text = storageLocation,
                     onClick = { onSelect(index) },
                     showCheck = false,
+                    iconDrawableId = OptionIcon.Storage.drawableRes(),
                 )
             }
         }

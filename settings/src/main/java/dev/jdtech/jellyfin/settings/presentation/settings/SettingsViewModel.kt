@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.jdtech.jellyfin.settings.R
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
+import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceAction
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceAppLanguage
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
@@ -20,7 +21,6 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
-import dev.jdtech.jellyfin.settings.presentation.models.SelectOptionIcon
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,7 +86,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_audio_language_summary,
-                                                    optionIcon = SelectOptionIcon.Audio,
+                                                    optionIcon = OptionIcon.Audio,
                                                     backendPreference =
                                                         appPreferences.preferredAudioLanguage,
                                                     options = R.array.languages,
@@ -100,7 +100,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_subtitle_language_summary,
-                                                    optionIcon = SelectOptionIcon.Subtitle,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.preferredSubtitleLanguage,
                                                     options = R.array.languages,
@@ -218,6 +218,7 @@ constructor(
                                                     nameStringResource = R.string.grid_spacing,
                                                     descriptionStringRes =
                                                         R.string.grid_spacing_summary,
+                                                    optionIcon = OptionIcon.Layout,
                                                     backendPreference = appPreferences.gridSpacing,
                                                     options = R.array.grid_spacing_options,
                                                     optionValues = R.array.grid_spacing_values,
@@ -233,6 +234,7 @@ constructor(
                                                         R.string.backdrop_portrait_ratio,
                                                     descriptionStringRes =
                                                         R.string.backdrop_portrait_ratio_summary,
+                                                    optionIcon = OptionIcon.Image,
                                                     backendPreference =
                                                         appPreferences.backdropPortraitRatio,
                                                     options = R.array.backdrop_ratios,
@@ -243,6 +245,7 @@ constructor(
                                                         R.string.backdrop_landscape_ratio,
                                                     descriptionStringRes =
                                                         R.string.backdrop_landscape_ratio_summary,
+                                                    optionIcon = OptionIcon.Image,
                                                     backendPreference =
                                                         appPreferences.backdropLandscapeRatio,
                                                     options = R.array.backdrop_ratios,
@@ -259,6 +262,7 @@ constructor(
                                                         R.string.title_portrait_width,
                                                     descriptionStringRes =
                                                         R.string.title_portrait_width_summary,
+                                                    optionIcon = OptionIcon.Text,
                                                     backendPreference =
                                                         appPreferences.titlePortraitWidth,
                                                     options = R.array.title_width_options,
@@ -269,6 +273,7 @@ constructor(
                                                         R.string.title_landscape_width,
                                                     descriptionStringRes =
                                                         R.string.title_landscape_width_summary,
+                                                    optionIcon = OptionIcon.Text,
                                                     backendPreference =
                                                         appPreferences.titleLandscapeWidth,
                                                     options = R.array.title_width_options_low,
@@ -279,6 +284,7 @@ constructor(
                                                         R.string.title_player_width,
                                                     descriptionStringRes =
                                                         R.string.title_player_width_summary,
+                                                    optionIcon = OptionIcon.Text,
                                                     backendPreference =
                                                         appPreferences.titlePlayerWidth,
                                                     options = R.array.title_width_options_low,
@@ -288,6 +294,7 @@ constructor(
                                                     nameStringResource = R.string.title_image_ratio,
                                                     descriptionStringRes =
                                                         R.string.title_image_ratio_summary,
+                                                    optionIcon = OptionIcon.Image,
                                                     backendPreference =
                                                         appPreferences.titleImageRatio,
                                                     options = R.array.title_ratio_options,
@@ -395,6 +402,8 @@ constructor(
                                                                             descriptionStringRes =
                                                                                 R.string
                                                                                     .pref_player_mpv_hwdec_summary,
+                                                                            optionIcon =
+                                                                                OptionIcon.Playback,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvHwdec,
@@ -411,6 +420,8 @@ constructor(
                                                                             descriptionStringRes =
                                                                                 R.string
                                                                                     .pref_player_mpv_vo_summary,
+                                                                            optionIcon =
+                                                                                OptionIcon.Video,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvVo,
@@ -427,6 +438,8 @@ constructor(
                                                                             descriptionStringRes =
                                                                                 R.string
                                                                                     .pref_player_mpv_ao_summary,
+                                                                            optionIcon =
+                                                                                OptionIcon.Audio,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvAo,
@@ -504,6 +517,7 @@ constructor(
                                                         R.string.pref_player_time_display,
                                                     descriptionStringRes =
                                                         R.string.pref_player_time_display_summary,
+                                                    optionIcon = OptionIcon.Clock,
                                                     backendPreference =
                                                         appPreferences.playerTimeDisplay,
                                                     onUpdate = { value ->
@@ -528,6 +542,7 @@ constructor(
                                                     dependencies =
                                                         listOf(appPreferences.playerTimeShowFinish),
                                                     hideWhenDisabled = true,
+                                                    optionIcon = OptionIcon.Clock,
                                                     backendPreference =
                                                         appPreferences.playerTimeEndFormat,
                                                     options =
@@ -619,6 +634,7 @@ constructor(
                                                         R.string.player_controls_timeout,
                                                     descriptionStringRes =
                                                         R.string.player_controls_timeout_summary,
+                                                    optionIcon = OptionIcon.Clock,
                                                     backendPreference =
                                                         appPreferences.playerControlsTimeout,
                                                     options =
@@ -688,6 +704,7 @@ constructor(
                                                             appPreferences
                                                                 .playerMediaSegmentsSkipButton
                                                         ),
+                                                    optionIcon = OptionIcon.Segment,
                                                     backendPreference =
                                                         appPreferences
                                                             .playerMediaSegmentsSkipButtonType,
@@ -734,6 +751,7 @@ constructor(
                                                             appPreferences
                                                                 .playerMediaSegmentsAutoSkip
                                                         ),
+                                                    optionIcon = OptionIcon.Segment,
                                                     backendPreference =
                                                         appPreferences
                                                             .playerMediaSegmentsAutoSkipMode,
@@ -753,6 +771,7 @@ constructor(
                                                             appPreferences
                                                                 .playerMediaSegmentsAutoSkip
                                                         ),
+                                                    optionIcon = OptionIcon.Segment,
                                                     backendPreference =
                                                         appPreferences
                                                             .playerMediaSegmentsAutoSkipType,
@@ -841,6 +860,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .pref_player_mpv_sub_font_size_summary,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubFontSize,
                                                     options = R.array.mpv_sub_font_size,
@@ -868,6 +888,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .pref_player_mpv_sub_font_weight_summary,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubFontWeight,
                                                     options = R.array.mpv_sub_font_weights,
@@ -879,6 +900,7 @@ constructor(
                                                         R.string.pref_player_mpv_sub_color,
                                                     descriptionStringRes =
                                                         R.string.pref_player_mpv_sub_color_summary,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubColor,
                                                     options = R.array.mpv_sub_colors,
@@ -890,6 +912,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .pref_player_mpv_sub_ass_override_summary,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubAssOverride,
                                                     options = R.array.mpv_sub_ass_override,
@@ -922,6 +945,7 @@ constructor(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
                                                     hideWhenDisabled = true,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderStyle,
                                                     options = R.array.mpv_sub_border_style,
@@ -939,6 +963,7 @@ constructor(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
                                                     hideWhenDisabled = true,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderSize,
                                                     options = R.array.mpv_sub_border_size,
@@ -955,6 +980,7 @@ constructor(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
                                                     hideWhenDisabled = true,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderColor,
                                                     options = R.array.mpv_sub_colors,
@@ -971,6 +997,7 @@ constructor(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
                                                     hideWhenDisabled = true,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderOpacity,
                                                     options = R.array.mpv_sub_border_opacity,
@@ -988,6 +1015,7 @@ constructor(
                                                         R.string.pref_player_mpv_sub_pos,
                                                     descriptionStringRes =
                                                         R.string.pref_player_mpv_sub_pos_summary,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubPosition,
                                                     options = R.array.mpv_sub_pos,
