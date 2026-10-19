@@ -85,6 +85,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_audio_language_summary,
+                                                    iconDrawableId = R.drawable.ic_speaker,
                                                     backendPreference =
                                                         appPreferences.preferredAudioLanguage,
                                                     options = R.array.languages,
@@ -98,6 +99,7 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_preferred_subtitle_language_summary,
+                                                    iconDrawableId = R.drawable.ic_closed_caption,
                                                     backendPreference =
                                                         appPreferences.preferredSubtitleLanguage,
                                                     options = R.array.languages,
