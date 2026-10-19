@@ -12,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
@@ -146,12 +146,18 @@ private fun SettingsFileEditScreenLayout(
             title = stringResource(SettingsR.string.discard_changes_dialog_title),
             onDismiss = { showDiscardDialog = false },
             negativeButton = {
-                TextButton(onClick = { showDiscardDialog = false }) {
+                AppButton(
+                    onClick = { showDiscardDialog = false },
+                    variant = AppButtonVariant.Ghost,
+                ) {
                     Text(stringResource(CoreR.string.cancel))
                 }
             },
             positiveButton = {
-                TextButton(onClick = { onAction(SettingsFileEditAction.OnBackClick) }) {
+                AppButton(
+                    onClick = { onAction(SettingsFileEditAction.OnBackClick) },
+                    variant = AppButtonVariant.Destructive,
+                ) {
                     Text(stringResource(CoreR.string.discard))
                 }
             },

@@ -42,7 +42,7 @@ fun AppOptionRow(
             modifier
                 .fillMaxWidth()
                 .selectable(selected = selected, role = role, onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (iconDrawableId != null) {
@@ -50,7 +50,7 @@ fun AppOptionRow(
                 painter = painterResource(iconDrawableId),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             )
             Spacer(modifier = Modifier.width(16.dp))
         }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,7 +26,8 @@ fun ErrorDialog(exception: Throwable, onDismissRequest: () -> Unit) {
         title = exception.message ?: stringResource(CoreR.string.unknown_error),
         onDismiss = onDismissRequest,
         negativeButton = {
-            TextButton(
+            AppButton(
+                variant = AppButtonVariant.Ghost,
                 onClick = {
                     val sendIntent =
                         Intent().apply {
@@ -40,13 +40,13 @@ fun ErrorDialog(exception: Throwable, onDismissRequest: () -> Unit) {
                         }
                     val shareIntent = Intent.createChooser(sendIntent, null)
                     context.startActivity(shareIntent)
-                }
+                },
             ) {
                 Text(stringResource(CoreR.string.share))
             }
         },
         positiveButton = {
-            TextButton(onClick = onDismissRequest) { Text(stringResource(CoreR.string.close)) }
+            AppButton(onClick = onDismissRequest) { Text(stringResource(CoreR.string.close)) }
         },
     ) { contentPadding ->
         Text(

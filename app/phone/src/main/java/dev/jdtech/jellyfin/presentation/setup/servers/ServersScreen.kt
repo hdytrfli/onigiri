@@ -16,7 +16,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +37,7 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServerAddress
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.models.ServerWithAddresses
+import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
@@ -176,12 +176,15 @@ private fun ServersScreenLayout(
             title = stringResource(SetupR.string.remove_server_dialog),
             onDismiss = { openDeleteDialog = false },
             negativeButton = {
-                TextButton(onClick = { openDeleteDialog = false }) {
+                AppButton(
+                    onClick = { openDeleteDialog = false },
+                    variant = AppButtonVariant.Ghost,
+                ) {
                     Text(text = stringResource(SetupR.string.cancel))
                 }
             },
             positiveButton = {
-                TextButton(
+                AppButton(
                     onClick = {
                         openDeleteDialog = false
                         scope
@@ -192,7 +195,8 @@ private fun ServersScreenLayout(
                                 }
                             }
                         onAction(ServersAction.DeleteServer(selectedServer!!.server.id))
-                    }
+                    },
+                    variant = AppButtonVariant.Destructive,
                 ) {
                     Text(text = stringResource(SetupR.string.confirm))
                 }

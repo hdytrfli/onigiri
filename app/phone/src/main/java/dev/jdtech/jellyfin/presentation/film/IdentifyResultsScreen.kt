@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +46,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyEvent
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
+import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
@@ -237,7 +237,7 @@ private fun IdentifyInfoDialog(info: RemoteSearchResult, onDismiss: () -> Unit) 
         onDismiss = onDismiss,
         negativeButton = {},
         positiveButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
+            AppButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
         },
     ) { contentPadding ->
         Column(

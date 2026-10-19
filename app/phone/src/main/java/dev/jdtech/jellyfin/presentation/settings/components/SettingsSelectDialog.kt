@@ -32,11 +32,10 @@ fun SettingsSelectDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
     ) {
-        if (lazyListState.canScrollBackward) {
-            HorizontalDivider()
-        }
+        HorizontalDivider()
 
         LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
             items(items = options, key = { it.first ?: "null" }) { option ->

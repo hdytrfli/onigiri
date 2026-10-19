@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.drawableRes
@@ -38,21 +39,20 @@ fun SettingsMultiSelectDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
-            TextButton(onClick = onDismissRequest) {
+            AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Ghost) {
                 Text(text = stringResource(SettingsR.string.cancel))
             }
         },
         positiveButton = {
-            TextButton(onClick = { onUpdate(selectedOptions) }) {
+            AppButton(onClick = { onUpdate(selectedOptions) }) {
                 Text(text = stringResource(SettingsR.string.save))
             }
         },
     ) {
-        if (lazyListState.canScrollBackward) {
-            HorizontalDivider()
-        }
+        HorizontalDivider()
         LazyColumn(
             modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
             state = lazyListState,

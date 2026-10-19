@@ -1,16 +1,12 @@
 package dev.jdtech.jellyfin.presentation.settings.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,9 +22,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
 import dev.jdtech.jellyfin.settings.presentation.models.Preference
@@ -92,27 +89,20 @@ fun SettingsNumberInputDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
-            TextButton(onClick = onDismissRequest) {
+            AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Ghost) {
                 Text(text = stringResource(SettingsR.string.cancel))
             }
         },
         positiveButton = {
-            TextButton(onClick = { onUpdate(textFieldValue.text) }) {
+            AppButton(onClick = { onUpdate(textFieldValue.text) }) {
                 Text(text = stringResource(SettingsR.string.save))
             }
         },
     ) { contentPadding ->
         Column(modifier = Modifier.padding(contentPadding)) {
-            preference.descriptionStringRes?.let {
-                Text(
-                    text = stringResource(it),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-            }
             OutlinedTextField(
                 value = textFieldValue,
                 onValueChange = {

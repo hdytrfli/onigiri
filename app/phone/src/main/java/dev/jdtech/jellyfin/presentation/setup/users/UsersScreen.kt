@@ -15,7 +15,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
@@ -186,16 +186,20 @@ private fun UsersScreenLayout(
                 title = stringResource(SetupR.string.remove_user_dialog),
                 onDismiss = { openDeleteDialog = false },
                 negativeButton = {
-                    TextButton(onClick = { openDeleteDialog = false }) {
+                    AppButton(
+                        onClick = { openDeleteDialog = false },
+                        variant = AppButtonVariant.Ghost,
+                    ) {
                         Text(text = stringResource(SetupR.string.cancel))
                     }
                 },
                 positiveButton = {
-                    TextButton(
+                    AppButton(
                         onClick = {
                             openDeleteDialog = false
                             onAction(UsersAction.OnDeleteUser(selectedUser!!.id))
-                        }
+                        },
+                        variant = AppButtonVariant.Destructive,
                     ) {
                         Text(text = stringResource(SetupR.string.confirm))
                     }

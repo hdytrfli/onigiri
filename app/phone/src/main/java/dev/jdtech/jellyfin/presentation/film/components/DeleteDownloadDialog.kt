@@ -2,12 +2,13 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 
@@ -17,10 +18,12 @@ fun DeleteDownloadDialog(onDelete: () -> Unit, onDismiss: () -> Unit) {
         title = stringResource(CoreR.string.delete_download),
         onDismiss = onDismiss,
         negativeButton = {
-            TextButton(onClick = onDismiss) { Text(text = stringResource(CoreR.string.cancel)) }
+            AppButton(onClick = onDismiss, variant = AppButtonVariant.Ghost) {
+                Text(text = stringResource(CoreR.string.cancel))
+            }
         },
         positiveButton = {
-            TextButton(onClick = onDelete) {
+            AppButton(onClick = onDelete, variant = AppButtonVariant.Destructive) {
                 Text(text = stringResource(CoreR.string.delete_download))
             }
         },

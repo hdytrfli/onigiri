@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -379,7 +378,7 @@ private fun SubtitleInfoDialog(info: RemoteSubtitleInfo, onDismiss: () -> Unit) 
         onDismiss = onDismiss,
         negativeButton = {},
         positiveButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
+            AppButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
         },
     ) { contentPadding ->
         Column(

@@ -19,7 +19,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,13 +60,6 @@ fun SortByDialog(
 
     val lazyListState = rememberLazyListState()
 
-    val isAtTop by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex == 0 &&
-                lazyListState.firstVisibleItemScrollOffset == 0
-        }
-    }
-
     BaseDialog(title = stringResource(CoreR.string.sort_by), onDismiss = onDismissRequest) {
         contentPadding ->
         Column {
@@ -107,9 +99,7 @@ fun SortByDialog(
                 }
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-            if (!isAtTop) {
-                HorizontalDivider()
-            }
+            HorizontalDivider()
             LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
                 items(options) { option ->
                     AppOptionRow(
