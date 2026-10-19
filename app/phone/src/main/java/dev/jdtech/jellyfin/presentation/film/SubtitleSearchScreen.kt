@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
@@ -50,7 +51,6 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -374,75 +374,59 @@ private fun LanguageDialogItem(name: String, selected: Boolean, onSelect: () -> 
 
 @Composable
 private fun SubtitleInfoDialog(info: RemoteSubtitleInfo, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier.width(Dimens.formMaxWidth).height(440.dp),
-            shape = MaterialTheme.shapes.extraLarge,
+    BaseDialog(
+        title = stringResource(CoreR.string.subtitle_details),
+        onDismiss = onDismiss,
+        negativeButton = {},
+        positiveButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
+        },
+    ) { contentPadding ->
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .heightIn(max = 360.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(contentPadding),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = stringResource(CoreR.string.subtitle_details),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(MaterialTheme.spacings.default),
-                )
-                HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState())
-                            .padding(MaterialTheme.spacings.default),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                ) {
-                    info.providerName?.let {
-                        InfoRow(stringResource(CoreR.string.subtitle_source), it)
-                    }
-                    info.threeLetterIsoLanguageName?.let {
-                        InfoRow(stringResource(CoreR.string.language), it)
-                    }
-                    info.format?.let { InfoRow(stringResource(CoreR.string.subtitle_format), it) }
-                    info.author?.let { InfoRow(stringResource(CoreR.string.subtitle_author), it) }
-                    info.downloadCount?.let {
-                        InfoRow(stringResource(CoreR.string.subtitle_downloads), it.toString())
-                    }
-                    info.communityRating?.let {
-                        InfoRow(stringResource(CoreR.string.subtitle_rating), "%.1f".format(it))
-                    }
-                    info.frameRate?.let {
-                        InfoRow(stringResource(CoreR.string.subtitle_frame_rate), it.toString())
-                    }
-                    val flags =
-                        listOfNotNull(
-                            if (info.hearingImpaired == true)
-                                stringResource(CoreR.string.subtitle_hearing_impaired)
-                            else null,
-                            if (info.forced == true) stringResource(CoreR.string.subtitle_forced)
-                            else null,
-                            if (info.aiTranslated == true)
-                                stringResource(CoreR.string.subtitle_ai_translated)
-                            else null,
-                            if (info.machineTranslated == true)
-                                stringResource(CoreR.string.subtitle_machine_translated)
-                            else null,
-                        )
-                    if (flags.isNotEmpty()) {
-                        InfoRow(
-                            stringResource(CoreR.string.subtitle_details),
-                            flags.joinToString(" · "),
-                        )
-                    }
-                    info.comment
-                        ?.takeIf { it.isNotBlank() }
-                        ?.let { InfoRow(stringResource(CoreR.string.subtitle_comment), it) }
-                }
-                HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(MaterialTheme.spacings.small),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
-                }
+            info.providerName?.let { InfoRow(stringResource(CoreR.string.subtitle_source), it) }
+            info.threeLetterIsoLanguageName?.let {
+                InfoRow(stringResource(CoreR.string.language), it)
             }
+            info.format?.let { InfoRow(stringResource(CoreR.string.subtitle_format), it) }
+            info.author?.let { InfoRow(stringResource(CoreR.string.subtitle_author), it) }
+            info.downloadCount?.let {
+                InfoRow(stringResource(CoreR.string.subtitle_downloads), it.toString())
+            }
+            info.communityRating?.let {
+                InfoRow(stringResource(CoreR.string.subtitle_rating), "%.1f".format(it))
+            }
+            info.frameRate?.let {
+                InfoRow(stringResource(CoreR.string.subtitle_frame_rate), it.toString())
+            }
+            val flags =
+                listOfNotNull(
+                    if (info.hearingImpaired == true)
+                        stringResource(CoreR.string.subtitle_hearing_impaired)
+                    else null,
+                    if (info.forced == true) stringResource(CoreR.string.subtitle_forced) else null,
+                    if (info.aiTranslated == true)
+                        stringResource(CoreR.string.subtitle_ai_translated)
+                    else null,
+                    if (info.machineTranslated == true)
+                        stringResource(CoreR.string.subtitle_machine_translated)
+                    else null,
+                )
+            if (flags.isNotEmpty()) {
+                InfoRow(
+                    stringResource(CoreR.string.subtitle_details),
+                    flags.joinToString(" · "),
+                )
+            }
+            info.comment
+                ?.takeIf { it.isNotBlank() }
+                ?.let { InfoRow(stringResource(CoreR.string.subtitle_comment), it) }
         }
     }
 }

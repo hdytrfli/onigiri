@@ -33,7 +33,6 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
-    description: String? = null,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -49,17 +48,11 @@ fun BaseDialog(
                 ),
         ) {
             Column {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium)
-                    if (!description.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                )
                 content(PaddingValues(horizontal = MaterialTheme.spacings.medium))
                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
             }

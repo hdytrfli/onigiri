@@ -50,7 +50,6 @@ fun SettingsSelectDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
-        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
     ) {
         if (lazyListState.canScrollBackward) {

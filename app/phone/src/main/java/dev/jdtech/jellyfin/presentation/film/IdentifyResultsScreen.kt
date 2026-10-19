@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,6 +49,7 @@ import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -232,44 +232,40 @@ private fun IdentifyResultCard(
 
 @Composable
 private fun IdentifyInfoDialog(info: RemoteSearchResult, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = info.name.orEmpty(),
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            ) {
-                info.productionYear?.let {
-                    InfoRow(stringResource(CoreR.string.identify_year), it.toString())
-                }
-                info.searchProviderName?.let {
-                    InfoRow(stringResource(CoreR.string.identify_source), it)
-                }
-                info.providerIds
-                    ?.takeIf { it.isNotEmpty() }
-                    ?.let { ids ->
-                        InfoRow(
-                            stringResource(CoreR.string.identify_providers),
-                            ids.entries.joinToString(", ") { "${it.key}: ${it.value}" },
-                        )
-                    }
-                info.overview
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { InfoRow(stringResource(CoreR.string.identify_overview), it) }
-            }
-        },
-        confirmButton = {
+    BaseDialog(
+        title = info.name.orEmpty(),
+        onDismiss = onDismiss,
+        negativeButton = {},
+        positiveButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
         },
-    )
+    ) { contentPadding ->
+        Column(
+            modifier =
+                Modifier.heightIn(max = 400.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(contentPadding),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        ) {
+            info.productionYear?.let {
+                InfoRow(stringResource(CoreR.string.identify_year), it.toString())
+            }
+            info.searchProviderName?.let {
+                InfoRow(stringResource(CoreR.string.identify_source), it)
+            }
+            info.providerIds
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { ids ->
+                    InfoRow(
+                        stringResource(CoreR.string.identify_providers),
+                        ids.entries.joinToString(", ") { "${it.key}: ${it.value}" },
+                    )
+                }
+            info.overview
+                ?.takeIf { it.isNotBlank() }
+                ?.let { InfoRow(stringResource(CoreR.string.identify_overview), it) }
+        }
+    }
 }
 
 @Composable

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -41,6 +40,7 @@ import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.models.ServerWithAddresses
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.setup.components.ServerBottomSheet
 import dev.jdtech.jellyfin.presentation.setup.components.ServerItem
@@ -172,19 +172,15 @@ private fun ServersScreenLayout(
     }
 
     if (openDeleteDialog && selectedServer != null) {
-        AlertDialog(
-            title = { Text(text = stringResource(SetupR.string.remove_server_dialog)) },
-            text = {
-                Text(
-                    text =
-                        stringResource(
-                            SetupR.string.remove_server_dialog_text,
-                            selectedServer!!.server.name,
-                        )
-                )
+        BaseDialog(
+            title = stringResource(SetupR.string.remove_server_dialog),
+            onDismiss = { openDeleteDialog = false },
+            negativeButton = {
+                TextButton(onClick = { openDeleteDialog = false }) {
+                    Text(text = stringResource(SetupR.string.cancel))
+                }
             },
-            onDismissRequest = { openDeleteDialog = false },
-            confirmButton = {
+            positiveButton = {
                 TextButton(
                     onClick = {
                         openDeleteDialog = false
@@ -201,12 +197,16 @@ private fun ServersScreenLayout(
                     Text(text = stringResource(SetupR.string.confirm))
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { openDeleteDialog = false }) {
-                    Text(text = stringResource(SetupR.string.cancel))
-                }
-            },
-        )
+        ) { contentPadding ->
+            Text(
+                text =
+                    stringResource(
+                        SetupR.string.remove_server_dialog_text,
+                        selectedServer!!.server.name,
+                    ),
+                modifier = Modifier.padding(contentPadding),
+            )
+        }
     }
 
     if (showBottomSheet && selectedServer != null) {
