@@ -223,7 +223,7 @@ constructor(
                                                         appPreferences
                                                             .gridThumbnailColumnsLandscape,
                                                 ),
-                                                PreferenceSlider(
+                                                PreferenceSelect(
                                                     nameStringResource = R.string.grid_spacing,
                                                     descriptionStringRes =
                                                         R.string.grid_spacing_summary,
@@ -238,7 +238,7 @@ constructor(
                                         nameStringResource = R.string.backdrop,
                                         preferences =
                                             listOf(
-                                                PreferenceSlider(
+                                                PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.backdrop_portrait_ratio,
                                                     descriptionStringRes =
@@ -249,7 +249,7 @@ constructor(
                                                     options = R.array.backdrop_ratios,
                                                     optionValues = R.array.backdrop_ratios_values,
                                                 ),
-                                                PreferenceSlider(
+                                                PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.backdrop_landscape_ratio,
                                                     descriptionStringRes =
@@ -299,7 +299,7 @@ constructor(
                                                     options = R.array.title_width_options_low,
                                                     optionValues = R.array.title_width_values_low,
                                                 ),
-                                                PreferenceSlider(
+                                                PreferenceSelect(
                                                     nameStringResource = R.string.title_image_ratio,
                                                     descriptionStringRes =
                                                         R.string.title_image_ratio_summary,
@@ -1320,6 +1320,19 @@ constructor(
                                                 )
                                             }
                                             is PreferenceSelect -> {
+                                                preference.copy(
+                                                    enabled =
+                                                        preference.enabled &&
+                                                            preference.dependencies.all {
+                                                                appPreferences.getValue(it)
+                                                            },
+                                                    value =
+                                                        appPreferences.getValue(
+                                                            preference.backendPreference
+                                                        ),
+                                                )
+                                            }
+                                            is PreferenceSlider -> {
                                                 preference.copy(
                                                     enabled =
                                                         preference.enabled &&

@@ -3,12 +3,8 @@ package dev.jdtech.jellyfin.presentation.settings.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,17 +12,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.SteppedSlider
-import dev.jdtech.jellyfin.presentation.components.drawableRes
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
@@ -35,8 +32,8 @@ import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSlider
 
 /**
- * A scalar setting edited in a dialog with a stepped slider: the current step's label is shown
- * large, the description (in the dialog header) explains it, and the endpoints label the range.
+ * A scalar setting edited with a stepped slider. The current value reads as a sentence, the
+ * endpoints label the range, and the preference's description explains it underneath.
  */
 @Composable
 fun SettingsSliderDialog(
@@ -48,11 +45,11 @@ fun SettingsSliderDialog(
 ) {
     val startIndex = optionValues.indexOfFirst { it == preference.value }.coerceAtLeast(0)
     var index by remember { mutableIntStateOf(startIndex) }
-    val icon = preference.optionIcon?.drawableRes()
+    val currentValue = optionNames.getOrElse(index) { "" }
+    val currentValuePrefix = stringResource(SettingsR.string.current_value)
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
-        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
             AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Secondary) {
@@ -67,39 +64,43 @@ fun SettingsSliderDialog(
     ) { contentPadding ->
         Column(
             modifier = Modifier.fillMaxWidth().padding(contentPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
-            if (icon != null) {
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-            }
             Text(
-                text = optionNames.getOrElse(index) { "" },
-                style = MaterialTheme.typography.headlineSmall,
+                text =
+                    buildAnnotatedString {
+                        append(currentValuePrefix)
+                        append(" ")
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(currentValue) }
+                    },
+                style = MaterialTheme.typography.bodyLarge,
             )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-            SteppedSlider(
-                index = index,
-                count = optionNames.size,
-                onIndexChange = { index = it },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = optionNames.firstOrNull().orEmpty(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall)) {
+                SteppedSlider(
+                    index = index,
+                    count = optionNames.size,
+                    onIndexChange = { index = it },
+                    modifier = Modifier.fillMaxWidth(),
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = optionNames.firstOrNull().orEmpty(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = optionNames.lastOrNull().orEmpty(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            preference.descriptionStringRes?.let {
                 Text(
-                    text = optionNames.lastOrNull().orEmpty(),
+                    text = stringResource(it),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -122,8 +123,10 @@ private fun SettingsSliderDialogPreview() {
                     options = SettingsR.array.title_width_options,
                     optionValues = SettingsR.array.title_width_values,
                 ),
-            optionNames = listOf("40%", "50%", "60%", "70%", "80%", "90%", "100%"),
-            optionValues = listOf("0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"),
+            optionNames =
+                listOf("0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"),
+            optionValues =
+                listOf("0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"),
             onUpdate = {},
             onDismissRequest = {},
         )

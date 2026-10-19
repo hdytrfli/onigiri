@@ -3,8 +3,8 @@ package dev.jdtech.jellyfin.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -34,20 +34,12 @@ fun SteppedSlider(
         valueRange = 0f..(steps - 1).toFloat(),
         steps = steps - 2,
         colors = playerSliderColors(),
-        thumb = {
-            Box(
-                modifier =
-                    Modifier.width(3.dp)
-                        .height(12.dp)
-                        .clip(RoundedCornerShape(1.5.dp))
-                        .background(Color.White)
-            )
-        },
+        thumb = { Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(Color.White)) },
         track = { state ->
             SliderDefaults.Track(
                 sliderState = state,
                 colors = playerSliderColors(),
-                modifier = Modifier.height(8.dp),
+                modifier = Modifier.height(12.dp),
             )
         },
         modifier = modifier,

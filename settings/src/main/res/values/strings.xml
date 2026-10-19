@@ -28,6 +28,7 @@
     <string name="settings_use_cache_title">Cache images</string>
     <string name="settings_use_cache_summary">Cache images on disk to speed up loading</string>
     <string name="settings_cache_size">Cache size</string>
+    <string name="current_value">Current value is</string>
     <string name="settings_cache_size_message">Disk space for cached images, in MB</string>
     <string name="settings_category_network">Network</string>
     <string name="settings_request_timeout">Request timeout</string>

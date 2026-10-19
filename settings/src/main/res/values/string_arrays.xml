@@ -172,6 +172,10 @@
         <item>2</item>
     </string-array>
     <string-array name="title_width_options">
+        <item>0%</item>
+        <item>10%</item>
+        <item>20%</item>
+        <item>30%</item>
         <item>40%</item>
         <item>50%</item>
         <item>60%</item>
@@ -181,6 +185,10 @@
         <item>100%</item>
     </string-array>
     <string-array name="title_width_values">
+        <item>0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
         <item>0.4</item>
         <item>0.5</item>
         <item>0.6</item>
@@ -190,6 +198,7 @@
         <item>1</item>
     </string-array>
     <string-array name="title_width_options_low">
+        <item>0%</item>
         <item>10%</item>
         <item>20%</item>
         <item>30%</item>
@@ -202,6 +211,7 @@
         <item>100%</item>
     </string-array>
     <string-array name="title_width_values_low">
+        <item>0</item>
         <item>0.1</item>
         <item>0.2</item>
         <item>0.3</item>
