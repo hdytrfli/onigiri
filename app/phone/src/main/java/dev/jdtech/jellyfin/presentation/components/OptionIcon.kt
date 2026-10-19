@@ -10,13 +10,16 @@ import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 fun OptionIcon.drawableRes(): Int =
     when (this) {
         OptionIcon.Audio -> CoreR.drawable.ic_music
+        OptionIcon.AudioOutput -> CoreR.drawable.ic_speaker
         OptionIcon.Subtitle -> CoreR.drawable.ic_case_sensitive
-        OptionIcon.Layout -> SettingsR.drawable.ic_layout_dashboard
-        OptionIcon.Image -> CoreR.drawable.ic_banner
-        OptionIcon.Text -> CoreR.drawable.ic_text_search
-        OptionIcon.Playback -> SettingsR.drawable.ic_play
-        OptionIcon.Video -> CoreR.drawable.ic_video
-        OptionIcon.Clock -> CoreR.drawable.ic_timer
+        OptionIcon.Grid -> CoreR.drawable.ic_layout_grid
+        OptionIcon.Portrait -> CoreR.drawable.ic_rectangle_vertical
+        OptionIcon.Landscape -> CoreR.drawable.ic_rectangle_horizontal
+        OptionIcon.Image -> CoreR.drawable.ic_image
+        OptionIcon.Width -> CoreR.drawable.ic_scaling
+        OptionIcon.Decode -> CoreR.drawable.ic_cpu
+        OptionIcon.Monitor -> CoreR.drawable.ic_monitor
+        OptionIcon.Clock -> CoreR.drawable.ic_clock
         OptionIcon.Segment -> CoreR.drawable.ic_fast_forward
         OptionIcon.Sort -> CoreR.drawable.ic_arrow_down_up
         OptionIcon.Storage -> SettingsR.drawable.ic_hard_drive

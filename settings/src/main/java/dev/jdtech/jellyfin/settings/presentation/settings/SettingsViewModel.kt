@@ -218,7 +218,7 @@ constructor(
                                                     nameStringResource = R.string.grid_spacing,
                                                     descriptionStringRes =
                                                         R.string.grid_spacing_summary,
-                                                    optionIcon = OptionIcon.Layout,
+                                                    optionIcon = OptionIcon.Grid,
                                                     backendPreference = appPreferences.gridSpacing,
                                                     options = R.array.grid_spacing_options,
                                                     optionValues = R.array.grid_spacing_values,
@@ -234,7 +234,7 @@ constructor(
                                                         R.string.backdrop_portrait_ratio,
                                                     descriptionStringRes =
                                                         R.string.backdrop_portrait_ratio_summary,
-                                                    optionIcon = OptionIcon.Image,
+                                                    optionIcon = OptionIcon.Portrait,
                                                     backendPreference =
                                                         appPreferences.backdropPortraitRatio,
                                                     options = R.array.backdrop_ratios,
@@ -245,7 +245,7 @@ constructor(
                                                         R.string.backdrop_landscape_ratio,
                                                     descriptionStringRes =
                                                         R.string.backdrop_landscape_ratio_summary,
-                                                    optionIcon = OptionIcon.Image,
+                                                    optionIcon = OptionIcon.Landscape,
                                                     backendPreference =
                                                         appPreferences.backdropLandscapeRatio,
                                                     options = R.array.backdrop_ratios,
@@ -262,7 +262,7 @@ constructor(
                                                         R.string.title_portrait_width,
                                                     descriptionStringRes =
                                                         R.string.title_portrait_width_summary,
-                                                    optionIcon = OptionIcon.Text,
+                                                    optionIcon = OptionIcon.Width,
                                                     backendPreference =
                                                         appPreferences.titlePortraitWidth,
                                                     options = R.array.title_width_options,
@@ -273,7 +273,7 @@ constructor(
                                                         R.string.title_landscape_width,
                                                     descriptionStringRes =
                                                         R.string.title_landscape_width_summary,
-                                                    optionIcon = OptionIcon.Text,
+                                                    optionIcon = OptionIcon.Width,
                                                     backendPreference =
                                                         appPreferences.titleLandscapeWidth,
                                                     options = R.array.title_width_options_low,
@@ -284,7 +284,7 @@ constructor(
                                                         R.string.title_player_width,
                                                     descriptionStringRes =
                                                         R.string.title_player_width_summary,
-                                                    optionIcon = OptionIcon.Text,
+                                                    optionIcon = OptionIcon.Width,
                                                     backendPreference =
                                                         appPreferences.titlePlayerWidth,
                                                     options = R.array.title_width_options_low,
@@ -403,7 +403,7 @@ constructor(
                                                                                 R.string
                                                                                     .pref_player_mpv_hwdec_summary,
                                                                             optionIcon =
-                                                                                OptionIcon.Playback,
+                                                                                OptionIcon.Decode,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvHwdec,
@@ -421,7 +421,7 @@ constructor(
                                                                                 R.string
                                                                                     .pref_player_mpv_vo_summary,
                                                                             optionIcon =
-                                                                                OptionIcon.Video,
+                                                                                OptionIcon.Monitor,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvVo,
@@ -439,7 +439,8 @@ constructor(
                                                                                 R.string
                                                                                     .pref_player_mpv_ao_summary,
                                                                             optionIcon =
-                                                                                OptionIcon.Audio,
+                                                                                OptionIcon
+                                                                                    .AudioOutput,
                                                                             backendPreference =
                                                                                 appPreferences
                                                                                     .playerMpvAo,
