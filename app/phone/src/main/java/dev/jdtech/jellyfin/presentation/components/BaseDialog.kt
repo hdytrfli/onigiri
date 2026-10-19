@@ -112,8 +112,13 @@ private fun BaseDialogImpl(
                             )
                         }
                     }
-                    content(PaddingValues(horizontal = MaterialTheme.spacings.medium))
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+                    content(
+                        PaddingValues(
+                            start = MaterialTheme.spacings.medium,
+                            end = MaterialTheme.spacings.medium,
+                            bottom = 16.dp,
+                        )
+                    )
                 }
             }
 

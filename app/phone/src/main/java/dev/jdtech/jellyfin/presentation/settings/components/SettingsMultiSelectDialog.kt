@@ -75,9 +75,6 @@ fun SettingsMultiSelectDialog(
                 )
             }
         }
-        if (lazyListState.canScrollForward) {
-            HorizontalDivider()
-        }
     }
 }
 
