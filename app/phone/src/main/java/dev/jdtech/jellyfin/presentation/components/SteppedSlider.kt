@@ -3,8 +3,8 @@ package dev.jdtech.jellyfin.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -34,7 +34,15 @@ fun SteppedSlider(
         valueRange = 0f..(steps - 1).toFloat(),
         steps = steps - 2,
         colors = playerSliderColors(),
-        thumb = { Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(Color.White)) },
+        thumb = {
+            Box(
+                modifier =
+                    Modifier.width(4.dp)
+                        .height(26.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color.White)
+            )
+        },
         track = { state ->
             SliderDefaults.Track(
                 sliderState = state,
@@ -46,11 +54,13 @@ fun SteppedSlider(
     )
 }
 
-/** Matches the player's seek bar and the subtitle-offset slider. */
+/** Matches the player's seek bar; the step indicators are deliberately faint. */
 @Composable
 private fun playerSliderColors() =
     SliderDefaults.colors(
         thumbColor = Color.White,
         activeTrackColor = Color.White,
         inactiveTrackColor = Color(0x33FFFFFF),
+        activeTickColor = Color(0x24000000),
+        inactiveTickColor = Color(0x14FFFFFF),
     )

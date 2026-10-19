@@ -21,6 +21,6 @@ fun OptionIcon.drawableRes(): Int =
         OptionIcon.Monitor -> CoreR.drawable.ic_monitor
         OptionIcon.Clock -> CoreR.drawable.ic_clock
         OptionIcon.Segment -> CoreR.drawable.ic_fast_forward
-        OptionIcon.Sort -> CoreR.drawable.ic_arrow_down_up
+        OptionIcon.Sort -> CoreR.drawable.ic_list
         OptionIcon.Storage -> SettingsR.drawable.ic_hard_drive
     }

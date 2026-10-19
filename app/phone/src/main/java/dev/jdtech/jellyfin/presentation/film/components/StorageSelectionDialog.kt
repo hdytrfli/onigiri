@@ -2,8 +2,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -13,7 +11,6 @@ import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.drawableRes
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 
 @Composable
@@ -24,11 +21,10 @@ fun StorageSelectionDialog(
 ) {
     BaseDialog(
         title = stringResource(CoreR.string.select_storage_location),
+        description = stringResource(CoreR.string.select_storage_location_summary),
         onDismiss = onDismiss,
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(bottom = MaterialTheme.spacings.default)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             storageLocations.forEachIndexed { index, storageLocation ->
                 AppOptionRow(
                     text = storageLocation,

@@ -36,6 +36,7 @@ fun AppOptionRow(
     @DrawableRes iconDrawableId: Int? = null,
     showCheck: Boolean = true,
     role: Role? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier =
@@ -61,7 +62,10 @@ fun AppOptionRow(
             modifier = Modifier.weight(1f),
         )
 
-        if (showCheck) {
+        if (trailingContent != null) {
+            Spacer(modifier = Modifier.width(16.dp))
+            trailingContent()
+        } else if (showCheck) {
             Spacer(modifier = Modifier.width(16.dp))
             Icon(
                 painter = painterResource(CoreR.drawable.ic_check),

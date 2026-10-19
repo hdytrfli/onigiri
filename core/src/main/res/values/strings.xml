@@ -53,6 +53,7 @@
     <string name="episodes_label">Episodes</string>
     <string name="hide">Hide</string>
     <string name="sort_by">Sort by</string>
+    <string name="sort_by_summary">Tap a field to sort; tap the selected field again to reverse</string>
     <string name="sort_order">Sort order</string>
     <string name="close">Close</string>
     <string name="share">Share</string>
@@ -85,6 +86,7 @@
     <string name="not_enough_storage">This item requires %1$s of free storage but only %2$s is available</string>
     <string name="no_server_connection">No connection to the Jellyfin server, to watch offline enable Offline Mode</string>
     <string name="select_storage_location">Select storage location</string>
+    <string name="select_storage_location_summary">Choose where this download is saved</string>
     <string name="storage_unavailable">Storage location is unavailable</string>
     <string name="internal">Internal</string>
     <string name="external">External</string>
