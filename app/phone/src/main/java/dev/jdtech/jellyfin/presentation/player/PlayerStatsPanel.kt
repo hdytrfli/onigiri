@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.theme.Radius
 import dev.jdtech.jellyfin.player.local.domain.StreamInfo
 import dev.jdtech.jellyfin.player.local.mpv.PlaybackStats
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -44,7 +45,7 @@ private const val NO_VALUE = "—"
 private const val VALUE_SEPARATOR = " · "
 
 private val PANEL_WIDTH = 300.dp
-private val PANEL_CORNER = 12.dp
+private val PANEL_CORNER = Radius.rounded
 private val LABEL_WIDTH = 78.dp
 
 /**

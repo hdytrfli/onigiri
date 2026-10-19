@@ -61,7 +61,7 @@
         <!-- Extra -->
         <item name="elevationOverlayEnabled">false</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
-        <item name="dialogCornerRadius">28dp</item>
+        <item name="dialogCornerRadius">@dimen/radius_rounded</item>
     </style>
 
     <!-- Forces a pure black background, e.g. for OLED screens. -->

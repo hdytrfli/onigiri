@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServerAddress
+import dev.jdtech.jellyfin.core.presentation.theme.Radius
 import dev.jdtech.jellyfin.models.ServerWithAddresses
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -98,7 +99,7 @@ fun ServerSelectionItem(
                     Box(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(MaterialTheme.spacings.medium))
+                                .clip(RoundedCornerShape(Radius.rounded))
                                 .clickable(onClick = { onClickAddress(address.id) })
                     ) {
                         Row(
