@@ -178,6 +178,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 /** How close the player's position must be to the scrub position before we trust it again. */
 private const val SEEK_TOLERANCE_MS = 1_000L
 
-/** Handle size in dp: a thin vertical rounded line (matches the Compose slider thumb). */
-private const val HANDLE_WIDTH_DP = 3f
-private const val HANDLE_HEIGHT_DP = 12f
+/** Handle size in dp: a rounded vertical line, matching the Compose slider thumb. */
+private const val HANDLE_WIDTH_DP = 4f
+private const val HANDLE_HEIGHT_DP = 26f

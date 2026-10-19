@@ -1512,6 +1512,11 @@ constructor(
                             action.preference.backendPreference,
                             action.preference.value,
                         )
+                    is PreferenceSlider ->
+                        appPreferences.setValue(
+                            action.preference.backendPreference,
+                            action.preference.value,
+                        )
                 }
             }
             else -> Unit

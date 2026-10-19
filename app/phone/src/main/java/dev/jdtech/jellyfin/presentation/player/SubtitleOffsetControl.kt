@@ -91,9 +91,9 @@ fun SubtitleOffsetControl(
                 thumb = {
                     Box(
                         modifier =
-                            Modifier.width(3.dp)
-                                .height(12.dp)
-                                .clip(RoundedCornerShape(1.5.dp))
+                            Modifier.width(4.dp)
+                                .height(26.dp)
+                                .clip(RoundedCornerShape(2.dp))
                                 .background(Color.White)
                     )
                 },
@@ -101,7 +101,7 @@ fun SubtitleOffsetControl(
                     SliderDefaults.Track(
                         sliderState = state,
                         colors = sliderColors(),
-                        modifier = Modifier.height(8.dp),
+                        modifier = Modifier.height(12.dp),
                     )
                 },
                 modifier = Modifier.weight(1f),
