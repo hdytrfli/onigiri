@@ -97,7 +97,14 @@ fun HomeHeader(
                     onClick = onRetryClick,
                     enabled = !isLoading,
                     content = {
-                        if (isLoading) {
+                        // Keep the spinner through the success fade-out: switching to the retry
+                        // icon first made the refresh button flash a rotate arrow as it vanished.
+                        if (isError && !isLoading) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                                contentDescription = stringResource(R.string.refresh),
+                            )
+                        } else {
                             val rotation =
                                 rememberInfiniteTransition(label = "loading")
                                     .animateFloat(
@@ -112,11 +119,6 @@ fun HomeHeader(
                                 painter = painterResource(CoreR.drawable.ic_loader_circle),
                                 contentDescription = null,
                                 modifier = Modifier.rotate(rotation),
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                                contentDescription = stringResource(R.string.refresh),
                             )
                         }
                     },
