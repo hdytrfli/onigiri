@@ -78,9 +78,11 @@ import dev.jdtech.jellyfin.presentation.film.IdentifyScreen
 import dev.jdtech.jellyfin.presentation.film.LibraryScreen
 import dev.jdtech.jellyfin.presentation.film.MediaScreen
 import dev.jdtech.jellyfin.presentation.film.MovieScreen
+import dev.jdtech.jellyfin.presentation.film.MoviesScreen
 import dev.jdtech.jellyfin.presentation.film.PersonScreen
 import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
+import dev.jdtech.jellyfin.presentation.film.ShowsScreen
 import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
@@ -100,7 +102,10 @@ import java.util.UUID
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ImageType
 
-private val TOP_LEVEL_ROUTES = setOf(HomeRoute, MediaRoute, FavoritesRoute, DownloadsRoute)
+private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = listOf(CoreR.string.title_settings))
+
+private val TOP_LEVEL_ROUTES =
+    setOf(HomeRoute, MoviesRoute, ShowsRoute, CollectionsRoute, SETTINGS_ROOT_ROUTE)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
 
 data class TabBarItem(
@@ -113,25 +118,32 @@ data class TabBarItem(
 val homeTab =
     TabBarItem(title = CoreR.string.title_home, icon = CoreR.drawable.ic_home, route = HomeRoute)
 
-val mediaTab =
+val moviesTab =
     TabBarItem(
-        title = CoreR.string.title_media,
-        icon = CoreR.drawable.ic_library,
-        route = MediaRoute,
+        title = CoreR.string.movies_label,
+        icon = CoreR.drawable.ic_clapperboard,
+        route = MoviesRoute,
     )
 
-val downloadsTab =
+val showsTab =
     TabBarItem(
-        title = CoreR.string.title_download,
-        icon = CoreR.drawable.ic_download,
-        route = DownloadsRoute,
+        title = CoreR.string.shows_label,
+        icon = CoreR.drawable.ic_tv,
+        route = ShowsRoute,
     )
 
-val favoritesTab =
+val collectionsTab =
     TabBarItem(
-        title = CoreR.string.title_favorite,
-        icon = CoreR.drawable.ic_heart,
-        route = FavoritesRoute,
+        title = CoreR.string.collections_label,
+        icon = CoreR.drawable.ic_package_2,
+        route = CollectionsRoute,
+    )
+
+val settingsTab =
+    TabBarItem(
+        title = CoreR.string.title_settings,
+        icon = CoreR.drawable.ic_user,
+        route = SETTINGS_ROOT_ROUTE,
     )
 
 @Composable
@@ -226,11 +238,7 @@ private fun MainNavigation(
     val snackbarHostState = remember { SnackbarHostState() }
     var exitPending by remember { mutableStateOf(false) }
 
-    val navigationItems =
-        when (isOfflineMode) {
-            false -> listOf(homeTab, mediaTab, favoritesTab, downloadsTab)
-            true -> listOf(homeTab, favoritesTab, downloadsTab)
-        }
+    val navigationItems = listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab)
     val tabRoutes = navigationItems.map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
@@ -315,13 +323,7 @@ private fun MainNavigation(
                 navigationItems.forEachIndexed { index, item ->
                     item(
                         selected = topLevelRoute == item.route,
-                        onClick = {
-                            if (item.route == MediaRoute && topLevelRoute == MediaRoute) {
-                                searchExpanded.value = true
-                            }
-
-                            navigator.navigate(item.route)
-                        },
+                        onClick = { navigator.navigate(item.route) },
                         icon = {
                             Icon(
                                 painter = painterResource(item.icon),
@@ -494,6 +496,48 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 },
             onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+        )
+    }
+    entry<MoviesRoute> {
+        MoviesScreen(
+            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            onListClick = dropUnlessResumed { navigator.navigate(MovieListRoute) },
+        )
+    }
+    entry<MovieListRoute> {
+        LibraryScreen(
+            libraryId = null,
+            libraryName = stringResource(CoreR.string.movies_label),
+            libraryType = CollectionType.Movies,
+            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            showTopBar = true,
+        )
+    }
+    entry<ShowsRoute> {
+        ShowsScreen(
+            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            onListClick = dropUnlessResumed { navigator.navigate(ShowListRoute) },
+        )
+    }
+    entry<ShowListRoute> {
+        LibraryScreen(
+            libraryId = null,
+            libraryName = stringResource(CoreR.string.shows_label),
+            libraryType = CollectionType.TvShows,
+            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            showTopBar = true,
+        )
+    }
+    entry<CollectionsRoute> {
+        LibraryScreen(
+            libraryId = null,
+            libraryName = null,
+            libraryType = CollectionType.BoxSets,
+            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            navigateBack = {},
+            showTopBar = false,
         )
     }
     entry<MediaRoute> {
@@ -747,6 +791,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
             navigateToSubtitleFont = dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
+            showTopBar = key.indexes.size > 1,
         )
     }
     entry<SettingsFileEditRoute> { key ->

@@ -59,6 +59,7 @@ fun SettingsScreen(
     navigateToAbout: () -> Unit,
     navigateToSubtitleFont: () -> Unit,
     navigateBack: () -> Unit,
+    showTopBar: Boolean = true,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -93,6 +94,7 @@ fun SettingsScreen(
 
     SettingsScreenLayout(
         title = indexes.last(),
+        showTopBar = showTopBar,
         state = state,
         onAction = { action ->
             when (action) {
@@ -110,6 +112,7 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreenLayout(
     @StringRes title: Int,
+    showTopBar: Boolean,
     state: SettingsState,
     onAction: (SettingsAction) -> Unit,
 ) {
@@ -123,23 +126,25 @@ private fun SettingsScreenLayout(
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(title)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = { onAction(SettingsAction.OnBackClick) },
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
+            if (showTopBar) {
+                TopAppBar(
+                    title = { Text(stringResource(title)) },
+                    navigationIcon = {
+                        AppIconButton(
+                            onClick = { onAction(SettingsAction.OnBackClick) },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                    },
+                    windowInsets = topBarWindowInsets(),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { innerPadding ->
         LazyColumn(
@@ -165,6 +170,7 @@ private fun SettingsScreenLayoutPreview() {
     FindroidTheme {
         SettingsScreenLayout(
             title = CoreR.string.title_settings,
+            showTopBar = true,
             state =
                 SettingsState(
                     preferenceGroups =
