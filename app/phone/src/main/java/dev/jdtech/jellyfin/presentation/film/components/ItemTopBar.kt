@@ -6,39 +6,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-
-/**
- * Colours for the icon-only actions in a detail top bar: an opaque black circle with white content,
- * matching the back/home buttons. Shared so the other detail actions (download, overflow) match.
- */
-@Composable
-fun detailTopBarIconButtonColors(): IconButtonColors =
-    IconButtonDefaults.iconButtonColors(
-        containerColor = MaterialTheme.colorScheme.scrim,
-        contentColor = OnScrim,
-    )
-
-/**
- * Opacity applied to every icon-only action in a detail top bar, matching the back/home buttons.
- */
-private const val DetailTopBarIconAlpha = 0.7f
-
-/** Applies [DetailTopBarIconAlpha] so every detail top-bar icon button renders identically. */
-fun Modifier.detailTopBarAlpha(): Modifier = alpha(DetailTopBarIconAlpha)
 
 @Composable
 fun ItemTopBar(
@@ -61,25 +39,28 @@ fun ItemTopBar(
                 )
     ) {
         if (hasBackButton) {
-            IconButton(
+            AppIconButton(
                 onClick = onBackClick,
-                modifier = Modifier.detailTopBarAlpha(),
-                colors = detailTopBarIconButtonColors(),
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_arrow_left),
-                    contentDescription = null,
-                )
-            }
+                variant = AppButtonVariant.Overlay,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_arrow_left),
+                        contentDescription = null,
+                    )
+                },
+            )
         }
         if (hasHomeButton) {
-            IconButton(
+            AppIconButton(
                 onClick = onHomeClick,
-                modifier = Modifier.detailTopBarAlpha(),
-                colors = detailTopBarIconButtonColors(),
-            ) {
-                Icon(painter = painterResource(CoreR.drawable.ic_home), contentDescription = null)
-            }
+                variant = AppButtonVariant.Overlay,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_home),
+                        contentDescription = null,
+                    )
+                },
+            )
         }
         content()
         Spacer(modifier = Modifier.weight(1f))

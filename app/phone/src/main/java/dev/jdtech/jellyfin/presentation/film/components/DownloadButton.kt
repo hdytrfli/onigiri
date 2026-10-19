@@ -2,17 +2,11 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import android.os.Environment
 import android.os.StatFs
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +25,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.isDownloaded
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 /**
@@ -66,49 +62,44 @@ fun DownloadButton(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier =
-                        Modifier.height(40.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .clickable(onClick = onNavigateToDownloads)
-                            .padding(horizontal = MaterialTheme.spacings.medium),
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Text(
-                        text = stringResource(CoreR.string.downloading_at, percent),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                }
-                IconButton(
+                AppButton(
+                    onClick = onNavigateToDownloads,
+                    variant = AppButtonVariant.Overlay,
+                    content = {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Text(text = stringResource(CoreR.string.downloading_at, percent))
+                    },
+                )
+                AppIconButton(
                     onClick = { cancelDialogOpen = true },
-                    modifier = Modifier.detailTopBarAlpha(),
-                    colors = detailTopBarIconButtonColors(),
-                ) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_x),
-                        contentDescription = stringResource(CoreR.string.cancel_download),
-                    )
-                }
-            }
-        }
-        item.isDownloaded() -> {
-            IconButton(
-                onClick = { deleteDialogOpen = true },
-                modifier = modifier.detailTopBarAlpha(),
-                colors = detailTopBarIconButtonColors(),
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_trash),
-                    contentDescription = stringResource(CoreR.string.delete_download),
+                    variant = AppButtonVariant.Overlay,
+                    content = {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_x),
+                            contentDescription = stringResource(CoreR.string.cancel_download),
+                        )
+                    },
                 )
             }
         }
+        item.isDownloaded() -> {
+            AppIconButton(
+                onClick = { deleteDialogOpen = true },
+                modifier = modifier,
+                variant = AppButtonVariant.Overlay,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_trash),
+                        contentDescription = stringResource(CoreR.string.delete_download),
+                    )
+                },
+            )
+        }
         item.canDownload -> {
-            IconButton(
+            AppIconButton(
                 onClick = {
                     storageLocations = context.getExternalFilesDirs(null)
                     if (storageLocations.size > 1) {
@@ -118,14 +109,15 @@ fun DownloadButton(
                         onDownloadClick(selectedStorageIndex)
                     }
                 },
-                modifier = modifier.detailTopBarAlpha(),
-                colors = detailTopBarIconButtonColors(),
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),
-                    contentDescription = stringResource(CoreR.string.download),
-                )
-            }
+                modifier = modifier,
+                variant = AppButtonVariant.Overlay,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),
+                        contentDescription = stringResource(CoreR.string.download),
+                    )
+                },
+            )
         }
     }
 

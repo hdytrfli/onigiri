@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +23,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,11 +39,12 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
-import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
@@ -298,14 +296,9 @@ private fun EpisodeScreenLayout(
             content = {
                 Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
                 state.episode?.let { episode ->
-                    Button(
+                    AppButton(
                         onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
-                        modifier = Modifier.alpha(0.7f),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.scrim,
-                                contentColor = OnScrim,
-                            ),
+                        variant = AppButtonVariant.Overlay,
                     ) {
                         Text(
                             text = episode.seriesName,
@@ -314,14 +307,9 @@ private fun EpisodeScreenLayout(
                         )
                     }
                     Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    Button(
+                    AppButton(
                         onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId)) },
-                        modifier = Modifier.alpha(0.7f),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.scrim,
-                                contentColor = OnScrim,
-                            ),
+                        variant = AppButtonVariant.Overlay,
                     ) {
                         episode.seasonName?.let { seasonName -> Text(seasonName) }
                             ?: run {

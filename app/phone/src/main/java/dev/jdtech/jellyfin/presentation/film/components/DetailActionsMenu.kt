@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +21,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import java.util.UUID
 
 /** The item-kind dependent actions a detail page can offer in its overflow menu. */
@@ -77,20 +78,20 @@ fun DetailActionsMenu(
     if (!showSubtitleSearch && !showIdentify && !showEditImages) return
 
     Box(modifier = modifier) {
-        IconButton(
+        AppIconButton(
             onClick = { menuOpen = true },
-            modifier = Modifier.detailTopBarAlpha(),
-            colors = detailTopBarIconButtonColors(),
-        ) {
-            if (identifyState.isApplying) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            } else {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_bolt),
-                    contentDescription = stringResource(CoreR.string.more_options),
-                )
-            }
-        }
+            variant = AppButtonVariant.Overlay,
+            content = {
+                if (identifyState.isApplying) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_bolt),
+                        contentDescription = stringResource(CoreR.string.more_options),
+                    )
+                }
+            },
+        )
         DropdownMenu(
             expanded = menuOpen,
             onDismissRequest = { menuOpen = false },
