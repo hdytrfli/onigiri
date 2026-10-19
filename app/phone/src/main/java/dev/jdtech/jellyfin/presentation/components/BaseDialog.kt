@@ -55,7 +55,7 @@ fun BaseDialog(
                         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
                         Text(
                             text = description,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

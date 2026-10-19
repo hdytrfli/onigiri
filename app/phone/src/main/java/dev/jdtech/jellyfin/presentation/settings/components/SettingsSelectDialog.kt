@@ -89,7 +89,7 @@ private fun SettingsSelectDialogItem(
                     role = Role.RadioButton,
                     onClick = { onSelect(option.first) },
                 )
-                .padding(12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (iconDrawableId != null) {
