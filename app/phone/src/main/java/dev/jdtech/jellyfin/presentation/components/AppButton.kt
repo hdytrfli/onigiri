@@ -173,15 +173,15 @@ private fun AppButtonImpl(
         contentAlignment = Alignment.Center,
     ) {
         if (effect == AppButtonEffect.Tint && pressed && enabled) {
-            Box(
-                modifier =
-                    Modifier.matchParentSize()
-                        .background(
-                            (if (variant == AppButtonVariant.Ghost) OnScrim else contentColor).copy(
-                                alpha = TintAlpha
-                            )
-                        )
-            )
+            val tint =
+                if (variant == AppButtonVariant.Ghost) {
+                    // A ghost button has no container of its own, so the press reads as a faint
+                    // lighter surface under the icon/label.
+                    OnScrim.copy(alpha = GhostTintAlpha)
+                } else {
+                    contentColor.copy(alpha = TintAlpha)
+                }
+            Box(modifier = Modifier.matchParentSize().background(tint))
         }
 
         CompositionLocalProvider(
@@ -193,7 +193,7 @@ private fun AppButtonImpl(
                     if (square) {
                         Modifier
                     } else {
-                        Modifier.padding(horizontal = MaterialTheme.spacings.medium)
+                        Modifier.padding(horizontal = MaterialTheme.spacings.default)
                     },
                 horizontalArrangement =
                     if (square) Arrangement.Center
@@ -251,6 +251,9 @@ private const val DisabledAlpha = 0.38f
 
 /** Opacity of the [AppButtonEffect.Tint] press overlay. */
 private const val TintAlpha = 0.12f
+
+/** The ghost variant's press hint: a little stronger, because it has no container to tint. */
+private const val GhostTintAlpha = 0.16f
 
 /** Opacity of the [AppButtonVariant.Overlay] scrim. */
 private const val ScrimAlpha = 0.7f

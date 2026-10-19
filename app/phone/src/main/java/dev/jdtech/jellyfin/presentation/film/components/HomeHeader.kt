@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
@@ -75,9 +76,9 @@ fun HomeHeader(
             }
         }
 
-        Spacer(Modifier.width(MaterialTheme.spacings.medium))
+        Spacer(Modifier.width(MaterialTheme.spacings.small))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
+        AppButtonGroup {
             AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
                 AppIconButton(
                     onClick = onErrorClick,
