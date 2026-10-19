@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -32,6 +33,8 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
+    description: String? = null,
+    titleBackground: Color = Color.Transparent,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -47,14 +50,22 @@ fun BaseDialog(
                 ),
         ) {
             Column {
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-                Text(
-                    text = title,
+                Column(
                     modifier =
-                        Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+                        Modifier.fillMaxWidth()
+                            .background(titleBackground)
+                            .padding(horizontal = 12.dp, vertical = 16.dp)
+                ) {
+                    Text(text = title, style = MaterialTheme.typography.titleMedium)
+                    if (!description.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 content(PaddingValues(horizontal = MaterialTheme.spacings.medium))
                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
             }

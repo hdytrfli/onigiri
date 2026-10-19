@@ -1,7 +1,5 @@
 package dev.jdtech.jellyfin.presentation.settings.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -46,6 +42,8 @@ fun SettingsSelectDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
+        titleBackground = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismiss = onDismissRequest,
     ) {
         if (lazyListState.canScrollBackward) {
@@ -84,24 +82,16 @@ private fun SettingsSelectDialogItem(
                     role = Role.RadioButton,
                     onClick = { onSelect(option.first) },
                 )
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (iconDrawableId != null) {
-            Box(
-                modifier =
-                    Modifier.size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerLow),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(iconDrawableId),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Icon(
+                painter = painterResource(iconDrawableId),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
         }
 
