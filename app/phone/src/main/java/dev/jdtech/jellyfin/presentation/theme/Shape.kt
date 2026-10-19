@@ -5,10 +5,9 @@ import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 /**
- * Every non-button shape in the app: cards, tiles, badges and pop-up surfaces all use the one 10dp
- * radius. Buttons do not read these - they are pills (see
- * [dev.jdtech.jellyfin.presentation.components.AppButton]). `extraLarge` is left at the Material
- * default for the dialog container.
+ * Every non-button shape in the app: cards, tiles, badges, dialog containers and pop-up surfaces
+ * all use the one 10dp radius. Buttons do not read these - they are pills (see
+ * [dev.jdtech.jellyfin.presentation.components.AppButton]).
  */
 private val Rounded = RoundedCornerShape(10.dp)
 
@@ -18,4 +17,5 @@ val shapes =
         small = Rounded,
         medium = Rounded,
         large = Rounded,
+        extraLarge = Rounded,
     )

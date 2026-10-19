@@ -17,7 +17,7 @@ object Dimens {
     val dialogMaxHeight = 540.dp
 
     /** Max width of a compact settings dialog (grid layout, sort by). */
-    val dialogMaxWidth = 360.dp
+    val dialogMaxWidth = 400.dp
 
     /** Max height of a compact settings dialog (grid layout, sort by). */
     val dialogCompactMaxHeight = 460.dp
