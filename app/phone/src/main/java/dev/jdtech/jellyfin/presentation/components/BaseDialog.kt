@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -112,13 +113,8 @@ private fun BaseDialogImpl(
                             )
                         }
                     }
-                    content(
-                        PaddingValues(
-                            start = MaterialTheme.spacings.medium,
-                            end = MaterialTheme.spacings.medium,
-                            bottom = 16.dp,
-                        )
-                    )
+                    HorizontalDivider()
+                    content(PaddingValues(MaterialTheme.spacings.medium))
                 }
             }
 
