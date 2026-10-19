@@ -42,7 +42,7 @@ fun SettingsMultiSelectDialog(
         description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
-            AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Ghost) {
+            AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Secondary) {
                 Text(text = stringResource(SettingsR.string.cancel))
             }
         },

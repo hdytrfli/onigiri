@@ -42,7 +42,7 @@ fun AppOptionRow(
             modifier
                 .fillMaxWidth()
                 .selectable(selected = selected, role = role, onClick = onClick)
-                .padding(horizontal = 24.dp, vertical = 12.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (iconDrawableId != null) {

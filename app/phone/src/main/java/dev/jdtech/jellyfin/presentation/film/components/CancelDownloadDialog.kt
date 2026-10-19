@@ -18,7 +18,7 @@ fun CancelDownloadDialog(onCancel: () -> Unit, onDismiss: () -> Unit) {
         title = stringResource(CoreR.string.cancel_download),
         onDismiss = onDismiss,
         negativeButton = {
-            AppButton(onClick = onDismiss, variant = AppButtonVariant.Ghost) {
+            AppButton(onClick = onDismiss, variant = AppButtonVariant.Secondary) {
                 Text(text = stringResource(CoreR.string.cancel))
             }
         },

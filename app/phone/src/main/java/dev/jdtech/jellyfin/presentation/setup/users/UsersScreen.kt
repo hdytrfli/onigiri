@@ -188,7 +188,7 @@ private fun UsersScreenLayout(
                 negativeButton = {
                     AppButton(
                         onClick = { openDeleteDialog = false },
-                        variant = AppButtonVariant.Ghost,
+                        variant = AppButtonVariant.Secondary,
                     ) {
                         Text(text = stringResource(SetupR.string.cancel))
                     }

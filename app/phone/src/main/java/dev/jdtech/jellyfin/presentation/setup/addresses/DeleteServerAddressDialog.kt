@@ -16,7 +16,7 @@ fun DeleteServerAddressDialog(address: String, onConfirm: () -> Unit, onDismiss:
         title = stringResource(SetupR.string.remove_server_address),
         onDismiss = onDismiss,
         negativeButton = {
-            AppButton(onClick = onDismiss, variant = AppButtonVariant.Ghost) {
+            AppButton(onClick = onDismiss, variant = AppButtonVariant.Secondary) {
                 Text(text = stringResource(SetupR.string.cancel))
             }
         },

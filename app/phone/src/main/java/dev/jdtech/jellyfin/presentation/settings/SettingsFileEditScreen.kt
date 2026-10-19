@@ -148,7 +148,7 @@ private fun SettingsFileEditScreenLayout(
             negativeButton = {
                 AppButton(
                     onClick = { showDiscardDialog = false },
-                    variant = AppButtonVariant.Ghost,
+                    variant = AppButtonVariant.Secondary,
                 ) {
                     Text(stringResource(CoreR.string.cancel))
                 }
