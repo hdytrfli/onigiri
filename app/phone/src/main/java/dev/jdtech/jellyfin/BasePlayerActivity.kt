@@ -72,12 +72,28 @@ abstract class BasePlayerActivity : AppCompatActivity() {
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }
 
-    protected fun configureInsets(playerControls: View) {
+    /**
+     * Reserves the same top inset the rest of the app uses for its top bars. The player hides the
+     * system bars, so the status-bar height is read with `getInsetsIgnoringVisibility` - this keeps
+     * the player's top row at the same offset as a detail top bar and stops it jumping up when
+     * playback opens. When the user hides the status bar in the interface settings, only the
+     * display cutout is reserved, exactly like
+     * [dev.jdtech.jellyfin.presentation.utils.rememberSafePadding].
+     */
+    protected fun configureInsets(playerControls: View, reserveStatusBar: Boolean) {
         playerControls.setOnApplyWindowInsetsListener { _, windowInsets ->
             val cutout = windowInsets.displayCutout
+            val statusBarTop =
+                if (reserveStatusBar) {
+                    windowInsets
+                        .getInsetsIgnoringVisibility(WindowInsetsCompat.Type.statusBars())
+                        .top
+                } else {
+                    0
+                }
             playerControls.updatePadding(
                 left = cutout?.safeInsetLeft ?: 0,
-                top = cutout?.safeInsetTop ?: 0,
+                top = maxOf(cutout?.safeInsetTop ?: 0, statusBarTop),
                 right = cutout?.safeInsetRight ?: 0,
                 bottom = cutout?.safeInsetBottom ?: 0,
             )

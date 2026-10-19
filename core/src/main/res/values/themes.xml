@@ -5,6 +5,14 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <!-- Fade between the app and the player instead of a hard cut. -->
+    <style name="Animation.Findroid.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
+    </style>
+
     <!-- Base application theme. Dark-only. -->
     <style name="Theme.Findroid" parent="Base.Theme.Findroid" />
 
@@ -43,6 +51,9 @@
 
         <!-- Toolbar -->
         <item name="toolbarStyle">@style/Widget.Material3.Toolbar.Surface</item>
+
+        <!-- Activity transitions -->
+        <item name="android:windowAnimationStyle">@style/Animation.Findroid.Activity</item>
 
         <!-- Navigation bar -->
         <item name="android:navigationBarColor">?attr/colorSurfaceContainer</item>

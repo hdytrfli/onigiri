@@ -191,8 +191,9 @@ class PlayerActivity : BasePlayerActivity() {
         isControlsLocked = false
         isVolumeBrightnessLocked = false
 
-        configureInsets(playerControls)
-        configureInsets(lockedControls)
+        val reserveStatusBar = !appPreferences.getValue(appPreferences.hideStatusBar)
+        configureInsets(playerControls, reserveStatusBar)
+        configureInsets(lockedControls, reserveStatusBar)
 
         playerGestureHelper =
             PlayerGestureHelper(
