@@ -45,6 +45,7 @@ import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
+import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
@@ -293,34 +294,35 @@ private fun MovieScreenLayout(
             onHomeClick = { onAction(MovieAction.OnHomeClick) },
             trailingContent = {
                 state.movie?.let { movie ->
-                    DownloadButton(
-                        item = movie,
-                        downloaderState = downloaderState,
-                        onDownloadClick = { storageIndex ->
-                            onDownloaderAction(DownloaderAction.Download(movie, storageIndex))
-                        },
-                        onCancelDownloadClick = {
-                            onDownloaderAction(DownloaderAction.CancelDownload(movie))
-                        },
-                        onDeleteDownloadClick = {
-                            onDownloaderAction(DownloaderAction.DeleteDownload(movie))
-                        },
-                        onNavigateToDownloads = onNavigateToDownloads,
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    DetailActionsMenu(
-                        itemId = movie.id,
-                        actions =
-                            setOf(
-                                DetailAction.SUBTITLE_SEARCH,
-                                DetailAction.IDENTIFY,
-                                DetailAction.EDIT_IMAGES,
-                            ),
-                        onSubtitleSearch = { onSubtitleSearch(movie.id) },
-                        onIdentify = { onIdentify(movie.id) },
-                        onIdentifyApplied = onIdentifyApplied,
-                        onEditImages = { onEditImages(movie.id) },
-                    )
+                    AppButtonGroup {
+                        DownloadButton(
+                            item = movie,
+                            downloaderState = downloaderState,
+                            onDownloadClick = { storageIndex ->
+                                onDownloaderAction(DownloaderAction.Download(movie, storageIndex))
+                            },
+                            onCancelDownloadClick = {
+                                onDownloaderAction(DownloaderAction.CancelDownload(movie))
+                            },
+                            onDeleteDownloadClick = {
+                                onDownloaderAction(DownloaderAction.DeleteDownload(movie))
+                            },
+                            onNavigateToDownloads = onNavigateToDownloads,
+                        )
+                        DetailActionsMenu(
+                            itemId = movie.id,
+                            actions =
+                                setOf(
+                                    DetailAction.SUBTITLE_SEARCH,
+                                    DetailAction.IDENTIFY,
+                                    DetailAction.EDIT_IMAGES,
+                                ),
+                            onSubtitleSearch = { onSubtitleSearch(movie.id) },
+                            onIdentify = { onIdentify(movie.id) },
+                            onIdentifyApplied = onIdentifyApplied,
+                            onEditImages = { onEditImages(movie.id) },
+                        )
+                    }
                 }
             },
         )

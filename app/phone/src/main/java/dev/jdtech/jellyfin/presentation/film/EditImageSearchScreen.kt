@@ -179,12 +179,9 @@ private fun RemoteImageTile(
     result: RemoteImageInfo,
     onClick: () -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier.fillMaxWidth()
-                .clip(MaterialTheme.shapes.small)
-                .clickable(enabled = result.url != null, onClick = onClick)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // The image is the card: rounded and tappable on its own. The text sits outside the clip,
+        // so the radius cannot crop it.
         AsyncImage(
             model = result.thumbnailUrl ?: result.url,
             contentDescription = null,
@@ -193,7 +190,8 @@ private fun RemoteImageTile(
                 Modifier.fillMaxWidth()
                     .aspectRatio(remoteImageAspectRatio(type, result, isEpisode))
                     .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .clickable(enabled = result.url != null, onClick = onClick),
         )
         Spacer(Modifier.height(MaterialTheme.spacings.small))
         Text(

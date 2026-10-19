@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -38,29 +39,31 @@ fun ItemTopBar(
                     end = safePadding.end + MaterialTheme.spacings.small,
                 )
     ) {
-        if (hasBackButton) {
-            AppIconButton(
-                onClick = onBackClick,
-                variant = AppButtonVariant.Overlay,
-                content = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_arrow_left),
-                        contentDescription = null,
-                    )
-                },
-            )
-        }
-        if (hasHomeButton) {
-            AppIconButton(
-                onClick = onHomeClick,
-                variant = AppButtonVariant.Overlay,
-                content = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_home),
-                        contentDescription = null,
-                    )
-                },
-            )
+        AppButtonGroup {
+            if (hasBackButton) {
+                AppIconButton(
+                    onClick = onBackClick,
+                    variant = AppButtonVariant.Overlay,
+                    content = {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_arrow_left),
+                            contentDescription = null,
+                        )
+                    },
+                )
+            }
+            if (hasHomeButton) {
+                AppIconButton(
+                    onClick = onHomeClick,
+                    variant = AppButtonVariant.Overlay,
+                    content = {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_home),
+                            contentDescription = null,
+                        )
+                    },
+                )
+            }
         }
         content()
         Spacer(modifier = Modifier.weight(1f))

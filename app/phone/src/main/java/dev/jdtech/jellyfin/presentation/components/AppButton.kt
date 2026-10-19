@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -37,15 +35,14 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.presentation.theme.LocalCornerRadius
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 /**
  * The one button in the app.
  *
  * [AppButton] lays its children out in a row and sizes to its label; [AppIconButton] is a square
- * box for an icon alone, so it becomes a circle at a full radius. Both share this implementation,
- * so they cannot drift apart.
+ * box for an icon alone. Both are pills - a square pill is a circle - and both share this
+ * implementation, so they cannot drift apart.
  *
  * The call site writes the children: an icon, a label, both in either order, a spinner, a tinted
  * icon - the button only supplies the row (with the gap between children) and the content colour.
@@ -53,9 +50,9 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
  * to write. The button owns the spacing.
  *
  * @param size the button's role in the app, which fixes its height (and width, for the icon form).
+ *   [AppButtonSize.Default] is used everywhere; [AppButtonSize.Player] only for the player's
+ *   transport controls.
  * @param variant the colour treatment; see [AppButtonVariant].
- * @param radius [AppButtonRadius.Full] is always a pill or a circle; [AppButtonRadius.Rounded]
- *   follows the user's corner-radius preference.
  * @param effect how the button reacts to a press; see [AppButtonEffect]. Defaults to
  *   [AppButtonEffect.Tint].
  * @param onHold the press edge, called `true` on press and `false` on release. Only the offset
@@ -67,7 +64,6 @@ fun AppButton(
     modifier: Modifier = Modifier,
     size: AppButtonSize = AppButtonSize.Default,
     variant: AppButtonVariant = AppButtonVariant.Primary,
-    radius: AppButtonRadius = AppButtonRadius.Rounded,
     effect: AppButtonEffect = AppButtonEffect.Tint,
     enabled: Boolean = true,
     onHold: ((pressed: Boolean) -> Unit)? = null,
@@ -78,7 +74,6 @@ fun AppButton(
         modifier = modifier,
         size = size,
         variant = variant,
-        radius = radius,
         effect = effect,
         enabled = enabled,
         onHold = onHold,
@@ -87,17 +82,13 @@ fun AppButton(
     )
 }
 
-/**
- * The square form of [AppButton] for an icon on its own: it is a circle at [AppButtonRadius.Full]
- * (the default) and a rounded square at [AppButtonRadius.Rounded].
- */
+/** The square form of [AppButton] for an icon on its own; a circle. */
 @Composable
 fun AppIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     size: AppButtonSize = AppButtonSize.Default,
     variant: AppButtonVariant = AppButtonVariant.Secondary,
-    radius: AppButtonRadius = AppButtonRadius.Full,
     effect: AppButtonEffect = AppButtonEffect.Tint,
     enabled: Boolean = true,
     onHold: ((pressed: Boolean) -> Unit)? = null,
@@ -108,11 +99,27 @@ fun AppIconButton(
         modifier = modifier,
         size = size,
         variant = variant,
-        radius = radius,
         effect = effect,
         enabled = enabled,
         onHold = onHold,
         square = true,
+        content = content,
+    )
+}
+
+/**
+ * A row of buttons sharing the app's one gap, so a set of actions reads as a group and no call site
+ * writes its own spacer between buttons.
+ */
+@Composable
+fun AppButtonGroup(
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
 }
@@ -123,7 +130,6 @@ private fun AppButtonImpl(
     modifier: Modifier,
     size: AppButtonSize,
     variant: AppButtonVariant,
-    radius: AppButtonRadius,
     effect: AppButtonEffect,
     enabled: Boolean,
     onHold: ((pressed: Boolean) -> Unit)?,
@@ -152,10 +158,12 @@ private fun AppButtonImpl(
     val shownContentColor = if (enabled) contentColor else contentColor.copy(alpha = DisabledAlpha)
 
     Box(
+        // No fillMaxWidth here: the button sizes to its content and only stretches when the call
+        // site gives it a weight.
         modifier =
             modifier
                 .then(if (square) Modifier.size(size.value) else Modifier.height(size.value))
-                .clip(radius.shape())
+                .clip(CircleShape)
                 .background(containerColor)
                 .clickable(
                     interactionSource = interactionSource,
@@ -187,7 +195,7 @@ private fun AppButtonImpl(
                     if (square) {
                         Modifier
                     } else {
-                        Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium)
+                        Modifier.padding(horizontal = MaterialTheme.spacings.medium)
                     },
                 horizontalArrangement =
                     if (square) Arrangement.Center
@@ -233,15 +241,6 @@ enum class AppButtonVariant {
 }
 
 /**
- * [Full] is a pill (or a circle, for the icon form) whatever the corner-radius preference is;
- * [Rounded] follows the preference.
- */
-enum class AppButtonRadius {
-    Full,
-    Rounded,
-}
-
-/**
  * How a button responds to a press. [Tint] is the default; the ripple is available, not default.
  */
 enum class AppButtonEffect {
@@ -256,12 +255,8 @@ private const val DisabledAlpha = 0.38f
 /** Opacity of the [AppButtonEffect.Tint] press overlay. */
 private const val TintAlpha = 0.12f
 
-@Composable
-private fun AppButtonRadius.shape(): Shape =
-    when (this) {
-        AppButtonRadius.Full -> CircleShape
-        AppButtonRadius.Rounded -> LocalCornerRadius.current.shape
-    }
+/** Opacity of the [AppButtonVariant.Overlay] scrim. */
+private const val ScrimAlpha = 0.7f
 
 @Composable
 private fun AppButtonVariant.containerColor(): Color =
@@ -270,7 +265,7 @@ private fun AppButtonVariant.containerColor(): Color =
         AppButtonVariant.Secondary -> MaterialTheme.colorScheme.secondaryContainer
         AppButtonVariant.Ghost -> Color.Transparent
         AppButtonVariant.Overlay -> MaterialTheme.colorScheme.scrim.copy(alpha = ScrimAlpha)
-        AppButtonVariant.Destructive -> MaterialTheme.colorScheme.error
+        AppButtonVariant.Destructive -> MaterialTheme.colorScheme.errorContainer
     }
 
 @Composable
@@ -280,46 +275,41 @@ private fun AppButtonVariant.contentColor(): Color =
         AppButtonVariant.Secondary -> MaterialTheme.colorScheme.onSecondaryContainer
         AppButtonVariant.Ghost -> LocalContentColor.current
         AppButtonVariant.Overlay -> OnScrim
-        AppButtonVariant.Destructive -> MaterialTheme.colorScheme.onError
+        AppButtonVariant.Destructive -> MaterialTheme.colorScheme.onErrorContainer
     }
-
-/** Opacity of the [AppButtonVariant.Overlay] scrim. */
-private const val ScrimAlpha = 0.7f
 
 @Preview(showBackground = true)
 @Composable
 private fun AppButtonPreview() {
     FindroidTheme {
-        Box {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(16.dp),
-            ) {
-                AppButton(onClick = {}, content = { Text("Play") })
-                AppButton(
-                    onClick = {},
-                    variant = AppButtonVariant.Secondary,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_play),
-                            contentDescription = null,
-                        )
-                        Text("Play")
-                    },
-                )
-                AppIconButton(
-                    onClick = {},
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_tune),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                )
-            }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(16.dp),
+        ) {
+            AppButton(onClick = {}, content = { Text("Play") })
+            AppButton(
+                onClick = {},
+                variant = AppButtonVariant.Secondary,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_play),
+                        contentDescription = null,
+                    )
+                    Text("Play")
+                },
+            )
+            AppIconButton(
+                onClick = {},
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_tune),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
         }
     }
 }

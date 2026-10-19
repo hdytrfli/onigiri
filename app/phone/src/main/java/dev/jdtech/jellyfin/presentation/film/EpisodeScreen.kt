@@ -44,6 +44,7 @@ import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
@@ -296,56 +297,60 @@ private fun EpisodeScreenLayout(
             content = {
                 Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
                 state.episode?.let { episode ->
-                    AppButton(
-                        onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
-                        variant = AppButtonVariant.Overlay,
-                    ) {
-                        Text(
-                            text = episode.seriesName,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    AppButton(
-                        onClick = { onAction(EpisodeAction.NavigateToSeason(episode.seasonId)) },
-                        variant = AppButtonVariant.Overlay,
-                    ) {
-                        episode.seasonName?.let { seasonName -> Text(seasonName) }
-                            ?: run {
-                                Text(
-                                    stringResource(
-                                        CoreR.string.season_number,
-                                        episode.parentIndexNumber,
+                    AppButtonGroup {
+                        AppButton(
+                            onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
+                            variant = AppButtonVariant.Overlay,
+                        ) {
+                            Text(
+                                text = episode.seriesName,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                            )
+                        }
+                        AppButton(
+                            onClick = {
+                                onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
+                            },
+                            variant = AppButtonVariant.Overlay,
+                        ) {
+                            episode.seasonName?.let { seasonName -> Text(seasonName) }
+                                ?: run {
+                                    Text(
+                                        stringResource(
+                                            CoreR.string.season_number,
+                                            episode.parentIndexNumber,
+                                        )
                                     )
-                                )
-                            }
+                                }
+                        }
                     }
                 }
             },
             trailingContent = {
                 state.episode?.let { episode ->
-                    DownloadButton(
-                        item = episode,
-                        downloaderState = downloaderState,
-                        onDownloadClick = { storageIndex ->
-                            onDownloaderAction(DownloaderAction.Download(episode, storageIndex))
-                        },
-                        onCancelDownloadClick = {
-                            onDownloaderAction(DownloaderAction.CancelDownload(episode))
-                        },
-                        onDeleteDownloadClick = {
-                            onDownloaderAction(DownloaderAction.DeleteDownload(episode))
-                        },
-                        onNavigateToDownloads = onNavigateToDownloads,
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    DetailActionsMenu(
-                        itemId = episode.id,
-                        actions = setOf(DetailAction.SUBTITLE_SEARCH, DetailAction.EDIT_IMAGES),
-                        onSubtitleSearch = { onSubtitleSearch(episode.id) },
-                        onEditImages = { onEditImages(episode.id) },
-                    )
+                    AppButtonGroup {
+                        DownloadButton(
+                            item = episode,
+                            downloaderState = downloaderState,
+                            onDownloadClick = { storageIndex ->
+                                onDownloaderAction(DownloaderAction.Download(episode, storageIndex))
+                            },
+                            onCancelDownloadClick = {
+                                onDownloaderAction(DownloaderAction.CancelDownload(episode))
+                            },
+                            onDeleteDownloadClick = {
+                                onDownloaderAction(DownloaderAction.DeleteDownload(episode))
+                            },
+                            onNavigateToDownloads = onNavigateToDownloads,
+                        )
+                        DetailActionsMenu(
+                            itemId = episode.id,
+                            actions = setOf(DetailAction.SUBTITLE_SEARCH, DetailAction.EDIT_IMAGES),
+                            onSubtitleSearch = { onSubtitleSearch(episode.id) },
+                            onEditImages = { onEditImages(episode.id) },
+                        )
+                    }
                 }
             },
         )

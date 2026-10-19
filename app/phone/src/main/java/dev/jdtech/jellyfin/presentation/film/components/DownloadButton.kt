@@ -2,12 +2,9 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import android.os.Environment
 import android.os.StatFs
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,7 +12,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -26,9 +22,9 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderState
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
-import dev.jdtech.jellyfin.presentation.theme.spacings
 
 /**
  * The media download action shown in the detail top bar. It reflects the download state: an
@@ -57,11 +53,7 @@ fun DownloadButton(
     when {
         isDownloading -> {
             val percent = (downloaderState.progress * 100).toInt().coerceIn(0, 100)
-            Row(
-                modifier = modifier,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            AppButtonGroup(modifier = modifier) {
                 AppButton(
                     onClick = onNavigateToDownloads,
                     variant = AppButtonVariant.Overlay,

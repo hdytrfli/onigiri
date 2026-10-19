@@ -10,10 +10,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,9 +30,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
@@ -53,7 +53,7 @@ fun HomeHeader(
     val isOfflineMode = LocalOfflineMode.current
 
     Row(
-        modifier = modifier.fillMaxWidth().height(56.dp),
+        modifier = modifier.fillMaxWidth().height(AppButtonSize.Default.value),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Surface(
@@ -79,32 +79,23 @@ fun HomeHeader(
 
         Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
             AnimatedVisibility(visible = isError, enter = fadeIn(), exit = fadeOut()) {
-                Surface(
+                AppIconButton(
                     onClick = onErrorClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.errorContainer,
-                ) {
-                    Box {
+                    variant = AppButtonVariant.Destructive,
+                    content = {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_alert_circle),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.align(Alignment.Center),
                         )
-                    }
-                }
+                    },
+                )
             }
 
             AnimatedVisibility(visible = isLoading || isError, enter = fadeIn(), exit = fadeOut()) {
-                Surface(
+                AppIconButton(
                     onClick = onRetryClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
                     enabled = !isLoading,
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ) {
-                    Box {
+                    content = {
                         if (isLoading) {
                             val rotation =
                                 rememberInfiniteTransition(label = "loading")
@@ -119,56 +110,39 @@ fun HomeHeader(
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_loader_circle),
                                 contentDescription = null,
-                                modifier = Modifier.align(Alignment.Center).rotate(rotation),
+                                modifier = Modifier.rotate(rotation),
                             )
                         } else {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_rotate_ccw),
                                 contentDescription = stringResource(R.string.refresh),
-                                modifier = Modifier.align(Alignment.Center),
                             )
                         }
-                    }
-                }
+                    },
+                )
             }
 
             if (!isOfflineMode) {
-                Surface(
+                AppIconButton(
                     onClick = onSearchClick,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    content = {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_search),
                             contentDescription = null,
                         )
-                    }
-                }
+                    },
+                )
             }
 
-            Surface(
+            AppIconButton(
                 onClick = onUserClick,
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                content = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_user),
                         contentDescription = null,
                     )
-                }
-            }
+                },
+            )
         }
     }
 }
