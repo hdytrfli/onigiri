@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -43,6 +42,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.setup.components.DiscoveredServerItem
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
@@ -170,12 +171,17 @@ private fun AddServerScreenLayout(state: AddServerState, onAction: (AddServerAct
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        IconButton(
+        AppIconButton(
             onClick = { onAction(AddServerAction.OnBackClick) },
             modifier = Modifier.padding(start = MaterialTheme.spacings.small),
-        ) {
-            Icon(painter = painterResource(CoreR.drawable.ic_arrow_left), contentDescription = null)
-        }
+            variant = AppButtonVariant.Ghost,
+            content = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_arrow_left),
+                    contentDescription = null,
+                )
+            },
+        )
     }
 }
 

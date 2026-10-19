@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.settings.components
 
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +11,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.domain.models.Preference
@@ -35,30 +37,36 @@ fun SettingsStepperCard(
         preference = preference,
         modifier = modifier,
         trailing = {
-            IconButton(
+            AppIconButton(
                 onClick = { onUpdate((value - 1).coerceAtLeast(range.first).toString()) },
                 enabled = preference.enabled && value > range.first,
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_minus_fat),
-                    contentDescription = null,
-                )
-            }
+                size = AppButtonSize.Decorator,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_minus_fat),
+                        contentDescription = null,
+                    )
+                },
+            )
             Text(
                 text = value.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(min = 24.dp),
             )
-            IconButton(
+            AppIconButton(
                 onClick = { onUpdate((value + 1).coerceAtMost(range.last).toString()) },
                 enabled = preference.enabled && value < range.last,
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_plus),
-                    contentDescription = null,
-                )
-            }
+                size = AppButtonSize.Decorator,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_plus),
+                        contentDescription = null,
+                    )
+                },
+            )
         },
     )
 }

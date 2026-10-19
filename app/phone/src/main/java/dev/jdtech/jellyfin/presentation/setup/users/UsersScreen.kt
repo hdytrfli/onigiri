@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.models.User
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.setup.components.UserItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -153,22 +154,26 @@ private fun UsersScreenLayout(
             }
         }
         if (showBack) {
-            IconButton(
+            AppIconButton(
                 onClick = { onAction(UsersAction.OnBackClick) },
                 modifier = Modifier.padding(start = MaterialTheme.spacings.small),
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_arrow_left),
-                    contentDescription = null,
-                )
-            }
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_arrow_left),
+                        contentDescription = null,
+                    )
+                },
+            )
         }
-        IconButton(
+        AppIconButton(
             onClick = { onAction(UsersAction.OnChangeServerClick) },
             modifier = Modifier.align(Alignment.TopEnd).padding(end = MaterialTheme.spacings.small),
-        ) {
-            Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
-        }
+            variant = AppButtonVariant.Ghost,
+            content = {
+                Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
+            },
+        )
         ExtendedFloatingActionButton(
             onClick = { onAction(UsersAction.OnAddClick) },
             icon = { Icon(painterResource(CoreR.drawable.ic_plus), contentDescription = null) },

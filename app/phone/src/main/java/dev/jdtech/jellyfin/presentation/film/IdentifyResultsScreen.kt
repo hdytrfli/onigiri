@@ -23,7 +23,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,6 +48,8 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyEvent
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -124,12 +125,16 @@ private fun IdentifyResultsLayout(
             TopAppBar(
                 title = { Text(stringResource(CoreR.string.identify)) },
                 navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = navigateBack,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
@@ -210,13 +215,17 @@ private fun IdentifyResultCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            IconButton(onClick = onInfo) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_info),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            AppIconButton(
+                onClick = onInfo,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_info),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+            )
         }
     }
 }

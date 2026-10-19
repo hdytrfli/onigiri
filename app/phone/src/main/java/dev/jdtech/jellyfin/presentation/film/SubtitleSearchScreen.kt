@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,7 +28,6 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -60,6 +58,9 @@ import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.jdtech.jellyfin.models.FindroidMediaStream
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
@@ -125,12 +126,16 @@ private fun SubtitleSearchScreenLayout(
             TopAppBar(
                 title = { Text(stringResource(CoreR.string.search_subtitles)) },
                 navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = navigateBack,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
@@ -161,8 +166,12 @@ private fun SubtitleSearchScreenLayout(
                         modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
                         contentAlignment = Alignment.CenterEnd,
                     ) {
-                        Button(onClick = onSearch, enabled = !state.isSearching) {
+                        AppButton(onClick = onSearch, enabled = !state.isSearching) {
                             Text(text = stringResource(CoreR.string.search))
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                contentDescription = null,
+                            )
                         }
                     }
                 }
@@ -483,18 +492,25 @@ private fun ExistingSubtitleRow(
                 } else {
                     // Always shown, so deletable and non-deletable rows have the same height.
                     // When it can't be deleted it's disabled and drawn muted.
-                    IconButton(onClick = onDelete, enabled = canDelete) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_trash),
-                            contentDescription = stringResource(CoreR.string.delete),
-                            tint =
-                                if (canDelete) {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-                                },
-                        )
-                    }
+                    AppIconButton(
+                        onClick = onDelete,
+                        enabled = canDelete,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_trash),
+                                contentDescription = stringResource(CoreR.string.delete),
+                                tint =
+                                    if (canDelete) {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                            alpha = 0.38f
+                                        )
+                                    },
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -513,25 +529,34 @@ private fun RemoteSubtitleRow(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onInfo) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_info),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            AppIconButton(
+                onClick = onInfo,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_info),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+            )
             // Fixed size so the row doesn't shift when the button becomes a spinner.
             Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                 if (isDownloading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    IconButton(onClick = onDownload, enabled = result.id != null) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),
-                            contentDescription = stringResource(CoreR.string.download),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = onDownload,
+                        enabled = result.id != null,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),
+                                contentDescription = stringResource(CoreR.string.download),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                    )
                 }
             }
         }

@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +43,8 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import dev.jdtech.jellyfin.BuildConfig
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
@@ -76,12 +76,16 @@ fun AboutScreen(navigateBack: () -> Unit) {
             TopAppBar(
                 title = { Text(text = stringResource(SettingsR.string.about)) },
                 navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = navigateBack,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
@@ -129,7 +133,7 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                 horizontalArrangement =
                                     Arrangement.spacedBy(MaterialTheme.spacings.small)
                             ) {
-                                FilledTonalIconButton(
+                                AppIconButton(
                                     onClick = {
                                         try {
                                             uriHandler.openUri(
@@ -143,14 +147,15 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                                 )
                                                 .show()
                                         }
-                                    }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_github),
-                                        contentDescription = null,
-                                    )
-                                }
-                                FilledTonalIconButton(
+                                    },
+                                    content = {
+                                        Icon(
+                                            painter = painterResource(CoreR.drawable.ic_github),
+                                            contentDescription = null,
+                                        )
+                                    },
+                                )
+                                AppIconButton(
                                     onClick = {
                                         try {
                                             uriHandler.openUri(
@@ -164,13 +169,14 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                                 )
                                                 .show()
                                         }
-                                    }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_coffee),
-                                        contentDescription = null,
-                                    )
-                                }
+                                    },
+                                    content = {
+                                        Icon(
+                                            painter = painterResource(CoreR.drawable.ic_coffee),
+                                            contentDescription = null,
+                                        )
+                                    },
+                                )
                             }
                             Spacer(Modifier.height(MaterialTheme.spacings.small))
                         }

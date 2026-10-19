@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,13 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.HomeItem
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
@@ -37,7 +38,8 @@ fun HomeView(
 ) {
     Column(modifier = modifier) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(42.dp).padding(itemsPadding),
+            modifier =
+                Modifier.fillMaxWidth().height(AppButtonSize.Default.value).padding(itemsPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -47,7 +49,7 @@ fun HomeView(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            IconButton(
+            AppIconButton(
                 onClick = {
                     onAction(
                         HomeAction.OnLibraryClick(
@@ -59,13 +61,15 @@ fun HomeView(
                             )
                         )
                     )
-                }
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                    contentDescription = null,
-                )
-            }
+                },
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                        contentDescription = null,
+                    )
+                },
+            )
         }
         Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
         GridRows(

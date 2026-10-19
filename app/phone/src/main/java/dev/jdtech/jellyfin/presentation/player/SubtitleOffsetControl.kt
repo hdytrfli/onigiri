@@ -1,8 +1,6 @@
 package dev.jdtech.jellyfin.presentation.player
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,12 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import kotlin.math.abs
 import kotlinx.coroutines.delay
@@ -157,42 +157,38 @@ private fun HoldRepeatIcon(
         }
     }
 
-    Box(
-        modifier =
-            Modifier.size(32.dp).pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        pressed = true
-                        tryAwaitRelease()
-                        pressed = false
-                    }
-                )
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = contentDescription,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
-    }
+    AppIconButton(
+        onClick = {},
+        onHold = { pressed = it },
+        size = AppButtonSize.Decorator,
+        variant = AppButtonVariant.Ghost,
+        content = {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = contentDescription,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        },
+    )
 }
 
 /** A 20dp icon (matching the track rows) that resets the offset to zero. */
 @Composable
 private fun ResetIcon(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier.size(32.dp).clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-            contentDescription = stringResource(R.string.player_subtitle_offset_reset),
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
-    }
+    AppIconButton(
+        onClick = onClick,
+        size = AppButtonSize.Decorator,
+        variant = AppButtonVariant.Ghost,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                contentDescription = stringResource(R.string.player_subtitle_offset_reset),
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        },
+    )
 }
 
 /** Formats a subtitle offset in seconds, e.g. "+0.5 s" / "-0.3 s" / "0.0 s". */

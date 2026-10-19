@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -71,14 +71,15 @@ private fun WelcomeScreenLayout(onAction: (WelcomeAction) -> Unit) {
             )
             Spacer(modifier = Modifier.height(MaterialTheme.spacings.large))
             Column(modifier = Modifier.widthIn(max = Dimens.formMaxWidth)) {
-                OutlinedButton(
+                AppButton(
                     onClick = { onAction(WelcomeAction.OnLearnMoreClick) },
                     modifier = Modifier.fillMaxWidth(),
+                    variant = AppButtonVariant.Ghost,
                 ) {
                     Text(text = stringResource(SetupR.string.welcome_btn_learn_more))
                 }
                 Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-                Button(
+                AppButton(
                     onClick = { onAction(WelcomeAction.OnContinueClick) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {

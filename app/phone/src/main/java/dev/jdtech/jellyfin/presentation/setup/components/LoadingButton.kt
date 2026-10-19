@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.setup.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
@@ -32,7 +32,9 @@ fun LoadingButton(
                         .offset(x = MaterialTheme.spacings.small),
             )
         }
-        Button(onClick = onClick, enabled = !isLoading, modifier = modifier) { Text(text = text) }
+        AppButton(onClick = onClick, enabled = !isLoading, modifier = modifier) {
+            Text(text = text)
+        }
     }
 }
 

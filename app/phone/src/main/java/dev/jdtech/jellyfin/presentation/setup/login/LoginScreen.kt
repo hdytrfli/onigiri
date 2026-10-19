@@ -23,9 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +46,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.setup.components.RootLayout
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -161,14 +162,18 @@ private fun LoginScreenLayout(
                     )
                 },
                 trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            painter =
-                                if (passwordVisible) painterResource(CoreR.drawable.ic_eye_off)
-                                else painterResource(CoreR.drawable.ic_eye),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = { passwordVisible = !passwordVisible },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter =
+                                    if (passwordVisible) painterResource(CoreR.drawable.ic_eye_off)
+                                    else painterResource(CoreR.drawable.ic_eye),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 onValueChange = { password = it },
                 label = { Text(text = stringResource(SetupR.string.edit_text_password_hint)) },
@@ -228,9 +233,10 @@ private fun LoginScreenLayout(
                                         .offset(x = MaterialTheme.spacings.small),
                             )
                         }
-                        OutlinedButton(
+                        AppButton(
                             onClick = { onAction(LoginAction.OnQuickConnectClick) },
                             modifier = Modifier.fillMaxWidth(),
+                            variant = AppButtonVariant.Secondary,
                         ) {
                             Text(
                                 text =
@@ -246,18 +252,25 @@ private fun LoginScreenLayout(
                 Text(text = state.disclaimer!!)
             }
         }
-        IconButton(
+        AppIconButton(
             onClick = { onAction(LoginAction.OnBackClick) },
             modifier = Modifier.padding(start = MaterialTheme.spacings.small),
-        ) {
-            Icon(painter = painterResource(CoreR.drawable.ic_arrow_left), contentDescription = null)
-        }
-        IconButton(
+            variant = AppButtonVariant.Ghost,
+            content = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_arrow_left),
+                    contentDescription = null,
+                )
+            },
+        )
+        AppIconButton(
             onClick = { onAction(LoginAction.OnChangeServerClick) },
             modifier = Modifier.align(Alignment.TopEnd).padding(end = MaterialTheme.spacings.small),
-        ) {
-            Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
-        }
+            variant = AppButtonVariant.Ghost,
+            content = {
+                Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
+            },
+        )
     }
 }
 

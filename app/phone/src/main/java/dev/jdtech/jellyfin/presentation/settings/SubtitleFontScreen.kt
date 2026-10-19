@@ -24,7 +24,6 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -47,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
@@ -123,12 +124,16 @@ private fun SubtitleFontScreenLayout(
             TopAppBar(
                 title = { Text(stringResource(R.string.subtitle_font_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = onBack,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
@@ -300,12 +305,16 @@ private fun FontRow(
             )
         }
         if (font.removable) {
-            IconButton(onClick = { onDelete(font) }) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_trash),
-                    contentDescription = stringResource(R.string.subtitle_font_delete),
-                )
-            }
+            AppIconButton(
+                onClick = { onDelete(font) },
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_trash),
+                        contentDescription = stringResource(R.string.subtitle_font_delete),
+                    )
+                },
+            )
         }
     }
 }

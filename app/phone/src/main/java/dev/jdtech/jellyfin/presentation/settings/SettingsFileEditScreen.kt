@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.R as SettingsR
@@ -90,31 +91,35 @@ private fun SettingsFileEditScreenLayout(
             TopAppBar(
                 title = { Text(stringResource(SettingsR.string.edit_file_title, fileName)) },
                 navigationIcon = {
-                    IconButton(
+                    AppIconButton(
                         onClick = {
                             if (isModified) showDiscardDialog = true
                             else onAction(SettingsFileEditAction.OnBackClick)
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    }
+                        },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 actions = {
-                    IconButton(
+                    AppIconButton(
                         onClick = {
                             val text = textFieldState.text.toString()
                             onAction(SettingsFileEditAction.OnSave(text))
                         },
                         enabled = isModified,
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_save),
-                            contentDescription = null,
-                        )
-                    }
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_save),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
             )
         },

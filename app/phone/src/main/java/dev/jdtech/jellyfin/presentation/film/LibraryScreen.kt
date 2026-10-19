@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,6 +43,8 @@ import dev.jdtech.jellyfin.film.presentation.library.LibraryState
 import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
@@ -130,20 +131,28 @@ private fun LibraryScreenLayout(
             TopAppBar(
                 title = { Text(libraryName) },
                 navigationIcon = {
-                    IconButton(onClick = { onAction(LibraryAction.OnBackClick) }) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = { onAction(LibraryAction.OnBackClick) },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 actions = {
-                    IconButton(onClick = { showSortByDialog = true }) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                            contentDescription = null,
-                        )
-                    }
+                    AppIconButton(
+                        onClick = { showSortByDialog = true },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
+                                contentDescription = null,
+                            )
+                        },
+                    )
                 },
                 windowInsets = topBarWindowInsets(),
                 scrollBehavior = scrollBehavior,

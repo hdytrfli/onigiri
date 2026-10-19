@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -38,6 +37,8 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.search.SearchAction
 import dev.jdtech.jellyfin.film.presentation.search.SearchState
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -124,12 +125,16 @@ fun FilmSearchBar(
                     AnimatedContent(targetState = expanded, label = "search_to_back") {
                         targetExpanded ->
                         if (targetExpanded) {
-                            IconButton(onClick = { onExpand(false) }) {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                    contentDescription = null,
-                                )
-                            }
+                            AppIconButton(
+                                onClick = { onExpand(false) },
+                                variant = AppButtonVariant.Ghost,
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                        contentDescription = null,
+                                    )
+                                },
+                            )
                         } else {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_search),
@@ -142,12 +147,16 @@ fun FilmSearchBar(
                     if (state.loading) {
                         Box(modifier = Modifier.size(32.dp)) { CircularProgressIndicator() }
                     } else if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_x),
-                                contentDescription = null,
-                            )
-                        }
+                        AppIconButton(
+                            onClick = { query = "" },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_x),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
                     }
                 },
             )

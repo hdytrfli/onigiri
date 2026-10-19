@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -18,6 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
@@ -48,18 +49,26 @@ fun ErrorCard(
                 text = stringResource(CoreR.string.error_loading_data),
                 modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
             )
-            IconButton(onClick = onShowStacktrace) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_logs),
-                    contentDescription = stringResource(CoreR.string.show_stacktrace),
-                )
-            }
-            IconButton(onClick = onRetryClick) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                    contentDescription = stringResource(CoreR.string.retry),
-                )
-            }
+            AppIconButton(
+                onClick = onShowStacktrace,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_logs),
+                        contentDescription = stringResource(CoreR.string.show_stacktrace),
+                    )
+                },
+            )
+            AppIconButton(
+                onClick = onRetryClick,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_rotate_ccw),
+                        contentDescription = stringResource(CoreR.string.retry),
+                    )
+                },
+            )
         }
     }
 }
