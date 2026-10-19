@@ -15,7 +15,7 @@ fun OptionIcon.drawableRes(): Int =
         OptionIcon.Grid -> CoreR.drawable.ic_layout_grid
         OptionIcon.Portrait -> CoreR.drawable.ic_rectangle_vertical
         OptionIcon.Landscape -> CoreR.drawable.ic_rectangle_horizontal
-        OptionIcon.Image -> CoreR.drawable.ic_image
+        OptionIcon.Ratio -> CoreR.drawable.ic_square
         OptionIcon.Width -> CoreR.drawable.ic_scaling
         OptionIcon.Decode -> CoreR.drawable.ic_cpu
         OptionIcon.Monitor -> CoreR.drawable.ic_monitor

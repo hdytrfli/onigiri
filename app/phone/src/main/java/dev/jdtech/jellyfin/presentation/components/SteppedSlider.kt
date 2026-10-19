@@ -1,0 +1,64 @@
+package dev.jdtech.jellyfin.presentation.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
+
+/**
+ * A stepped slider in the player's seek-bar style: white played track, faint unplayed track and the
+ * thin white handle. [index] is the selected step (0 until [count]); the slider snaps to steps.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SteppedSlider(
+    index: Int,
+    count: Int,
+    onIndexChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val steps = count.coerceAtLeast(2)
+    Slider(
+        value = index.coerceIn(0, steps - 1).toFloat(),
+        onValueChange = { onIndexChange(it.roundToInt()) },
+        valueRange = 0f..(steps - 1).toFloat(),
+        steps = steps - 2,
+        colors = playerSliderColors(),
+        thumb = {
+            Box(
+                modifier =
+                    Modifier.width(3.dp)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(1.5.dp))
+                        .background(Color.White)
+            )
+        },
+        track = { state ->
+            SliderDefaults.Track(
+                sliderState = state,
+                colors = playerSliderColors(),
+                modifier = Modifier.height(8.dp),
+            )
+        },
+        modifier = modifier,
+    )
+}
+
+/** Matches the player's seek bar and the subtitle-offset slider. */
+@Composable
+private fun playerSliderColors() =
+    SliderDefaults.colors(
+        thumbColor = Color.White,
+        activeTrackColor = Color.White,
+        inactiveTrackColor = Color(0x33FFFFFF),
+    )

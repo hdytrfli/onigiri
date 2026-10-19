@@ -11,7 +11,7 @@ enum class OptionIcon {
     Grid,
     Portrait,
     Landscape,
-    Image,
+    Ratio,
     Width,
     Decode,
     Monitor,

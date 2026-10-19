@@ -19,6 +19,7 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceIntInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceLongInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSlider
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
 import javax.inject.Inject
@@ -181,40 +182,48 @@ constructor(
                                         nameStringResource = R.string.settings_group_layout_grid,
                                         preferences =
                                             listOf(
-                                                PreferenceStepper(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.grid_poster_portrait,
                                                     descriptionStringRes =
                                                         R.string.grid_poster_portrait_summary,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
                                                     backendPreference =
                                                         appPreferences.gridPosterColumnsPortrait,
                                                 ),
-                                                PreferenceStepper(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.grid_poster_landscape,
                                                     descriptionStringRes =
                                                         R.string.grid_poster_landscape_summary,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
                                                     backendPreference =
                                                         appPreferences.gridPosterColumnsLandscape,
                                                 ),
-                                                PreferenceStepper(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.grid_thumbnail_portrait,
                                                     descriptionStringRes =
                                                         R.string.grid_thumbnail_portrait_summary,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
                                                     backendPreference =
                                                         appPreferences.gridThumbnailColumnsPortrait,
                                                 ),
-                                                PreferenceStepper(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.grid_thumbnail_landscape,
                                                     descriptionStringRes =
                                                         R.string.grid_thumbnail_landscape_summary,
+                                                    options = R.array.grid_columns,
+                                                    optionValues = R.array.grid_columns,
                                                     backendPreference =
                                                         appPreferences
                                                             .gridThumbnailColumnsLandscape,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource = R.string.grid_spacing,
                                                     descriptionStringRes =
                                                         R.string.grid_spacing_summary,
@@ -229,7 +238,7 @@ constructor(
                                         nameStringResource = R.string.backdrop,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.backdrop_portrait_ratio,
                                                     descriptionStringRes =
@@ -240,7 +249,7 @@ constructor(
                                                     options = R.array.backdrop_ratios,
                                                     optionValues = R.array.backdrop_ratios_values,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.backdrop_landscape_ratio,
                                                     descriptionStringRes =
@@ -257,7 +266,7 @@ constructor(
                                         nameStringResource = R.string.title_image,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.title_portrait_width,
                                                     descriptionStringRes =
@@ -268,7 +277,7 @@ constructor(
                                                     options = R.array.title_width_options,
                                                     optionValues = R.array.title_width_values,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.title_landscape_width,
                                                     descriptionStringRes =
@@ -279,7 +288,7 @@ constructor(
                                                     options = R.array.title_width_options_low,
                                                     optionValues = R.array.title_width_values_low,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.title_player_width,
                                                     descriptionStringRes =
@@ -290,11 +299,11 @@ constructor(
                                                     options = R.array.title_width_options_low,
                                                     optionValues = R.array.title_width_values_low,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource = R.string.title_image_ratio,
                                                     descriptionStringRes =
                                                         R.string.title_image_ratio_summary,
-                                                    optionIcon = OptionIcon.Image,
+                                                    optionIcon = OptionIcon.Ratio,
                                                     backendPreference =
                                                         appPreferences.titleImageRatio,
                                                     options = R.array.title_ratio_options,
@@ -855,7 +864,7 @@ constructor(
                                         nameStringResource = R.string.mpv_sub_group_text,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.pref_player_mpv_sub_font_size,
                                                     descriptionStringRes =
@@ -953,7 +962,7 @@ constructor(
                                                     optionValues =
                                                         R.array.mpv_sub_border_style_values,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.pref_player_mpv_sub_border_size,
                                                     descriptionStringRes =
@@ -987,7 +996,7 @@ constructor(
                                                     options = R.array.mpv_sub_colors,
                                                     optionValues = R.array.mpv_sub_colors_values,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.pref_player_mpv_sub_border_opacity,
                                                     descriptionStringRes =
@@ -1011,7 +1020,7 @@ constructor(
                                         nameStringResource = R.string.mpv_sub_group_position,
                                         preferences =
                                             listOf(
-                                                PreferenceSelect(
+                                                PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.pref_player_mpv_sub_pos,
                                                     descriptionStringRes =
