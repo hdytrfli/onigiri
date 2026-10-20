@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -62,6 +63,7 @@ import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
@@ -199,18 +201,23 @@ fun LibraryContent(
     embedded: Boolean = false,
     innerPadding: PaddingValues = PaddingValues(0.dp),
     sectionTitle: String? = null,
+    showSearchField: Boolean = true,
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
+    // Under a root page the floating header overlays the content, so the first grid item
+    // starts below it; standalone the grid keeps its own spacing.
+    val rootInset = LocalRootPageContentInset.current
     val contentPadding =
         if (embedded) {
             PaddingValues(
                 start = safePadding.start + MaterialTheme.spacings.default,
                 top =
-                    if (sectionTitle != null) {
-                        0.dp
-                    } else {
-                        MaterialTheme.spacings.default
-                    },
+                    rootInset +
+                        if (sectionTitle != null) {
+                            0.dp
+                        } else {
+                            MaterialTheme.spacings.default
+                        },
                 end = safePadding.end + MaterialTheme.spacings.default,
                 bottom = safePadding.bottom + MaterialTheme.spacings.default,
             )
@@ -234,19 +241,13 @@ fun LibraryContent(
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(state.searchExpanded) {
-        if (state.searchExpanded) {
+        if (showSearchField && state.searchExpanded) {
             focusRequester.requestFocus()
         }
     }
 
     Column(modifier = modifier.fillMaxSize().padding(innerPadding)) {
-        if (sectionTitle != null) {
-            SectionHeader(
-                title = sectionTitle,
-                modifier = Modifier.padding(horizontal = MaterialTheme.spacings.default),
-            )
-        }
-        if (state.searchExpanded) {
+        if (showSearchField && state.searchExpanded) {
             AppTextField(
                 value = state.searchQuery,
                 onValueChange = { onAction(LibraryAction.SetSearchQuery(it)) },
@@ -309,6 +310,12 @@ fun LibraryContent(
                 horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
+                // The title is content, not a header: it scrolls away with the grid.
+                if (sectionTitle != null) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        SectionHeader(title = sectionTitle)
+                    }
+                }
                 items(count = items.itemCount, key = items.itemKey { it.id }) {
                     val item = items[it]
                     item?.let { item ->
@@ -388,7 +395,7 @@ private fun LibraryActionButtons(
 }
 
 @Composable
-private fun DisplayInfoDialog(
+fun DisplayInfoDialog(
     fields: Set<ListDisplayField>,
     onToggle: (ListDisplayField) -> Unit,
     onDismiss: () -> Unit,

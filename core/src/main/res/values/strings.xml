@@ -55,7 +55,7 @@
     <string name="all_movies">All movies</string>
     <string name="all_shows">All shows</string>
     <string name="items_count">%1$d items</string>
-    <string name="shows_label">TV Shows</string>
+    <string name="shows_label">Shows</string>
     <string name="collections_label">Collections</string>
     <string name="unrated">Unrated</string>
     <string name="display_info">Display info</string>

@@ -2,11 +2,10 @@ package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,7 +25,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionsViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
+import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
@@ -49,36 +50,26 @@ fun CollectionsScreen(
 
     LaunchedEffect(true) { viewModel.load() }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        PageToolbar(
-            tabs =
-                listOf(
-                    stringResource(CoreR.string.movies_label),
-                    stringResource(CoreR.string.shows_label),
-                ),
-            selectedIndex = selectedTab,
-            onSelect = { selectedTab = it },
-            modifier =
-                Modifier.padding(
-                    top = safePadding.top + MaterialTheme.spacings.small,
-                    bottom = MaterialTheme.spacings.small,
-                ),
-        )
-        SectionHeader(
-            title = stringResource(CoreR.string.collections_label),
-            modifier =
-                Modifier.padding(
-                    start = safePadding.start + MaterialTheme.spacings.default,
-                    end = safePadding.end + MaterialTheme.spacings.default,
-                ),
-        )
+    RootPage(
+        header = {
+            PageToolbar(
+                tabs =
+                    listOf(
+                        stringResource(CoreR.string.movies_label),
+                        stringResource(CoreR.string.shows_label),
+                    ),
+                selectedIndex = selectedTab,
+                onSelect = { selectedTab = it },
+            )
+        }
+    ) {
         val items = if (selectedTab == 0) state.movies else state.shows
         if (state.error != null && items.isEmpty()) {
             FullPageError(
                 onRefresh = { viewModel.retry() },
                 isRefreshing = state.isLoading,
                 error = state.error,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxSize(),
             )
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -91,12 +82,17 @@ fun CollectionsScreen(
                     contentPadding =
                         PaddingValues(
                             start = safePadding.start + MaterialTheme.spacings.default,
+                            top = LocalRootPageContentInset.current,
                             end = safePadding.end + MaterialTheme.spacings.default,
                             bottom = safePadding.bottom + MaterialTheme.spacings.default,
                         ),
                     horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 ) {
+                    // The title is content, not a header: it scrolls away with the grid.
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        SectionHeader(title = stringResource(CoreR.string.collections_label))
+                    }
                     items(items = items, key = { it.id }) { item ->
                         ItemCard(
                             item = item,

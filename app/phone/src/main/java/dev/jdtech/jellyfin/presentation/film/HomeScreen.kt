@@ -37,7 +37,9 @@ import dev.jdtech.jellyfin.film.presentation.home.HomeViewModel
 import dev.jdtech.jellyfin.film.presentation.media.MediaSection
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
+import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
@@ -62,7 +64,6 @@ fun HomeScreen(
     LaunchedEffect(true) { viewModel.refresh() }
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
-    val safePadding = rememberSafePadding(handleStartInsets = false)
 
     val onAction: (HomeAction) -> Unit = { action ->
         when (action) {
@@ -76,22 +77,20 @@ fun HomeScreen(
         viewModel.onAction(action)
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        PageToolbar(
-            tabs =
-                listOf(
-                    stringResource(CoreR.string.title_home),
-                    stringResource(CoreR.string.title_favorite),
-                    stringResource(CoreR.string.title_download),
-                ),
-            selectedIndex = selectedTab,
-            onSelect = { selectedTab = it },
-            modifier =
-                Modifier.padding(
-                    top = safePadding.top + MaterialTheme.spacings.small,
-                    bottom = MaterialTheme.spacings.small,
-                ),
-        )
+    RootPage(
+        header = {
+            PageToolbar(
+                tabs =
+                    listOf(
+                        stringResource(CoreR.string.title_home),
+                        stringResource(CoreR.string.title_favorite),
+                        stringResource(CoreR.string.title_download),
+                    ),
+                selectedIndex = selectedTab,
+                onSelect = { selectedTab = it },
+            )
+        }
+    ) {
         when (selectedTab) {
             0 -> HomeScreenLayout(state = state, onAction = onAction)
             1 ->
@@ -117,7 +116,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
-    val contentPaddingTop = MaterialTheme.spacings.small
+    val contentPaddingTop = LocalRootPageContentInset.current
 
     if (state.error != null && state.suggestionsSection == null && state.views.isEmpty()) {
         FullPageError(

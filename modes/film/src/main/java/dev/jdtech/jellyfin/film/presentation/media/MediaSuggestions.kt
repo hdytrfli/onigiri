@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.film.presentation.media
 
-import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.UiText
 
@@ -24,12 +23,6 @@ data class MediaSection(
 
 data class MediaSuggestionsState(
     val sections: List<MediaSection> = emptyList(),
-    val displayFields: Set<ListDisplayField> =
-        setOf(
-            ListDisplayField.Year,
-            ListDisplayField.CommunityRating,
-            ListDisplayField.AgeRating,
-        ),
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )

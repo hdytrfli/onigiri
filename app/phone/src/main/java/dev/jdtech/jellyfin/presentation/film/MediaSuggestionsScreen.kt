@@ -1,12 +1,11 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,7 +39,10 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
+import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -75,7 +77,6 @@ private fun MediaPage(
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val safePadding = rememberSafePadding(handleStartInsets = false)
 
     val listViewModel: LibraryViewModel = hiltViewModel()
     val listState by listViewModel.state.collectAsStateWithLifecycle()
@@ -90,64 +91,79 @@ private fun MediaPage(
         listViewModel.loadItems()
     }
 
-    val toolbarActions: (@Composable RowScope.() -> Unit)? =
+    // Search and sort only exist on the list tab; the display-info trigger lives on every
+    // tab and drives the one global listDisplayFields setting through the list ViewModel.
+    val toolbarActions: @Composable RowScope.() -> Unit = {
         if (selectedTab == 0) {
-            {
-                AppIconButton(
-                    onClick = { listViewModel.onAction(LibraryAction.ToggleSearch) },
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_search),
-                            contentDescription = stringResource(CoreR.string.search),
-                        )
-                    },
-                )
-                AppIconButton(
-                    onClick = { showDisplayDialog = true },
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_layout_list),
-                            contentDescription = stringResource(CoreR.string.display_info),
-                        )
-                    },
-                )
-                AppIconButton(
-                    onClick = { showSortDialog = true },
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
-                            contentDescription = stringResource(CoreR.string.sort_by),
-                        )
-                    },
-                )
-            }
-        } else {
-            null
+            AppIconButton(
+                onClick = { listViewModel.onAction(LibraryAction.ToggleSearch) },
+                variant = AppButtonVariant.Overlay,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_search),
+                        contentDescription = stringResource(CoreR.string.search),
+                    )
+                },
+            )
         }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        PageToolbar(
-            tabs =
-                listOf(
-                    stringResource(
-                        if (kind == MediaKind.Movies) CoreR.string.movies_label
-                        else CoreR.string.shows_label
-                    ),
-                    stringResource(FilmR.string.suggestions),
-                    stringResource(FilmR.string.genres),
-                ),
-            selectedIndex = selectedTab,
-            onSelect = { selectedTab = it },
-            modifier =
-                Modifier.padding(
-                    top = safePadding.top + MaterialTheme.spacings.small,
-                    bottom = MaterialTheme.spacings.small,
-                ),
-            actions = toolbarActions,
+        AppIconButton(
+            onClick = { showDisplayDialog = true },
+            variant = AppButtonVariant.Overlay,
+            content = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_layout_list),
+                    contentDescription = stringResource(CoreR.string.display_info),
+                )
+            },
         )
+        if (selectedTab == 0) {
+            AppIconButton(
+                onClick = { showSortDialog = true },
+                variant = AppButtonVariant.Overlay,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
+                        contentDescription = stringResource(CoreR.string.sort_by),
+                    )
+                },
+            )
+        }
+    }
+
+    RootPage(
+        header = {
+            // The search icon expands into the field in place; its x collapses it back.
+            AnimatedContent(
+                targetState = listState.searchExpanded,
+                label = "media-search",
+            ) { searchExpanded ->
+                if (searchExpanded) {
+                    PageSearchField(
+                        value = listState.searchQuery,
+                        onValueChange = {
+                            listViewModel.onAction(LibraryAction.SetSearchQuery(it))
+                        },
+                        onClose = { listViewModel.onAction(LibraryAction.ToggleSearch) },
+                    )
+                } else {
+                    PageToolbar(
+                        tabs =
+                            listOf(
+                                stringResource(
+                                    if (kind == MediaKind.Movies) CoreR.string.movies_label
+                                    else CoreR.string.shows_label
+                                ),
+                                stringResource(FilmR.string.suggestions),
+                                stringResource(FilmR.string.genres),
+                            ),
+                        selectedIndex = selectedTab,
+                        onSelect = { selectedTab = it },
+                        actions = toolbarActions,
+                    )
+                }
+            }
+        }
+    ) {
         when (selectedTab) {
             0 ->
                 LibraryContent(
@@ -159,19 +175,21 @@ private fun MediaPage(
                         listViewModel.onAction(action)
                     },
                     showSortDialog = showSortDialog,
-                    showDisplayDialog = showDisplayDialog,
+                    showDisplayDialog = false,
                     onShowSortDialogChange = { showSortDialog = it },
-                    onShowDisplayDialogChange = { showDisplayDialog = it },
+                    onShowDisplayDialogChange = {},
                     embedded = true,
                     sectionTitle =
                         stringResource(
                             if (kind == MediaKind.Movies) CoreR.string.all_movies
                             else CoreR.string.all_shows
                         ),
+                    showSearchField = false,
                 )
             1 ->
                 MediaSuggestionsContent(
                     state = state,
+                    displayFields = listState.displayFields,
                     onItemClick = onItemClick,
                     onListClick = { selectedTab = 0 },
                     onRetry = { viewModel.retry(kind) },
@@ -179,10 +197,18 @@ private fun MediaPage(
             else ->
                 GenresContent(
                     kind = kind,
-                    displayFields = state.displayFields,
+                    displayFields = listState.displayFields,
                     onItemClick = onItemClick,
                     onGenreClick = onGenreClick,
                 )
+        }
+        // One dialog for every tab; the setting itself is global, never stored per page.
+        if (showDisplayDialog) {
+            DisplayInfoDialog(
+                fields = listState.displayFields,
+                onToggle = { listViewModel.onAction(LibraryAction.ToggleDisplayField(it)) },
+                onDismiss = { showDisplayDialog = false },
+            )
         }
     }
 }
@@ -190,12 +216,17 @@ private fun MediaPage(
 @Composable
 private fun MediaSuggestionsContent(
     state: MediaSuggestionsState,
+    displayFields: Set<ListDisplayField>,
     onItemClick: (FindroidItem) -> Unit,
     onListClick: () -> Unit,
     onRetry: () -> Unit,
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
-    val contentPadding = PaddingValues(bottom = safePadding.bottom + MaterialTheme.spacings.default)
+    val contentPadding =
+        PaddingValues(
+            top = LocalRootPageContentInset.current,
+            bottom = safePadding.bottom + MaterialTheme.spacings.default,
+        )
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.sections.isNotEmpty()) {
@@ -207,7 +238,7 @@ private fun MediaSuggestionsContent(
                 items(items = state.sections, key = { it.id }) { section ->
                     MediaSectionRow(
                         section = section,
-                        displayFields = state.displayFields,
+                        displayFields = displayFields,
                         onItemClick = onItemClick,
                         onListClick = if (section.showsListLink) onListClick else null,
                     )
@@ -251,7 +282,10 @@ private fun GenresContent(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding =
-                    PaddingValues(bottom = safePadding.bottom + MaterialTheme.spacings.default),
+                    PaddingValues(
+                        top = LocalRootPageContentInset.current,
+                        bottom = safePadding.bottom + MaterialTheme.spacings.default,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {
                 items(items = state.sections, key = { it.id }) { section ->

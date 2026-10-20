@@ -16,6 +16,7 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -32,7 +33,14 @@ fun CollectionGrid(
     LazyVerticalGrid(
         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
         modifier = Modifier.padding(innerPadding).fillMaxSize(),
-        contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
+        // Under a root page the floating header overlays this grid; standalone the value is 0.
+        contentPadding =
+            PaddingValues(
+                top = LocalRootPageContentInset.current,
+                bottom = MaterialTheme.spacings.default,
+                start = MaterialTheme.spacings.default,
+                end = MaterialTheme.spacings.default,
+            ),
         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
     ) {
