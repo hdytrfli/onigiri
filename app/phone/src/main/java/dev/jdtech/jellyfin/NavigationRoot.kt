@@ -291,11 +291,10 @@ private fun MainNavigation(
         }
     val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
 
-    // The rail stays visible on tablets, like Mihon: hiding it resizes the content area, which
-    // re-measures every grid and reads as a stutter when opening a detail. Only the compact
-    // bottom bar hides (and reappears at a tab root).
-    LaunchedEffect(showBottomBar, isRail) {
-        if (showBottomBar || isRail) {
+    // The suite belongs to the root screens (as in Mihon): it is shown at a tab root and hidden
+    // once a deeper screen is on top, so detail screens get the full width.
+    LaunchedEffect(showBottomBar) {
+        if (showBottomBar) {
             navigationSuiteScaffoldState.show()
         } else {
             navigationSuiteScaffoldState.hide()
