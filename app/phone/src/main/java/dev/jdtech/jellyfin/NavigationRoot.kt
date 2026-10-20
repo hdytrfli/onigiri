@@ -276,14 +276,6 @@ private fun MainNavigation(
 
     val navigationSuiteScaffoldState = rememberNavigationSuiteScaffoldState()
 
-    LaunchedEffect(showBottomBar) {
-        if (showBottomBar) {
-            navigationSuiteScaffoldState.show()
-        } else {
-            navigationSuiteScaffoldState.hide()
-        }
-    }
-
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val customNavSuiteType =
         with(windowAdaptiveInfo) {
@@ -297,6 +289,18 @@ private fun MainNavigation(
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(this)
             }
         }
+    val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
+
+    // The rail stays visible on tablets, like Mihon: hiding it resizes the content area, which
+    // re-measures every grid and reads as a stutter when opening a detail. Only the compact
+    // bottom bar hides (and reappears at a tab root).
+    LaunchedEffect(showBottomBar, isRail) {
+        if (showBottomBar || isRail) {
+            navigationSuiteScaffoldState.show()
+        } else {
+            navigationSuiteScaffoldState.hide()
+        }
+    }
 
     val entryProvider = entryProvider {
         mainEntries(
@@ -318,7 +322,6 @@ private fun MainNavigation(
             WindowInsets(0, 0, 0, 0)
         }
     Box(modifier = Modifier.fillMaxSize().consumeWindowInsets(navSuiteInsets)) {
-        val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 navigationItems.forEachIndexed { index, item ->
@@ -353,10 +356,12 @@ private fun MainNavigation(
                     entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
                     onBack = { navigator.goBack() },
                     transitionSpec = {
-                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else GLOBAL_TRANSITION_SPEC
+                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC
+                        else SHARED_AXIS_FORWARD_SPEC
                     },
                     popTransitionSpec = {
-                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else GLOBAL_TRANSITION_SPEC
+                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC
+                        else SHARED_AXIS_BACKWARD_SPEC
                     },
                     predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
                 )
