@@ -74,7 +74,7 @@ private fun PillTabs(
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .height(48.dp)
-                .padding(2.dp)
+                .padding(4.dp)
                 .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
