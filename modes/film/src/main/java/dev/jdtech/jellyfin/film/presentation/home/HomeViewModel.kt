@@ -190,6 +190,17 @@ constructor(
             is HomeAction.OnRetryClick -> {
                 loadData()
             }
+            is HomeAction.ToggleDisplayField -> {
+                val fields = _state.value.displayFields.toMutableSet()
+                if (!fields.add(action.field)) {
+                    fields.remove(action.field)
+                }
+                appPreferences.setValue(
+                    appPreferences.listDisplayFields,
+                    fields.map { it.key }.toSet(),
+                )
+                _state.value = _state.value.copy(displayFields = fields)
+            }
             else -> Unit
         }
     }

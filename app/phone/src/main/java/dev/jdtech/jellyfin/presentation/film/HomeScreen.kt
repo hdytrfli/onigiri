@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -30,12 +32,16 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSuggestions
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeView
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
 import dev.jdtech.jellyfin.film.R as FilmR
+import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsViewModel
+import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
 import dev.jdtech.jellyfin.film.presentation.home.HomeViewModel
 import dev.jdtech.jellyfin.film.presentation.media.MediaSection
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
@@ -59,10 +65,17 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Favorites and Downloads render inside this page but their display options are edited from
+    // the shared toolbar, so their ViewModels are hoisted here and handed down.
+    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    val favoritesState by favoritesViewModel.state.collectAsStateWithLifecycle()
+    val downloadsViewModel: DownloadsViewModel = hiltViewModel()
+    val downloadsState by downloadsViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.refresh() }
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
+    var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
 
     val onAction: (HomeAction) -> Unit = { action ->
         when (action) {
@@ -87,6 +100,18 @@ fun HomeScreen(
                     ),
                 selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
+                actions = {
+                    AppIconButton(
+                        onClick = { showDisplayDialog = true },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_layout_list),
+                                contentDescription = null,
+                            )
+                        },
+                    )
+                },
             )
         }
     ) {
@@ -98,8 +123,40 @@ fun HomeScreen(
                     onSearchClick = onSearchClick,
                     onSettingsClick = onSettingsClick,
                     embedded = true,
+                    viewModel = favoritesViewModel,
                 )
-            else -> DownloadsScreen(onItemClick = onItemClick, embedded = true)
+            else ->
+                DownloadsScreen(
+                    onItemClick = onItemClick,
+                    embedded = true,
+                    viewModel = downloadsViewModel,
+                )
+        }
+    }
+
+    // The dialog edits the fields of the tab it was opened from; the other pages pick the shared
+    // preference up when they next load.
+    if (showDisplayDialog) {
+        val onDismiss = { showDisplayDialog = false }
+        when (selectedTab) {
+            0 ->
+                DisplayInfoDialog(
+                    fields = state.displayFields,
+                    onToggle = { viewModel.onAction(HomeAction.ToggleDisplayField(it)) },
+                    onDismiss = onDismiss,
+                )
+            1 ->
+                DisplayInfoDialog(
+                    fields = favoritesState.displayFields,
+                    onToggle = { favoritesViewModel.toggleDisplayField(it) },
+                    onDismiss = onDismiss,
+                )
+            else ->
+                DisplayInfoDialog(
+                    fields = downloadsState.displayFields,
+                    onToggle = { downloadsViewModel.toggleDisplayField(it) },
+                    onDismiss = onDismiss,
+                )
         }
     }
 }

@@ -54,4 +54,14 @@ constructor(
             }
         }
     }
+
+    /** Flips [field] in the shared list display preference every list page reads. */
+    fun toggleDisplayField(field: ListDisplayField) {
+        val fields = _state.value.displayFields.toMutableSet()
+        if (!fields.add(field)) {
+            fields.remove(field)
+        }
+        appPreferences.setValue(appPreferences.listDisplayFields, fields.map { it.key }.toSet())
+        _state.value = _state.value.copy(displayFields = fields)
+    }
 }
