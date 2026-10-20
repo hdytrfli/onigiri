@@ -92,6 +92,9 @@ constructor(
                             sortOrder = sortOrder,
                             searchTerm = searchQuery.ifBlank { null },
                             genreIds = genreIds.takeIf { it.isNotEmpty() },
+                            onTotalCount = { total ->
+                                _state.value = _state.value.copy(itemCount = total)
+                            },
                         )
                         .cachedIn(viewModelScope)
                 _state.emit(_state.value.copy(items = items))

@@ -95,6 +95,7 @@ class JellyfinRepositoryOfflineImpl(
         limit: Int?,
         searchTerm: String?,
         genreIds: List<UUID>?,
+        onTotalCount: ((Int) -> Unit)?,
     ): List<FindroidItem> {
         return emptyList()
     }
@@ -107,6 +108,7 @@ class JellyfinRepositoryOfflineImpl(
         sortOrder: SortOrder,
         searchTerm: String?,
         genreIds: List<UUID>?,
+        onTotalCount: ((Int) -> Unit)?,
     ): Flow<PagingData<FindroidItem>> {
         TODO("Not yet implemented")
     }

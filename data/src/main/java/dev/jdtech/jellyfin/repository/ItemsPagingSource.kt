@@ -18,6 +18,7 @@ class ItemsPagingSource(
     private val sortOrder: SortOrder,
     private val searchTerm: String?,
     private val genreIds: List<UUID>?,
+    private val onTotalCount: ((Int) -> Unit)? = null,
 ) : PagingSource<Int, FindroidItem>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FindroidItem> {
         val position = params.key ?: 0
@@ -36,6 +37,9 @@ class ItemsPagingSource(
                     limit = params.loadSize,
                     searchTerm = searchTerm,
                     genreIds = genreIds,
+                    // The server's total rides on every page; only the first page of a load
+                    // pass reports it, so paging and refreshes do not re-send the same number.
+                    onTotalCount = { total -> if (position == 0) onTotalCount?.invoke(total) },
                 )
             LoadResult.Page(
                 data = items,

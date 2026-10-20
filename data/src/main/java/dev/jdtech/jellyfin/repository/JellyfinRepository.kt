@@ -56,6 +56,7 @@ interface JellyfinRepository {
         limit: Int? = null,
         searchTerm: String? = null,
         genreIds: List<UUID>? = null,
+        onTotalCount: ((Int) -> Unit)? = null,
     ): List<FindroidItem>
 
     suspend fun getItemsPaging(
@@ -66,6 +67,7 @@ interface JellyfinRepository {
         sortOrder: SortOrder = SortOrder.ASCENDING,
         searchTerm: String? = null,
         genreIds: List<UUID>? = null,
+        onTotalCount: ((Int) -> Unit)? = null,
     ): Flow<PagingData<FindroidItem>>
 
     suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre>

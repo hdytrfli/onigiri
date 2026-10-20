@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.emptyFlow
 
 data class LibraryState(
     val items: Flow<PagingData<FindroidItem>> = emptyFlow(),
+    /** The server's total for the current query, reported by the first page; null until then. */
+    val itemCount: Int? = null,
     val sortBy: SortBy = SortBy.NAME,
     val sortOrder: SortOrder = SortOrder.ASCENDING,
     val displayFields: Set<ListDisplayField> =

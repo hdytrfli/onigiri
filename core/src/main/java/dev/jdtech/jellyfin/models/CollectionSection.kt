@@ -6,15 +6,20 @@ import dev.jdtech.jellyfin.core.R as CoreR
 data class CollectionSection(val id: Int, val name: UiText, var items: List<FindroidItem>)
 
 /**
- * Splits a flat item list into the Movies and Shows sections shared by the Favorites and Downloads
- * pages, so both group content the same way: shows and episodes go to Shows, everything else
- * (movies, box sets, collections) to Movies, and empty sections are dropped so a page that holds
- * only one kind of item shows a single header.
+ * Splits a flat item list into the Movies, Shows, Seasons and Episodes sections shared by the
+ * Favorites and Downloads pages, so both group content the same way: every kind gets its own header
+ * and the grid can give episodes their 16:9 thumbnail density while the poster kinds keep the
+ * poster grid, and empty sections are dropped so a page that holds only one kind of item shows a
+ * single header.
  */
 fun mediaSections(items: List<FindroidItem>): List<CollectionSection> {
     if (items.isEmpty()) return emptyList()
-    val shows = items.filter { it is FindroidShow || it is FindroidEpisode }
-    val movies = items.filterNot { it is FindroidShow || it is FindroidEpisode }
+    val episodes = items.filter { it is FindroidEpisode }
+    val seasons = items.filter { it is FindroidSeason }
+    val shows = items.filter { it is FindroidShow }
+    val movies = items.filterNot {
+        it is FindroidShow || it is FindroidSeason || it is FindroidEpisode
+    }
     return buildList {
         if (movies.isNotEmpty()) {
             add(
@@ -31,6 +36,24 @@ fun mediaSections(items: List<FindroidItem>): List<CollectionSection> {
                     id = Constants.FAVORITE_TYPE_SHOWS,
                     name = UiText.StringResource(CoreR.string.shows_label),
                     items = shows,
+                )
+            )
+        }
+        if (seasons.isNotEmpty()) {
+            add(
+                CollectionSection(
+                    id = Constants.FAVORITE_TYPE_SEASONS,
+                    name = UiText.StringResource(CoreR.string.seasons),
+                    items = seasons,
+                )
+            )
+        }
+        if (episodes.isNotEmpty()) {
+            add(
+                CollectionSection(
+                    id = Constants.FAVORITE_TYPE_EPISODES,
+                    name = UiText.StringResource(CoreR.string.episodes_label),
+                    items = episodes,
                 )
             )
         }

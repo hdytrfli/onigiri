@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
@@ -35,8 +36,17 @@ fun CollectionGrid(
     // is resolved before the grid starts.
     val titles = sections.map { it.name.asString() }
 
+    // One grid serves both tile shapes: a row fits posterColumns posters or thumbnailColumns
+    // episode thumbnails, so the grid takes the least common multiple of the two as its column
+    // count and every item spans the cells its shape needs.
+    val posterColumns = gridColumns(GridSize.POSTER)
+    val thumbnailColumns = gridColumns(GridSize.THUMBNAIL)
+    val columns = leastCommonMultiple(posterColumns, thumbnailColumns)
+    val posterSpan = columns / posterColumns
+    val episodeSpan = columns / thumbnailColumns
+
     LazyVerticalGrid(
-        columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+        columns = GridCells.Fixed(columns),
         modifier = Modifier.padding(innerPadding).fillMaxSize(),
         contentPadding = contentPadding,
         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
@@ -44,7 +54,17 @@ fun CollectionGrid(
     ) {
         sections.forEachIndexed { index, section ->
             section(title = titles[index]) {
-                items(items = section.items, key = { it.id }) { item ->
+                items(
+                    items = section.items,
+                    key = { it.id },
+                    span = {
+                        if (it is FindroidEpisode) {
+                            GridItemSpan(episodeSpan)
+                        } else {
+                            GridItemSpan(posterSpan)
+                        }
+                    },
+                ) { item ->
                     ItemCard(
                         item = item,
                         direction =
@@ -64,4 +84,12 @@ fun CollectionGrid(
             }
         }
     }
+}
+
+/** The least common multiple of two column counts, merging a poster and a thumbnail grid. */
+private fun leastCommonMultiple(a: Int, b: Int): Int {
+    fun greatestCommonDivisor(x: Int, y: Int): Int =
+        if (y == 0) x else greatestCommonDivisor(y, x % y)
+
+    return a / greatestCommonDivisor(a, b) * b
 }

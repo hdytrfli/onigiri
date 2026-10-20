@@ -58,7 +58,7 @@ fun MediaSectionRow(
                         variant = AppButtonVariant.Ghost,
                         content = {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                painter = painterResource(CoreR.drawable.ic_ellipsis),
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp),
                             )

@@ -148,24 +148,26 @@ class JellyfinRepositoryImpl(
         limit: Int?,
         searchTerm: String?,
         genreIds: List<UUID>?,
+        onTotalCount: ((Int) -> Unit)?,
     ): List<FindroidItem> =
         withContext(Dispatchers.IO) {
-            jellyfinApi.itemsApi
-                .getItems(
-                    jellyfinApi.userId!!,
-                    parentId = parentId,
-                    includeItemTypes = includeTypes,
-                    recursive = recursive,
-                    sortBy = listOf(ItemSortBy.fromName(sortBy.sortString)),
-                    sortOrder = listOf(ItemSortOrder.fromName(sortOrder.sortString)),
-                    startIndex = startIndex,
-                    limit = limit,
-                    searchTerm = searchTerm,
-                    genreIds = genreIds,
-                )
-                .content
-                .items
-                .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+            val result =
+                jellyfinApi.itemsApi
+                    .getItems(
+                        jellyfinApi.userId!!,
+                        parentId = parentId,
+                        includeItemTypes = includeTypes,
+                        recursive = recursive,
+                        sortBy = listOf(ItemSortBy.fromName(sortBy.sortString)),
+                        sortOrder = listOf(ItemSortOrder.fromName(sortOrder.sortString)),
+                        startIndex = startIndex,
+                        limit = limit,
+                        searchTerm = searchTerm,
+                        genreIds = genreIds,
+                    )
+                    .content
+            onTotalCount?.invoke(result.totalRecordCount)
+            result.items.mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
         }
 
     override suspend fun getItemsPaging(
@@ -176,6 +178,7 @@ class JellyfinRepositoryImpl(
         sortOrder: SortOrder,
         searchTerm: String?,
         genreIds: List<UUID>?,
+        onTotalCount: ((Int) -> Unit)?,
     ): Flow<PagingData<FindroidItem>> {
         return Pager(
                 config = PagingConfig(pageSize = 10, enablePlaceholders = false),
@@ -189,6 +192,7 @@ class JellyfinRepositoryImpl(
                         sortOrder,
                         searchTerm,
                         genreIds,
+                        onTotalCount,
                     )
                 },
             )

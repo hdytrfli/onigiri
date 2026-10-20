@@ -67,6 +67,7 @@ import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.ItemCountBadge
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -225,6 +226,9 @@ fun LibraryContent(
         }
 
     val items = state.items.collectAsLazyPagingItems()
+    // The server's total for the current query rides along with the first page request;
+    // shown as the badge on the section title once it arrives.
+    val itemCount = state.itemCount
 
     // Refresh the paged list when returning to this screen so play-state changes made on a
     // detail page are reflected (the paging data is cached in the ViewModel).
@@ -309,8 +313,20 @@ fun LibraryContent(
                 horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
-                // The title is content, not a header: it scrolls away with the grid.
-                section(title = sectionTitle) {
+                // The title is content, not a header: it scrolls away with the grid. The badge
+                // on its right shows the query's total once the first page reports it.
+                section(
+                    title = sectionTitle,
+                    trailingContent =
+                        itemCount?.let { count ->
+                            {
+                                ItemCountBadge(
+                                    count = count,
+                                    modifier = Modifier.padding(start = 8.dp),
+                                )
+                            }
+                        },
+                ) {
                     items(count = items.itemCount, key = items.itemKey { it.id }) {
                         val item = items[it]
                         item?.let { item ->
