@@ -157,13 +157,15 @@ private fun PillTabs(
                                 onClick = { onSelect(index) },
                             )
                             .fillMaxHeight()
-                            .padding(horizontal = 14.dp)
+                            // Measure before the label padding so the pill spans the whole tab,
+                            // not just its text.
                             .onGloballyPositioned { coordinates ->
                                 val bounds = coordinates.boundsInParent()
                                 if (tabBounds[index] != bounds) {
                                     tabBounds[index] = bounds
                                 }
-                            },
+                            }
+                            .padding(horizontal = 14.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
