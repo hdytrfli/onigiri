@@ -352,8 +352,12 @@ private fun MainNavigation(
                 NavDisplay(
                     entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
                     onBack = { navigator.goBack() },
-                    transitionSpec = { GLOBAL_TRANSITION_SPEC },
-                    popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
+                    transitionSpec = {
+                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else GLOBAL_TRANSITION_SPEC
+                    },
+                    popTransitionSpec = {
+                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else GLOBAL_TRANSITION_SPEC
+                    },
                     predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
                 )
                 // Keep the snackbar above the bottom navigation bar, otherwise its
