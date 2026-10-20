@@ -104,6 +104,23 @@ constructor(
         }
     }
 
+    /** The item whose detail page was last opened; refreshed once when this page resumes. */
+    private var openedItemId: UUID? = null
+
+    /**
+     * Re-fetches only the item whose detail page was opened, so its updated play state shows on
+     * return without reloading the paged list (which would reset the scroll position).
+     */
+    private fun refreshOpenedItem() {
+        val itemId = openedItemId ?: return
+        openedItemId = null
+        viewModelScope.launch {
+            val item = jellyfinRepository.getItem(itemId) ?: return@launch
+            _state.value =
+                _state.value.copy(updatedItems = _state.value.updatedItems + (item.id to item))
+        }
+    }
+
     private suspend fun initSorting() {
         if (!::sortBy.isInitialized || !::sortOrder.isInitialized) {
             sortBy = SortBy.fromString(appPreferences.getValue(appPreferences.sortBy))
@@ -124,6 +141,8 @@ constructor(
 
     fun onAction(action: LibraryAction) {
         when (action) {
+            is LibraryAction.OnItemClick -> openedItemId = action.item.id
+            is LibraryAction.RefreshOpenedItem -> refreshOpenedItem()
             is LibraryAction.ChangeSorting -> {
                 if (action.sortBy != this.sortBy || action.sortOrder != this.sortOrder) {
                     setSorting(sortBy = action.sortBy, sortOrder = action.sortOrder)

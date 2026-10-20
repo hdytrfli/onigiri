@@ -16,4 +16,7 @@ sealed interface LibraryAction {
     data class SetSearchQuery(val query: String) : LibraryAction
 
     data object ToggleSearch : LibraryAction
+
+    /** Re-fetches the item whose detail page was last opened, if any. */
+    data object RefreshOpenedItem : LibraryAction
 }

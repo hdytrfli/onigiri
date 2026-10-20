@@ -230,16 +230,9 @@ fun LibraryContent(
     // shown as the badge on the section title once it arrives.
     val itemCount = state.itemCount
 
-    // Refresh the paged list when returning to this screen so play-state changes made on a
-    // detail page are reflected (the paging data is cached in the ViewModel).
-    var isFirstResume by remember { mutableStateOf(true) }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        if (isFirstResume) {
-            isFirstResume = false
-        } else {
-            items.refresh()
-        }
-    }
+    // Do not refresh the paged list on resume: reloading it resets the scroll position. Only the
+    // item whose detail page was opened can have changed, so the ViewModel re-fetches just that.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { onAction(LibraryAction.RefreshOpenedItem) }
 
     val focusRequester = remember { FocusRequester() }
 
@@ -328,7 +321,7 @@ fun LibraryContent(
                         },
                 ) {
                     items(count = items.itemCount, key = items.itemKey { it.id }) {
-                        val item = items[it]
+                        val item = items[it]?.let { paged -> state.updatedItems[paged.id] ?: paged }
                         item?.let { item ->
                             ItemCard(
                                 item = item,
