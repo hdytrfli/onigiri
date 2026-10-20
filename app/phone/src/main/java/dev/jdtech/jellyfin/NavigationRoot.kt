@@ -83,6 +83,7 @@ import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -269,6 +270,7 @@ private fun MainNavigation(
     }
 
     val suiteType = rememberNavigationSuiteType()
+    val predictiveBack = LocalPredictiveBack.current
     val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
     CompositionLocalProvider(
         LocalSuiteStartInset provides suiteType.suiteStartInset(),
@@ -284,7 +286,13 @@ private fun MainNavigation(
                 popTransitionSpec = {
                     if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
                 },
-                predictivePopTransitionSpec = { _ -> PAGE_TRANSITION_SPEC },
+                predictivePopTransitionSpec = { _ ->
+                    if (predictiveBack) {
+                        PAGE_TRANSITION_SPEC
+                    } else {
+                        NO_PREVIEW_TRANSITION_SPEC
+                    }
+                },
             )
             // The suite is drawn over the content, outside the NavDisplay, so a page transition
             // never moves it: switching tabs animates only the content behind it.

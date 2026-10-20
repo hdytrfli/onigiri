@@ -347,6 +347,13 @@ constructor(
                                                         R.string.blur_hash_summary,
                                                     backendPreference = appPreferences.blurHash,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.predictive_back,
+                                                    descriptionStringRes =
+                                                        R.string.predictive_back_summary,
+                                                    backendPreference =
+                                                        appPreferences.predictiveBack,
+                                                ),
                                             )
                                     ),
                                 ),

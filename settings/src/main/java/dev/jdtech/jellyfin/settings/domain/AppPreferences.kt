@@ -38,6 +38,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     /** Show a blurhash of each image while it loads, instead of the flat surface colour. */
     val blurHash = Preference("pref_blur_hash", true)
 
+    /** Preview the previous screen while swiping back (Android predictive back). */
+    val predictiveBack = Preference("pref_predictive_back", false)
+
     /** Which metadata the movie/show list cards show: release year, rating, age rating. */
     val listDisplayFields = Preference("pref_list_display_fields", setOf("year", "rating", "age"))
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")

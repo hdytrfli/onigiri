@@ -1,6 +1,8 @@
 package dev.jdtech.jellyfin
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,6 +41,9 @@ internal val PAGE_TRANSITION_SPEC =
             slideOutHorizontally(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) {
                 -it * PAGE_TRANSITION_OFFSET_PERCENT / 100
             })
+
+// Used when the predictive-back preview is off: the gesture shows nothing until it commits.
+internal val NO_PREVIEW_TRANSITION_SPEC = EnterTransition.None togetherWith ExitTransition.None
 
 /** True when a transition moves between two top-level tabs rather than onto a detail screen. */
 internal fun AnimatedContentTransitionScope<Scene<NavKey>>.isTabSwitch(

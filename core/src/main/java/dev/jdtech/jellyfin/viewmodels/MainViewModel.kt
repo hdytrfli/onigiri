@@ -84,20 +84,26 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
 
             val interfacePrefs =
                 combine(
-                    appPreferences.observe(appPreferences.backdropPortraitRatio),
-                    appPreferences.observe(appPreferences.backdropLandscapeRatio),
-                    appPreferences.observe(appPreferences.confirmExit),
-                    appPreferences.observe(appPreferences.hideStatusBar),
-                    appPreferences.observe(appPreferences.blurHash),
-                ) { portraitRatio, landscapeRatio, confirmExit, hideStatusBar, blurHash ->
-                    InterfacePrefs(
-                        portraitRatio,
-                        landscapeRatio,
-                        confirmExit,
-                        hideStatusBar,
-                        blurHash,
-                    )
-                }
+                        appPreferences.observe(appPreferences.backdropPortraitRatio),
+                        appPreferences.observe(appPreferences.backdropLandscapeRatio),
+                        appPreferences.observe(appPreferences.confirmExit),
+                        appPreferences.observe(appPreferences.hideStatusBar),
+                        appPreferences.observe(appPreferences.blurHash),
+                    ) { portraitRatio, landscapeRatio, confirmExit, hideStatusBar, blurHash ->
+                        InterfacePrefs(
+                            portraitRatio,
+                            landscapeRatio,
+                            confirmExit,
+                            hideStatusBar,
+                            blurHash,
+                            predictiveBack = false,
+                        )
+                    }
+                    .combine(appPreferences.observe(appPreferences.predictiveBack)) {
+                        prefs,
+                        predictiveBack ->
+                        prefs.copy(predictiveBack = predictiveBack)
+                    }
 
             val titlePrefs =
                 combine(
@@ -148,6 +154,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         confirmExit = interfacePrefs.confirmExit,
                         hideStatusBar = interfacePrefs.hideStatusBar,
                         blurHash = interfacePrefs.blurHash,
+                        predictiveBack = interfacePrefs.predictiveBack,
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
@@ -180,6 +187,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val confirmExit: Boolean,
         val hideStatusBar: Boolean,
         val blurHash: Boolean,
+        val predictiveBack: Boolean,
     )
 
     private data class GridPrefs(
@@ -206,6 +214,7 @@ data class MainState(
     val confirmExit: Boolean = false,
     val hideStatusBar: Boolean = false,
     val blurHash: Boolean = true,
+    val predictiveBack: Boolean = false,
     val gridPosterPortrait: Int = 2,
     val gridPosterLandscape: Int = 4,
     val gridThumbnailPortrait: Int = 3,

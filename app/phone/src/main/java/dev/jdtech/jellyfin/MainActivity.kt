@@ -31,6 +31,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalGridColumns
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity() {
                         CompositionLocalProvider(
                             LocalOfflineMode provides state.isOfflineMode,
                             LocalBlurHash provides state.blurHash,
+                            LocalPredictiveBack provides state.predictiveBack,
                             LocalBackdropRatios provides
                                 BackdropRatios(
                                     portrait = state.backdropPortraitRatio,
