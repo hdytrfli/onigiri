@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -267,31 +268,49 @@ private fun MainNavigation(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        NavDisplay(
-            entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
-            onBack = { navigator.goBack() },
-            transitionSpec = {
-                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
-            },
-            popTransitionSpec = {
-                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
-            },
-            predictivePopTransitionSpec = { _ -> PAGE_TRANSITION_SPEC },
-        )
-        // Keep the snackbar above the bottom navigation bar, otherwise its translucent background
-        // reveals the (light) navigation bar behind it.
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier =
-                Modifier.align(Alignment.BottomCenter)
-                    .padding(bottom = MaterialTheme.spacings.medium),
-        ) { data ->
-            Snackbar(
-                snackbarData = data,
-                containerColor = ScrimMedium,
-                contentColor = OnScrim,
+    val suiteType = rememberNavigationSuiteType()
+    val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
+    CompositionLocalProvider(
+        LocalSuiteStartInset provides suiteType.suiteStartInset(),
+        LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            NavDisplay(
+                entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
+                onBack = { navigator.goBack() },
+                transitionSpec = {
+                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
+                },
+                popTransitionSpec = {
+                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
+                },
+                predictivePopTransitionSpec = { _ -> PAGE_TRANSITION_SPEC },
             )
+            // The suite is drawn over the content, outside the NavDisplay, so a page transition
+            // never moves it: switching tabs animates only the content behind it.
+            if (atTabRoot && topLevelRoute in tabRoutes) {
+                RootNavigationSuite(
+                    navigator = navigator,
+                    selectedRoute = topLevelRoute,
+                    suiteType = suiteType,
+                )
+            }
+            // Keep the snackbar above the bottom navigation bar, otherwise its translucent
+            // background reveals the (light) navigation bar behind it.
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier =
+                    Modifier.align(Alignment.BottomCenter)
+                        .padding(
+                            bottom = MaterialTheme.spacings.medium + LocalSuiteBottomInset.current
+                        ),
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = ScrimMedium,
+                    contentColor = OnScrim,
+                )
+            }
         }
     }
 }
@@ -400,7 +419,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         onSetupComplete = { navigator.navigateHome() },
     )
     entry<HomeRoute> {
-        RootSuiteScaffold(navigator = navigator, selectedRoute = HomeRoute) {
+        SuiteInsetBox {
             HomeScreen(
                 onLibraryClick =
                     resumedAction { library ->
@@ -425,7 +444,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         }
     }
     entry<MoviesRoute> {
-        RootSuiteScaffold(navigator = navigator, selectedRoute = MoviesRoute) {
+        SuiteInsetBox {
             MoviesScreen(
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
                 onGenreClick = { genre ->
@@ -452,7 +471,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         )
     }
     entry<ShowsRoute> {
-        RootSuiteScaffold(navigator = navigator, selectedRoute = ShowsRoute) {
+        SuiteInsetBox {
             ShowsScreen(
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
                 onGenreClick = { genre ->
@@ -468,7 +487,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         }
     }
     entry<CollectionsRoute> {
-        RootSuiteScaffold(navigator = navigator, selectedRoute = CollectionsRoute) {
+        SuiteInsetBox {
             CollectionsScreen(
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) }
             )
@@ -734,7 +753,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             )
         }
         if (isRoot) {
-            RootSuiteScaffold(navigator = navigator, selectedRoute = key) { settings() }
+            SuiteInsetBox { settings() }
         } else {
             settings()
         }
