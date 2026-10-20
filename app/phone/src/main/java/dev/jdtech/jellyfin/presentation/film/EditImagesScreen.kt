@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +48,7 @@ import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.MenuActionItem
@@ -56,7 +56,6 @@ import dev.jdtech.jellyfin.presentation.film.components.MenuWidth
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageInfo
@@ -122,25 +121,7 @@ private fun EditImagesScreenLayout(
             Modifier.fillMaxSize()
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(CoreR.string.edit_images)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
-        },
+        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
     ) { innerPadding ->
         if (state.isLoading && state.images.isEmpty()) {
             Box(

@@ -23,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,12 +42,10 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import dev.jdtech.jellyfin.BuildConfig
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
-import dev.jdtech.jellyfin.settings.R as SettingsR
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,25 +69,7 @@ fun AboutScreen(navigateBack: () -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(SettingsR.string.about)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
-        },
+        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
     ) { innerPadding ->
         LibrariesContainer(
             libraries = libraries,

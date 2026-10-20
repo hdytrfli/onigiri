@@ -20,11 +20,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,13 +43,11 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchEvent
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchState
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
 import org.jellyfin.sdk.model.api.ImageType
@@ -110,25 +105,7 @@ private fun EditImageSearchLayout(
             Modifier.fillMaxSize()
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(CoreR.string.search_images)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
-        },
+        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             when {

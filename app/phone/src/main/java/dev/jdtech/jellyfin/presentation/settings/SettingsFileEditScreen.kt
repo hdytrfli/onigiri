@@ -1,9 +1,15 @@
 package dev.jdtech.jellyfin.presentation.settings
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -14,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,9 +41,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsFileEditAction
 import dev.jdtech.jellyfin.settings.presentation.settings.SettingsFileEditViewModel
@@ -54,7 +60,6 @@ fun SettingsFileEditScreen(
     LaunchedEffect(filePath) { viewModel.loadFile(filePath = filePath) }
 
     SettingsFileEditScreenLayout(
-        fileName = filePath.split("/").last(),
         initialText = state.initialText,
         onAction = { action ->
             when (action) {
@@ -68,7 +73,6 @@ fun SettingsFileEditScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsFileEditScreenLayout(
-    fileName: String,
     initialText: String,
     onAction: (SettingsFileEditAction) -> Unit,
 ) {
@@ -88,40 +92,35 @@ private fun SettingsFileEditScreenLayout(
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(SettingsR.string.edit_file_title, fileName)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = {
-                            if (isModified) showDiscardDialog = true
-                            else onAction(SettingsFileEditAction.OnBackClick)
-                        },
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                actions = {
-                    AppIconButton(
-                        onClick = {
-                            val text = textFieldState.text.toString()
-                            onAction(SettingsFileEditAction.OnSave(text))
-                        },
-                        enabled = isModified,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_save),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
+            BackTopBar(
+                onBack = {
+                    if (isModified) showDiscardDialog = true
+                    else onAction(SettingsFileEditAction.OnBackClick)
+                }
             )
+        },
+        bottomBar = {
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .padding(MaterialTheme.spacings.default),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                AppButton(
+                    onClick = {
+                        val text = textFieldState.text.toString()
+                        onAction(SettingsFileEditAction.OnSave(text))
+                    },
+                    enabled = isModified,
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_save),
+                        contentDescription = null,
+                    )
+                    Text(stringResource(SettingsR.string.save))
+                }
+            }
         },
     ) { innerPadding ->
         TextField(
@@ -176,7 +175,6 @@ private fun SettingsFileEditScreenLayout(
 private fun SettingsFileEditScreenLayoutPreview() {
     FindroidTheme {
         SettingsFileEditScreenLayout(
-            fileName = "mpv.conf",
             initialText = "sample text",
             onAction = {},
         )

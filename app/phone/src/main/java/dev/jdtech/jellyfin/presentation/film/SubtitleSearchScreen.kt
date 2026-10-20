@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -60,10 +59,10 @@ import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
@@ -121,25 +120,7 @@ private fun SubtitleSearchScreenLayout(
             Modifier.fillMaxSize()
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(CoreR.string.search_subtitles)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
-        },
+        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
     ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,

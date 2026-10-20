@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.presentation.settings
 
 import android.app.Activity
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,11 +10,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,20 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.settings.components.SettingsGroupCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceGroup
@@ -93,7 +84,6 @@ fun SettingsScreen(
     }
 
     SettingsScreenLayout(
-        title = indexes.last(),
         showTopBar = showTopBar,
         state = state,
         onAction = { action ->
@@ -111,7 +101,6 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsScreenLayout(
-    @StringRes title: Int,
     showTopBar: Boolean,
     state: SettingsState,
     onAction: (SettingsAction) -> Unit,
@@ -127,21 +116,8 @@ private fun SettingsScreenLayout(
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (showTopBar) {
-                TopAppBar(
-                    title = { Text(stringResource(title)) },
-                    navigationIcon = {
-                        AppIconButton(
-                            onClick = { onAction(SettingsAction.OnBackClick) },
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                    contentDescription = null,
-                                )
-                            },
-                        )
-                    },
-                    windowInsets = topBarWindowInsets(),
+                BackTopBar(
+                    onBack = { onAction(SettingsAction.OnBackClick) },
                     scrollBehavior = scrollBehavior,
                 )
             }
@@ -169,7 +145,6 @@ private fun SettingsScreenLayout(
 private fun SettingsScreenLayoutPreview() {
     FindroidTheme {
         SettingsScreenLayout(
-            title = CoreR.string.title_settings,
             showTopBar = true,
             state =
                 SettingsState(
