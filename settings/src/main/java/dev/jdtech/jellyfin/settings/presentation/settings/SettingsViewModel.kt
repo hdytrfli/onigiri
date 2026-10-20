@@ -152,19 +152,6 @@ constructor(
                                                         appPreferences.hideStatusBar,
                                                 ),
                                                 PreferenceSwitch(
-                                                    nameStringResource = R.string.offline_mode,
-                                                    descriptionStringRes =
-                                                        R.string.offline_mode_summary,
-                                                    onClick = {
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.RestartActivity
-                                                            )
-                                                        }
-                                                    },
-                                                    backendPreference = appPreferences.offlineMode,
-                                                ),
-                                                PreferenceSwitch(
                                                     nameStringResource = R.string.confirm_exit,
                                                     descriptionStringRes =
                                                         R.string.confirm_exit_summary,
@@ -1073,6 +1060,22 @@ constructor(
                                     eventsChannel.send(SettingsEvent.NavigateToServers)
                                 }
                             },
+                        )
+                    )
+            ),
+            PreferenceGroup(
+                preferences =
+                    listOf(
+                        PreferenceSwitch(
+                            nameStringResource = R.string.offline_mode,
+                            descriptionStringRes = R.string.offline_mode_summary,
+                            iconDrawableId = R.drawable.ic_server,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(SettingsEvent.RestartActivity)
+                                }
+                            },
+                            backendPreference = appPreferences.offlineMode,
                         )
                     )
             ),
