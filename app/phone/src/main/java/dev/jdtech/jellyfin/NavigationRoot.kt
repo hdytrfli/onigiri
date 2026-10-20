@@ -279,12 +279,12 @@ private fun MainNavigation(
                 entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
                 onBack = { navigator.goBack() },
                 transitionSpec = {
-                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
+                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_FORWARD_SPEC
                 },
                 popTransitionSpec = {
-                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
+                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_BACKWARD_SPEC
                 },
-                predictivePopTransitionSpec = { _ -> PAGE_TRANSITION_SPEC },
+                predictivePopTransitionSpec = { _ -> PAGE_BACKWARD_SPEC },
             )
             // The suite is drawn over the content, outside the NavDisplay, so a page transition
             // never moves it: switching tabs animates only the content behind it.

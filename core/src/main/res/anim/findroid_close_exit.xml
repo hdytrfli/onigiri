@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Going back: the closing page fades and shrinks a hair, mirroring the open transition. -->
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@android:interpolator/fast_out_slow_in">
-    <alpha
-        android:duration="280"
-        android:fromAlpha="1"
-        android:toAlpha="0" />
-    <scale
-        android:duration="280"
-        android:fromXScale="1"
-        android:fromYScale="1"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="0.94"
-        android:toYScale="0.94" />
-</set>
+<!-- Going back: the closing window fades out over the revealed one. Opacity only, no movement. -->
+<alpha xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="240"
+    android:fromAlpha="1"
+    android:toAlpha="0" />

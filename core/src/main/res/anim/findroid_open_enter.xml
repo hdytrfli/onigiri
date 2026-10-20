@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A page emerges over the previous one: a soft fade with a 6% scale, so the change is clearly
-     visible without any large movement. Mirrors the in-app page transition. -->
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@android:interpolator/fast_out_slow_in">
-    <alpha
-        android:duration="300"
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-    <scale
-        android:duration="300"
-        android:fromXScale="0.94"
-        android:fromYScale="0.94"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-</set>
+<!-- A window fades in over the previous one: opacity only, no movement. -->
+<alpha xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="260"
+    android:fromAlpha="0"
+    android:toAlpha="1" />
