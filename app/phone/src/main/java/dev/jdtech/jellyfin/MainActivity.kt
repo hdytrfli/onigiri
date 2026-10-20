@@ -26,6 +26,7 @@ import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.GridColumns
 import dev.jdtech.jellyfin.presentation.utils.GridGapBase
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalBlurHash
 import dev.jdtech.jellyfin.presentation.utils.LocalGridColumns
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         CompositionLocalProvider(
                             LocalOfflineMode provides state.isOfflineMode,
+                            LocalBlurHash provides state.blurHash,
                             LocalBackdropRatios provides
                                 BackdropRatios(
                                     portrait = state.backdropPortraitRatio,

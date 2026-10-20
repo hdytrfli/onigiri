@@ -340,7 +340,13 @@ constructor(
                                                         R.string.extra_info_summary,
                                                     backendPreference =
                                                         appPreferences.displayExtraInfo,
-                                                )
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.blur_hash,
+                                                    descriptionStringRes =
+                                                        R.string.blur_hash_summary,
+                                                    backendPreference = appPreferences.blurHash,
+                                                ),
                                             )
                                     ),
                                 ),

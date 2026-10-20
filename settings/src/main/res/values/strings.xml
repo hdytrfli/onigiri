@@ -88,6 +88,8 @@
     <string name="confirm_exit">Confirm exit</string>
     <string name="back_again_to_close">Press back again to close</string>
     <string name="offline_mode_summary">Use the app offline without a server</string>
+    <string name="blur_hash">Blurhash placeholders</string>
+    <string name="blur_hash_summary">Show a blurred preview of an image while it loads</string>
     <string name="extra_info">Display Extra Info</string>
     <string name="extra_info_summary">Detailed audio, video and subtitle information</string>
     <string name="backdrop">Backdrop</string>

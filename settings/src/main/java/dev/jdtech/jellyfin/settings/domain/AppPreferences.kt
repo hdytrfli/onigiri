@@ -35,6 +35,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val homeLatest = Preference<Boolean>("home_latest", true)
     val displayExtraInfo = Preference("pref_display_extra_info", false)
 
+    /** Show a blurhash of each image while it loads, instead of the flat surface colour. */
+    val blurHash = Preference("pref_blur_hash", true)
+
     /** Which metadata the movie/show list cards show: release year, rating, age rating. */
     val listDisplayFields = Preference("pref_list_display_fields", setOf("year", "rating", "age"))
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
