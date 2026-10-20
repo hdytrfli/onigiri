@@ -58,7 +58,6 @@ import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemCountBadge
@@ -282,14 +281,6 @@ fun LibraryContent(
                 error = error,
             )
         } else {
-            // A refresh keeps the cached list on screen, so a failed one only adds a banner.
-            if (error != null) {
-                ErrorCard(
-                    onShowStacktrace = {},
-                    onRetryClick = { onAction(LibraryAction.RefreshItems) },
-                    modifier = Modifier.fillMaxWidth().padding(contentPadding),
-                )
-            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
