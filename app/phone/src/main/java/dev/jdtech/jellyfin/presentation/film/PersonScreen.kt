@@ -22,10 +22,12 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyPersonDetail
@@ -201,8 +205,18 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
 
 @Composable
 private fun PersonImage(person: FindroidPerson, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val portrait =
+        remember(context, person.images.primary) {
+            ImageRequest.Builder(context)
+                .data(person.images.primary)
+                // The person page portrait is a one-off large image: keep it out of the shared
+                // bitmap pool and let the disk cache serve it.
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .build()
+        }
     AsyncImage(
-        model = person.images.primary,
+        model = portrait,
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier =

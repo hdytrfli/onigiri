@@ -20,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,10 +28,13 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
 import dev.jdtech.jellyfin.film.presentation.mediadetail.MediaDetailState
@@ -193,8 +197,18 @@ private fun PersonRow(person: FindroidItemPerson) {
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val context = LocalContext.current
+        val avatar =
+            remember(context, person.image.uri) {
+                ImageRequest.Builder(context)
+                    .data(person.image.uri)
+                    // Avatars are not worth a slot in the shared bitmap pool: the disk cache
+                    // serves them and they decode small.
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .build()
+            }
         AsyncImage(
-            model = person.image.uri,
+            model = avatar,
             contentDescription = null,
             modifier =
                 Modifier.size(56.dp)
