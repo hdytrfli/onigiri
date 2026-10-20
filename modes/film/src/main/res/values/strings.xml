@@ -5,6 +5,7 @@
     <string name="latest_library">Latest %1$s</string>
     <string name="media_recently_added_movies">Recently added movies</string>
     <string name="media_recently_added_episodes">Recently added episodes</string>
+    <string name="media_recently_added_shows">Recently added shows</string>
     <string name="recommendation_because_you_watched">Because you watched %1$s</string>
     <string name="recommendation_because_you_like">Because you like %1$s</string>
     <string name="recommendation_directed_by">Directed by %1$s</string>

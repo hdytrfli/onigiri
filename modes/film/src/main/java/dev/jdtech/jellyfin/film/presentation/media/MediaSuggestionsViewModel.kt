@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidMovie
+import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.RecommendationKind
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
@@ -23,7 +24,8 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 /**
  * The Movies and Shows pages, following the Jellyfin web layout: continue watching, the newly added
  * row, then (movies only) the server's recommendation categories. TV Shows has no recommendation
- * rows in Jellyfin - only continue watching, latest episodes and next up.
+ * rows in Jellyfin - only continue watching, next up and recently added shows, all shown as series
+ * cards rather than episodes.
  */
 @HiltViewModel
 class MediaSuggestionsViewModel
@@ -129,53 +131,64 @@ constructor(
     private suspend fun loadShows(): List<MediaSection> {
         val sections = mutableListOf<MediaSection>()
 
-        val resume = repository.getResumeItems().filterIsInstance<FindroidEpisode>()
+        val resume = showsFor(repository.getResumeItems().filterIsInstance<FindroidEpisode>())
         if (resume.isNotEmpty()) {
             sections +=
                 MediaSection(
                     id = "resume",
                     title = UiText.StringResource(FilmR.string.continue_watching),
                     items = resume,
-                    useThumbnails = true,
-                    showRemainingTime = true,
                 )
         }
 
-        val latest =
-            repository.getItems(
-                includeTypes = listOf(BaseItemKind.EPISODE),
-                recursive = true,
-                sortBy = SortBy.DATE_ADDED,
-                sortOrder = SortOrder.DESCENDING,
-                limit = LATEST_EPISODES_LIMIT,
-            )
-        if (latest.isNotEmpty()) {
-            sections +=
-                MediaSection(
-                    id = "latest",
-                    title = UiText.StringResource(FilmR.string.media_recently_added_episodes),
-                    items = latest,
-                    showsListLink = true,
-                    useThumbnails = true,
-                )
-        }
-
-        val nextUp = repository.getNextUp()
+        val nextUp = showsFor(repository.getNextUp())
         if (nextUp.isNotEmpty()) {
             sections +=
                 MediaSection(
                     id = "next-up",
                     title = UiText.StringResource(FilmR.string.next_up),
                     items = nextUp,
-                    useThumbnails = true,
+                )
+        }
+
+        val latest =
+            repository.getItems(
+                includeTypes = listOf(BaseItemKind.SERIES),
+                recursive = true,
+                sortBy = SortBy.DATE_ADDED,
+                sortOrder = SortOrder.DESCENDING,
+                limit = LATEST_LIMIT,
+            )
+        if (latest.isNotEmpty()) {
+            sections +=
+                MediaSection(
+                    id = "latest",
+                    title = UiText.StringResource(FilmR.string.media_recently_added_shows),
+                    items = latest,
+                    showsListLink = true,
                 )
         }
 
         return sections
     }
 
+    /**
+     * Continue Watching and Next Up are episode lists on the server. The Shows page shows the
+     * series those episodes belong to, de-duplicated so a show appears only once.
+     */
+    private suspend fun showsFor(episodes: List<FindroidEpisode>): List<FindroidShow> =
+        episodes
+            .map { it.seriesId }
+            .distinct()
+            .mapNotNull { seriesId ->
+                try {
+                    repository.getShow(seriesId)
+                } catch (_: Exception) {
+                    null
+                }
+            }
+
     private companion object {
         const val LATEST_LIMIT = 18
-        const val LATEST_EPISODES_LIMIT = 30
     }
 }

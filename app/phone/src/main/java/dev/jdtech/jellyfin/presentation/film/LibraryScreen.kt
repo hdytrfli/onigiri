@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -125,43 +125,9 @@ private fun LibraryScreenLayout(
     state: LibraryState,
     onAction: (LibraryAction) -> Unit,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
-    val contentPadding =
-        if (embedded) {
-            PaddingValues(
-                start = safePadding.start + MaterialTheme.spacings.default,
-                top = MaterialTheme.spacings.default,
-                end = safePadding.end + MaterialTheme.spacings.default,
-                bottom = safePadding.bottom + MaterialTheme.spacings.default,
-            )
-        } else {
-            PaddingValues(all = MaterialTheme.spacings.default)
-        }
-
-    val items = state.items.collectAsLazyPagingItems()
-
-    // Refresh the paged list when returning to this screen so play-state changes made on a
-    // detail page are reflected (the paging data is cached in the ViewModel).
-    var isFirstResume by remember { mutableStateOf(true) }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        if (isFirstResume) {
-            isFirstResume = false
-        } else {
-            items.refresh()
-        }
-    }
-
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
     var showSortByDialog by remember { mutableStateOf(false) }
     var showDisplayDialog by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(state.searchExpanded) {
-        if (state.searchExpanded) {
-            focusRequester.requestFocus()
-        }
-    }
 
     Scaffold(
         modifier =
@@ -203,105 +169,150 @@ private fun LibraryScreenLayout(
             }
         },
     ) { innerPadding ->
-        Column {
-            if (embedded) {
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(horizontal = MaterialTheme.spacings.default),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    LibraryActionButtons(
-                        onSearch = { onAction(LibraryAction.ToggleSearch) },
-                        onInfo = { showDisplayDialog = true },
-                        onSort = { showSortByDialog = true },
-                    )
-                }
-            }
-            if (state.searchExpanded) {
-                AppTextField(
-                    value = state.searchQuery,
-                    onValueChange = { onAction(LibraryAction.SetSearchQuery(it)) },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(
-                                start = MaterialTheme.spacings.default,
-                                top = MaterialTheme.spacings.small,
-                                end = MaterialTheme.spacings.default,
-                            )
-                            .focusRequester(focusRequester),
-                    hint = stringResource(CoreR.string.search),
-                    leadingContent = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_search),
-                            contentDescription = null,
+        LibraryContent(
+            state = state,
+            onAction = onAction,
+            showSortDialog = showSortByDialog,
+            showDisplayDialog = showDisplayDialog,
+            onShowSortDialogChange = { showSortByDialog = it },
+            onShowDisplayDialogChange = { showDisplayDialog = it },
+            embedded = embedded,
+            innerPadding = innerPadding,
+        )
+    }
+}
+
+/** The grid, its search field and its dialogs, without a top bar or window insets. */
+@Composable
+fun LibraryContent(
+    state: LibraryState,
+    onAction: (LibraryAction) -> Unit,
+    showSortDialog: Boolean,
+    showDisplayDialog: Boolean,
+    onShowSortDialogChange: (Boolean) -> Unit,
+    onShowDisplayDialogChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    embedded: Boolean = false,
+    innerPadding: PaddingValues = PaddingValues(0.dp),
+) {
+    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val contentPadding =
+        if (embedded) {
+            PaddingValues(
+                start = safePadding.start + MaterialTheme.spacings.default,
+                top = MaterialTheme.spacings.default,
+                end = safePadding.end + MaterialTheme.spacings.default,
+                bottom = safePadding.bottom + MaterialTheme.spacings.default,
+            )
+        } else {
+            PaddingValues(all = MaterialTheme.spacings.default)
+        }
+
+    val items = state.items.collectAsLazyPagingItems()
+
+    // Refresh the paged list when returning to this screen so play-state changes made on a
+    // detail page are reflected (the paging data is cached in the ViewModel).
+    var isFirstResume by remember { mutableStateOf(true) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (isFirstResume) {
+            isFirstResume = false
+        } else {
+            items.refresh()
+        }
+    }
+
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(state.searchExpanded) {
+        if (state.searchExpanded) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    Column(modifier = modifier.fillMaxSize().padding(innerPadding)) {
+        if (state.searchExpanded) {
+            AppTextField(
+                value = state.searchQuery,
+                onValueChange = { onAction(LibraryAction.SetSearchQuery(it)) },
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(
+                            start = MaterialTheme.spacings.default,
+                            top = MaterialTheme.spacings.small,
+                            end = MaterialTheme.spacings.default,
                         )
-                    },
-                    trailingContent = {
-                        if (state.searchQuery.isNotEmpty()) {
-                            AppIconButton(
-                                onClick = { onAction(LibraryAction.SetSearchQuery("")) },
-                                size = AppButtonSize.Decorator,
-                                variant = AppButtonVariant.Ghost,
-                                content = {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_x),
-                                        contentDescription = null,
-                                    )
-                                },
-                            )
-                        }
-                    },
-                )
-            }
-            val refreshError = items.loadState.refresh as? LoadState.Error
-            if (refreshError != null && items.itemCount == 0) {
-                FullPageError(
-                    onRefresh = { items.refresh() },
-                    isRefreshing = items.loadState.refresh is LoadState.Loading,
-                )
-            } else {
-                ErrorGroup(
-                    loadStates = items.loadState,
-                    onRefresh = { items.refresh() },
-                    modifier = Modifier.fillMaxWidth().padding(contentPadding + innerPadding),
-                )
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding + innerPadding,
-                    horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                    verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                ) {
-                    items(count = items.itemCount, key = items.itemKey { it.id }) {
-                        val item = items[it]
-                        item?.let { item ->
-                            ItemCard(
-                                item = item,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                modifier = Modifier.animateItem(),
-                                fillWidth = true,
-                                showYear = ListDisplayField.Year in state.displayFields,
-                                showCommunityRating =
-                                    ListDisplayField.CommunityRating in state.displayFields,
-                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                            )
-                        }
+                        .focusRequester(focusRequester),
+                hint = stringResource(CoreR.string.search),
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_search),
+                        contentDescription = null,
+                    )
+                },
+                trailingContent = {
+                    if (state.searchQuery.isNotEmpty()) {
+                        AppIconButton(
+                            onClick = { onAction(LibraryAction.SetSearchQuery("")) },
+                            size = AppButtonSize.Decorator,
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_x),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                    }
+                },
+            )
+        }
+        val refreshError = items.loadState.refresh as? LoadState.Error
+        if (refreshError != null && items.itemCount == 0) {
+            FullPageError(
+                onRefresh = { items.refresh() },
+                isRefreshing = items.loadState.refresh is LoadState.Loading,
+            )
+        } else {
+            ErrorGroup(
+                loadStates = items.loadState,
+                onRefresh = { items.refresh() },
+                modifier = Modifier.fillMaxWidth().padding(contentPadding),
+            )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = contentPadding,
+                horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+            ) {
+                items(count = items.itemCount, key = items.itemKey { it.id }) {
+                    val item = items[it]
+                    item?.let { item ->
+                        ItemCard(
+                            item = item,
+                            direction = Direction.VERTICAL,
+                            onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                            modifier = Modifier.animateItem(),
+                            fillWidth = true,
+                            showYear = ListDisplayField.Year in state.displayFields,
+                            showCommunityRating =
+                                ListDisplayField.CommunityRating in state.displayFields,
+                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
+                        )
                     }
                 }
             }
         }
     }
 
-    if (showSortByDialog) {
+    if (showSortDialog) {
         SortByDialog(
             currentSortBy = state.sortBy,
             currentSortOrder = state.sortOrder,
             onUpdate = { sortBy, sortOrder ->
                 onAction(LibraryAction.ChangeSorting(sortBy, sortOrder))
             },
-            onDismissRequest = { showSortByDialog = false },
+            onDismissRequest = { onShowSortDialogChange(false) },
         )
     }
 
@@ -309,7 +320,7 @@ private fun LibraryScreenLayout(
         DisplayInfoDialog(
             fields = state.displayFields,
             onToggle = { onAction(LibraryAction.ToggleDisplayField(it)) },
-            onDismiss = { showDisplayDialog = false },
+            onDismiss = { onShowDisplayDialogChange(false) },
         )
     }
 }
@@ -335,7 +346,7 @@ private fun LibraryActionButtons(
         variant = AppButtonVariant.Ghost,
         content = {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_info),
+                painter = painterResource(CoreR.drawable.ic_table_of_contents),
                 contentDescription = null,
             )
         },
@@ -345,7 +356,7 @@ private fun LibraryActionButtons(
         variant = AppButtonVariant.Ghost,
         content = {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
+                painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
                 contentDescription = null,
             )
         },
