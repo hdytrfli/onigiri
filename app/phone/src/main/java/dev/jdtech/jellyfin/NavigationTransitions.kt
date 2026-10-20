@@ -26,8 +26,8 @@ internal val TAB_TRANSITION_SPEC =
 // Pages beyond the current one emerge over it: a quick fade with a slight scale, the same language
 // as the activity transition, so the change reads clearly without any large movement. Symmetric,
 // so going back looks the same.
-private const val PAGE_TRANSITION_DURATION_MS = 220
-private const val PAGE_TRANSITION_SCALE = 0.97f
+private const val PAGE_TRANSITION_DURATION_MS = 300
+private const val PAGE_TRANSITION_SCALE = 0.94f
 
 internal val PAGE_TRANSITION_SPEC =
     (fadeIn(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) +
