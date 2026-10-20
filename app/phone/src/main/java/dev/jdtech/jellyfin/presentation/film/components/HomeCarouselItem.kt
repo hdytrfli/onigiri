@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrimSecondary
@@ -55,7 +54,6 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
         remember(context, backdrop) {
             ImageRequest.Builder(context)
                 .data(backdrop)
-                .crossfade(true)
                 // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
                 // keeping them in the shared memory pool.
                 .memoryCachePolicy(CachePolicy.DISABLED)

@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -76,7 +75,6 @@ fun ItemHeader(
         remember(context, backdropUri) {
             ImageRequest.Builder(context)
                 .data(backdropUri)
-                .crossfade(true)
                 // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
                 // keeping them in the shared memory pool.
                 .memoryCachePolicy(CachePolicy.DISABLED)
@@ -143,7 +141,6 @@ fun ItemHeader(
         remember(context, backdropUri) {
             ImageRequest.Builder(context)
                 .data(backdropUri)
-                .crossfade(true)
                 // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
                 // keeping them in the shared memory pool.
                 .memoryCachePolicy(CachePolicy.DISABLED)

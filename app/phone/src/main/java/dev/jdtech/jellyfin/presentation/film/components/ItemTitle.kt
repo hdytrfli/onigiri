@@ -7,15 +7,19 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 
 /**
@@ -44,8 +48,17 @@ fun ItemTitle(
         val ratioHeight = if (titleConfig.ratio > 0f) maxWidth / titleConfig.ratio else maxWidth
         val maxHeight =
             if (logoHeight == Dp.Unspecified) ratioHeight else minOf(logoHeight, ratioHeight)
+        val context = LocalContext.current
+        val model =
+            remember(context, logoUri) {
+                ImageRequest.Builder(context)
+                    .data(logoUri)
+                    // Logos are one-off images: served from disk, not the bitmap pool.
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .build()
+            }
         AsyncImage(
-            model = logoUri,
+            model = model,
             contentDescription = title,
             contentScale = ContentScale.Fit,
             alignment = Alignment.CenterStart,

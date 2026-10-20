@@ -154,12 +154,21 @@ private fun MetadataRow(detail: MediaDetailState) {
 @Composable
 private fun BackdropHeader(backdropUri: String, title: String?) {
     val backgroundColor = MaterialTheme.colorScheme.background
+    val context = LocalContext.current
+    val backdrop =
+        remember(context, backdropUri) {
+            ImageRequest.Builder(context)
+                .data(backdropUri)
+                // Backdrops are multi-megabyte bitmaps: served from disk, not the heap.
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .build()
+        }
     Box(
         modifier =
             Modifier.fillMaxWidth().aspectRatio(LocalBackdropRatios.current.portrait).clipToBounds()
     ) {
         AsyncImage(
-            model = backdropUri,
+            model = backdrop,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,

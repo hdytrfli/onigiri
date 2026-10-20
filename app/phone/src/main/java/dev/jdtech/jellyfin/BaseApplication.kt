@@ -78,7 +78,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
             // logos); 0.45 of this device's 256MB limit is ~115MB, still above the Java heap's
             // own working set.
             .memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.45).build() }
-            .crossfade(true)
+            // Coil's default (200ms) felt abrupt; 300ms reads as a smooth fade.
+            .crossfade(300)
             .build()
     }
 

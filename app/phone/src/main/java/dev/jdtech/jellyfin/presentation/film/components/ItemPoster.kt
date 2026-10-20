@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -26,12 +26,15 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
     val context = LocalContext.current
     var imageUri = item.images.primary
     var blurHash = item.images.primaryBlurHash
+    // Only Primary images are worth a heap slot; backdrops are served from the disk cache.
+    var useBackdrop = false
 
     when (direction) {
         Direction.HORIZONTAL -> {
             if (item is FindroidMovie) {
                 imageUri = item.images.backdrop
                 blurHash = item.images.backdropBlurHash
+                useBackdrop = true
             }
         }
         Direction.VERTICAL -> {
@@ -62,8 +65,12 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
             height = if (isHorizontal) BLUR_HASH_LANDSCAPE_HEIGHT else BLUR_HASH_POSTER_HEIGHT,
         )
     val model =
-        remember(context, imageUri) {
-            ImageRequest.Builder(context).data(imageUri).crossfade(true).build()
+        remember(context, imageUri, useBackdrop) {
+            ImageRequest.Builder(context)
+                .data(imageUri)
+                // Only Primary images take a heap slot; the fade duration comes from the loader.
+                .memoryCachePolicy(if (useBackdrop) CachePolicy.DISABLED else CachePolicy.ENABLED)
+                .build()
         }
 
     AsyncImage(
