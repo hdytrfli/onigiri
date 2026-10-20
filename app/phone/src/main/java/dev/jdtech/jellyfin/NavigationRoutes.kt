@@ -20,11 +20,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object MoviesRoute : NavKey
 
-@Serializable data object MovieListRoute : NavKey
-
 @Serializable data object ShowsRoute : NavKey
 
-@Serializable data object ShowListRoute : NavKey
+@Serializable
+data class GenreListRoute(
+    val genreId: String,
+    val genreName: String,
+    val movies: Boolean,
+) : NavKey
 
 @Serializable data object CollectionsRoute : NavKey
 

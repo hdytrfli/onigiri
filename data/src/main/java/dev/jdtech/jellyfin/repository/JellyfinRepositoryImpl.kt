@@ -8,6 +8,7 @@ import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.models.FindroidGenre
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidPerson
@@ -68,6 +69,7 @@ import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
+import org.jellyfin.sdk.model.api.request.GetGenresRequest
 import timber.log.Timber
 
 class JellyfinRepositoryImpl(
@@ -145,6 +147,7 @@ class JellyfinRepositoryImpl(
         startIndex: Int?,
         limit: Int?,
         searchTerm: String?,
+        genreIds: List<UUID>?,
     ): List<FindroidItem> =
         withContext(Dispatchers.IO) {
             jellyfinApi.itemsApi
@@ -158,6 +161,7 @@ class JellyfinRepositoryImpl(
                     startIndex = startIndex,
                     limit = limit,
                     searchTerm = searchTerm,
+                    genreIds = genreIds,
                 )
                 .content
                 .items
@@ -171,6 +175,7 @@ class JellyfinRepositoryImpl(
         sortBy: SortBy,
         sortOrder: SortOrder,
         searchTerm: String?,
+        genreIds: List<UUID>?,
     ): Flow<PagingData<FindroidItem>> {
         return Pager(
                 config = PagingConfig(pageSize = 10, enablePlaceholders = false),
@@ -183,11 +188,26 @@ class JellyfinRepositoryImpl(
                         sortBy,
                         sortOrder,
                         searchTerm,
+                        genreIds,
                     )
                 },
             )
             .flow
     }
+
+    override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.genresApi
+                .getGenres(
+                    GetGenresRequest(
+                        userId = jellyfinApi.userId,
+                        includeItemTypes = includeTypes,
+                    )
+                )
+                .content
+                .items
+                .map { FindroidGenre(id = it.id, name = it.name.orEmpty()) }
+        }
 
     override suspend fun getPerson(personId: UUID): FindroidPerson =
         withContext(Dispatchers.IO) {

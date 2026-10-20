@@ -16,6 +16,10 @@ data class MediaSection(
     val items: List<FindroidItem>,
     /** The "newly added" row links to the sortable list page. */
     val showsListLink: Boolean = false,
+    /** Continue Watching / Next Up use the wide thumbnail cards instead of posters. */
+    val useThumbnails: Boolean = false,
+    /** Continue Watching shows how much of the item is left. */
+    val showRemainingTime: Boolean = false,
 )
 
 data class MediaSuggestionsState(

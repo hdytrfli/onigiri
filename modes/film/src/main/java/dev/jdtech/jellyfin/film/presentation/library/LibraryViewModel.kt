@@ -30,6 +30,7 @@ constructor(
 
     var parentId: UUID? = null
     lateinit var libraryType: CollectionType
+    var genreIds: List<UUID> = emptyList()
 
     lateinit var sortBy: SortBy
     lateinit var sortOrder: SortOrder
@@ -37,9 +38,14 @@ constructor(
     private var searchQuery: String = ""
     private var searchJob: Job? = null
 
-    fun setup(parentId: UUID?, libraryType: CollectionType) {
+    fun setup(
+        parentId: UUID?,
+        libraryType: CollectionType,
+        genreIds: List<UUID> = emptyList(),
+    ) {
         this.parentId = parentId
         this.libraryType = libraryType
+        this.genreIds = genreIds
         _state.value =
             _state.value.copy(
                 displayFields =
@@ -85,6 +91,7 @@ constructor(
                             // data played
                             sortOrder = sortOrder,
                             searchTerm = searchQuery.ifBlank { null },
+                            genreIds = genreIds.takeIf { it.isNotEmpty() },
                         )
                         .cachedIn(viewModelScope)
                 _state.emit(_state.value.copy(items = items))

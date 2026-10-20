@@ -79,6 +79,8 @@ constructor(
                     id = "resume",
                     title = UiText.StringResource(FilmR.string.continue_watching),
                     items = resume,
+                    useThumbnails = true,
+                    showRemainingTime = true,
                 )
         }
 
@@ -134,6 +136,8 @@ constructor(
                     id = "resume",
                     title = UiText.StringResource(FilmR.string.continue_watching),
                     items = resume,
+                    useThumbnails = true,
+                    showRemainingTime = true,
                 )
         }
 
@@ -152,6 +156,7 @@ constructor(
                     title = UiText.StringResource(FilmR.string.media_recently_added_episodes),
                     items = latest,
                     showsListLink = true,
+                    useThumbnails = true,
                 )
         }
 
@@ -162,6 +167,7 @@ constructor(
                     id = "next-up",
                     title = UiText.StringResource(FilmR.string.next_up),
                     items = nextUp,
+                    useThumbnails = true,
                 )
         }
 

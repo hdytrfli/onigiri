@@ -3,6 +3,8 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -58,6 +61,7 @@ import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -66,6 +70,7 @@ import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.plus
+import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
@@ -79,6 +84,8 @@ fun LibraryScreen(
     onItemClick: (item: FindroidItem) -> Unit,
     navigateBack: () -> Unit,
     showTopBar: Boolean = true,
+    embedded: Boolean = false,
+    genreIds: List<UUID> = emptyList(),
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -86,7 +93,7 @@ fun LibraryScreen(
     var initialLoad by rememberSaveable { mutableStateOf(true) }
 
     LaunchedEffect(true) {
-        viewModel.setup(parentId = libraryId, libraryType = libraryType)
+        viewModel.setup(parentId = libraryId, libraryType = libraryType, genreIds = genreIds)
         if (initialLoad) {
             viewModel.loadItems()
             initialLoad = false
@@ -96,6 +103,7 @@ fun LibraryScreen(
     LibraryScreenLayout(
         libraryName = libraryName,
         showTopBar = showTopBar,
+        embedded = embedded,
         state = state,
         onAction = { action ->
             when (action) {
@@ -113,10 +121,22 @@ fun LibraryScreen(
 private fun LibraryScreenLayout(
     libraryName: String?,
     showTopBar: Boolean,
+    embedded: Boolean,
     state: LibraryState,
     onAction: (LibraryAction) -> Unit,
 ) {
-    val contentPadding = PaddingValues(all = MaterialTheme.spacings.default)
+    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val contentPadding =
+        if (embedded) {
+            PaddingValues(
+                start = safePadding.start + MaterialTheme.spacings.default,
+                top = MaterialTheme.spacings.default,
+                end = safePadding.end + MaterialTheme.spacings.default,
+                bottom = safePadding.bottom + MaterialTheme.spacings.default,
+            )
+        } else {
+            PaddingValues(all = MaterialTheme.spacings.default)
+        }
 
     val items = state.items.collectAsLazyPagingItems()
 
@@ -148,6 +168,12 @@ private fun LibraryScreenLayout(
             Modifier.fillMaxSize()
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets =
+            if (embedded) {
+                WindowInsets(0, 0, 0, 0)
+            } else {
+                ScaffoldDefaults.contentWindowInsets
+            },
         topBar = {
             if (showTopBar) {
                 TopAppBar(
@@ -165,35 +191,10 @@ private fun LibraryScreenLayout(
                         )
                     },
                     actions = {
-                        AppIconButton(
-                            onClick = { onAction(LibraryAction.ToggleSearch) },
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_search),
-                                    contentDescription = null,
-                                )
-                            },
-                        )
-                        AppIconButton(
-                            onClick = { showDisplayDialog = true },
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_info),
-                                    contentDescription = null,
-                                )
-                            },
-                        )
-                        AppIconButton(
-                            onClick = { showSortByDialog = true },
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                                    contentDescription = null,
-                                )
-                            },
+                        LibraryActionButtons(
+                            onSearch = { onAction(LibraryAction.ToggleSearch) },
+                            onInfo = { showDisplayDialog = true },
+                            onSort = { showSortByDialog = true },
                         )
                     },
                     windowInsets = topBarWindowInsets(),
@@ -203,6 +204,20 @@ private fun LibraryScreenLayout(
         },
     ) { innerPadding ->
         Column {
+            if (embedded) {
+                Row(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = MaterialTheme.spacings.default),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    LibraryActionButtons(
+                        onSearch = { onAction(LibraryAction.ToggleSearch) },
+                        onInfo = { showDisplayDialog = true },
+                        onSort = { showSortByDialog = true },
+                    )
+                }
+            }
             if (state.searchExpanded) {
                 AppTextField(
                     value = state.searchQuery,
@@ -239,32 +254,40 @@ private fun LibraryScreenLayout(
                     },
                 )
             }
-            ErrorGroup(
-                loadStates = items.loadState,
-                onRefresh = { items.refresh() },
-                modifier = Modifier.fillMaxWidth().padding(contentPadding + innerPadding),
-            )
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = contentPadding + innerPadding,
-                horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-            ) {
-                items(count = items.itemCount, key = items.itemKey { it.id }) {
-                    val item = items[it]
-                    item?.let { item ->
-                        ItemCard(
-                            item = item,
-                            direction = Direction.VERTICAL,
-                            onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                            modifier = Modifier.animateItem(),
-                            fillWidth = true,
-                            showYear = ListDisplayField.Year in state.displayFields,
-                            showCommunityRating =
-                                ListDisplayField.CommunityRating in state.displayFields,
-                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                        )
+            val refreshError = items.loadState.refresh as? LoadState.Error
+            if (refreshError != null && items.itemCount == 0) {
+                FullPageError(
+                    onRefresh = { items.refresh() },
+                    isRefreshing = items.loadState.refresh is LoadState.Loading,
+                )
+            } else {
+                ErrorGroup(
+                    loadStates = items.loadState,
+                    onRefresh = { items.refresh() },
+                    modifier = Modifier.fillMaxWidth().padding(contentPadding + innerPadding),
+                )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding + innerPadding,
+                    horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                    verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                ) {
+                    items(count = items.itemCount, key = items.itemKey { it.id }) {
+                        val item = items[it]
+                        item?.let { item ->
+                            ItemCard(
+                                item = item,
+                                direction = Direction.VERTICAL,
+                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                modifier = Modifier.animateItem(),
+                                fillWidth = true,
+                                showYear = ListDisplayField.Year in state.displayFields,
+                                showCommunityRating =
+                                    ListDisplayField.CommunityRating in state.displayFields,
+                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
+                            )
+                        }
                     }
                 }
             }
@@ -289,6 +312,44 @@ private fun LibraryScreenLayout(
             onDismiss = { showDisplayDialog = false },
         )
     }
+}
+
+@Composable
+private fun LibraryActionButtons(
+    onSearch: () -> Unit,
+    onInfo: () -> Unit,
+    onSort: () -> Unit,
+) {
+    AppIconButton(
+        onClick = onSearch,
+        variant = AppButtonVariant.Ghost,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_search),
+                contentDescription = null,
+            )
+        },
+    )
+    AppIconButton(
+        onClick = onInfo,
+        variant = AppButtonVariant.Ghost,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_info),
+                contentDescription = null,
+            )
+        },
+    )
+    AppIconButton(
+        onClick = onSort,
+        variant = AppButtonVariant.Ghost,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
+                contentDescription = null,
+            )
+        },
+    )
 }
 
 @Composable
@@ -370,6 +431,7 @@ private fun LibraryScreenLayoutPreview() {
         LibraryScreenLayout(
             libraryName = "Movies",
             showTopBar = true,
+            embedded = false,
             state = LibraryState(items = items),
             onAction = {},
         )

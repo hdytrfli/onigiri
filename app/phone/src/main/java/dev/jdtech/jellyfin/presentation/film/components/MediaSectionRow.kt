@@ -1,12 +1,14 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
@@ -25,10 +27,14 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 
 /**
  * A horizontally scrollable home-style row: the title (with the optional list arrow) and a
- * [LazyRow] of poster cards.
+ * [LazyRow] of cards. The card width follows the user's poster/thumbnail column setting for the
+ * current orientation.
  */
 @Composable
 fun MediaSectionRow(
@@ -38,44 +44,61 @@ fun MediaSectionRow(
     modifier: Modifier = Modifier,
     onListClick: (() -> Unit)? = null,
 ) {
-    Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.default),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = section.title.asString(),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f),
-            )
-            if (onListClick != null) {
-                AppIconButton(
-                    onClick = onListClick,
-                    size = AppButtonSize.Decorator,
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    },
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val gridSize = if (section.useThumbnails) GridSize.THUMBNAIL else GridSize.POSTER
+        val columns = gridColumns(gridSize)
+        val gap = LocalGridGap.current
+        val horizontalPadding = MaterialTheme.spacings.default
+        val cardWidth =
+            (maxWidth - horizontalPadding * 2f - gap * (columns - 1).toFloat()) /
+                columns.coerceAtLeast(1)
+
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = section.title.asString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
                 )
+                if (onListClick != null) {
+                    AppIconButton(
+                        onClick = onListClick,
+                        size = AppButtonSize.Decorator,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        },
+                    )
+                }
             }
-        }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = MaterialTheme.spacings.default),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-        ) {
-            items(items = section.items, key = { it.id }) { item ->
-                ItemCard(
-                    item = item,
-                    direction = Direction.VERTICAL,
-                    onClick = { onItemClick(item) },
-                    showYear = ListDisplayField.Year in displayFields,
-                    showCommunityRating = ListDisplayField.CommunityRating in displayFields,
-                    showAgeRating = ListDisplayField.AgeRating in displayFields,
-                )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = horizontalPadding),
+                horizontalArrangement = Arrangement.spacedBy(gap),
+            ) {
+                items(items = section.items, key = { it.id }) { item ->
+                    ItemCard(
+                        item = item,
+                        direction =
+                            if (section.useThumbnails) {
+                                Direction.HORIZONTAL
+                            } else {
+                                Direction.VERTICAL
+                            },
+                        onClick = { onItemClick(item) },
+                        modifier = Modifier.width(cardWidth),
+                        showRemainingTime = section.showRemainingTime,
+                        showYear = ListDisplayField.Year in displayFields,
+                        showCommunityRating = ListDisplayField.CommunityRating in displayFields,
+                        showAgeRating = ListDisplayField.AgeRating in displayFields,
+                    )
+                }
             }
         }
     }

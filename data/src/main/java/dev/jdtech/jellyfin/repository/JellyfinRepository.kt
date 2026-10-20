@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.repository
 import androidx.paging.PagingData
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.models.FindroidGenre
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidPerson
@@ -54,6 +55,7 @@ interface JellyfinRepository {
         startIndex: Int? = null,
         limit: Int? = null,
         searchTerm: String? = null,
+        genreIds: List<UUID>? = null,
     ): List<FindroidItem>
 
     suspend fun getItemsPaging(
@@ -63,7 +65,10 @@ interface JellyfinRepository {
         sortBy: SortBy = SortBy.defaultValue,
         sortOrder: SortOrder = SortOrder.ASCENDING,
         searchTerm: String? = null,
+        genreIds: List<UUID>? = null,
     ): Flow<PagingData<FindroidItem>>
+
+    suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre>
 
     suspend fun getPerson(personId: UUID): FindroidPerson
 

@@ -67,6 +67,7 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
+import dev.jdtech.jellyfin.presentation.film.CollectionsScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
 import dev.jdtech.jellyfin.presentation.film.EditImageSearchScreen
 import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
@@ -501,44 +502,44 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<MoviesRoute> {
         MoviesScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onListClick = dropUnlessResumed { navigator.navigate(MovieListRoute) },
+            onGenreClick = { genre ->
+                navigator.navigate(
+                    GenreListRoute(
+                        genreId = genre.id.toString(),
+                        genreName = genre.name,
+                        movies = true,
+                    )
+                )
+            },
         )
     }
-    entry<MovieListRoute> {
+    entry<GenreListRoute> { key ->
         LibraryScreen(
             libraryId = null,
-            libraryName = stringResource(CoreR.string.movies_label),
-            libraryType = CollectionType.Movies,
+            libraryName = key.genreName,
+            libraryType = if (key.movies) CollectionType.Movies else CollectionType.TvShows,
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
             showTopBar = true,
+            genreIds = listOf(UUID.fromString(key.genreId)),
         )
     }
     entry<ShowsRoute> {
         ShowsScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onListClick = dropUnlessResumed { navigator.navigate(ShowListRoute) },
-        )
-    }
-    entry<ShowListRoute> {
-        LibraryScreen(
-            libraryId = null,
-            libraryName = stringResource(CoreR.string.shows_label),
-            libraryType = CollectionType.TvShows,
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            navigateBack = dropUnlessResumed { navigator.goBack() },
-            showTopBar = true,
+            onGenreClick = { genre ->
+                navigator.navigate(
+                    GenreListRoute(
+                        genreId = genre.id.toString(),
+                        genreName = genre.name,
+                        movies = false,
+                    )
+                )
+            },
         )
     }
     entry<CollectionsRoute> {
-        LibraryScreen(
-            libraryId = null,
-            libraryName = null,
-            libraryType = CollectionType.BoxSets,
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            navigateBack = {},
-            showTopBar = false,
-        )
+        CollectionsScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
     }
     entry<MediaRoute> {
         MediaScreen(

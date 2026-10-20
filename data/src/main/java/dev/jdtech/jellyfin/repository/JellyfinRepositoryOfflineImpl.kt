@@ -6,6 +6,7 @@ import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.models.FindroidGenre
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidPerson
@@ -93,6 +94,7 @@ class JellyfinRepositoryOfflineImpl(
         startIndex: Int?,
         limit: Int?,
         searchTerm: String?,
+        genreIds: List<UUID>?,
     ): List<FindroidItem> {
         return emptyList()
     }
@@ -104,9 +106,13 @@ class JellyfinRepositoryOfflineImpl(
         sortBy: SortBy,
         sortOrder: SortOrder,
         searchTerm: String?,
+        genreIds: List<UUID>?,
     ): Flow<PagingData<FindroidItem>> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
+        emptyList()
 
     override suspend fun getMovieRecommendations(parentId: UUID?): List<RecommendationCategory> =
         emptyList()

@@ -108,17 +108,12 @@ fun ItemCard(
                     )
                 }
                 if (showAgeRating && ageRating != null) {
-                    BaseBadge(
+                    AgeRatingBadge(
+                        rating = ageRating,
                         modifier =
                             Modifier.align(Alignment.BottomEnd)
-                                .padding(MaterialTheme.spacings.small)
-                    ) {
-                        Text(
-                            text = ageRating,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                        )
-                    }
+                                .padding(MaterialTheme.spacings.small),
+                    )
                 }
             }
         }
@@ -126,7 +121,7 @@ fun ItemCard(
         Text(
             text = if (item is FindroidEpisode) item.seriesName else item.name,
             style = MaterialTheme.typography.bodyMedium,
-            maxLines = if (item is FindroidEpisode) 1 else 2,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         if (item is FindroidEpisode) {

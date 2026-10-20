@@ -9,5 +9,7 @@
     <string name="recommendation_because_you_like">Because you like %1$s</string>
     <string name="recommendation_directed_by">Directed by %1$s</string>
     <string name="recommendation_starring">Starring %1$s</string>
+    <string name="suggestions">Suggestions</string>
+    <string name="genres">Genres</string>
     <string name="search_placeholder">Search movies and TV shows</string>
 </resources>

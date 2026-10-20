@@ -22,6 +22,7 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -36,6 +37,7 @@ fun FavoritesScreen(
     onItemClick: (item: FindroidItem) -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    embedded: Boolean = false,
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -48,6 +50,7 @@ fun FavoritesScreen(
         onSearchClick = onSearchClick,
         onSettingsClick = onSettingsClick,
         onRetryClick = { viewModel.loadItems() },
+        embedded = embedded,
     )
 }
 
@@ -58,6 +61,7 @@ private fun FavoritesScreenLayout(
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onRetryClick: () -> Unit,
+    embedded: Boolean = false,
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
 
@@ -66,7 +70,20 @@ private fun FavoritesScreenLayout(
     val paddingEnd = safePadding.end + MaterialTheme.spacings.default
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
 
-    val contentPaddingTop = safePadding.top + 88.dp
+    val contentPaddingTop =
+        if (embedded) {
+            MaterialTheme.spacings.small
+        } else {
+            safePadding.top + 88.dp
+        }
+
+    if (state.error != null && state.items.isEmpty()) {
+        FullPageError(
+            onRefresh = onRetryClick,
+            isRefreshing = state.isLoading,
+        )
+        return
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -93,16 +110,23 @@ private fun FavoritesScreenLayout(
             }
         }
 
-        HomeHeader(
-            serverName = state.serverName ?: "",
-            isLoading = state.isLoading,
-            isError = state.error != null,
-            onErrorClick = {},
-            onRetryClick = onRetryClick,
-            onSearchClick = onSearchClick,
-            onUserClick = onSettingsClick,
-            modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
-        )
+        if (!embedded) {
+            HomeHeader(
+                serverName = state.serverName ?: "",
+                isLoading = state.isLoading,
+                isError = state.error != null,
+                onErrorClick = {},
+                onRetryClick = onRetryClick,
+                onSearchClick = onSearchClick,
+                onUserClick = onSettingsClick,
+                modifier =
+                    Modifier.padding(
+                        start = paddingStart,
+                        top = safePadding.top + MaterialTheme.spacings.small,
+                        end = paddingEnd,
+                    ),
+            )
+        }
     }
 }
 

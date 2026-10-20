@@ -38,6 +38,7 @@ import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 @Composable
 fun DownloadsScreen(
     onItemClick: (item: FindroidItem) -> Unit,
+    embedded: Boolean = false,
     viewModel: DownloadsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -52,12 +53,17 @@ fun DownloadsScreen(
                 is CollectionAction.OnBackClick -> Unit
             }
         },
+        embedded = embedded,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DownloadsScreenLayout(state: CollectionState, onAction: (CollectionAction) -> Unit) {
+private fun DownloadsScreenLayout(
+    state: CollectionState,
+    onAction: (CollectionAction) -> Unit,
+    embedded: Boolean = false,
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
@@ -66,13 +72,20 @@ private fun DownloadsScreenLayout(state: CollectionState, onAction: (CollectionA
                 .recalculateWindowInsets()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(CoreR.string.title_download)) },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
+            if (!embedded) {
+                TopAppBar(
+                    title = { Text(text = stringResource(CoreR.string.title_download)) },
+                    windowInsets = topBarWindowInsets(),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
-        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
+        contentWindowInsets =
+            if (embedded) {
+                WindowInsets(0, 0, 0, 0)
+            } else {
+                WindowInsets.statusBars.union(WindowInsets.displayCutout)
+            },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (state.sections.isEmpty()) {
