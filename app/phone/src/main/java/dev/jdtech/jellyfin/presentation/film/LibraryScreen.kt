@@ -66,6 +66,7 @@ import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.SectionHeader
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -204,7 +205,12 @@ fun LibraryContent(
         if (embedded) {
             PaddingValues(
                 start = safePadding.start + MaterialTheme.spacings.default,
-                top = MaterialTheme.spacings.default,
+                top =
+                    if (sectionTitle != null) {
+                        0.dp
+                    } else {
+                        MaterialTheme.spacings.default
+                    },
                 end = safePadding.end + MaterialTheme.spacings.default,
                 bottom = safePadding.bottom + MaterialTheme.spacings.default,
             )
@@ -235,15 +241,9 @@ fun LibraryContent(
 
     Column(modifier = modifier.fillMaxSize().padding(innerPadding)) {
         if (sectionTitle != null) {
-            Text(
-                text = sectionTitle,
-                style = MaterialTheme.typography.titleMedium,
-                modifier =
-                    Modifier.padding(
-                        start = MaterialTheme.spacings.default,
-                        top = MaterialTheme.spacings.small,
-                        end = MaterialTheme.spacings.default,
-                    ),
+            SectionHeader(
+                title = sectionTitle,
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacings.default),
             )
         }
         if (state.searchExpanded) {
@@ -294,6 +294,7 @@ fun LibraryContent(
             FullPageError(
                 onRefresh = { items.refresh() },
                 isRefreshing = items.loadState.refresh is LoadState.Loading,
+                error = refreshError.error,
             )
         } else {
             ErrorGroup(

@@ -235,7 +235,12 @@ fun CollectionScreenLayout(
         },
         contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout),
     ) { innerPadding ->
-        CollectionGrid(sections = state.sections, innerPadding = innerPadding, onAction = onAction)
+        CollectionGrid(
+            sections = state.sections,
+            innerPadding = innerPadding,
+            onAction = onAction,
+            displayFields = state.displayFields,
+        )
     }
 }
 

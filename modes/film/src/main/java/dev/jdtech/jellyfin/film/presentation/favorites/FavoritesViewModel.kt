@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import javax.inject.Inject
@@ -36,7 +37,16 @@ constructor(
 
                 val items = repository.getFavoriteItems()
 
-                _state.emit(_state.value.copy(isLoading = false, items = items))
+                _state.emit(
+                    _state.value.copy(
+                        isLoading = false,
+                        items = items,
+                        displayFields =
+                            ListDisplayField.fromKeys(
+                                appPreferences.getValue(appPreferences.listDisplayFields)
+                            ),
+                    )
+                )
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(isLoading = false, error = e))
             }

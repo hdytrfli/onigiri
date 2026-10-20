@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,11 +24,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionsViewModel
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.SectionHeader
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -63,14 +64,12 @@ fun CollectionsScreen(
                     bottom = MaterialTheme.spacings.small,
                 ),
         )
-        Text(
-            text = stringResource(CoreR.string.collections_label),
-            style = MaterialTheme.typography.titleMedium,
+        SectionHeader(
+            title = stringResource(CoreR.string.collections_label),
             modifier =
                 Modifier.padding(
                     start = safePadding.start + MaterialTheme.spacings.default,
                     end = safePadding.end + MaterialTheme.spacings.default,
-                    bottom = MaterialTheme.spacings.small,
                 ),
         )
         val items = if (selectedTab == 0) state.movies else state.shows
@@ -78,6 +77,7 @@ fun CollectionsScreen(
             FullPageError(
                 onRefresh = { viewModel.retry() },
                 isRefreshing = state.isLoading,
+                error = state.error,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -104,6 +104,10 @@ fun CollectionsScreen(
                             onClick = { onItemClick(item) },
                             modifier = Modifier.animateItem(),
                             fillWidth = true,
+                            showYear = ListDisplayField.Year in state.displayFields,
+                            showCommunityRating =
+                                ListDisplayField.CommunityRating in state.displayFields,
+                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
                         )
                     }
                 }

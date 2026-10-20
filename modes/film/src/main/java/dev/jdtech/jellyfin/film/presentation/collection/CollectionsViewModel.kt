@@ -3,11 +3,13 @@ package dev.jdtech.jellyfin.film.presentation.collection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +20,7 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 data class CollectionsState(
     val movies: List<FindroidItem> = emptyList(),
     val shows: List<FindroidItem> = emptyList(),
+    val displayFields: Set<ListDisplayField> = emptySet(),
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )
@@ -27,8 +30,12 @@ data class CollectionsState(
  * movie/show kind, so each set is classified by its first movie or series child.
  */
 @HiltViewModel
-class CollectionsViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class CollectionsViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val appPreferences: AppPreferences,
+) : ViewModel() {
     private val _state = MutableStateFlow(CollectionsState())
     val state = _state.asStateFlow()
 
@@ -38,7 +45,16 @@ class CollectionsViewModel @Inject constructor(private val repository: JellyfinR
         if (loaded) return
         loaded = true
         viewModelScope.launch(Dispatchers.IO) {
-            _state.emit(_state.value.copy(isLoading = true, error = null))
+            _state.emit(
+                _state.value.copy(
+                    isLoading = true,
+                    error = null,
+                    displayFields =
+                        ListDisplayField.fromKeys(
+                            appPreferences.getValue(appPreferences.listDisplayFields)
+                        ),
+                )
+            )
             try {
                 val boxSets =
                     repository.getItems(

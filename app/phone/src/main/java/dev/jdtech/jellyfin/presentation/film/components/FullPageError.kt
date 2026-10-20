@@ -1,7 +1,9 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -22,13 +28,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 /**
- * A full-page error state: a warning icon, a short title and one line of explanation, centred in
- * the available space. The page can be pulled down to retry, so a failed request never leaves the
- * user with a dead screen and no way back.
+ * A full-page error state: a warning icon, a short title, one line of explanation and the actions
+ * the user needs (refresh, and details when the exception is available). The page can also be
+ * pulled down to retry.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +47,10 @@ fun FullPageError(
     isRefreshing: Boolean = false,
     title: String = stringResource(CoreR.string.error_title),
     description: String? = stringResource(CoreR.string.error_try_again),
+    error: Throwable? = null,
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
+    var showDetails by rememberSaveable { mutableStateOf(false) }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -59,32 +70,57 @@ fun FullPageError(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_alert_triangle),
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center,
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                )
-                if (!description.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_alert_triangle),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
                     Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    if (!description.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.medium))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)
+                    ) {
+                        AppButton(
+                            onClick = onRefresh,
+                            content = { Text(stringResource(CoreR.string.refresh)) },
+                        )
+                        if (error != null) {
+                            AppButton(
+                                onClick = { showDetails = true },
+                                variant = AppButtonVariant.Secondary,
+                                content = { Text(stringResource(CoreR.string.details)) },
+                            )
+                        }
+                    }
                 }
             }
         }
+    }
+
+    if (showDetails && error != null) {
+        ErrorDialog(exception = error, onDismissRequest = { showDetails = false })
     }
 }

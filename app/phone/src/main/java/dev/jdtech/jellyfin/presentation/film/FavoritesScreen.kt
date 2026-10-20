@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
@@ -81,6 +82,7 @@ private fun FavoritesScreenLayout(
         FullPageError(
             onRefresh = onRetryClick,
             isRefreshing = state.isLoading,
+            error = state.error,
         )
         return
     }
@@ -106,6 +108,9 @@ private fun FavoritesScreenLayout(
                     onClick = { onItemClick(item) },
                     modifier = Modifier.animateItem(),
                     fillWidth = true,
+                    showYear = ListDisplayField.Year in state.displayFields,
+                    showCommunityRating = ListDisplayField.CommunityRating in state.displayFields,
+                    showAgeRating = ListDisplayField.AgeRating in state.displayFields,
                 )
             }
         }

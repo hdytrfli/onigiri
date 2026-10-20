@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +34,7 @@ import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
 import dev.jdtech.jellyfin.film.presentation.home.HomeViewModel
+import dev.jdtech.jellyfin.film.presentation.media.MediaSection
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
@@ -42,6 +42,8 @@ import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
+import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
+import dev.jdtech.jellyfin.presentation.film.components.SectionHeader
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -121,6 +123,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
         FullPageError(
             onRefresh = { onAction(HomeAction.OnRetryClick) },
             isRefreshing = state.isLoading,
+            error = state.error,
         )
         return
     }
@@ -138,10 +141,9 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                 state.suggestionsSection?.let { section ->
                     item(key = section.id) {
                         Column {
-                            Text(
-                                text = stringResource(FilmR.string.suggestions),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(horizontal = paddingStart),
+                            SectionHeader(
+                                title = stringResource(FilmR.string.suggestions),
+                                modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
                             )
                             HomeCarousel(
                                 items = section.items,
@@ -153,12 +155,18 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                 }
                 state.resumeSection?.let { section ->
                     item(key = section.id) {
-                        HomeSection(
-                            section = section.homeSection,
-                            itemsPadding = itemsPadding,
-                            onAction = onAction,
+                        MediaSectionRow(
+                            section =
+                                MediaSection(
+                                    id = section.id.toString(),
+                                    title = section.homeSection.name,
+                                    items = section.homeSection.items,
+                                    useThumbnails = true,
+                                    showRemainingTime = true,
+                                ),
+                            displayFields = state.displayFields,
+                            onItemClick = { item -> onAction(HomeAction.OnItemClick(item)) },
                             modifier = Modifier.animateItem(),
-                            showRemainingTime = true,
                         )
                     }
                 }
@@ -169,6 +177,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                             itemsPadding = itemsPadding,
                             onAction = onAction,
                             modifier = Modifier.animateItem(),
+                            displayFields = state.displayFields,
                         )
                     }
                 }
@@ -178,6 +187,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                         itemsPadding = itemsPadding,
                         onAction = onAction,
                         modifier = Modifier.animateItem(),
+                        displayFields = state.displayFields,
                     )
                 }
             }

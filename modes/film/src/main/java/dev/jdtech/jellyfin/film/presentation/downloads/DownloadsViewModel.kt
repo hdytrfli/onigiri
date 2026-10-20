@@ -7,12 +7,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.core.Constants
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.models.isDownloading
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import java.util.UUID
 import javax.inject.Inject
@@ -28,6 +30,7 @@ class DownloadsViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val downloader: Downloader,
+    private val appPreferences: AppPreferences,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
@@ -55,7 +58,15 @@ constructor(
                         )
                     }
 
-                _state.value = _state.value.copy(isLoading = false, sections = sections)
+                _state.value =
+                    _state.value.copy(
+                        isLoading = false,
+                        sections = sections,
+                        displayFields =
+                            ListDisplayField.fromKeys(
+                                appPreferences.getValue(appPreferences.listDisplayFields)
+                            ),
+                    )
                 startProgressPolling(items)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(isLoading = false, error = e)

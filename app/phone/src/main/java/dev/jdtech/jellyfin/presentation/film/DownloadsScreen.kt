@@ -102,6 +102,7 @@ private fun DownloadsScreenLayout(
             innerPadding = innerPadding,
             onAction = onAction,
             showSectionHeaders = false,
+            displayFields = state.displayFields,
         )
     }
 }

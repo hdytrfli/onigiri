@@ -1,18 +1,19 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -26,6 +27,7 @@ fun CollectionGrid(
     innerPadding: PaddingValues,
     onAction: (CollectionAction) -> Unit,
     showSectionHeaders: Boolean = true,
+    displayFields: Set<ListDisplayField> = emptySet(),
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
@@ -37,18 +39,13 @@ fun CollectionGrid(
         sections.forEach { section ->
             if (showSectionHeaders) {
                 stickyHeader {
-                    Card {
-                        Text(
-                            text = section.name.asString(),
-                            modifier =
-                                Modifier.padding(
-                                    horizontal = MaterialTheme.spacings.medium,
-                                    vertical = MaterialTheme.spacings.medium,
-                                ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
+                    SectionHeader(
+                        title = section.name.asString(),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(horizontal = MaterialTheme.spacings.default),
+                    )
                 }
             }
             items(items = section.items, key = { it.id }) { item ->
@@ -59,6 +56,9 @@ fun CollectionGrid(
                     onClick = { onAction(CollectionAction.OnItemClick(item)) },
                     modifier = Modifier.animateItem(),
                     fillWidth = true,
+                    showYear = ListDisplayField.Year in displayFields,
+                    showCommunityRating = ListDisplayField.CommunityRating in displayFields,
+                    showAgeRating = ListDisplayField.AgeRating in displayFields,
                 )
             }
         }

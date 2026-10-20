@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,9 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -54,30 +51,30 @@ fun MediaSectionRow(
                 columns.coerceAtLeast(1)
 
         Column {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = section.title.asString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
+            val trailingAction: (@Composable () -> Unit)? =
                 if (onListClick != null) {
-                    AppIconButton(
-                        onClick = onListClick,
-                        size = AppButtonSize.Decorator,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        },
-                    )
+                    {
+                        AppIconButton(
+                            onClick = onListClick,
+                            size = AppButtonSize.Decorator,
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            },
+                        )
+                    }
+                } else {
+                    null
                 }
-            }
+            SectionHeader(
+                title = section.title.asString(),
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+                trailingContent = trailingAction,
+            )
             LazyRow(
                 contentPadding = PaddingValues(horizontal = horizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(gap),
@@ -96,7 +93,10 @@ fun MediaSectionRow(
                         showRemainingTime = section.showRemainingTime,
                         showYear = ListDisplayField.Year in displayFields,
                         showCommunityRating = ListDisplayField.CommunityRating in displayFields,
-                        showAgeRating = ListDisplayField.AgeRating in displayFields,
+                        // Continue Watching already has the time-left badge in the same corner.
+                        showAgeRating =
+                            ListDisplayField.AgeRating in displayFields &&
+                                !section.showRemainingTime,
                     )
                 }
             }

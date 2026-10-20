@@ -16,6 +16,8 @@
     <string name="error_try_again">Pull down to try again.</string>
     <string name="show_stacktrace">Show stacktrace</string>
     <string name="retry">Retry</string>
+    <string name="refresh">Refresh</string>
+    <string name="details">Details</string>
     <string name="genres">Genres</string>
     <string name="director">Director</string>
     <string name="writers">Writers</string>
@@ -55,6 +57,7 @@
     <string name="items_count">%1$d items</string>
     <string name="shows_label">TV Shows</string>
     <string name="collections_label">Collections</string>
+    <string name="unrated">Unrated</string>
     <string name="display_info">Display info</string>
     <string name="display_year">Release year</string>
     <string name="display_rating">Community rating</string>

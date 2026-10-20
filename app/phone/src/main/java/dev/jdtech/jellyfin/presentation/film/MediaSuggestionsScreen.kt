@@ -217,6 +217,7 @@ private fun MediaSuggestionsContent(
             FullPageError(
                 onRefresh = onRetry,
                 isRefreshing = state.isLoading,
+                error = state.error,
             )
         } else if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -242,6 +243,7 @@ private fun GenresContent(
             FullPageError(
                 onRefresh = { viewModel.retry(kind) },
                 isRefreshing = state.isLoading,
+                error = state.error,
             )
         } else if (state.isLoading && state.sections.isEmpty()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

@@ -107,9 +107,10 @@ fun ItemCard(
                                 .padding(MaterialTheme.spacings.small),
                     )
                 }
-                if (showAgeRating && ageRating != null) {
+                // Episodes do not carry the movie/show official rating; don't label them Unrated.
+                if (showAgeRating && item !is FindroidEpisode) {
                     AgeRatingBadge(
-                        rating = ageRating,
+                        rating = ageRating ?: stringResource(R.string.unrated),
                         modifier =
                             Modifier.align(Alignment.BottomEnd)
                                 .padding(MaterialTheme.spacings.small),
