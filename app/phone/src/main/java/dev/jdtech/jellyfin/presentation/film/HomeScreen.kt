@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -45,7 +44,7 @@ import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
-import dev.jdtech.jellyfin.presentation.film.components.SectionHeader
+import dev.jdtech.jellyfin.presentation.film.components.Section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -139,11 +138,11 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
             ) {
                 state.suggestionsSection?.let { section ->
                     item(key = section.id) {
-                        Column {
-                            SectionHeader(
-                                title = stringResource(FilmR.string.suggestions),
-                                modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
-                            )
+                        Section(
+                            title = stringResource(FilmR.string.suggestions),
+                            titleModifier =
+                                Modifier.padding(start = paddingStart, end = paddingEnd),
+                        ) {
                             HomeCarousel(
                                 items = section.items,
                                 itemsPadding = itemsPadding,

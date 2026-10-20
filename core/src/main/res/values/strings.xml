@@ -41,6 +41,8 @@
     <string name="collection_no_media">This collection does not contain any media</string>
     <string name="no_favorites">You have no favorites</string>
     <string name="no_downloads">You have nothing downloaded</string>
+    <string name="no_movie_collections">You have no movie collections</string>
+    <string name="no_show_collections">You have no show collections</string>
     <string name="search">Search</string>
     <string name="no_search_results">No search results</string>
     <string name="device_name">Device name</string>
@@ -59,6 +61,7 @@
     <string name="collections_label">Collections</string>
     <string name="unrated">Unrated</string>
     <string name="display_info">Display info</string>
+    <string name="display_info_summary">Tap a field to show or hide it on every item</string>
     <string name="display_year">Release year</string>
     <string name="display_rating">Community rating</string>
     <string name="display_age_rating">Age rating</string>

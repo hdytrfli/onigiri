@@ -4,15 +4,12 @@ import android.app.DownloadManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.jdtech.jellyfin.core.Constants
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
-import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSourceType
-import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.models.isDownloading
+import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
@@ -44,24 +41,11 @@ constructor(
             try {
                 val items = repository.getDownloads()
 
-                // No Movies/Shows grouping: the downloads page shows one flat list.
-                val sections =
-                    if (items.isEmpty()) {
-                        emptyList()
-                    } else {
-                        listOf(
-                            CollectionSection(
-                                Constants.FAVORITE_TYPE_MOVIES,
-                                UiText.StringResource(CoreR.string.movies_label),
-                                items,
-                            )
-                        )
-                    }
-
                 _state.value =
                     _state.value.copy(
                         isLoading = false,
-                        sections = sections,
+                        items = items,
+                        sections = mediaSections(items),
                         displayFields =
                             ListDisplayField.fromKeys(
                                 appPreferences.getValue(appPreferences.listDisplayFields)

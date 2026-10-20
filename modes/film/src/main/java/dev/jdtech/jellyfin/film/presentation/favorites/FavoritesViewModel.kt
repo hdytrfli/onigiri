@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
+import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import javax.inject.Inject
@@ -41,6 +42,7 @@ constructor(
                     _state.value.copy(
                         isLoading = false,
                         items = items,
+                        sections = mediaSections(items),
                         displayFields =
                             ListDisplayField.fromKeys(
                                 appPreferences.getValue(appPreferences.listDisplayFields)

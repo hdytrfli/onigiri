@@ -1,37 +1,33 @@
 package dev.jdtech.jellyfin.presentation.film
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
+import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
-import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
-import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
-import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.GridSize
-import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
-import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 @Composable
@@ -88,9 +84,13 @@ private fun FavoritesScreenLayout(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-            modifier = Modifier.fillMaxSize(),
+        if (state.sections.isEmpty()) {
+            EmptyState(text = stringResource(CoreR.string.no_favorites))
+        }
+
+        CollectionGrid(
+            sections = state.sections,
+            innerPadding = PaddingValues(0.dp),
             contentPadding =
                 PaddingValues(
                     start = paddingStart,
@@ -98,22 +98,13 @@ private fun FavoritesScreenLayout(
                     end = paddingEnd,
                     bottom = paddingBottom,
                 ),
-            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-        ) {
-            items(state.items, key = { it.id }) { item ->
-                ItemCard(
-                    item = item,
-                    direction = Direction.VERTICAL,
-                    onClick = { onItemClick(item) },
-                    modifier = Modifier.animateItem(),
-                    fillWidth = true,
-                    showYear = ListDisplayField.Year in state.displayFields,
-                    showCommunityRating = ListDisplayField.CommunityRating in state.displayFields,
-                    showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                )
-            }
-        }
+            onAction = { action ->
+                if (action is CollectionAction.OnItemClick) {
+                    onItemClick(action.item)
+                }
+            },
+            displayFields = state.displayFields,
+        )
 
         if (!embedded) {
             HomeHeader(
@@ -140,7 +131,7 @@ private fun FavoritesScreenLayout(
 private fun FavoritesScreenLayoutPreview() {
     FindroidTheme {
         FavoritesScreenLayout(
-            state = CollectionState(items = dummyMovies, serverName = "Jellyfin"),
+            state = CollectionState(sections = mediaSections(dummyMovies), serverName = "Jellyfin"),
             onItemClick = {},
             onSearchClick = {},
             onSettingsClick = {},

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -68,8 +67,8 @@ import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
-import dev.jdtech.jellyfin.presentation.film.components.SectionHeader
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
+import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
@@ -311,25 +310,22 @@ fun LibraryContent(
                 verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
                 // The title is content, not a header: it scrolls away with the grid.
-                if (sectionTitle != null) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        SectionHeader(title = sectionTitle)
-                    }
-                }
-                items(count = items.itemCount, key = items.itemKey { it.id }) {
-                    val item = items[it]
-                    item?.let { item ->
-                        ItemCard(
-                            item = item,
-                            direction = Direction.VERTICAL,
-                            onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                            modifier = Modifier.animateItem(),
-                            fillWidth = true,
-                            showYear = ListDisplayField.Year in state.displayFields,
-                            showCommunityRating =
-                                ListDisplayField.CommunityRating in state.displayFields,
-                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                        )
+                section(title = sectionTitle) {
+                    items(count = items.itemCount, key = items.itemKey { it.id }) {
+                        val item = items[it]
+                        item?.let { item ->
+                            ItemCard(
+                                item = item,
+                                direction = Direction.VERTICAL,
+                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                modifier = Modifier.animateItem(),
+                                fillWidth = true,
+                                showYear = ListDisplayField.Year in state.displayFields,
+                                showCommunityRating =
+                                    ListDisplayField.CommunityRating in state.displayFields,
+                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
+                            )
+                        }
                     }
                 }
             }
@@ -402,6 +398,7 @@ fun DisplayInfoDialog(
 ) {
     BaseDialog(
         title = stringResource(CoreR.string.display_info),
+        description = stringResource(CoreR.string.display_info_summary),
         onDismiss = onDismiss,
         negativeButton = {},
         positiveButton = {

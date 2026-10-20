@@ -121,13 +121,17 @@ class MediaSuggestionsViewModel @Inject constructor(private val repository: Jell
     private suspend fun loadShows(): List<MediaSection> {
         val sections = mutableListOf<MediaSection>()
 
-        val resume = showsFor(repository.getResumeItems().filterIsInstance<FindroidEpisode>())
+        // Continue Watching stays on the episode: the thumbnail and the time-left badge say what
+        // is actually being watched, unlike the series poster.
+        val resume = repository.getResumeItems().filterIsInstance<FindroidEpisode>()
         if (resume.isNotEmpty()) {
             sections +=
                 MediaSection(
                     id = "resume",
                     title = UiText.StringResource(FilmR.string.continue_watching),
                     items = resume,
+                    useThumbnails = true,
+                    showRemainingTime = true,
                 )
         }
 
@@ -163,8 +167,9 @@ class MediaSuggestionsViewModel @Inject constructor(private val repository: Jell
     }
 
     /**
-     * Continue Watching and Next Up are episode lists on the server. The Shows page shows the
-     * series those episodes belong to, de-duplicated so a show appears only once.
+     * Next Up is an episode list on the server. The Shows page shows the series those episodes
+     * belong to, de-duplicated so a show appears only once. (Continue Watching keeps its raw
+     * episodes so it can show the episode thumbnail.)
      */
     private suspend fun showsFor(episodes: List<FindroidEpisode>): List<FindroidShow> =
         episodes

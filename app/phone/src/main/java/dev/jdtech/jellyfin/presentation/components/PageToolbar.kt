@@ -53,7 +53,7 @@ fun PageToolbar(
         )
         if (actions != null) {
             Spacer(modifier = Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically, content = actions)
+            AppButtonGroup(content = actions)
         }
     }
 }

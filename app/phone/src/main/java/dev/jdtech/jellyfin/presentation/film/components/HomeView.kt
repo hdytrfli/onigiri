@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,36 +30,36 @@ fun HomeView(
     modifier: Modifier = Modifier,
     displayFields: Set<ListDisplayField> = emptySet(),
 ) {
-    Column(modifier = modifier) {
-        SectionHeader(
-            title = stringResource(FilmR.string.latest_library, view.view.name),
-            modifier = Modifier.padding(itemsPadding),
-            trailingContent = {
-                AppIconButton(
-                    onClick = {
-                        onAction(
-                            HomeAction.OnLibraryClick(
-                                FindroidCollection(
-                                    id = view.view.id,
-                                    name = view.view.name,
-                                    images = FindroidImages(),
-                                    type = view.view.type,
-                                )
+    Section(
+        title = stringResource(FilmR.string.latest_library, view.view.name),
+        modifier = modifier,
+        titleModifier = Modifier.padding(itemsPadding),
+        trailingContent = {
+            AppIconButton(
+                onClick = {
+                    onAction(
+                        HomeAction.OnLibraryClick(
+                            FindroidCollection(
+                                id = view.view.id,
+                                name = view.view.name,
+                                images = FindroidImages(),
+                                type = view.view.type,
                             )
                         )
-                    },
-                    size = AppButtonSize.Decorator,
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    },
-                )
-            },
-        )
+                    )
+                },
+                size = AppButtonSize.Decorator,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                },
+            )
+        },
+    ) {
         GridRows(
             items = view.view.items,
             columns = gridColumns(GridSize.POSTER),

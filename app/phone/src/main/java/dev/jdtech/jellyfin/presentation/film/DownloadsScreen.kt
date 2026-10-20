@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +17,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -28,11 +28,14 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsViewModel
-import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.models.UiText
+import dev.jdtech.jellyfin.models.mediaSections
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 
 @Composable
@@ -65,6 +68,7 @@ private fun DownloadsScreenLayout(
     embedded: Boolean = false,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val safePadding = rememberSafePadding(handleStartInsets = false)
 
     Scaffold(
         modifier =
@@ -87,23 +91,34 @@ private fun DownloadsScreenLayout(
                 WindowInsets.statusBars.union(WindowInsets.displayCutout)
             },
     ) { innerPadding ->
+        val contentPadding =
+            if (embedded) {
+                // Under a root page the floating header overlays the grid and the Scaffold adds
+                // no padding, so the scroll inset holds both the header and the safe area.
+                PaddingValues(
+                    start = safePadding.start + MaterialTheme.spacings.default,
+                    top = LocalRootPageContentInset.current,
+                    end = safePadding.end + MaterialTheme.spacings.default,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.default,
+                )
+            } else {
+                // Standalone, the Scaffold's inner padding already holds the top bar and safe area.
+                PaddingValues(all = MaterialTheme.spacings.default)
+            }
+
         Box(modifier = Modifier.fillMaxSize()) {
             if (state.sections.isEmpty()) {
-                Text(
-                    text = stringResource(CoreR.string.no_downloads),
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                EmptyState(text = stringResource(CoreR.string.no_downloads))
             }
-        }
 
-        CollectionGrid(
-            sections = state.sections,
-            innerPadding = innerPadding,
-            onAction = onAction,
-            showSectionHeaders = false,
-            displayFields = state.displayFields,
-        )
+            CollectionGrid(
+                sections = state.sections,
+                innerPadding = innerPadding,
+                contentPadding = contentPadding,
+                onAction = onAction,
+                displayFields = state.displayFields,
+            )
+        }
     }
 }
 
@@ -112,17 +127,7 @@ private fun DownloadsScreenLayout(
 private fun DownloadsScreenLayoutPreview() {
     FindroidTheme {
         DownloadsScreenLayout(
-            state =
-                CollectionState(
-                    sections =
-                        listOf(
-                            CollectionSection(
-                                id = 0,
-                                name = UiText.StringResource(CoreR.string.movies_label),
-                                items = dummyMovies,
-                            )
-                        )
-                ),
+            state = CollectionState(sections = mediaSections(dummyMovies)),
             onAction = {},
         )
     }

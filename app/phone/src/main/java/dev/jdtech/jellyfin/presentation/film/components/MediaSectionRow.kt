@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -50,31 +49,30 @@ fun MediaSectionRow(
             (maxWidth - horizontalPadding * 2f - gap * (columns - 1).toFloat()) /
                 columns.coerceAtLeast(1)
 
-        Column {
-            val trailingAction: (@Composable () -> Unit)? =
-                if (onListClick != null) {
-                    {
-                        AppIconButton(
-                            onClick = onListClick,
-                            size = AppButtonSize.Decorator,
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            },
-                        )
-                    }
-                } else {
-                    null
+        val trailingAction: (@Composable () -> Unit)? =
+            if (onListClick != null) {
+                {
+                    AppIconButton(
+                        onClick = onListClick,
+                        size = AppButtonSize.Decorator,
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        },
+                    )
                 }
-            SectionHeader(
-                title = section.title.asString(),
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-                trailingContent = trailingAction,
-            )
+            } else {
+                null
+            }
+        Section(
+            title = section.title.asString(),
+            titleModifier = Modifier.padding(horizontal = horizontalPadding),
+            trailingContent = trailingAction,
+        ) {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = horizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(gap),

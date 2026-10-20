@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,9 +28,10 @@ import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
-import dev.jdtech.jellyfin.presentation.film.components.SectionHeader
+import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -64,6 +64,8 @@ fun CollectionsScreen(
         }
     ) {
         val items = if (selectedTab == 0) state.movies else state.shows
+        // Resolved here: the grid's content lambda below is not composable.
+        val collectionsTitle = stringResource(CoreR.string.collections_label)
         if (state.error != null && items.isEmpty()) {
             FullPageError(
                 onRefresh = { viewModel.retry() },
@@ -75,6 +77,18 @@ fun CollectionsScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 if (state.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                if (items.isEmpty() && !state.isLoading) {
+                    EmptyState(
+                        text =
+                            stringResource(
+                                if (selectedTab == 0) {
+                                    CoreR.string.no_movie_collections
+                                } else {
+                                    CoreR.string.no_show_collections
+                                }
+                            )
+                    )
                 }
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
@@ -90,21 +104,20 @@ fun CollectionsScreen(
                     verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 ) {
                     // The title is content, not a header: it scrolls away with the grid.
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        SectionHeader(title = stringResource(CoreR.string.collections_label))
-                    }
-                    items(items = items, key = { it.id }) { item ->
-                        ItemCard(
-                            item = item,
-                            direction = Direction.VERTICAL,
-                            onClick = { onItemClick(item) },
-                            modifier = Modifier.animateItem(),
-                            fillWidth = true,
-                            showYear = ListDisplayField.Year in state.displayFields,
-                            showCommunityRating =
-                                ListDisplayField.CommunityRating in state.displayFields,
-                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                        )
+                    section(title = collectionsTitle) {
+                        items(items = items, key = { it.id }) { item ->
+                            ItemCard(
+                                item = item,
+                                direction = Direction.VERTICAL,
+                                onClick = { onItemClick(item) },
+                                modifier = Modifier.animateItem(),
+                                fillWidth = true,
+                                showYear = ListDisplayField.Year in state.displayFields,
+                                showCommunityRating =
+                                    ListDisplayField.CommunityRating in state.displayFields,
+                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
+                            )
+                        }
                     }
                 }
             }

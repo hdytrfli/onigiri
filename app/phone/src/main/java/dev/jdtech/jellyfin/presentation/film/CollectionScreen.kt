@@ -238,6 +238,7 @@ fun CollectionScreenLayout(
         CollectionGrid(
             sections = state.sections,
             innerPadding = innerPadding,
+            contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
             onAction = onAction,
             displayFields = state.displayFields,
         )

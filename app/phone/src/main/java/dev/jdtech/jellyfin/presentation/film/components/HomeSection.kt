@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -20,11 +19,11 @@ fun HomeSection(
     showRemainingTime: Boolean = false,
     displayFields: Set<ListDisplayField> = emptySet(),
 ) {
-    Column(modifier = modifier) {
-        SectionHeader(
-            title = section.name.asString(),
-            modifier = Modifier.padding(itemsPadding),
-        )
+    Section(
+        title = section.name.asString(),
+        modifier = modifier,
+        titleModifier = Modifier.padding(itemsPadding),
+    ) {
         GridRows(
             items = section.items,
             columns = gridColumns(GridSize.THUMBNAIL),
