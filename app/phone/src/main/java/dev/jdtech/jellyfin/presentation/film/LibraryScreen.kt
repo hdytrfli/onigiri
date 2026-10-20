@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -290,9 +289,6 @@ fun LibraryContent(
                     onRetryClick = { onAction(LibraryAction.RefreshItems) },
                     modifier = Modifier.fillMaxWidth().padding(contentPadding),
                 )
-            }
-            if (state.isLoading && items.isNotEmpty()) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
