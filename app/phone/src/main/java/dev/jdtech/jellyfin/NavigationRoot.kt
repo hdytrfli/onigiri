@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
@@ -291,14 +292,16 @@ private fun MainNavigation(
         }
     val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
 
-    // The suite belongs to the root screens (as in Mihon): it is shown at a tab root and hidden
-    // once a deeper screen is on top, so detail screens get the full width.
+    // The suite belongs to the root screens (as in Mihon): shown at a tab root, hidden as soon as
+    // a deeper screen is on top. Mihon swaps it without animating, so snap rather than show/hide.
     LaunchedEffect(showBottomBar) {
-        if (showBottomBar) {
-            navigationSuiteScaffoldState.show()
-        } else {
-            navigationSuiteScaffoldState.hide()
-        }
+        navigationSuiteScaffoldState.snapTo(
+            if (showBottomBar) {
+                NavigationSuiteScaffoldValue.Visible
+            } else {
+                NavigationSuiteScaffoldValue.Hidden
+            }
+        )
     }
 
     val entryProvider = entryProvider {
