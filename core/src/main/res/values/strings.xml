@@ -50,6 +50,8 @@
     <string name="download_button_description">Download</string>
     <string name="person_detail_title">Details</string>
     <string name="movies_label">Movies</string>
+    <string name="all_movies">All movies</string>
+    <string name="all_shows">All shows</string>
     <string name="items_count">%1$d items</string>
     <string name="shows_label">TV Shows</string>
     <string name="collections_label">Collections</string>

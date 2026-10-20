@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -43,16 +43,16 @@ fun PageToolbar(
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.default),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
+        // Keep the tabs anchored to the leading edge whether or not a page has trailing actions,
+        // so the group does not jump between tabs or between pages.
         PillTabs(
             tabs = tabs,
             selectedIndex = selectedIndex,
             onSelect = onSelect,
-            modifier = Modifier.weight(1f, fill = false),
         )
         if (actions != null) {
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+            Spacer(modifier = Modifier.weight(1f))
             Row(verticalAlignment = Alignment.CenterVertically, content = actions)
         }
     }
@@ -70,6 +70,7 @@ private fun PillTabs(
             modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .height(48.dp)
                 .padding(4.dp)
                 .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -110,7 +111,8 @@ private fun PillTabs(
                         .clip(CircleShape)
                         .background(containerColor)
                         .clickable(role = Role.Tab, onClick = { onSelect(index) })
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                        .height(40.dp)
+                        .padding(horizontal = 14.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(

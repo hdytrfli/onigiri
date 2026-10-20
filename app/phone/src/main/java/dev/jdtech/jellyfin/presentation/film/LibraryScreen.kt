@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -194,6 +197,7 @@ fun LibraryContent(
     modifier: Modifier = Modifier,
     embedded: Boolean = false,
     innerPadding: PaddingValues = PaddingValues(0.dp),
+    sectionTitle: String? = null,
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
     val contentPadding =
@@ -230,6 +234,18 @@ fun LibraryContent(
     }
 
     Column(modifier = modifier.fillMaxSize().padding(innerPadding)) {
+        if (sectionTitle != null) {
+            Text(
+                text = sectionTitle,
+                style = MaterialTheme.typography.titleMedium,
+                modifier =
+                    Modifier.padding(
+                        start = MaterialTheme.spacings.default,
+                        top = MaterialTheme.spacings.small,
+                        end = MaterialTheme.spacings.default,
+                    ),
+            )
+        }
         if (state.searchExpanded) {
             AppTextField(
                 value = state.searchQuery,
@@ -250,18 +266,25 @@ fun LibraryContent(
                     )
                 },
                 trailingContent = {
-                    if (state.searchQuery.isNotEmpty()) {
-                        AppIconButton(
-                            onClick = { onAction(LibraryAction.SetSearchQuery("")) },
-                            size = AppButtonSize.Decorator,
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_x),
-                                    contentDescription = null,
-                                )
-                            },
-                        )
+                    // Keep the clear button's footprint even while the field is empty, otherwise
+                    // the text area jumps sideways as soon as the first character is typed.
+                    Box(
+                        modifier = Modifier.size(32.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (state.searchQuery.isNotEmpty()) {
+                            AppIconButton(
+                                onClick = { onAction(LibraryAction.SetSearchQuery("")) },
+                                size = AppButtonSize.Decorator,
+                                variant = AppButtonVariant.Ghost,
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_x),
+                                        contentDescription = null,
+                                    )
+                                },
+                            )
+                        }
                     }
                 },
             )
@@ -346,7 +369,7 @@ private fun LibraryActionButtons(
         variant = AppButtonVariant.Ghost,
         content = {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_table_of_contents),
+                painter = painterResource(CoreR.drawable.ic_layout_list),
                 contentDescription = null,
             )
         },
@@ -382,18 +405,21 @@ private fun DisplayInfoDialog(
                 text = stringResource(CoreR.string.display_year),
                 onClick = { onToggle(ListDisplayField.Year) },
                 selected = ListDisplayField.Year in fields,
+                iconDrawableId = CoreR.drawable.ic_calendar,
                 role = Role.Checkbox,
             )
             AppOptionRow(
                 text = stringResource(CoreR.string.display_rating),
                 onClick = { onToggle(ListDisplayField.CommunityRating) },
                 selected = ListDisplayField.CommunityRating in fields,
+                iconDrawableId = CoreR.drawable.ic_star,
                 role = Role.Checkbox,
             )
             AppOptionRow(
                 text = stringResource(CoreR.string.display_age_rating),
                 onClick = { onToggle(ListDisplayField.AgeRating) },
                 selected = ListDisplayField.AgeRating in fields,
+                iconDrawableId = CoreR.drawable.ic_shield,
                 role = Role.Checkbox,
             )
         }
