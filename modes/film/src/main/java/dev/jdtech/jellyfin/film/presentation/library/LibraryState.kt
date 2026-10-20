@@ -1,19 +1,16 @@
 package dev.jdtech.jellyfin.film.presentation.library
 
-import androidx.paging.PagingData
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
-import java.util.UUID
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 data class LibraryState(
-    val items: Flow<PagingData<FindroidItem>> = emptyFlow(),
-    /** The server's total for the current query, reported by the first page; null until then. */
-    val itemCount: Int? = null,
-    /** Re-fetched after a detail visit, keyed by id; the grid shows these over the paged copy. */
-    val updatedItems: Map<UUID, FindroidItem> = emptyMap(),
+    /**
+     * The cached list for the current query. It is kept in the ViewModel, so revisiting the page
+     * (or coming back from a detail) renders the same data at once instead of reloading, and it
+     * stays on screen while an explicit refresh runs.
+     */
+    val items: List<FindroidItem> = emptyList(),
     val sortBy: SortBy = SortBy.NAME,
     val sortOrder: SortOrder = SortOrder.ASCENDING,
     val displayFields: Set<ListDisplayField> =

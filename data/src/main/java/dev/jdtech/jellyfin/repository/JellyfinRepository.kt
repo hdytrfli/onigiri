@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.repository
 
-import androidx.paging.PagingData
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidGenre
@@ -15,7 +14,6 @@ import dev.jdtech.jellyfin.models.RecommendationCategory
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import java.util.UUID
-import kotlinx.coroutines.flow.Flow
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageInfo
@@ -56,19 +54,7 @@ interface JellyfinRepository {
         limit: Int? = null,
         searchTerm: String? = null,
         genreIds: List<UUID>? = null,
-        onTotalCount: ((Int) -> Unit)? = null,
     ): List<FindroidItem>
-
-    suspend fun getItemsPaging(
-        parentId: UUID? = null,
-        includeTypes: List<BaseItemKind>? = null,
-        recursive: Boolean = false,
-        sortBy: SortBy = SortBy.defaultValue,
-        sortOrder: SortOrder = SortOrder.ASCENDING,
-        searchTerm: String? = null,
-        genreIds: List<UUID>? = null,
-        onTotalCount: ((Int) -> Unit)? = null,
-    ): Flow<PagingData<FindroidItem>>
 
     suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre>
 

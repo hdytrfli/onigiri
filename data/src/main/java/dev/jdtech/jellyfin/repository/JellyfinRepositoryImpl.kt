@@ -1,9 +1,6 @@
 package dev.jdtech.jellyfin.repository
 
 import android.content.Context
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidCollection
@@ -33,7 +30,6 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.FileInfo
 import org.jellyfin.sdk.model.api.BaseItemDto
@@ -148,56 +144,25 @@ class JellyfinRepositoryImpl(
         limit: Int?,
         searchTerm: String?,
         genreIds: List<UUID>?,
-        onTotalCount: ((Int) -> Unit)?,
     ): List<FindroidItem> =
         withContext(Dispatchers.IO) {
-            val result =
-                jellyfinApi.itemsApi
-                    .getItems(
-                        jellyfinApi.userId!!,
-                        parentId = parentId,
-                        includeItemTypes = includeTypes,
-                        recursive = recursive,
-                        sortBy = listOf(ItemSortBy.fromName(sortBy.sortString)),
-                        sortOrder = listOf(ItemSortOrder.fromName(sortOrder.sortString)),
-                        startIndex = startIndex,
-                        limit = limit,
-                        searchTerm = searchTerm,
-                        genreIds = genreIds,
-                    )
-                    .content
-            onTotalCount?.invoke(result.totalRecordCount)
-            result.items.mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    parentId = parentId,
+                    includeItemTypes = includeTypes,
+                    recursive = recursive,
+                    sortBy = listOf(ItemSortBy.fromName(sortBy.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(sortOrder.sortString)),
+                    startIndex = startIndex,
+                    limit = limit,
+                    searchTerm = searchTerm,
+                    genreIds = genreIds,
+                )
+                .content
+                .items
+                .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
         }
-
-    override suspend fun getItemsPaging(
-        parentId: UUID?,
-        includeTypes: List<BaseItemKind>?,
-        recursive: Boolean,
-        sortBy: SortBy,
-        sortOrder: SortOrder,
-        searchTerm: String?,
-        genreIds: List<UUID>?,
-        onTotalCount: ((Int) -> Unit)?,
-    ): Flow<PagingData<FindroidItem>> {
-        return Pager(
-                config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                pagingSourceFactory = {
-                    ItemsPagingSource(
-                        this,
-                        parentId,
-                        includeTypes,
-                        recursive,
-                        sortBy,
-                        sortOrder,
-                        searchTerm,
-                        genreIds,
-                        onTotalCount,
-                    )
-                },
-            )
-            .flow
-    }
 
     override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
         withContext(Dispatchers.IO) {

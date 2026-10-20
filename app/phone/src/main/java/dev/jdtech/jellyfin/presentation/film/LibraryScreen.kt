@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -25,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,11 +42,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
-import androidx.paging.PagingData
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.film.presentation.library.LibraryAction
@@ -61,7 +57,6 @@ import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
-import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.ErrorCard
@@ -79,8 +74,6 @@ import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun LibraryScreen(
@@ -96,14 +89,10 @@ fun LibraryScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    var initialLoad by rememberSaveable { mutableStateOf(true) }
-
     LaunchedEffect(true) {
         viewModel.setup(parentId = libraryId, libraryType = libraryType, genreIds = genreIds)
-        if (initialLoad) {
-            viewModel.loadItems()
-            initialLoad = false
-        }
+        // The ViewModel owns the list cache, so a revisit renders it instead of reloading.
+        viewModel.loadItemsIfNeeded()
     }
 
     LibraryScreenLayout(
@@ -165,6 +154,7 @@ private fun LibraryScreenLayout(
                     actions = {
                         LibraryActionButtons(
                             onSearch = { onAction(LibraryAction.ToggleSearch) },
+                            onRefresh = { onAction(LibraryAction.RefreshItems) },
                             onInfo = { showDisplayDialog = true },
                             onSort = { showSortByDialog = true },
                         )
@@ -225,10 +215,9 @@ fun LibraryContent(
             PaddingValues(all = MaterialTheme.spacings.default)
         }
 
-    val items = state.items.collectAsLazyPagingItems()
-    // The server's total for the current query rides along with the first page request;
-    // shown as the badge on the section title once it arrives.
-    val itemCount = state.itemCount
+    val items = state.items
+    // The badge on the section title shows the cached list's total.
+    val itemCount = items.size.takeIf { it > 0 }
 
     // Do not refresh the paged list on resume: reloading it resets the scroll position. Only the
     // item whose detail page was opened can have changed, so the ViewModel re-fetches just that.
@@ -286,19 +275,25 @@ fun LibraryContent(
                 },
             )
         }
-        val refreshError = items.loadState.refresh as? LoadState.Error
-        if (refreshError != null && items.itemCount == 0) {
+        val error = state.error
+        if (error != null && items.isEmpty()) {
             FullPageError(
-                onRefresh = { items.refresh() },
-                isRefreshing = items.loadState.refresh is LoadState.Loading,
-                error = refreshError.error,
+                onRefresh = { onAction(LibraryAction.RefreshItems) },
+                isRefreshing = state.isLoading,
+                error = error,
             )
         } else {
-            ErrorGroup(
-                loadStates = items.loadState,
-                onRefresh = { items.refresh() },
-                modifier = Modifier.fillMaxWidth().padding(contentPadding),
-            )
+            // A refresh keeps the cached list on screen, so a failed one only adds a banner.
+            if (error != null) {
+                ErrorCard(
+                    onShowStacktrace = {},
+                    onRetryClick = { onAction(LibraryAction.RefreshItems) },
+                    modifier = Modifier.fillMaxWidth().padding(contentPadding),
+                )
+            }
+            if (state.isLoading && items.isNotEmpty()) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
@@ -307,7 +302,7 @@ fun LibraryContent(
                 verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
                 // The title is content, not a header: it scrolls away with the grid. The badge
-                // on its right shows the query's total once the first page reports it.
+                // on its right shows the cached list's total.
                 section(
                     title = sectionTitle,
                     trailingContent =
@@ -320,21 +315,18 @@ fun LibraryContent(
                             }
                         },
                 ) {
-                    items(count = items.itemCount, key = items.itemKey { it.id }) {
-                        val item = items[it]?.let { paged -> state.updatedItems[paged.id] ?: paged }
-                        item?.let { item ->
-                            ItemCard(
-                                item = item,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                modifier = Modifier.animateItem(),
-                                fillWidth = true,
-                                showYear = ListDisplayField.Year in state.displayFields,
-                                showCommunityRating =
-                                    ListDisplayField.CommunityRating in state.displayFields,
-                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                            )
-                        }
+                    items(items = items, key = { it.id }) { item ->
+                        ItemCard(
+                            item = item,
+                            direction = Direction.VERTICAL,
+                            onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                            modifier = Modifier.animateItem(),
+                            fillWidth = true,
+                            showYear = ListDisplayField.Year in state.displayFields,
+                            showCommunityRating =
+                                ListDisplayField.CommunityRating in state.displayFields,
+                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
+                        )
                     }
                 }
             }
@@ -364,6 +356,7 @@ fun LibraryContent(
 @Composable
 private fun LibraryActionButtons(
     onSearch: () -> Unit,
+    onRefresh: () -> Unit,
     onInfo: () -> Unit,
     onSort: () -> Unit,
 ) {
@@ -373,6 +366,16 @@ private fun LibraryActionButtons(
         content = {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_search),
+                contentDescription = null,
+            )
+        },
+    )
+    AppIconButton(
+        onClick = onRefresh,
+        variant = AppButtonVariant.Ghost,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
                 contentDescription = null,
             )
         },
@@ -440,50 +443,15 @@ fun DisplayInfoDialog(
     }
 }
 
-@Composable
-private fun ErrorGroup(
-    loadStates: CombinedLoadStates,
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var showErrorDialog by rememberSaveable { mutableStateOf(false) }
-
-    val loadStateError =
-        when {
-            loadStates.refresh is LoadState.Error -> {
-                loadStates.refresh as LoadState.Error
-            }
-            loadStates.prepend is LoadState.Error -> {
-                loadStates.prepend as LoadState.Error
-            }
-            loadStates.append is LoadState.Error -> {
-                loadStates.append as LoadState.Error
-            }
-            else -> null
-        }
-
-    loadStateError?.let {
-        ErrorCard(
-            onShowStacktrace = { showErrorDialog = true },
-            onRetryClick = onRefresh,
-            modifier = modifier,
-        )
-        if (showErrorDialog) {
-            ErrorDialog(exception = it.error, onDismissRequest = { showErrorDialog = false })
-        }
-    }
-}
-
 @PreviewScreenSizes
 @Composable
 private fun LibraryScreenLayoutPreview() {
-    val items: Flow<PagingData<FindroidItem>> = flowOf(PagingData.from(dummyMovies))
     FindroidTheme {
         LibraryScreenLayout(
             libraryName = "Movies",
             showTopBar = true,
             embedded = false,
-            state = LibraryState(items = items),
+            state = LibraryState(items = dummyMovies),
             onAction = {},
         )
     }

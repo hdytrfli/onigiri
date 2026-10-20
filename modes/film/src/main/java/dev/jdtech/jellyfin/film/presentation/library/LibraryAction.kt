@@ -19,4 +19,7 @@ sealed interface LibraryAction {
 
     /** Re-fetches the item whose detail page was last opened, if any. */
     data object RefreshOpenedItem : LibraryAction
+
+    /** Re-fetches the whole list; the cached items stay visible while it runs. */
+    data object RefreshItems : LibraryAction
 }

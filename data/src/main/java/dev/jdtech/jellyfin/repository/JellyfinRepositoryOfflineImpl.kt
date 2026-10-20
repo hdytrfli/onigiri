@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.repository
 
 import android.content.Context
-import androidx.paging.PagingData
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidCollection
@@ -27,7 +26,6 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -95,22 +93,8 @@ class JellyfinRepositoryOfflineImpl(
         limit: Int?,
         searchTerm: String?,
         genreIds: List<UUID>?,
-        onTotalCount: ((Int) -> Unit)?,
     ): List<FindroidItem> {
         return emptyList()
-    }
-
-    override suspend fun getItemsPaging(
-        parentId: UUID?,
-        includeTypes: List<BaseItemKind>?,
-        recursive: Boolean,
-        sortBy: SortBy,
-        sortOrder: SortOrder,
-        searchTerm: String?,
-        genreIds: List<UUID>?,
-        onTotalCount: ((Int) -> Unit)?,
-    ): Flow<PagingData<FindroidItem>> {
-        TODO("Not yet implemented")
     }
 
     override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
