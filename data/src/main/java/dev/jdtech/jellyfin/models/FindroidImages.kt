@@ -13,26 +13,28 @@ data class FindroidImages(
     val showPrimary: Uri? = null,
     val showBackdrop: Uri? = null,
     val showLogo: Uri? = null,
+    val primaryBlurHash: String? = null,
+    val backdropBlurHash: String? = null,
 )
 
 fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): FindroidImages {
     val baseUrl = Uri.parse(jellyfinRepository.getBaseUrl())
-    val primary =
-        imageTags?.get(ImageType.PRIMARY)?.let { tag ->
-            baseUrl
-                .buildUpon()
-                .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
-                .appendQueryParameter("tag", tag)
-                .build()
-        }
-    val backdrop =
-        backdropImageTags?.firstOrNull()?.let { tag ->
-            baseUrl
-                .buildUpon()
-                .appendEncodedPath("items/$id/Images/${ImageType.BACKDROP}/0")
-                .appendQueryParameter("tag", tag)
-                .build()
-        }
+    val primaryTag = imageTags?.get(ImageType.PRIMARY)
+    val primary = primaryTag?.let { tag ->
+        baseUrl
+            .buildUpon()
+            .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
+            .appendQueryParameter("tag", tag)
+            .build()
+    }
+    val backdropTag = backdropImageTags?.firstOrNull()
+    val backdrop = backdropTag?.let { tag ->
+        baseUrl
+            .buildUpon()
+            .appendEncodedPath("items/$id/Images/${ImageType.BACKDROP}/0")
+            .appendQueryParameter("tag", tag)
+            .build()
+    }
     val logo =
         imageTags?.get(ImageType.LOGO)?.let { tag ->
             baseUrl
@@ -62,6 +64,8 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .appendQueryParameter("tag", tag)
             .build()
     }
+    val primaryBlurHash = primaryTag?.let { imageBlurHashes?.get(ImageType.PRIMARY)?.get(it) }
+    val backdropBlurHash = backdropTag?.let { imageBlurHashes?.get(ImageType.BACKDROP)?.get(it) }
 
     return FindroidImages(
         primary = primary,
@@ -70,6 +74,8 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
         showPrimary = showPrimary,
         showBackdrop = showBackdrop,
         showLogo = showLogo,
+        primaryBlurHash = primaryBlurHash,
+        backdropBlurHash = backdropBlurHash,
     )
 }
 

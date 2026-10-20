@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -25,6 +26,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -47,6 +50,11 @@ fun ItemHeader(
             is FindroidEpisode -> item.images.primary
             else -> item.images.backdrop
         }
+    val backdropBlurHash =
+        when (item) {
+            is FindroidEpisode -> item.images.primaryBlurHash
+            else -> item.images.backdropBlurHash
+        }
 
     // Ugly workaround to append the files directory when loading local images
     if (backdropUri?.scheme == null) {
@@ -57,17 +65,29 @@ fun ItemHeader(
                 .build()
     }
 
+    val placeholder =
+        rememberBlurHashPainter(
+            hash = backdropBlurHash,
+            width = BLUR_HASH_LANDSCAPE_WIDTH,
+            height = BLUR_HASH_LANDSCAPE_HEIGHT,
+        )
+    val model =
+        remember(context, backdropUri) {
+            ImageRequest.Builder(context).data(backdropUri).crossfade(true).build()
+        }
+
     ItemHeaderBase(
         item = item,
         showLogo = showLogo,
         backdropImage = {
             AsyncImage(
-                model = backdropUri,
+                model = model,
                 contentDescription = null,
                 modifier =
                     Modifier.fillMaxSize()
                         .parallaxLayoutModifier(scrollState = scrollState, rate = 2),
-                placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
+                placeholder =
+                    placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
                 contentScale = ContentScale.Crop,
             )
         },
@@ -89,6 +109,13 @@ fun ItemHeader(
             is FindroidSeason -> item.images.showBackdrop
             else -> item.images.backdrop
         }
+    val backdropBlurHash =
+        when (item) {
+            is FindroidEpisode -> item.images.primaryBlurHash
+            // Local seasons show the series backdrop, which has no stored blur hash.
+            is FindroidSeason -> null
+            else -> item.images.backdropBlurHash
+        }
 
     // Ugly workaround to append the files directory when loading local images
     if (backdropUri?.scheme == null) {
@@ -99,17 +126,29 @@ fun ItemHeader(
                 .build()
     }
 
+    val placeholder =
+        rememberBlurHashPainter(
+            hash = backdropBlurHash,
+            width = BLUR_HASH_LANDSCAPE_WIDTH,
+            height = BLUR_HASH_LANDSCAPE_HEIGHT,
+        )
+    val model =
+        remember(context, backdropUri) {
+            ImageRequest.Builder(context).data(backdropUri).crossfade(true).build()
+        }
+
     ItemHeaderBase(
         item = item,
         showLogo = showLogo,
         backdropImage = {
             AsyncImage(
-                model = backdropUri,
+                model = model,
                 contentDescription = null,
                 modifier =
                     Modifier.fillMaxSize()
                         .parallaxLayoutModifier(lazyListState = lazyListState, rate = 2),
-                placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
+                placeholder =
+                    placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
                 contentScale = ContentScale.Crop,
             )
         },
