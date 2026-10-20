@@ -9,26 +9,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -40,8 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -52,7 +37,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimMedium
@@ -97,7 +81,6 @@ import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
@@ -240,12 +223,10 @@ private fun MainNavigation(
     val snackbarHostState = remember { SnackbarHostState() }
     var exitPending by remember { mutableStateOf(false) }
 
-    val navigationItems = listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab)
-    val tabRoutes = navigationItems.map { it.route }
+    val tabRoutes =
+        listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab).map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
-    val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
-    val showBottomBar = atTabRoot && topLevelRoute in tabRoutes && !searchExpanded.value
 
     // Press back twice to exit from the start route's root.
     val atExitRoot =
@@ -275,35 +256,6 @@ private fun MainNavigation(
         }
     }
 
-    val navigationSuiteScaffoldState = rememberNavigationSuiteScaffoldState()
-
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val customNavSuiteType =
-        with(windowAdaptiveInfo) {
-            if (
-                windowSizeClass.isWidthAtLeastBreakpoint(
-                    WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
-                )
-            ) {
-                NavigationSuiteType.NavigationRail
-            } else {
-                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(this)
-            }
-        }
-    val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
-
-    // The suite belongs to the root screens (as in Mihon): shown at a tab root, hidden as soon as
-    // a deeper screen is on top. Mihon swaps it without animating, so snap rather than show/hide.
-    LaunchedEffect(showBottomBar) {
-        navigationSuiteScaffoldState.snapTo(
-            if (showBottomBar) {
-                NavigationSuiteScaffoldValue.Visible
-            } else {
-                NavigationSuiteScaffoldValue.Hidden
-            }
-        )
-    }
-
     val entryProvider = entryProvider {
         mainEntries(
             navigator = navigator,
@@ -315,71 +267,31 @@ private fun MainNavigation(
         )
     }
 
-    // Consume the hidden status-bar/cutout top inset here as well, right above the navigation
-    // suite, so the rail does not reserve space when the status bar is hidden.
-    val navSuiteInsets =
-        if (LocalHideStatusBar.current) {
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-        } else {
-            WindowInsets(0, 0, 0, 0)
-        }
-    Box(modifier = Modifier.fillMaxSize().consumeWindowInsets(navSuiteInsets)) {
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                navigationItems.forEachIndexed { index, item ->
-                    item(
-                        selected = topLevelRoute == item.route,
-                        onClick = { navigator.navigate(item.route) },
-                        icon = {
-                            Icon(
-                                painter = painterResource(item.icon),
-                                contentDescription = stringResource(item.title),
-                            )
-                        },
-                        modifier =
-                            if (isRail) {
-                                // Match the top bar's top padding on the rail (first item only, so
-                                // the items keep their normal spacing).
-                                if (index == 0) Modifier.padding(top = MaterialTheme.spacings.small)
-                                else Modifier
-                            } else {
-                                Modifier.padding(vertical = MaterialTheme.spacings.small)
-                            },
-                        enabled = item.enabled,
-                        label = { Text(text = stringResource(item.title)) },
-                    )
-                }
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavDisplay(
+            entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
+            onBack = { navigator.goBack() },
+            transitionSpec = {
+                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else LAYER_TRANSITION_SPEC
             },
-            layoutType = customNavSuiteType,
-            state = navigationSuiteScaffoldState,
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                NavDisplay(
-                    entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
-                    onBack = { navigator.goBack() },
-                    transitionSpec = {
-                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else LAYER_TRANSITION_SPEC
-                    },
-                    popTransitionSpec = {
-                        if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else LAYER_TRANSITION_SPEC
-                    },
-                    predictivePopTransitionSpec = { _ -> LAYER_TRANSITION_SPEC },
-                )
-                // Keep the snackbar above the bottom navigation bar, otherwise its
-                // translucent background reveals the (light) navigation bar behind it.
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier =
-                        Modifier.align(Alignment.BottomCenter)
-                            .padding(bottom = MaterialTheme.spacings.medium),
-                ) { data ->
-                    Snackbar(
-                        snackbarData = data,
-                        containerColor = ScrimMedium,
-                        contentColor = OnScrim,
-                    )
-                }
-            }
+            popTransitionSpec = {
+                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else LAYER_TRANSITION_SPEC
+            },
+            predictivePopTransitionSpec = { _ -> LAYER_TRANSITION_SPEC },
+        )
+        // Keep the snackbar above the bottom navigation bar, otherwise its translucent background
+        // reveals the (light) navigation bar behind it.
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .padding(bottom = MaterialTheme.spacings.medium),
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                containerColor = ScrimMedium,
+                contentColor = OnScrim,
+            )
         }
     }
 }
@@ -488,39 +400,45 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         onSetupComplete = { navigator.navigateHome() },
     )
     entry<HomeRoute> {
-        HomeScreen(
-            onLibraryClick =
-                resumedAction { library ->
+        RootSuiteScaffold(navigator = navigator, selectedRoute = HomeRoute) {
+            HomeScreen(
+                onLibraryClick =
+                    resumedAction { library ->
+                        navigator.navigate(
+                            LibraryRoute(
+                                libraryId = library.id.toString(),
+                                libraryName = library.name,
+                                libraryType = library.type,
+                            )
+                        )
+                    },
+                onSearchClick = dropUnlessResumed { onSearchClick() },
+                onSettingsClick =
+                    dropUnlessResumed {
+                        navigator.navigate(
+                            SettingsRoute(indexes = listOf(CoreR.string.title_settings))
+                        )
+                    },
+                onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            )
+        }
+    }
+    entry<MoviesRoute> {
+        RootSuiteScaffold(navigator = navigator, selectedRoute = MoviesRoute) {
+            MoviesScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+                onGenreClick = { genre ->
                     navigator.navigate(
-                        LibraryRoute(
-                            libraryId = library.id.toString(),
-                            libraryName = library.name,
-                            libraryType = library.type,
+                        GenreListRoute(
+                            genreId = genre.id.toString(),
+                            genreName = genre.name,
+                            movies = true,
                         )
                     )
                 },
-            onSearchClick = dropUnlessResumed { onSearchClick() },
-            onSettingsClick =
-                dropUnlessResumed {
-                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
-                },
-            onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-        )
-    }
-    entry<MoviesRoute> {
-        MoviesScreen(
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onGenreClick = { genre ->
-                navigator.navigate(
-                    GenreListRoute(
-                        genreId = genre.id.toString(),
-                        genreName = genre.name,
-                        movies = true,
-                    )
-                )
-            },
-        )
+            )
+        }
     }
     entry<GenreListRoute> { key ->
         LibraryScreen(
@@ -534,21 +452,27 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         )
     }
     entry<ShowsRoute> {
-        ShowsScreen(
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onGenreClick = { genre ->
-                navigator.navigate(
-                    GenreListRoute(
-                        genreId = genre.id.toString(),
-                        genreName = genre.name,
-                        movies = false,
+        RootSuiteScaffold(navigator = navigator, selectedRoute = ShowsRoute) {
+            ShowsScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+                onGenreClick = { genre ->
+                    navigator.navigate(
+                        GenreListRoute(
+                            genreId = genre.id.toString(),
+                            genreName = genre.name,
+                            movies = false,
+                        )
                     )
-                )
-            },
-        )
+                },
+            )
+        }
     }
     entry<CollectionsRoute> {
-        CollectionsScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
+        RootSuiteScaffold(navigator = navigator, selectedRoute = CollectionsRoute) {
+            CollectionsScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) }
+            )
+        }
     }
     entry<MediaRoute> {
         MediaScreen(
@@ -788,21 +712,32 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         )
     }
     entry<SettingsRoute> { key ->
-        SettingsScreen(
-            indexes = key.indexes,
-            navigateToSettings =
-                resumedAction { indexes -> navigator.navigate(SettingsRoute(indexes = indexes)) },
-            navigateToSettingsFileEdit =
-                resumedAction { filePath ->
-                    navigator.navigate(SettingsFileEditRoute(filePath = filePath))
-                },
-            navigateToServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
-            navigateToUsers = dropUnlessResumed { navigator.navigate(UsersRoute) },
-            navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
-            navigateToSubtitleFont = dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
-            navigateBack = dropUnlessResumed { navigator.goBack() },
-            showTopBar = key.indexes.size > 1,
-        )
+        val isRoot = key.indexes.size == 1
+        val settings: @Composable () -> Unit = {
+            SettingsScreen(
+                indexes = key.indexes,
+                navigateToSettings =
+                    resumedAction { indexes ->
+                        navigator.navigate(SettingsRoute(indexes = indexes))
+                    },
+                navigateToSettingsFileEdit =
+                    resumedAction { filePath ->
+                        navigator.navigate(SettingsFileEditRoute(filePath = filePath))
+                    },
+                navigateToServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
+                navigateToUsers = dropUnlessResumed { navigator.navigate(UsersRoute) },
+                navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
+                navigateToSubtitleFont =
+                    dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
+                navigateBack = dropUnlessResumed { navigator.goBack() },
+                showTopBar = !isRoot,
+            )
+        }
+        if (isRoot) {
+            RootSuiteScaffold(navigator = navigator, selectedRoute = key) { settings() }
+        } else {
+            settings()
+        }
     }
     entry<SettingsFileEditRoute> { key ->
         SettingsFileEditScreen(
