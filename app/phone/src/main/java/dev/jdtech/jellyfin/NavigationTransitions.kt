@@ -1,11 +1,11 @@
 package dev.jdtech.jellyfin
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
@@ -24,32 +24,9 @@ internal val TAB_TRANSITION_SPEC =
         )
     ) togetherWith fadeOut(tween(durationMillis = TAB_TRANSITION_FADE_OUT_MS))
 
-// Material's shared-axis X, the motion Mihon uses when pushing to a deeper screen (reversed on
-// pop): both screens slide slightly along the horizontal axis while cross-fading, which gives the
-// navigation a direction without a full-width slide. The offset is a fraction of the screen rather
-// than Material's fixed 30dp so it scales with the display.
-private const val SHARED_AXIS_DURATION_MS = 300
-private const val SHARED_AXIS_OFFSET_DIVISOR = 20
-
-internal val SHARED_AXIS_FORWARD_SPEC =
-    (fadeIn(tween(durationMillis = SHARED_AXIS_DURATION_MS)) +
-        slideInHorizontally(tween(durationMillis = SHARED_AXIS_DURATION_MS)) {
-            it / SHARED_AXIS_OFFSET_DIVISOR
-        }) togetherWith
-        (fadeOut(tween(durationMillis = SHARED_AXIS_DURATION_MS)) +
-            slideOutHorizontally(tween(durationMillis = SHARED_AXIS_DURATION_MS)) {
-                -it / SHARED_AXIS_OFFSET_DIVISOR
-            })
-
-internal val SHARED_AXIS_BACKWARD_SPEC =
-    (fadeIn(tween(durationMillis = SHARED_AXIS_DURATION_MS)) +
-        slideInHorizontally(tween(durationMillis = SHARED_AXIS_DURATION_MS)) {
-            -it / SHARED_AXIS_OFFSET_DIVISOR
-        }) togetherWith
-        (fadeOut(tween(durationMillis = SHARED_AXIS_DURATION_MS)) +
-            slideOutHorizontally(tween(durationMillis = SHARED_AXIS_DURATION_MS)) {
-                it / SHARED_AXIS_OFFSET_DIVISOR
-            })
+// Non-root screens are layers on top of the root: they appear over it with no transition, so the
+// root page — rail included — never moves, fades or re-measures while it is being covered.
+internal val LAYER_TRANSITION_SPEC = EnterTransition.None togetherWith ExitTransition.None
 
 /** True when a transition moves between two top-level tabs rather than onto a detail screen. */
 internal fun AnimatedContentTransitionScope<Scene<NavKey>>.isTabSwitch(
