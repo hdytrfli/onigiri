@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
@@ -52,7 +53,13 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
     val backdrop = item.images.backdrop
     val model =
         remember(context, backdrop) {
-            ImageRequest.Builder(context).data(backdrop).crossfade(true).build()
+            ImageRequest.Builder(context)
+                .data(backdrop)
+                .crossfade(true)
+                // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
+                // keeping them in the shared memory pool.
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .build()
         }
     val placeholder =
         rememberBlurHashPainter(

@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
@@ -73,7 +74,13 @@ fun ItemHeader(
         )
     val model =
         remember(context, backdropUri) {
-            ImageRequest.Builder(context).data(backdropUri).crossfade(true).build()
+            ImageRequest.Builder(context)
+                .data(backdropUri)
+                .crossfade(true)
+                // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
+                // keeping them in the shared memory pool.
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .build()
         }
 
     ItemHeaderBase(
@@ -134,7 +141,13 @@ fun ItemHeader(
         )
     val model =
         remember(context, backdropUri) {
-            ImageRequest.Builder(context).data(backdropUri).crossfade(true).build()
+            ImageRequest.Builder(context)
+                .data(backdropUri)
+                .crossfade(true)
+                // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
+                // keeping them in the shared memory pool.
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .build()
         }
 
     ItemHeaderBase(

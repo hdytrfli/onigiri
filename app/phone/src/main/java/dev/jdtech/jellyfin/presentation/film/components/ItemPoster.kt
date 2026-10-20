@@ -63,7 +63,9 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
         )
     val model =
         remember(context, imageUri) {
-            ImageRequest.Builder(context).data(imageUri).crossfade(true).build()
+            // No crossfade here: a card scrolling back into view is a cache hit, and fading it in
+            // again would read as a reload.
+            ImageRequest.Builder(context).data(imageUri).crossfade(false).build()
         }
 
     AsyncImage(

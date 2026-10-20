@@ -17,6 +17,13 @@ data class FindroidImages(
     val backdropBlurHash: String? = null,
 )
 
+/**
+ * Card-sized sources: the server renders at most this wide, so grids stay cheap to fetch/decode.
+ */
+private const val POSTER_IMAGE_WIDTH = 800
+private const val BACKDROP_IMAGE_WIDTH = 1600
+private const val LOGO_IMAGE_WIDTH = 600
+
 fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): FindroidImages {
     val baseUrl = Uri.parse(jellyfinRepository.getBaseUrl())
     val primaryTag = imageTags?.get(ImageType.PRIMARY)
@@ -25,6 +32,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", POSTER_IMAGE_WIDTH.toString())
             .build()
     }
     val backdropTag = backdropImageTags?.firstOrNull()
@@ -33,6 +41,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$id/Images/${ImageType.BACKDROP}/0")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", BACKDROP_IMAGE_WIDTH.toString())
             .build()
     }
     val logo =
@@ -41,6 +50,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
                 .buildUpon()
                 .appendEncodedPath("items/$id/Images/${ImageType.LOGO}")
                 .appendQueryParameter("tag", tag)
+                .appendQueryParameter("maxWidth", LOGO_IMAGE_WIDTH.toString())
                 .build()
         }
     val showPrimary = seriesPrimaryImageTag?.let { tag ->
@@ -48,6 +58,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$seriesId/Images/${ImageType.PRIMARY}")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", POSTER_IMAGE_WIDTH.toString())
             .build()
     }
     val showBackdrop = seriesPrimaryImageTag?.let { tag ->
@@ -55,6 +66,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$seriesId/Images/${ImageType.BACKDROP}/0")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", BACKDROP_IMAGE_WIDTH.toString())
             .build()
     }
     val showLogo = seriesPrimaryImageTag?.let { tag ->
@@ -62,6 +74,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$seriesId/Images/${ImageType.LOGO}")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", LOGO_IMAGE_WIDTH.toString())
             .build()
     }
     val primaryBlurHash = primaryTag?.let { imageBlurHashes?.get(ImageType.PRIMARY)?.get(it) }
