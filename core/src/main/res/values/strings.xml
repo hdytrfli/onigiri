@@ -75,7 +75,7 @@
     <string name="image_description_poster">%1$s poster</string>
     <string name="image_description_backdrop">%1$s backdrop</string>
     <string name="sort_by_options_0">Title</string>
-    <string name="sort_by_options_1">IMDB Rating</string>
+    <string name="sort_by_options_1">Community Rating</string>
     <string name="sort_by_options_2">Parental Rating</string>
     <string name="sort_by_options_3">Date Added</string>
     <string name="sort_by_options_4">Date Played</string>
