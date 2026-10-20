@@ -294,6 +294,15 @@ private fun MainNavigation(
                     }
                 },
             )
+            // Predictive back drives NavDisplay's own animation session, whose commit is the
+            // predictive transform (a no-op when the preview is off). Intercept the gesture with a
+            // plain callback instead, so it commits straight into the normal pop transition -
+            // exactly like the in-app back button, and with no preview while dragging.
+            if (!predictiveBack) {
+                BackHandler(enabled = navigationState.currentBackStack().size > 1) {
+                    navigator.goBack()
+                }
+            }
             // The suite is drawn over the content, outside the NavDisplay, so a page transition
             // never moves it: switching tabs animates only the content behind it.
             if (atTabRoot && topLevelRoute in tabRoutes) {
