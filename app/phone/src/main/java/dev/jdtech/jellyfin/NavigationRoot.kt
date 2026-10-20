@@ -272,12 +272,12 @@ private fun MainNavigation(
             entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
             onBack = { navigator.goBack() },
             transitionSpec = {
-                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else LAYER_TRANSITION_SPEC
+                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
             },
             popTransitionSpec = {
-                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else LAYER_TRANSITION_SPEC
+                if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
             },
-            predictivePopTransitionSpec = { _ -> LAYER_TRANSITION_SPEC },
+            predictivePopTransitionSpec = { _ -> PAGE_TRANSITION_SPEC },
         )
         // Keep the snackbar above the bottom navigation bar, otherwise its translucent background
         // reveals the (light) navigation bar behind it.

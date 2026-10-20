@@ -1,11 +1,10 @@
 package dev.jdtech.jellyfin
 
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
@@ -24,9 +23,18 @@ internal val TAB_TRANSITION_SPEC =
         )
     ) togetherWith fadeOut(tween(durationMillis = TAB_TRANSITION_FADE_OUT_MS))
 
-// Non-root screens are layers on top of the root: they appear over it with no transition, so the
-// root page — rail included — never moves, fades or re-measures while it is being covered.
-internal val LAYER_TRANSITION_SPEC = EnterTransition.None togetherWith ExitTransition.None
+// Pages beyond the current one emerge over it: a quick fade with a slight scale, the same language
+// as the activity transition, so the change reads clearly without any large movement. Symmetric,
+// so going back looks the same.
+private const val PAGE_TRANSITION_DURATION_MS = 220
+private const val PAGE_TRANSITION_SCALE = 0.97f
+
+internal val PAGE_TRANSITION_SPEC =
+    (fadeIn(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) +
+        scaleIn(
+            animationSpec = tween(durationMillis = PAGE_TRANSITION_DURATION_MS),
+            initialScale = PAGE_TRANSITION_SCALE,
+        )) togetherWith fadeOut(tween(durationMillis = PAGE_TRANSITION_DURATION_MS - 40))
 
 /** True when a transition moves between two top-level tabs rather than onto a detail screen. */
 internal fun AnimatedContentTransitionScope<Scene<NavKey>>.isTabSwitch(
