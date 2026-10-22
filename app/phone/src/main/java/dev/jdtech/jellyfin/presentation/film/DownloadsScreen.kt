@@ -3,14 +3,9 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -18,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -31,10 +25,12 @@ import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.pageContentWindowInsets
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 
@@ -70,11 +66,8 @@ private fun DownloadsScreenLayout(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val safePadding = rememberSafePadding(handleStartInsets = false)
 
-    Scaffold(
-        modifier =
-            Modifier.fillMaxSize()
-                .recalculateWindowInsets()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+    PageScaffold(
+        scrollBehavior = scrollBehavior,
         topBar = {
             if (!embedded) {
                 TopAppBar(
@@ -88,7 +81,7 @@ private fun DownloadsScreenLayout(
             if (embedded) {
                 WindowInsets(0, 0, 0, 0)
             } else {
-                WindowInsets.statusBars.union(WindowInsets.displayCutout)
+                pageContentWindowInsets()
             },
     ) { innerPadding ->
         val contentPadding =
