@@ -97,6 +97,7 @@ class MainActivity : AppCompatActivity() {
                             LocalOfflineMode provides state.isOfflineMode,
                             LocalBlurHash provides state.blurHash,
                             LocalPredictiveBack provides state.predictiveBack,
+                            LocalTabletUiMode provides state.tabletUiMode,
                             LocalBackdropRatios provides
                                 BackdropRatios(
                                     portrait = state.backdropPortraitRatio,

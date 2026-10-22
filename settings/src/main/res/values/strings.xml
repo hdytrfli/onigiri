@@ -92,6 +92,13 @@
     <string name="blur_hash_summary">Show a blurred preview of an image while it loads</string>
     <string name="predictive_back">Predictive back</string>
     <string name="predictive_back_summary">Preview the previous screen while swiping back</string>
+    <string name="tablet_mode">Tablet mode</string>
+    <string name="tablet_mode_summary">Choose where the navigation bar sits: the vertical rail or the bottom bar</string>
+    <string name="tablet_ui_option_automatic">Automatic</string>
+    <string name="tablet_ui_option_always">Always</string>
+    <string name="tablet_ui_option_landscape">Landscape</string>
+    <string name="tablet_ui_option_never">Never</string>
+    <string name="general">General</string>
     <string name="extra_info">Display Extra Info</string>
     <string name="extra_info_summary">Detailed audio, video and subtitle information</string>
     <string name="backdrop">Backdrop</string>

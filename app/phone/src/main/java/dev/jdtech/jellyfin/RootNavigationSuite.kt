@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,34 +14,55 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
+import dev.jdtech.jellyfin.models.TabletUiMode
 
 /** Space a root screen must leave for the [RootNavigationSuite] overlay. */
 val LocalSuiteStartInset = compositionLocalOf { 0.dp }
 val LocalSuiteBottomInset = compositionLocalOf { 0.dp }
 
+/**
+ * Where the navigation suite is drawn. [TabletUiMode] drives it: AUTOMATIC follows the adaptive
+ * width rule (rail on expanded widths), ALWAYS and NEVER force the rail and the bottom bar, and
+ * LANDSCAPE rails only when the device is turned sideways.
+ */
+val LocalTabletUiMode = compositionLocalOf { TabletUiMode.AUTOMATIC }
+
 /** The rail on tablets, the bottom bar on phones. */
 @Composable
 fun rememberNavigationSuiteType(): NavigationSuiteType {
+    val tabletUiMode = LocalTabletUiMode.current
+    val configuration = LocalConfiguration.current
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     return with(windowAdaptiveInfo) {
-        if (
-            windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
-        ) {
+        val preferRail =
+            when (tabletUiMode) {
+                TabletUiMode.AUTOMATIC ->
+                    windowSizeClass.isWidthAtLeastBreakpoint(
+                        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+                    )
+                TabletUiMode.ALWAYS -> true
+                TabletUiMode.LANDSCAPE ->
+                    configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                TabletUiMode.NEVER -> false
+            }
+        if (preferRail) {
             NavigationSuiteType.NavigationRail
         } else {
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(this)
+            // Never consult the adaptive default here: on an expanded-width window it picks a
+            // rail anyway, which would silently cancel NEVER and the other non-automatic modes.
+            NavigationSuiteType.NavigationBar
         }
     }
 }

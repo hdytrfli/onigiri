@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.Server
+import dev.jdtech.jellyfin.models.TabletUiMode
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.domain.Constants
@@ -97,12 +98,18 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                             hideStatusBar,
                             blurHash,
                             predictiveBack = false,
+                            tabletUiMode = null,
                         )
                     }
                     .combine(appPreferences.observe(appPreferences.predictiveBack)) {
                         prefs,
                         predictiveBack ->
                         prefs.copy(predictiveBack = predictiveBack)
+                    }
+                    .combine(appPreferences.observe(appPreferences.tabletUiMode)) {
+                        prefs,
+                        tabletUiMode ->
+                        prefs.copy(tabletUiMode = tabletUiMode)
                     }
 
             val titlePrefs =
@@ -155,6 +162,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         hideStatusBar = interfacePrefs.hideStatusBar,
                         blurHash = interfacePrefs.blurHash,
                         predictiveBack = interfacePrefs.predictiveBack,
+                        tabletUiMode = TabletUiMode.fromStorageKey(interfacePrefs.tabletUiMode),
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
                         titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
@@ -188,6 +196,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val hideStatusBar: Boolean,
         val blurHash: Boolean,
         val predictiveBack: Boolean,
+        val tabletUiMode: String?,
     )
 
     private data class GridPrefs(
@@ -215,6 +224,7 @@ data class MainState(
     val hideStatusBar: Boolean = false,
     val blurHash: Boolean = true,
     val predictiveBack: Boolean = false,
+    val tabletUiMode: TabletUiMode = TabletUiMode.AUTOMATIC,
     val gridPosterPortrait: Int = 2,
     val gridPosterLandscape: Int = 4,
     val gridThumbnailPortrait: Int = 3,

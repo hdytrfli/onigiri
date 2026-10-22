@@ -309,4 +309,16 @@
         <item>600</item>
         <item>700</item>
     </string-array>
+    <string-array name="tablet_ui_modes_options">
+        <item>@string/tablet_ui_option_automatic</item>
+        <item>@string/tablet_ui_option_always</item>
+        <item>@string/tablet_ui_option_landscape</item>
+        <item>@string/tablet_ui_option_never</item>
+    </string-array>
+    <string-array name="tablet_ui_modes_values">
+        <item>auto</item>
+        <item>always</item>
+        <item>landscape</item>
+        <item>never</item>
+    </string-array>
 </resources>

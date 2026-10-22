@@ -41,6 +41,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     /** Preview the previous screen while swiping back (Android predictive back). */
     val predictiveBack = Preference("pref_predictive_back", false)
 
+    /** Whether the wide-layout navigation rail is used: automatic, always, landscape or never. */
+    val tabletUiMode = Preference("pref_tablet_ui_mode", "auto")
+
     /** Which metadata the movie/show list cards show: release year, rating, age rating. */
     val listDisplayFields = Preference("pref_list_display_fields", setOf("year", "rating", "age"))
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")

@@ -141,6 +141,40 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.general,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource = R.string.tablet_mode,
+                                                    descriptionStringRes =
+                                                        R.string.tablet_mode_summary,
+                                                    backendPreference = appPreferences.tabletUiMode,
+                                                    options = R.array.tablet_ui_modes_options,
+                                                    optionValues = R.array.tablet_ui_modes_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.predictive_back,
+                                                    descriptionStringRes =
+                                                        R.string.predictive_back_summary,
+                                                    backendPreference =
+                                                        appPreferences.predictiveBack,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.blur_hash,
+                                                    descriptionStringRes =
+                                                        R.string.blur_hash_summary,
+                                                    backendPreference = appPreferences.blurHash,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.extra_info,
+                                                    descriptionStringRes =
+                                                        R.string.extra_info_summary,
+                                                    backendPreference =
+                                                        appPreferences.displayExtraInfo,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
                                         nameStringResource = R.string.settings_category_appearance,
                                         preferences =
                                             listOf(
@@ -330,31 +364,6 @@ constructor(
                                                     backendPreference = appPreferences.homeLatest,
                                                 ),
                                             ),
-                                    ),
-                                    PreferenceGroup(
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.extra_info,
-                                                    descriptionStringRes =
-                                                        R.string.extra_info_summary,
-                                                    backendPreference =
-                                                        appPreferences.displayExtraInfo,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.blur_hash,
-                                                    descriptionStringRes =
-                                                        R.string.blur_hash_summary,
-                                                    backendPreference = appPreferences.blurHash,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.predictive_back,
-                                                    descriptionStringRes =
-                                                        R.string.predictive_back_summary,
-                                                    backendPreference =
-                                                        appPreferences.predictiveBack,
-                                                ),
-                                            )
                                     ),
                                 ),
                         )
