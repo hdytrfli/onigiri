@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
@@ -150,6 +152,7 @@ private fun LibraryScreenLayout(
                             onRefresh = { onAction(LibraryAction.RefreshItems) },
                             onInfo = { showDisplayDialog = true },
                             onSort = { showSortByDialog = true },
+                            sortAscending = state.sortOrder == SortOrder.ASCENDING,
                         )
                     },
                     windowInsets = topBarWindowInsets(),
@@ -238,6 +241,7 @@ fun LibraryContent(
                         )
                         .focusRequester(focusRequester),
                 hint = stringResource(CoreR.string.search),
+                shape = CircleShape,
                 leadingContent = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_search),
@@ -341,6 +345,7 @@ private fun LibraryActionButtons(
     onRefresh: () -> Unit,
     onInfo: () -> Unit,
     onSort: () -> Unit,
+    sortAscending: Boolean,
 ) {
     AppIconButton(
         onClick = onSearch,
@@ -367,7 +372,7 @@ private fun LibraryActionButtons(
         variant = AppButtonVariant.Ghost,
         content = {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_layout_list),
+                painter = painterResource(CoreR.drawable.ic_panel_left),
                 contentDescription = null,
             )
         },
@@ -376,8 +381,16 @@ private fun LibraryActionButtons(
         onClick = onSort,
         variant = AppButtonVariant.Ghost,
         content = {
+            // The icon carries the current direction, like the root pages' sort trigger.
             Icon(
-                painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
+                painter =
+                    painterResource(
+                        if (sortAscending) {
+                            CoreR.drawable.ic_list_sort_ascending
+                        } else {
+                            CoreR.drawable.ic_list_sort_descending
+                        }
+                    ),
                 contentDescription = null,
             )
         },

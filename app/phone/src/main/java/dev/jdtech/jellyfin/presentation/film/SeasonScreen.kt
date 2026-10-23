@@ -218,7 +218,8 @@ private fun SeasonScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
+            // Compact widths keep only the back button; the series shortcut is tablet's.
+            hasHomeButton = showNamesInHeader,
             onBackClick = { onAction(SeasonAction.OnBackClick) },
             onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
@@ -230,17 +231,29 @@ private fun SeasonScreenLayout(
                     )
                 }
             },
-        ) {
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
-            state.season?.let { season ->
-                AppButton(
-                    onClick = { onAction(SeasonAction.NavigateToSeries(season.seriesId)) },
-                    variant = AppButtonVariant.Overlay,
-                ) {
-                    Text(text = season.seriesName, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                }
-            }
-        }
+            content =
+                if (showNamesInHeader) {
+                    {
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
+                        state.season?.let { season ->
+                            AppButton(
+                                onClick = {
+                                    onAction(SeasonAction.NavigateToSeries(season.seriesId))
+                                },
+                                variant = AppButtonVariant.Overlay,
+                            ) {
+                                Text(
+                                    text = season.seriesName,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    {}
+                },
+        )
     }
 }
 

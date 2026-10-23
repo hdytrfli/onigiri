@@ -18,6 +18,7 @@ import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 
 @Composable
 fun ItemTopBar(
@@ -35,7 +36,7 @@ fun ItemTopBar(
             Modifier.fillMaxWidth()
                 .padding(
                     start = safePadding.start + MaterialTheme.spacings.gutter,
-                    top = safePadding.top + MaterialTheme.spacings.gutter,
+                    top = safePadding.statusTopSpacing(),
                     end = safePadding.end + MaterialTheme.spacings.gutter,
                 )
     ) {

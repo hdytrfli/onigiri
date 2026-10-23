@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -143,27 +141,11 @@ private fun TabDropdown(
             )
         }
 
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             tabs.forEachIndexed { index, title ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    },
-                    leadingIcon =
-                        if (index == selectedIndex) {
-                            {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_check),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
-                        } else {
-                            null
-                        },
+                MenuActionItem(
+                    label = title,
+                    selected = index == selectedIndex,
                     onClick = {
                         expanded = false
                         onSelect(index)

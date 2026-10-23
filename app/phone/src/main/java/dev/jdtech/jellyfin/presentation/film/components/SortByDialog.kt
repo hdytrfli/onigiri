@@ -76,9 +76,9 @@ fun SortByDialog(
                                 painter =
                                     painterResource(
                                         if (selectedOrder == SortOrder.ASCENDING) {
-                                            CoreR.drawable.ic_move_up
+                                            CoreR.drawable.ic_chevron_up
                                         } else {
-                                            CoreR.drawable.ic_move_down
+                                            CoreR.drawable.ic_chevron_down
                                         }
                                     ),
                                 contentDescription = null,

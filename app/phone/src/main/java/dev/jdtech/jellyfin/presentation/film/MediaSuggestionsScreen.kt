@@ -36,6 +36,7 @@ import dev.jdtech.jellyfin.film.presentation.media.MediaSuggestionsViewModel
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidGenre
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
@@ -111,7 +112,7 @@ private fun MediaPage(
             variant = AppButtonVariant.Overlay,
             content = {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_layout_list),
+                    painter = painterResource(CoreR.drawable.ic_panel_left),
                     contentDescription = stringResource(CoreR.string.display_info),
                 )
             },
@@ -121,8 +122,17 @@ private fun MediaPage(
                 onClick = { showSortDialog = true },
                 variant = AppButtonVariant.Overlay,
                 content = {
+                    // The icon carries the current direction: its ascending variant while sorting
+                    // ascending, its descending variant otherwise.
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
+                        painter =
+                            painterResource(
+                                if (listState.sortOrder == SortOrder.ASCENDING) {
+                                    CoreR.drawable.ic_list_sort_ascending
+                                } else {
+                                    CoreR.drawable.ic_list_sort_descending
+                                }
+                            ),
                         contentDescription = stringResource(CoreR.string.sort_by),
                     )
                 },

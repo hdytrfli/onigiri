@@ -301,42 +301,50 @@ private fun EpisodeScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
+            // Compact widths keep only the back button; the series/season shortcuts are tablet's.
+            hasHomeButton = showNamesInHeader,
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
             onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
-            content = {
-                Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
-                state.episode?.let { episode ->
-                    AppButtonGroup {
-                        AppButton(
-                            onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
-                            variant = AppButtonVariant.Overlay,
-                        ) {
-                            Text(
-                                text = episode.seriesName,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                            )
-                        }
-                        AppButton(
-                            onClick = {
-                                onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
-                            },
-                            variant = AppButtonVariant.Overlay,
-                        ) {
-                            episode.seasonName?.let { seasonName -> Text(seasonName) }
-                                ?: run {
+            content =
+                if (showNamesInHeader) {
+                    {
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
+                        state.episode?.let { episode ->
+                            AppButtonGroup {
+                                AppButton(
+                                    onClick = {
+                                        onAction(EpisodeAction.NavigateToShow(episode.seriesId))
+                                    },
+                                    variant = AppButtonVariant.Overlay,
+                                ) {
                                     Text(
-                                        stringResource(
-                                            CoreR.string.season_number,
-                                            episode.parentIndexNumber,
-                                        )
+                                        text = episode.seriesName,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1,
                                     )
                                 }
+                                AppButton(
+                                    onClick = {
+                                        onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
+                                    },
+                                    variant = AppButtonVariant.Overlay,
+                                ) {
+                                    episode.seasonName?.let { seasonName -> Text(seasonName) }
+                                        ?: run {
+                                            Text(
+                                                stringResource(
+                                                    CoreR.string.season_number,
+                                                    episode.parentIndexNumber,
+                                                )
+                                            )
+                                        }
+                                }
+                            }
                         }
                     }
-                }
-            },
+                } else {
+                    {}
+                },
             trailingContent = {
                 state.episode?.let { episode ->
                     AppButtonGroup {

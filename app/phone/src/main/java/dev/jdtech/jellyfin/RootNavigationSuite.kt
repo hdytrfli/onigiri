@@ -41,6 +41,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.models.TabletUiMode
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 /** Horizontal space a screen must leave at the start edge for the rail-shaped suite. */
@@ -130,7 +131,14 @@ fun RootNavigationSuite(
                     modifier =
                         Modifier.height(
                             if (index == 0) {
-                                safeTop + MaterialTheme.spacings.gutter
+                                // The rail's own spine sits a touch tighter than the pages' gutter:
+                                // the status-bar inset plus 12dp, or plain 12dp when the status bar
+                                // is hidden and the inset is satisfied.
+                                if (LocalHideStatusBar.current) {
+                                    MaterialTheme.spacings.railTopGutter
+                                } else {
+                                    safeTop + MaterialTheme.spacings.railTopGutter
+                                }
                             } else {
                                 MaterialTheme.spacings.small
                             }

@@ -73,18 +73,17 @@ abstract class BasePlayerActivity : AppCompatActivity() {
     }
 
     /**
-     * Reserves the display cutout for the player's controls. The player hides the system bars, so
-     * the status-bar height is never reserved - the cutout is the only thing the content has to
-     * stay clear of, exactly like [dev.jdtech.jellyfin.presentation.utils.rememberSafePadding]
-     * behind a hidden status bar.
+     * Reserves the display cutout vertically for the player's controls. The player hides the system
+     * bars and uses the full screen width - the video and controls run under a side camera cutout
+     * instead of leaving a dead strip - so only the top/bottom cutout insets are padded.
      */
     protected fun configureInsets(playerControls: View) {
         playerControls.setOnApplyWindowInsetsListener { _, windowInsets ->
             val cutout = windowInsets.displayCutout
             playerControls.updatePadding(
-                left = cutout?.safeInsetLeft ?: 0,
+                left = 0,
                 top = cutout?.safeInsetTop ?: 0,
-                right = cutout?.safeInsetRight ?: 0,
+                right = 0,
                 bottom = cutout?.safeInsetBottom ?: 0,
             )
             return@setOnApplyWindowInsetsListener windowInsets

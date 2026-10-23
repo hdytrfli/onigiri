@@ -107,7 +107,7 @@ fun HomeScreen(
                         variant = AppButtonVariant.Overlay,
                         content = {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_layout_list),
+                                painter = painterResource(CoreR.drawable.ic_panel_left),
                                 contentDescription = null,
                             )
                         },

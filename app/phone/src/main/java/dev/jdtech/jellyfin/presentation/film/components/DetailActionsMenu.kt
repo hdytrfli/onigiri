@@ -2,9 +2,7 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +20,9 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import java.util.UUID
 
 /** The item-kind dependent actions a detail page can offer in its overflow menu. */
@@ -92,10 +92,9 @@ fun DetailActionsMenu(
                 }
             },
         )
-        DropdownMenu(
+        AppDropdownMenu(
             expanded = menuOpen,
             onDismissRequest = { menuOpen = false },
-            modifier = Modifier.width(MenuWidth),
         ) {
             if (showSubtitleSearch) {
                 MenuActionItem(

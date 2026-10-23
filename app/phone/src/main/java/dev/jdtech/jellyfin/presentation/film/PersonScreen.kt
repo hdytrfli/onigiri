@@ -55,6 +55,7 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 import java.util.UUID
 
 @Composable
@@ -89,8 +90,7 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     // Home-style spine: status bar, gutter, the floating action bar, gutter, then content - the
     // same 48dp header gap RootPage uses, since ItemTopBar floats at the top just like a header.
-    val paddingTop =
-        safePadding.top + MaterialTheme.spacings.gutter + 48.dp + MaterialTheme.spacings.gutter
+    val paddingTop = safePadding.statusTopSpacing() + 48.dp + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
