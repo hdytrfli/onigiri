@@ -191,9 +191,10 @@ class PlayerActivity : BasePlayerActivity() {
         isControlsLocked = false
         isVolumeBrightnessLocked = false
 
-        val reserveStatusBar = !appPreferences.getValue(appPreferences.hideStatusBar)
-        configureInsets(playerControls, reserveStatusBar)
-        configureInsets(lockedControls, reserveStatusBar)
+        // The player always hides the system bars, so it only ever reserves the display cutout,
+        // never the status-bar height.
+        configureInsets(playerControls)
+        configureInsets(lockedControls)
 
         playerGestureHelper =
             PlayerGestureHelper(

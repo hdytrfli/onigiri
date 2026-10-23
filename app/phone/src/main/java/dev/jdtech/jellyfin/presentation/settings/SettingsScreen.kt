@@ -24,6 +24,7 @@ import dev.jdtech.jellyfin.presentation.settings.components.SettingsGroupCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
+import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceGroup
@@ -93,7 +94,16 @@ private fun SettingsScreenLayout(
 ) {
     // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox,
     // so this list only adds its own gutter and never reserves the suite's space again.
-    val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
+    // The status bar is reserved only when the interface toggle keeps it visible, matching the
+    // headers of the other root pages.
+    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val contentPadding =
+        PaddingValues(
+            start = MaterialTheme.spacings.gutter,
+            end = MaterialTheme.spacings.gutter,
+            top = safePadding.top + MaterialTheme.spacings.gutter,
+            bottom = MaterialTheme.spacings.gutter,
+        )
 
     PageScaffold { innerPadding ->
         LazyColumn(
