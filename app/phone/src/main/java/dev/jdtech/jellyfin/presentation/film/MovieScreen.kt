@@ -289,9 +289,7 @@ private fun MovieScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
             onBackClick = { onAction(MovieAction.OnBackClick) },
-            onHomeClick = { onAction(MovieAction.OnHomeClick) },
             trailingContent = {
                 state.movie?.let { movie ->
                     AppButtonGroup {

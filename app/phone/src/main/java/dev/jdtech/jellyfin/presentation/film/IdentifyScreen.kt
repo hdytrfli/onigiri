@@ -28,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,8 +46,8 @@ import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import java.util.UUID
 
@@ -99,11 +98,13 @@ private fun IdentifyScreenLayout(
     onSearch: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
     PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
+        topBar = {
+            PageTopBar(
+                title = stringResource(CoreR.string.identify),
+                onBack = navigateBack,
+            )
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxWidth().padding(innerPadding),

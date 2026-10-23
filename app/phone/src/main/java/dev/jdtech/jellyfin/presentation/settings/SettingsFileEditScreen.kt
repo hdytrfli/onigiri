@@ -41,8 +41,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.R as SettingsR
@@ -61,6 +61,7 @@ fun SettingsFileEditScreen(
 
     SettingsFileEditScreenLayout(
         initialText = state.initialText,
+        fileName = filePath.substringAfterLast('/'),
         onAction = { action ->
             when (action) {
                 is SettingsFileEditAction.OnBackClick -> navigateBack()
@@ -74,6 +75,7 @@ fun SettingsFileEditScreen(
 @Composable
 private fun SettingsFileEditScreenLayout(
     initialText: String,
+    fileName: String,
     onAction: (SettingsFileEditAction) -> Unit,
 ) {
     val textFieldState = rememberTextFieldState()
@@ -92,11 +94,12 @@ private fun SettingsFileEditScreenLayout(
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
-            BackTopBar(
+            PageTopBar(
+                title = stringResource(SettingsR.string.edit_file_title, fileName),
                 onBack = {
                     if (isModified) showDiscardDialog = true
                     else onAction(SettingsFileEditAction.OnBackClick)
-                }
+                },
             )
         },
         bottomBar = {
@@ -176,6 +179,7 @@ private fun SettingsFileEditScreenLayoutPreview() {
     FindroidTheme {
         SettingsFileEditScreenLayout(
             initialText = "sample text",
+            fileName = "preferences.xml",
             onAction = {},
         )
     }

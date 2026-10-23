@@ -15,16 +15,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.settings.components.SettingsGroupCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
-import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceGroup
@@ -45,6 +47,7 @@ fun SettingsScreen(
     navigateToUsers: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToSubtitleFont: () -> Unit,
+    navigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -79,6 +82,10 @@ fun SettingsScreen(
 
     SettingsScreenLayout(
         state = state,
+        // The pushed indexes name the page: the root is "Settings", every deeper page takes the
+        // name of the category that was pushed.
+        pageTitle = stringResource(indexes.lastOrNull() ?: CoreR.string.title_settings),
+        onBack = if (indexes.isEmpty()) null else navigateBack,
         onAction = { action ->
             viewModel.onAction(action)
             viewModel.loadPreferences(indexes)
@@ -90,22 +97,16 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreenLayout(
     state: SettingsState,
+    pageTitle: String,
+    onBack: (() -> Unit)?,
     onAction: (SettingsAction) -> Unit,
 ) {
-    // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox,
-    // so this list only adds its own gutter and never reserves the suite's space again.
-    // The status bar is reserved only when the interface toggle keeps it visible, matching the
-    // headers of the other root pages.
-    val safePadding = rememberSafePadding(handleStartInsets = false)
-    val contentPadding =
-        PaddingValues(
-            start = MaterialTheme.spacings.gutter,
-            end = MaterialTheme.spacings.gutter,
-            top = safePadding.top + MaterialTheme.spacings.gutter,
-            bottom = MaterialTheme.spacings.gutter,
-        )
+    // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox, so this
+    // list only adds its own gutter and never reserves the suite's space again. The floating title
+    // bar owns the top spacing.
+    val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
 
-    PageScaffold { innerPadding ->
+    PageScaffold(topBar = { PageTopBar(title = pageTitle, onBack = onBack) }) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = contentPadding + innerPadding,
@@ -156,6 +157,8 @@ private fun SettingsScreenLayoutPreview() {
                             ),
                         )
                 ),
+            pageTitle = "Settings",
+            onBack = null,
             onAction = {},
         )
     }

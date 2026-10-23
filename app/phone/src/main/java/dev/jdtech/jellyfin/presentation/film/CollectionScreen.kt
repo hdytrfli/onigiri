@@ -179,7 +179,6 @@ private fun CollectionDetailLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = false,
             onBackClick = { onAction(CollectionAction.OnBackClick) },
             trailingContent = {
                 state.collection?.let { collection ->

@@ -18,7 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,10 +43,10 @@ import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
@@ -110,11 +109,13 @@ private fun EditImagesScreenLayout(
     onDismissError: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
     PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
+        topBar = {
+            PageTopBar(
+                title = stringResource(CoreR.string.edit_images),
+                onBack = navigateBack,
+            )
+        }
     ) { innerPadding ->
         if (state.isLoading && state.images.isEmpty()) {
             Box(

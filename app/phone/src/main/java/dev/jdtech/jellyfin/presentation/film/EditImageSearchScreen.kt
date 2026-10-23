@@ -21,7 +21,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,8 +39,8 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchEvent
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchState
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
@@ -91,7 +90,6 @@ private fun EditImageSearchLayout(
     onApply: (RemoteImageInfo) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     // A poster-shaped result and a wide (16:9) result are different tile shapes, so they use the
     // matching grid size.
@@ -99,8 +97,12 @@ private fun EditImageSearchLayout(
         if (isPosterShapedSearchResult(type, isEpisode)) GridSize.POSTER else GridSize.THUMBNAIL
 
     PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
+        topBar = {
+            PageTopBar(
+                title = stringResource(CoreR.string.search_images),
+                onBack = navigateBack,
+            )
+        }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             when {

@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServerAddress
 import dev.jdtech.jellyfin.models.ServerAddress
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -80,17 +78,16 @@ fun ServerAddressesLayout(state: ServerAddressesState, onAction: (ServerAddresse
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var selectedAddress by remember { mutableStateOf<ServerAddress?>(null) }
     var openAddDialog by remember { mutableStateOf(false) }
     var openDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
-            BackTopBar(
+            PageTopBar(
+                title = stringResource(SetupR.string.addresses),
                 onBack = { onAction(ServerAddressesAction.OnBackClick) },
-                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {

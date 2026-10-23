@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,15 +28,12 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.PlayerActivity
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
@@ -46,6 +42,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.ParentNavMenu
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -115,13 +112,6 @@ private fun SeasonScreenLayout(
     val episodeColumns = gridColumns(GridSize.THUMBNAIL)
 
     val spacingScale = LocalContentSpacingScale.current
-
-    // The top bar's extra actions (home, series shortcut) are tablet-only; compact widths keep
-    // just the back button. The page content always shows the names.
-    val showNamesInHeader =
-        currentWindowAdaptiveInfo()
-            .windowSizeClass
-            .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.season?.let { season ->
@@ -217,10 +207,7 @@ private fun SeasonScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            // Compact widths keep only the back button; the series shortcut is tablet's.
-            hasHomeButton = showNamesInHeader,
             onBackClick = { onAction(SeasonAction.OnBackClick) },
-            onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
                 state.season?.let { season ->
                     DetailActionsMenu(
@@ -230,28 +217,14 @@ private fun SeasonScreenLayout(
                     )
                 }
             },
-            content =
-                if (showNamesInHeader) {
-                    {
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                        state.season?.let { season ->
-                            AppButton(
-                                onClick = {
-                                    onAction(SeasonAction.NavigateToSeries(season.seriesId))
-                                },
-                                variant = AppButtonVariant.Secondary,
-                            ) {
-                                Text(
-                                    text = season.seriesName,
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    {}
-                },
+            content = {
+                state.season?.let { season ->
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    ParentNavMenu(
+                        onShowClick = { onAction(SeasonAction.NavigateToSeries(season.seriesId)) }
+                    )
+                }
+            },
         )
     }
 }

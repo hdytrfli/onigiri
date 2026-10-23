@@ -31,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,9 +55,9 @@ import dev.jdtech.jellyfin.models.FindroidMediaStream
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.settings.R as SettingsR
@@ -110,12 +109,15 @@ private fun SubtitleSearchScreenLayout(
     val languageValues = stringArrayResource(SettingsR.array.languages_values)
     var languagePickerOpen by remember { mutableStateOf(false) }
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val contentPadding = PaddingValues(all = MaterialTheme.spacings.default)
 
     PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = { BackTopBar(onBack = navigateBack, scrollBehavior = scrollBehavior) },
+        topBar = {
+            PageTopBar(
+                title = stringResource(CoreR.string.search_subtitles),
+                onBack = navigateBack,
+            )
+        }
     ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,

@@ -199,9 +199,7 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
             onBackClick = { onAction(PersonAction.NavigateBack) },
-            onHomeClick = { onAction(PersonAction.NavigateHome) },
         )
     }
 }

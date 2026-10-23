@@ -270,9 +270,7 @@ private fun ShowScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
             onBackClick = { onAction(ShowAction.OnBackClick) },
-            onHomeClick = { onAction(ShowAction.OnHomeClick) },
             trailingContent = {
                 state.show?.let { show ->
                     DetailActionsMenu(

@@ -45,9 +45,7 @@ import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
-import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
@@ -58,6 +56,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.ParentNavMenu
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -302,50 +301,18 @@ private fun EpisodeScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            // Compact widths keep only the back button; the series/season shortcuts are tablet's.
-            hasHomeButton = showNamesInHeader,
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
-            onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
-            content =
-                if (showNamesInHeader) {
-                    {
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                        state.episode?.let { episode ->
-                            AppButtonGroup {
-                                AppButton(
-                                    onClick = {
-                                        onAction(EpisodeAction.NavigateToShow(episode.seriesId))
-                                    },
-                                    variant = AppButtonVariant.Secondary,
-                                ) {
-                                    Text(
-                                        text = episode.seriesName,
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1,
-                                    )
-                                }
-                                AppButton(
-                                    onClick = {
-                                        onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
-                                    },
-                                    variant = AppButtonVariant.Secondary,
-                                ) {
-                                    episode.seasonName?.let { seasonName -> Text(seasonName) }
-                                        ?: run {
-                                            Text(
-                                                stringResource(
-                                                    CoreR.string.season_number,
-                                                    episode.parentIndexNumber,
-                                                )
-                                            )
-                                        }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    {}
-                },
+            content = {
+                state.episode?.let { episode ->
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    ParentNavMenu(
+                        onShowClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
+                        onSeasonClick = {
+                            onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
+                        },
+                    )
+                }
+            },
             trailingContent = {
                 state.episode?.let { episode ->
                     AppButtonGroup {

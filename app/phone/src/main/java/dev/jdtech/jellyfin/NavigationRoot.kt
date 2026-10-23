@@ -771,6 +771,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
                 navigateToSubtitleFont =
                     dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
+                navigateBack = dropUnlessResumed { navigator.goBack() },
             )
         }
     }

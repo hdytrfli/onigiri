@@ -22,9 +22,7 @@ import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 @Composable
 fun ItemTopBar(
     hasBackButton: Boolean,
-    hasHomeButton: Boolean,
     onBackClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {},
     trailingContent: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable (RowScope.() -> Unit) = {},
 ) {
@@ -52,18 +50,6 @@ fun ItemTopBar(
                     },
                 )
             }
-            if (hasHomeButton) {
-                AppIconButton(
-                    onClick = onHomeClick,
-                    variant = AppButtonVariant.Secondary,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_home),
-                            contentDescription = null,
-                        )
-                    },
-                )
-            }
         }
         content()
         Spacer(modifier = Modifier.weight(1f))
@@ -74,5 +60,5 @@ fun ItemTopBar(
 @Composable
 @Preview(showBackground = true)
 private fun ItemTopBarPreview() {
-    FindroidTheme { ItemTopBar(hasBackButton = true, hasHomeButton = true) }
+    FindroidTheme { ItemTopBar(hasBackButton = true) }
 }
