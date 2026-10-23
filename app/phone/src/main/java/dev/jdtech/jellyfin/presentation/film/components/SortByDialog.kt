@@ -24,9 +24,7 @@ import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
-import dev.jdtech.jellyfin.presentation.components.drawableRes
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
-import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 
 @Composable
 fun SortByDialog(
@@ -68,7 +66,7 @@ fun SortByDialog(
                         onUpdate(selectedOption, selectedOrder)
                     },
                     selected = isSelected,
-                    iconDrawableId = OptionIcon.Sort.drawableRes(),
+                    iconDrawableId = CoreR.drawable.ic_diamond,
                     role = Role.RadioButton,
                     trailingContent = {
                         if (isSelected) {

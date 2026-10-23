@@ -113,7 +113,7 @@ fun HomeScreen(
                         variant = AppButtonVariant.Secondary,
                         content = {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_panel_left),
+                                painter = painterResource(CoreR.drawable.ic_tv_minimal),
                                 contentDescription = null,
                             )
                         },

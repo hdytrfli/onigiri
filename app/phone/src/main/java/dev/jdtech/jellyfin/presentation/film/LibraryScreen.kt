@@ -47,7 +47,6 @@ import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
@@ -377,7 +376,7 @@ private fun LibraryActionButtons(
         variant = AppButtonVariant.Ghost,
         content = {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_panel_left),
+                painter = painterResource(CoreR.drawable.ic_tv_minimal),
                 contentDescription = null,
             )
         },
@@ -387,7 +386,7 @@ private fun LibraryActionButtons(
         variant = AppButtonVariant.Ghost,
         content = {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
+                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
                 contentDescription = null,
             )
         },
@@ -404,10 +403,6 @@ fun DisplayInfoDialog(
         title = stringResource(CoreR.string.display_info),
         description = stringResource(CoreR.string.display_info_summary),
         onDismiss = onDismiss,
-        negativeButton = {},
-        positiveButton = {
-            AppButton(onClick = onDismiss) { Text(stringResource(CoreR.string.close)) }
-        },
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             AppOptionRow(

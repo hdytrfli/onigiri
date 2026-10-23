@@ -119,7 +119,7 @@ private fun MediaPage(
             variant = AppButtonVariant.Secondary,
             content = {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_panel_left),
+                    painter = painterResource(CoreR.drawable.ic_tv_minimal),
                     contentDescription = stringResource(CoreR.string.display_info),
                 )
             },
@@ -130,7 +130,7 @@ private fun MediaPage(
                 variant = AppButtonVariant.Secondary,
                 content = {
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
+                        painter = painterResource(CoreR.drawable.ic_arrow_down_up),
                         contentDescription = stringResource(CoreR.string.sort_by),
                     )
                 },
@@ -166,9 +166,9 @@ private fun MediaPage(
                             ),
                         tabIcons =
                             listOf(
-                                if (kind == MediaKind.Movies) CoreR.drawable.ic_film
+                                if (kind == MediaKind.Movies) CoreR.drawable.ic_clapperboard
                                 else CoreR.drawable.ic_tv,
-                                CoreR.drawable.ic_sparkles,
+                                CoreR.drawable.ic_star,
                                 CoreR.drawable.ic_layout_grid,
                             ),
                         selectedIndex = selectedTab,

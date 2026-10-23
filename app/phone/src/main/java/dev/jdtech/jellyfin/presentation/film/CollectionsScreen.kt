@@ -60,7 +60,7 @@ fun CollectionsScreen(
                     ),
                 tabIcons =
                     listOf(
-                        CoreR.drawable.ic_film,
+                        CoreR.drawable.ic_clapperboard,
                         CoreR.drawable.ic_tv,
                     ),
                 selectedIndex = selectedTab,
