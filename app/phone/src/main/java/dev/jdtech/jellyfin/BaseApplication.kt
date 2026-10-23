@@ -51,6 +51,13 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
         if (!appPreferences.getValue(appPreferences.mpvMigrated)) {
             scheduleMpvCleanup(workManager)
         }
+
+        // The subtitle-position slider used to run past the screen bottom (up to 120%); its range
+        // is 0-100 now, so a stored 110/120 would otherwise fall outside the options.
+        val subPosition = appPreferences.getValue(appPreferences.playerMpvSubPosition)
+        if ((subPosition.toIntOrNull() ?: 0) > 100) {
+            appPreferences.setValue(appPreferences.playerMpvSubPosition, "100")
+        }
     }
 
     @OptIn(ExperimentalCoilApi::class, ExperimentalTime::class)

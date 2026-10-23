@@ -28,6 +28,8 @@ import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.theme.Red
+import dev.jdtech.jellyfin.models.FindroidBoxSet
+import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -66,6 +68,14 @@ fun ItemCard(
             is FindroidShow -> item.officialRating
             else -> null
         }?.takeIf { it.isNotBlank() }
+    // Collections carry no rating; their card shows how many items are inside instead.
+    val collectionItemCount =
+        when (item) {
+            is FindroidCollection -> item.itemCount
+            is FindroidBoxSet -> item.itemCount
+            else -> null
+        }?.takeIf { it > 0 }
+    val isCollection = item is FindroidCollection || item is FindroidBoxSet
 
     val width =
         when (direction) {
@@ -89,7 +99,11 @@ fun ItemCard(
                 ) {
                     if (item.isDownloaded()) DownloadedBadge()
                     if (item.played) PlayedBadge()
-                    item.unplayedItemCount?.takeIf { it > 0 }?.let { ItemCountBadge(it) }
+                    if (isCollection) {
+                        collectionItemCount?.let { ItemCountBadge(it) }
+                    } else {
+                        item.unplayedItemCount?.takeIf { it > 0 }?.let { ItemCountBadge(it) }
+                    }
                 }
                 if (direction == Direction.HORIZONTAL && !showRemainingTime) {
                     ProgressBar(
@@ -108,7 +122,8 @@ fun ItemCard(
                     )
                 }
                 // Episodes do not carry the movie/show official rating; don't label them Unrated.
-                if (showAgeRating && item !is FindroidEpisode) {
+                // Collections have no rating either - they show their item count instead.
+                if (showAgeRating && item !is FindroidEpisode && !isCollection) {
                     AgeRatingBadge(
                         rating = ageRating ?: stringResource(R.string.unrated),
                         modifier =

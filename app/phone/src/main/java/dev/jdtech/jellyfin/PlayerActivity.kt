@@ -209,14 +209,12 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
-        // Title logo sizing from settings (player width fraction and max width:height ratio).
+        // Title logo sizing from settings (player width fraction), capped at a fixed 16:9 box.
         val playerWidthFraction =
             appPreferences.getValue(appPreferences.titlePlayerWidth).toFloatOrNull() ?: 0.2f
         val logoMaxWidth = (resources.displayMetrics.widthPixels * playerWidthFraction).toInt()
-        val logoRatio =
-            appPreferences.getValue(appPreferences.titleImageRatio).toFloatOrNull() ?: 2f
         videoLogoImageView.maxWidth = logoMaxWidth
-        videoLogoImageView.maxHeight = (logoMaxWidth / logoRatio).toInt()
+        videoLogoImageView.maxHeight = (logoMaxWidth * 9f / 16f).toInt()
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
         val videoEpisodeNameTextView =

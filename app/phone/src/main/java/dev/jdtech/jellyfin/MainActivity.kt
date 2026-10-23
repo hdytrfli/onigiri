@@ -109,7 +109,6 @@ class MainActivity : AppCompatActivity() {
                                 TitleImageConfig(
                                     portraitWidth = state.titlePortraitWidth,
                                     landscapeWidth = state.titleLandscapeWidth,
-                                    ratio = state.titleImageRatio,
                                 ),
                             LocalGridColumns provides
                                 GridColumns(
@@ -117,6 +116,8 @@ class MainActivity : AppCompatActivity() {
                                     posterLandscape = state.gridPosterLandscape,
                                     thumbnailPortrait = state.gridThumbnailPortrait,
                                     thumbnailLandscape = state.gridThumbnailLandscape,
+                                    suggestionPortrait = state.gridSuggestionPortrait,
+                                    suggestionLandscape = state.gridSuggestionLandscape,
                                 ),
                             LocalGridGap provides GridGapBase * state.gridGapScale,
                         ) {

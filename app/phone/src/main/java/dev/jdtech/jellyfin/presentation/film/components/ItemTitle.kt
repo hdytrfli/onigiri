@@ -45,7 +45,8 @@ fun ItemTitle(
         val widthFraction =
             if (isLandscape) titleConfig.landscapeWidth else titleConfig.portraitWidth
         val maxWidth = (configuration.screenWidthDp * widthFraction).dp
-        val ratioHeight = if (titleConfig.ratio > 0f) maxWidth / titleConfig.ratio else maxWidth
+        // Logos are capped at a fixed 16:9 box.
+        val ratioHeight = maxWidth / (16f / 9f)
         val maxHeight =
             if (logoHeight == Dp.Unspecified) ratioHeight else minOf(logoHeight, ratioHeight)
         val context = LocalContext.current
