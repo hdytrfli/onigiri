@@ -42,6 +42,13 @@ internal val PAGE_TRANSITION_SPEC =
                 -it * PAGE_TRANSITION_OFFSET_PERCENT / 100
             })
 
+// The suite never moves between pages, so its appearance is animated instead: it fades out when
+// an immersive page takes over (a detail screen, the player) and fades back in on the way home.
+private const val SUITE_FADE_DURATION_MS = 200
+
+internal val SUITE_ENTER_TRANSITION = fadeIn(tween(durationMillis = SUITE_FADE_DURATION_MS))
+internal val SUITE_EXIT_TRANSITION = fadeOut(tween(durationMillis = SUITE_FADE_DURATION_MS))
+
 // Used when the predictive-back preview is off: the gesture shows nothing until it commits.
 internal val NO_PREVIEW_TRANSITION_SPEC = EnterTransition.None togetherWith ExitTransition.None
 

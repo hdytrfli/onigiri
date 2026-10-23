@@ -39,7 +39,7 @@ fun PageSearchField(
             modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .padding(horizontal = MaterialTheme.spacings.default),
+                .padding(horizontal = MaterialTheme.spacings.gutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AppTextField(

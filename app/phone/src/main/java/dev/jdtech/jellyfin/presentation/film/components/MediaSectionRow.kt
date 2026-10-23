@@ -44,7 +44,7 @@ fun MediaSectionRow(
         val gridSize = if (section.useThumbnails) GridSize.THUMBNAIL else GridSize.POSTER
         val columns = gridColumns(gridSize)
         val gap = LocalGridGap.current
-        val horizontalPadding = MaterialTheme.spacings.default
+        val horizontalPadding = MaterialTheme.spacings.gutter
         val cardWidth =
             (maxWidth - horizontalPadding * 2f - gap * (columns - 1).toFloat()) /
                 columns.coerceAtLeast(1)

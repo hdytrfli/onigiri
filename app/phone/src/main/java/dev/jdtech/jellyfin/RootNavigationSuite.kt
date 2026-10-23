@@ -1,13 +1,23 @@
 package dev.jdtech.jellyfin
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -17,8 +27,11 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,9 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.models.TabletUiMode
+import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
-/** Space a root screen must leave for the [RootNavigationSuite] overlay. */
+/** Horizontal space a screen must leave at the start edge for the rail-shaped suite. */
 val LocalSuiteStartInset = compositionLocalOf { 0.dp }
+
+/** Bottom space a screen must leave for the bar-shaped suite. */
 val LocalSuiteBottomInset = compositionLocalOf { 0.dp }
 
 /**
@@ -38,6 +55,25 @@ val LocalSuiteBottomInset = compositionLocalOf { 0.dp }
  * LANDSCAPE rails only when the device is turned sideways.
  */
 val LocalTabletUiMode = compositionLocalOf { TabletUiMode.AUTOMATIC }
+
+/**
+ * Pages that keep the navigation suite drawn over them: the five tab roots and every
+ * settings-related page. Immersive content - item details, the player - hides it, because the bar
+ * would only cover material the page already wants edge-to-edge.
+ */
+fun NavKey.drawsNavigationSuite(tabRoutes: Collection<NavKey>): Boolean =
+    this is SettingsRoute ||
+        this is SettingsFileEditRoute ||
+        this is AboutRoute ||
+        this is SubtitleFontRoute ||
+        this in tabRoutes
+
+/** The bottom bar puts its items in one row (Play-style) instead of stacking them. */
+@Composable
+fun rememberWideBottomBar(): Boolean =
+    currentWindowAdaptiveInfo()
+        .windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
 
 /** The rail on tablets, the bottom bar on phones. */
 @Composable
@@ -73,7 +109,7 @@ fun rememberNavigationSuiteType(): NavigationSuiteType {
  * the rail stays perfectly still. Root entries reserve its space with [SuiteInsetBox].
  */
 @Composable
-fun BoxScope.RootNavigationSuite(
+fun RootNavigationSuite(
     navigator: Navigator,
     selectedRoute: NavKey,
     suiteType: NavigationSuiteType,
@@ -81,8 +117,25 @@ fun BoxScope.RootNavigationSuite(
     val items = listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab)
 
     if (suiteType == NavigationSuiteType.NavigationRail) {
-        NavigationRail(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight()) {
-            items.forEach { item ->
+        // The rail takes no window insets of its own: the first item starts on the content's top
+        // spine (status bar + gutter, like the floating header beside it), and every item below is
+        // separated by a small gap. Only the top is inset - the rail surface stays full-bleed.
+        val safeTop = rememberSafePadding(handleStartInsets = false).top
+        NavigationRail(
+            modifier = Modifier.fillMaxHeight(),
+            windowInsets = WindowInsets(0, 0, 0, 0),
+        ) {
+            items.forEachIndexed { index, item ->
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            if (index == 0) {
+                                safeTop + MaterialTheme.spacings.gutter
+                            } else {
+                                MaterialTheme.spacings.small
+                            }
+                        )
+                )
                 NavigationRailItem(
                     selected = selectedRoute == item.route,
                     onClick = { navigator.navigate(item.route) },
@@ -93,21 +146,34 @@ fun BoxScope.RootNavigationSuite(
             }
         }
     } else {
-        NavigationBar(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+        // Like Google Play on tablets: on wide windows the bottom bar puts the icon and the label
+        // in one row inside the selection pill; compact windows keep the stacked phone item.
+        val wideBottomBar = rememberWideBottomBar()
+        NavigationBar(modifier = Modifier.fillMaxWidth().height(80.dp)) {
             items.forEach { item ->
-                NavigationBarItem(
-                    selected = selectedRoute == item.route,
-                    onClick = { navigator.navigate(item.route) },
-                    icon = { Icon(painterResource(item.icon), contentDescription = null) },
-                    label = { Text(stringResource(item.title)) },
-                    enabled = item.enabled,
-                )
+                if (wideBottomBar) {
+                    WideNavigationBarItem(
+                        selected = selectedRoute == item.route,
+                        onClick = { navigator.navigate(item.route) },
+                        iconResource = item.icon,
+                        label = stringResource(item.title),
+                        enabled = item.enabled,
+                    )
+                } else {
+                    NavigationBarItem(
+                        selected = selectedRoute == item.route,
+                        onClick = { navigator.navigate(item.route) },
+                        icon = { Icon(painterResource(item.icon), contentDescription = null) },
+                        label = { Text(stringResource(item.title)) },
+                        enabled = item.enabled,
+                    )
+                }
             }
         }
     }
 }
 
-/** Reserves the suite's space on a root screen, with a constant inset so hiding it never shifts. */
+/** Reserves the suite's space so overlaid content never sits under the suite's shape. */
 @Composable
 fun SuiteInsetBox(content: @Composable () -> Unit) {
     Box(
@@ -126,6 +192,71 @@ fun SuiteInsetBox(content: @Composable () -> Unit) {
 fun NavigationSuiteType.suiteStartInset(): Dp =
     if (this == NavigationSuiteType.NavigationRail) 80.dp else 0.dp
 
-/** The height the bottom bar takes from the content on compact layouts. */
+/** The height the bottom bar takes from the content: the suite's 80dp default bar. */
 fun NavigationSuiteType.suiteBottomInset(): Dp =
     if (this == NavigationSuiteType.NavigationRail) 0.dp else 80.dp
+
+/**
+ * A [NavigationBar] item for wide layouts: the icon and the label share one row inside the
+ * selection pill on a thinner 64dp bar, like the tablet bottom nav in Google Play. The interaction
+ * feedback stays on the pill itself - the plain slot behind it gives no press effect.
+ */
+@Composable
+private fun RowScope.WideNavigationBarItem(
+    selected: Boolean,
+    onClick: () -> Unit,
+    iconResource: Int,
+    label: String,
+    enabled: Boolean,
+) {
+    Box(
+        modifier =
+            Modifier.weight(1f)
+                .height(64.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onClick,
+                    enabled = enabled,
+                ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            modifier =
+                Modifier.clip(RoundedCornerShape(percent = 50))
+                    .background(
+                        if (selected) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            Color.Transparent
+                        },
+                        RoundedCornerShape(percent = 50),
+                    )
+                    .clickable(onClick = onClick, enabled = enabled)
+                    .padding(horizontal = MaterialTheme.spacings.medium, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(iconResource),
+                contentDescription = null,
+                tint =
+                    if (selected) {
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            )
+            Spacer(Modifier.width(MaterialTheme.spacings.small))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color =
+                    if (selected) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            )
+        }
+    }
+}

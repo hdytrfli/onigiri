@@ -225,7 +225,7 @@ private fun MediaSuggestionsContent(
     val contentPadding =
         PaddingValues(
             top = LocalRootPageContentInset.current,
-            bottom = safePadding.bottom + MaterialTheme.spacings.default,
+            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -284,7 +284,7 @@ private fun GenresContent(
                 contentPadding =
                     PaddingValues(
                         top = LocalRootPageContentInset.current,
-                        bottom = safePadding.bottom + MaterialTheme.spacings.default,
+                        bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
                     ),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {

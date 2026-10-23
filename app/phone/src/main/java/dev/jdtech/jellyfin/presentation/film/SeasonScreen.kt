@@ -104,9 +104,9 @@ private fun SeasonScreenLayout(
 ) {
     val safePadding = rememberSafePadding()
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val lazyListState = rememberLazyListState()
 

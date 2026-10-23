@@ -3,11 +3,11 @@ package dev.jdtech.jellyfin.presentation.utils
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
@@ -37,19 +37,21 @@ fun topBarWindowInsets(): WindowInsets =
     }
 
 /**
- * The window insets a secondary page pads its Scaffold content with. Pages that call
- * `Modifier.recalculateWindowInsets()` reset the consumed insets of their subtree, undoing the
- * app-wide hidden-status-bar consumption (see MainActivity), so they must drop the top inset
- * themselves - exactly as their top bars do with [topBarWindowInsets]. [PageScaffold] applies this
- * automatically.
+ * The window insets a secondary page pads its Scaffold content with: the horizontal gutters plus
+ * the keyboard, never the bottom - the app owns the bottom edge (the navigation suite at roots,
+ * edge-to-edge content elsewhere) and reserving the safe-drawing bottom left an empty surface band
+ * above the gesture area on secondary pages.
+ *
+ * Pages that call `Modifier.recalculateWindowInsets()` reset the consumed insets of their subtree,
+ * undoing the app-wide hidden-status-bar consumption (see MainActivity), so they must drop the top
+ * inset themselves - exactly as their top bars do with [topBarWindowInsets]. [PageScaffold] applies
+ * this automatically.
  */
 @Composable
 fun pageContentWindowInsets(): WindowInsets =
-    if (LocalHideStatusBar.current) {
-        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-    } else {
-        ScaffoldDefaults.contentWindowInsets
-    }
+    WindowInsets.safeDrawing
+        .only(WindowInsetsSides.Horizontal)
+        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
 
 @Composable
 fun rememberSafePadding(handleStartInsets: Boolean = true): SafePadding {

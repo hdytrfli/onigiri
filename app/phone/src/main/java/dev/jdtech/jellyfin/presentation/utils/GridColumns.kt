@@ -6,10 +6,11 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
-/** The two tile shapes the app's grids use: a 2:3 poster or a 16:9 thumbnail. */
+/** The tile shapes the app's grids use, plus the home carousel's suggestions density. */
 enum class GridSize {
     POSTER,
     THUMBNAIL,
+    SUGGESTIONS,
 }
 
 /** Base gap between grid cells, scaled by the "Layout grid" gap preference. */
@@ -30,11 +31,15 @@ data class GridColumns(
     val posterLandscape: Int = 4,
     val thumbnailPortrait: Int = 3,
     val thumbnailLandscape: Int = 4,
+    /** How many suggestions the home carousel shows at once, per orientation. */
+    val suggestionPortrait: Int = 1,
+    val suggestionLandscape: Int = 3,
 ) {
     fun columns(size: GridSize, isLandscape: Boolean): Int =
         when (size) {
             GridSize.POSTER -> if (isLandscape) posterLandscape else posterPortrait
             GridSize.THUMBNAIL -> if (isLandscape) thumbnailLandscape else thumbnailPortrait
+            GridSize.SUGGESTIONS -> if (isLandscape) suggestionLandscape else suggestionPortrait
         }
 }
 

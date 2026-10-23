@@ -79,7 +79,7 @@ private fun SettingsStepperCardPreview() {
             preference =
                 PreferenceStepper(
                     nameStringResource = SettingsR.string.grid_poster_portrait,
-                    descriptionStringRes = SettingsR.string.grid_poster_portrait_summary,
+                    descriptionStringRes = SettingsR.string.grid_posters_summary,
                     backendPreference = Preference("", "2"),
                     value = "2",
                 ),

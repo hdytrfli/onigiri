@@ -51,13 +51,15 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.3")
     val titlePlayerWidth = Preference("pref_title_player_width", "0.2")
-    val titleImageRatio = Preference("pref_title_image_ratio", "2")
 
     // Layout grid (1..8 columns). "Poster" is the 2:3 poster shape; "thumbnail" is the 16:9 shape.
     val gridPosterColumnsPortrait = Preference("pref_grid_poster_columns_portrait", "2")
     val gridPosterColumnsLandscape = Preference("pref_grid_poster_columns_landscape", "4")
     val gridThumbnailColumnsPortrait = Preference("pref_grid_thumbnail_columns_portrait", "3")
     val gridThumbnailColumnsLandscape = Preference("pref_grid_thumbnail_columns_landscape", "4")
+    // How many suggestions the home screen carousel shows at once, per orientation.
+    val gridSuggestionColumnsPortrait = Preference("pref_grid_suggestion_columns_portrait", "1")
+    val gridSuggestionColumnsLandscape = Preference("pref_grid_suggestion_columns_landscape", "3")
     val gridSpacing = Preference("pref_grid_spacing", "1")
 
     // Player

@@ -61,10 +61,10 @@ fun FullPageError(
             modifier = Modifier.fillMaxSize(),
             contentPadding =
                 PaddingValues(
-                    start = safePadding.start + MaterialTheme.spacings.default,
-                    top = safePadding.top + MaterialTheme.spacings.default,
-                    end = safePadding.end + MaterialTheme.spacings.default,
-                    bottom = safePadding.bottom + MaterialTheme.spacings.default,
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                    top = safePadding.top + MaterialTheme.spacings.gutter,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
                 ),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,

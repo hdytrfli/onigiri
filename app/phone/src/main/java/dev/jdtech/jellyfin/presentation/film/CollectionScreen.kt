@@ -96,9 +96,9 @@ private fun CollectionDetailLayout(
 ) {
     val safePadding = rememberSafePadding()
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
     val scrollState = rememberScrollState()

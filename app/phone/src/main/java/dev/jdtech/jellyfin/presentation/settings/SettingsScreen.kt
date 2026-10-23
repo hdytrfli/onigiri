@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +19,6 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
-import dev.jdtech.jellyfin.presentation.components.BackTopBar
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.settings.components.SettingsGroupCard
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -46,8 +44,6 @@ fun SettingsScreen(
     navigateToUsers: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToSubtitleFont: () -> Unit,
-    navigateBack: () -> Unit,
-    showTopBar: Boolean = true,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -81,16 +77,10 @@ fun SettingsScreen(
     }
 
     SettingsScreenLayout(
-        showTopBar = showTopBar,
         state = state,
         onAction = { action ->
-            when (action) {
-                is SettingsAction.OnBackClick -> navigateBack()
-                is SettingsAction.OnUpdate -> {
-                    viewModel.onAction(action)
-                    viewModel.loadPreferences(indexes)
-                }
-            }
+            viewModel.onAction(action)
+            viewModel.loadPreferences(indexes)
         },
     )
 }
@@ -98,25 +88,14 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsScreenLayout(
-    showTopBar: Boolean,
     state: SettingsState,
     onAction: (SettingsAction) -> Unit,
 ) {
-    val contentPadding = PaddingValues(all = MaterialTheme.spacings.default)
+    // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox,
+    // so this list only adds its own gutter and never reserves the suite's space again.
+    val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-    PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = {
-            if (showTopBar) {
-                BackTopBar(
-                    onBack = { onAction(SettingsAction.OnBackClick) },
-                    scrollBehavior = scrollBehavior,
-                )
-            }
-        },
-    ) { innerPadding ->
+    PageScaffold { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = contentPadding + innerPadding,
@@ -139,7 +118,6 @@ private fun SettingsScreenLayout(
 private fun SettingsScreenLayoutPreview() {
     FindroidTheme {
         SettingsScreenLayout(
-            showTopBar = true,
             state =
                 SettingsState(
                     preferenceGroups =

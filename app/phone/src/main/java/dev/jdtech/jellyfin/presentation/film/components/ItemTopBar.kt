@@ -34,9 +34,9 @@ fun ItemTopBar(
         modifier =
             Modifier.fillMaxWidth()
                 .padding(
-                    start = safePadding.start + MaterialTheme.spacings.small,
-                    top = safePadding.top + MaterialTheme.spacings.small,
-                    end = safePadding.end + MaterialTheme.spacings.small,
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                    top = safePadding.top + MaterialTheme.spacings.gutter,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
                 )
     ) {
         AppButtonGroup {

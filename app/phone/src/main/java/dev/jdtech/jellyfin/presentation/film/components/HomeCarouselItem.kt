@@ -86,7 +86,7 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             modifier =
                 Modifier.padding(
-                        horizontal = MaterialTheme.spacings.default,
+                        horizontal = MaterialTheme.spacings.gutter,
                         vertical = MaterialTheme.spacings.medium,
                     )
                     .align(Alignment.BottomStart)

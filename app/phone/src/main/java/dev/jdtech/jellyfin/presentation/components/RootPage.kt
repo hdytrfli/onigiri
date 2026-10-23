@@ -31,8 +31,10 @@ fun RootPage(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
-    val headerTop = safePadding.top + MaterialTheme.spacings.small
-    val contentInset = headerTop + 48.dp + MaterialTheme.spacings.small
+    // The gutter above and below the 48dp floating header keeps the status bar (unless hidden),
+    // the header, and the content on one shared outer margin.
+    val headerTop = safePadding.top + MaterialTheme.spacings.gutter
+    val contentInset = headerTop + 48.dp + MaterialTheme.spacings.gutter
 
     CompositionLocalProvider(LocalRootPageContentInset provides contentInset) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -43,7 +45,7 @@ fun RootPage(
                         .fillMaxWidth()
                         .padding(
                             top = headerTop,
-                            bottom = MaterialTheme.spacings.small,
+                            bottom = MaterialTheme.spacings.gutter,
                         )
             ) {
                 header()

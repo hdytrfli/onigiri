@@ -116,9 +116,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                 combine(
                     appPreferences.observe(appPreferences.titlePortraitWidth),
                     appPreferences.observe(appPreferences.titleLandscapeWidth),
-                    appPreferences.observe(appPreferences.titleImageRatio),
-                ) { portraitWidth, landscapeWidth, ratio ->
-                    TitlePrefs(portraitWidth, landscapeWidth, ratio)
+                ) { portraitWidth, landscapeWidth ->
+                    TitlePrefs(portraitWidth, landscapeWidth)
                 }
 
             // Layout grid column counts: the two tile sizes, portrait and landscape, plus the gap.
@@ -131,7 +130,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     appPreferences.observe(appPreferences.gridSpacing),
                 ) { posterPortrait, posterLandscape, thumbnailPortrait, thumbnailLandscape, spacing
                     ->
-                    GridPrefs(
+                    GridColumnsPrefs(
                         posterPortrait,
                         posterLandscape,
                         thumbnailPortrait,
@@ -140,12 +139,36 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     )
                 }
 
+            // The home screen suggestions carousel: how many suggestions show at once per
+            // orientation, coalesced with the grid prefs so the state build stays one combine.
+            val suggestionPrefs =
+                combine(
+                    appPreferences.observe(appPreferences.gridSuggestionColumnsPortrait),
+                    appPreferences.observe(appPreferences.gridSuggestionColumnsLandscape),
+                ) { portrait, landscape ->
+                    portrait to landscape
+                }
+
+            val gridAndSuggestionPrefs =
+                gridPrefs.combine(suggestionPrefs) { grid, (suggestionPortrait, suggestionLandscape)
+                    ->
+                    GridPrefs(
+                        grid.posterPortrait,
+                        grid.posterLandscape,
+                        grid.thumbnailPortrait,
+                        grid.thumbnailLandscape,
+                        suggestionPortrait,
+                        suggestionLandscape,
+                        grid.spacing,
+                    )
+                }
+
             combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.offlineMode),
                     interfacePrefs,
                     titlePrefs,
-                    gridPrefs,
+                    gridAndSuggestionPrefs,
                 ) { flags, offlineMode, interfacePrefs, titlePrefs, gridPrefs ->
                     MainState(
                         isLoading = false,
@@ -165,11 +188,12 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         tabletUiMode = TabletUiMode.fromStorageKey(interfacePrefs.tabletUiMode),
                         titlePortraitWidth = titlePrefs.portraitWidth.toFloatOrNull() ?: 0.7f,
                         titleLandscapeWidth = titlePrefs.landscapeWidth.toFloatOrNull() ?: 0.3f,
-                        titleImageRatio = titlePrefs.ratio.toFloatOrNull() ?: 2f,
                         gridPosterPortrait = gridPrefs.posterPortrait.toIntOrNull() ?: 2,
                         gridPosterLandscape = gridPrefs.posterLandscape.toIntOrNull() ?: 4,
                         gridThumbnailPortrait = gridPrefs.thumbnailPortrait.toIntOrNull() ?: 3,
                         gridThumbnailLandscape = gridPrefs.thumbnailLandscape.toIntOrNull() ?: 4,
+                        gridSuggestionPortrait = gridPrefs.suggestionPortrait.toIntOrNull() ?: 1,
+                        gridSuggestionLandscape = gridPrefs.suggestionLandscape.toIntOrNull() ?: 3,
                         gridGapScale = gridPrefs.spacing.toFloatOrNull() ?: 1f,
                     )
                 }
@@ -186,7 +210,6 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
     private data class TitlePrefs(
         val portraitWidth: String,
         val landscapeWidth: String,
-        val ratio: String,
     )
 
     private data class InterfacePrefs(
@@ -199,11 +222,21 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val tabletUiMode: String?,
     )
 
+    private data class GridColumnsPrefs(
+        val posterPortrait: String,
+        val posterLandscape: String,
+        val thumbnailPortrait: String,
+        val thumbnailLandscape: String,
+        val spacing: String,
+    )
+
     private data class GridPrefs(
         val posterPortrait: String,
         val posterLandscape: String,
         val thumbnailPortrait: String,
         val thumbnailLandscape: String,
+        val suggestionPortrait: String,
+        val suggestionLandscape: String,
         val spacing: String,
     )
 }
@@ -219,7 +252,6 @@ data class MainState(
     val contentSpacingScale: Float = Constants.CONTENT_SPACING_SCALE,
     val titlePortraitWidth: Float = 0.7f,
     val titleLandscapeWidth: Float = 0.3f,
-    val titleImageRatio: Float = 2f,
     val confirmExit: Boolean = false,
     val hideStatusBar: Boolean = false,
     val blurHash: Boolean = true,
@@ -229,5 +261,7 @@ data class MainState(
     val gridPosterLandscape: Int = 4,
     val gridThumbnailPortrait: Int = 3,
     val gridThumbnailLandscape: Int = 4,
+    val gridSuggestionPortrait: Int = 1,
+    val gridSuggestionLandscape: Int = 3,
     val gridGapScale: Float = 1f,
 )

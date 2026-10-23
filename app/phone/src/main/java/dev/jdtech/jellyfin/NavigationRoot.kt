@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,6 +17,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -89,7 +91,7 @@ import java.util.UUID
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ImageType
 
-private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = listOf(CoreR.string.title_settings))
+private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
 
 private val TOP_LEVEL_ROUTES =
     setOf(HomeRoute, MoviesRoute, ShowsRoute, CollectionsRoute, SETTINGS_ROOT_ROUTE)
@@ -271,7 +273,7 @@ private fun MainNavigation(
 
     val suiteType = rememberNavigationSuiteType()
     val predictiveBack = LocalPredictiveBack.current
-    val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
+    val currentRoute = navigationState.currentBackStack().last()
     CompositionLocalProvider(
         LocalSuiteStartInset provides suiteType.suiteStartInset(),
         LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
@@ -304,8 +306,21 @@ private fun MainNavigation(
                 }
             }
             // The suite is drawn over the content, outside the NavDisplay, so a page transition
-            // never moves it: switching tabs animates only the content behind it.
-            if (atTabRoot && topLevelRoute in tabRoutes) {
+            // never moves it: switching tabs animates only the content behind it. Its presence is
+            // animated, so hiding it on immersive pages is a quick fade instead of a pop.
+            AnimatedVisibility(
+                visible = currentRoute.drawsNavigationSuite(tabRoutes),
+                enter = SUITE_ENTER_TRANSITION,
+                exit = SUITE_EXIT_TRANSITION,
+                modifier =
+                    Modifier.align(
+                        if (suiteType == NavigationSuiteType.NavigationRail) {
+                            Alignment.CenterStart
+                        } else {
+                            Alignment.BottomCenter
+                        }
+                    ),
+            ) {
                 RootNavigationSuite(
                     navigator = navigator,
                     selectedRoute = topLevelRoute,
@@ -450,11 +465,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     },
                 onSearchClick = dropUnlessResumed { onSearchClick() },
                 onSettingsClick =
-                    dropUnlessResumed {
-                        navigator.navigate(
-                            SettingsRoute(indexes = listOf(CoreR.string.title_settings))
-                        )
-                    },
+                    dropUnlessResumed { navigator.navigate(SettingsRoute(indexes = emptyList())) },
                 onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             )
@@ -513,10 +524,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<MediaRoute> {
         MediaScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onSettingsClick =
-                dropUnlessResumed {
-                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
-                },
+            onSettingsClick = dropUnlessResumed { navigator.navigate(SETTINGS_ROOT_ROUTE) },
             searchExpanded = searchExpanded.value,
             onSearchExpand = { searchExpanded.value = it },
         )
@@ -561,10 +569,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     searchExpanded.value = true
                     navigator.navigate(MediaRoute)
                 },
-            onSettingsClick =
-                dropUnlessResumed {
-                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
-                },
+            onSettingsClick = dropUnlessResumed { navigator.navigate(SETTINGS_ROOT_ROUTE) },
         )
     }
     entry<MovieRoute> { key ->
@@ -747,9 +752,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 },
         )
     }
+    // Every settings page keeps the navigation suite, so every one of them reserves its space:
+    // a constant inset keeps the bar in place instead of laying one out per page.
     entry<SettingsRoute> { key ->
-        val isRoot = key.indexes.size == 1
-        val settings: @Composable () -> Unit = {
+        SuiteInsetBox {
             SettingsScreen(
                 indexes = key.indexes,
                 navigateToSettings =
@@ -765,25 +771,24 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
                 navigateToSubtitleFont =
                     dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
-                navigateBack = dropUnlessResumed { navigator.goBack() },
-                showTopBar = !isRoot,
             )
-        }
-        if (isRoot) {
-            SuiteInsetBox { settings() }
-        } else {
-            settings()
         }
     }
     entry<SettingsFileEditRoute> { key ->
-        SettingsFileEditScreen(
-            filePath = key.filePath,
-            navigateBack = dropUnlessResumed { navigator.goBack() },
-        )
+        SuiteInsetBox {
+            SettingsFileEditScreen(
+                filePath = key.filePath,
+                navigateBack = dropUnlessResumed { navigator.goBack() },
+            )
+        }
     }
-    entry<AboutRoute> { AboutScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
+    entry<AboutRoute> {
+        SuiteInsetBox { AboutScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
+    }
     entry<SubtitleFontRoute> {
-        SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
+        SuiteInsetBox {
+            SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
+        }
     }
 }
 

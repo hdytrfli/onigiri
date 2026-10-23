@@ -103,7 +103,7 @@ fun HomeScreen(
                 actions = {
                     AppIconButton(
                         onClick = { showDisplayDialog = true },
-                        variant = AppButtonVariant.Ghost,
+                        variant = AppButtonVariant.Overlay,
                         content = {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_layout_list),
@@ -166,9 +166,9 @@ fun HomeScreen(
 private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 

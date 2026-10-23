@@ -55,7 +55,7 @@ private fun SettingsSliderCardPreview() {
             preference =
                 PreferenceSlider(
                     nameStringResource = SettingsR.string.title_portrait_width,
-                    descriptionStringRes = SettingsR.string.title_portrait_width_summary,
+                    descriptionStringRes = SettingsR.string.title_image_summary,
                     optionIcon = OptionIcon.Width,
                     backendPreference = Preference("", "0.7"),
                     options = SettingsR.array.title_width_options,

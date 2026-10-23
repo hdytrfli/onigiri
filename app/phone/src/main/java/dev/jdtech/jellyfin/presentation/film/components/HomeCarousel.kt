@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -17,19 +18,15 @@ import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import kotlinx.coroutines.delay
 
-private val dynamicPageSize =
+/** Splits the available width into [count] slides, accounting for the page spacing. */
+private fun suggestionsPageSize(count: Int) =
     object : PageSize {
         override fun Density.calculateMainAxisPageSize(availableSpace: Int, pageSpacing: Int): Int {
-            val nPages =
-                when {
-                    availableSpace.toDp() >= 840.dp -> 3
-                    availableSpace.toDp() >= 600.dp -> 2
-                    else -> 1
-                }
-
-            return (availableSpace - (nPages - 1) * pageSpacing) / nPages
+            return (availableSpace - (count - 1) * pageSpacing) / count
         }
     }
 
@@ -40,6 +37,7 @@ fun HomeCarousel(
     onAction: (HomeAction) -> Unit,
 ) {
     val itemCount = items.size.coerceAtLeast(1)
+    val suggestionCount = gridColumns(GridSize.SUGGESTIONS).coerceAtLeast(1)
 
     // An effectively unbounded pager indexed modulo the item count, so swiping and the
     // auto-scroll keep moving forward and wrap last -> first (and back) with no jump.
@@ -64,7 +62,7 @@ fun HomeCarousel(
     HorizontalPager(
         state = pagerState,
         contentPadding = itemsPadding,
-        pageSize = dynamicPageSize,
+        pageSize = remember(suggestionCount) { suggestionsPageSize(suggestionCount) },
         pageSpacing = MaterialTheme.spacings.medium,
     ) { page ->
         items.getOrNull(page % itemCount)?.let { item ->

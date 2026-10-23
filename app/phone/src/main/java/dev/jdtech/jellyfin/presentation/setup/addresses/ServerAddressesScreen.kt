@@ -75,10 +75,10 @@ fun ServerAddressesLayout(state: ServerAddressesState, onAction: (ServerAddresse
     val layoutDirection = LocalLayoutDirection.current
     val safePadding = rememberSafePadding()
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingTop = MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var selectedAddress by remember { mutableStateOf<ServerAddress?>(null) }

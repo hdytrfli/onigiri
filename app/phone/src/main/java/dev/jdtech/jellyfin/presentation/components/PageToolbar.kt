@@ -57,7 +57,7 @@ fun PageToolbar(
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.default),
+        modifier = modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.gutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Keep the tabs anchored to the leading edge whether or not a page has trailing actions,

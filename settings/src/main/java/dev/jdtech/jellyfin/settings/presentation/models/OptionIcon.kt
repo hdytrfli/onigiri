@@ -19,4 +19,5 @@ enum class OptionIcon {
     Segment,
     Sort,
     Storage,
+    TabletMode,
 }

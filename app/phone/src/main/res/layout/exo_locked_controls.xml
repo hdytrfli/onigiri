@@ -16,7 +16,7 @@
         android:background="@drawable/rounded_corner"
         android:contentDescription="@string/select_playback_speed"
         android:padding="12dp"
-        android:layout_margin="8dp"
+        android:layout_margin="20dp"
         android:src="@drawable/ic_lock_open"
         app:tint="@android:color/white" />
 

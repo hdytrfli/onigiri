@@ -89,10 +89,10 @@ private fun DownloadsScreenLayout(
                 // Under a root page the floating header overlays the grid and the Scaffold adds
                 // no padding, so the scroll inset holds both the header and the safe area.
                 PaddingValues(
-                    start = safePadding.start + MaterialTheme.spacings.default,
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
                     top = LocalRootPageContentInset.current,
-                    end = safePadding.end + MaterialTheme.spacings.default,
-                    bottom = safePadding.bottom + MaterialTheme.spacings.default,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
                 )
             } else {
                 // Standalone, the Scaffold's inner padding already holds the top bar and safe area.

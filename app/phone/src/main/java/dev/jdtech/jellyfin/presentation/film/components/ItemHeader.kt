@@ -206,7 +206,7 @@ private fun ItemHeaderBase(
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .padding(top = safePadding.top + MaterialTheme.spacings.default)
+                    .padding(top = safePadding.top + MaterialTheme.spacings.gutter)
         ) {
             content()
         }

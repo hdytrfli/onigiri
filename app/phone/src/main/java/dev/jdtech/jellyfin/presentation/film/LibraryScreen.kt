@@ -193,7 +193,7 @@ fun LibraryContent(
     val contentPadding =
         if (embedded) {
             PaddingValues(
-                start = safePadding.start + MaterialTheme.spacings.default,
+                start = safePadding.start + MaterialTheme.spacings.gutter,
                 top =
                     rootInset +
                         if (sectionTitle != null) {
@@ -201,8 +201,8 @@ fun LibraryContent(
                         } else {
                             MaterialTheme.spacings.default
                         },
-                end = safePadding.end + MaterialTheme.spacings.default,
-                bottom = safePadding.bottom + MaterialTheme.spacings.default,
+                end = safePadding.end + MaterialTheme.spacings.gutter,
+                bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
             )
         } else {
             PaddingValues(all = MaterialTheme.spacings.default)

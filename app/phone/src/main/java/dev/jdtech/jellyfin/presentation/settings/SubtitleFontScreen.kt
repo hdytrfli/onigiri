@@ -99,7 +99,7 @@ private fun SubtitleFontScreenLayout(
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val contentPadding = PaddingValues(all = MaterialTheme.spacings.default)
+    val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
     val fontsDir = remember { SubtitleFonts.fontsDir(context) }
 
     val defaultFonts = fonts.filter { it.family == SubtitleFonts.DEFAULT_FAMILY }
