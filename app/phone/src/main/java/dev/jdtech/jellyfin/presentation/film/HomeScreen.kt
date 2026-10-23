@@ -100,6 +100,7 @@ fun HomeScreen(
                     ),
                 selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
+                dropdownOnCompact = true,
                 actions = {
                     AppIconButton(
                         onClick = { showDisplayDialog = true },

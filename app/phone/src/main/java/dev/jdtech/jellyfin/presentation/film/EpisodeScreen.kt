@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.PlayerActivity
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderAction
@@ -161,6 +163,12 @@ private fun EpisodeScreenLayout(
 
     val spacingScale = LocalContentSpacingScale.current
 
+    // The show and season names only appear on tablet; on phone the poster/backdrop is the header.
+    val showNamesInHeader =
+        currentWindowAdaptiveInfo()
+            .windowSizeClass
+            .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.episode?.let { episode ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
@@ -181,16 +189,18 @@ private fun EpisodeScreenLayout(
                                             episode.parentIndexNumber,
                                         )
                                     }
-                            Text(
-                                text =
-                                    "$seasonName - " +
-                                        stringResource(
-                                            id = CoreR.string.episode_number,
-                                            episode.indexNumber,
-                                        ),
-                                maxLines = 1,
-                                style = MaterialTheme.typography.labelLarge,
-                            )
+                            if (showNamesInHeader) {
+                                Text(
+                                    text =
+                                        "$seasonName - " +
+                                            stringResource(
+                                                id = CoreR.string.episode_number,
+                                                episode.indexNumber,
+                                            ),
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
                             Text(
                                 text = episode.name,
                                 overflow = TextOverflow.Ellipsis,

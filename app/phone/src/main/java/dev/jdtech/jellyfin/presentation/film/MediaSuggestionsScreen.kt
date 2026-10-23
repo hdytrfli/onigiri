@@ -158,6 +158,7 @@ private fun MediaPage(
                             ),
                         selectedIndex = selectedTab,
                         onSelect = { selectedTab = it },
+                        dropdownOnCompact = true,
                         actions = toolbarActions,
                     )
                 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.PlayerActivity
 import dev.jdtech.jellyfin.core.presentation.dummy.dummySeason
 import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
@@ -114,6 +116,12 @@ private fun SeasonScreenLayout(
 
     val spacingScale = LocalContentSpacingScale.current
 
+    // The show and season names only appear on tablet; on phone the backdrop is the header.
+    val showNamesInHeader =
+        currentWindowAdaptiveInfo()
+            .windowSizeClass
+            .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
     Box(modifier = Modifier.fillMaxSize()) {
         state.season?.let { season ->
             LazyColumn(
@@ -133,17 +141,19 @@ private fun SeasonScreenLayout(
                                     Modifier.align(Alignment.BottomStart)
                                         .padding(start = paddingStart, end = paddingEnd)
                             ) {
-                                ItemTitle(
-                                    title = season.seriesName,
-                                    logoUri = season.images.showLogo,
-                                    maxLines = 1,
-                                )
-                                Text(
-                                    text = season.name,
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
+                                if (showNamesInHeader) {
+                                    ItemTitle(
+                                        title = season.seriesName,
+                                        logoUri = season.images.showLogo,
+                                        maxLines = 1,
+                                    )
+                                    Text(
+                                        text = season.name,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                }
                             }
                         },
                     )

@@ -60,6 +60,7 @@ fun CollectionsScreen(
                     ),
                 selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
+                dropdownOnCompact = true,
             )
         }
     ) {

@@ -18,11 +18,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,15 +43,21 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import kotlinx.coroutines.launch
 
 /**
  * A page's toolbar: a segmented set of pill tabs (shadcn's default tabs style) with optional
  * trailing actions, e.g. search / display info / sort on the Movies and Shows pages.
+ *
+ * [dropdownOnCompact] swaps the pills for a single dropdown on compact widths (phones), where the
+ * full pill row does not fit; root pages opt in, secondary pages keep the pills everywhere.
  */
 @Composable
 fun PageToolbar(
@@ -54,22 +65,111 @@ fun PageToolbar(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    dropdownOnCompact: Boolean = false,
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.gutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Keep the tabs anchored to the leading edge whether or not a page has trailing actions,
-        // so the group does not jump between tabs or between pages.
-        PillTabs(
-            tabs = tabs,
-            selectedIndex = selectedIndex,
-            onSelect = onSelect,
-        )
+        if (dropdownOnCompact && isCompactWindow()) {
+            TabDropdown(
+                tabs = tabs,
+                selectedIndex = selectedIndex,
+                onSelect = onSelect,
+            )
+        } else {
+            // Keep the tabs anchored to the leading edge whether or not a page has trailing
+            // actions, so the group does not jump between tabs or between pages.
+            PillTabs(
+                tabs = tabs,
+                selectedIndex = selectedIndex,
+                onSelect = onSelect,
+            )
+        }
         if (actions != null) {
             Spacer(modifier = Modifier.weight(1f))
             AppButtonGroup(content = actions)
+        }
+    }
+}
+
+/** True below the medium width breakpoint - the phone bucket the dropdown replaces the pills in. */
+@Composable
+private fun isCompactWindow(): Boolean =
+    !currentWindowAdaptiveInfo()
+        .windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
+/**
+ * The compact-width stand-in for [PillTabs]: one pill-shaped button with the selected tab and a
+ * chevron, opening a menu with every tab.
+ */
+@Composable
+private fun TabDropdown(
+    tabs: List<String>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Row(
+            modifier =
+                Modifier.clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { expanded = true },
+                    )
+                    .height(48.dp)
+                    .padding(horizontal = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = tabs.getOrElse(selectedIndex) { "" },
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_chevron_down),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            tabs.forEachIndexed { index, title ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    },
+                    leadingIcon =
+                        if (index == selectedIndex) {
+                            {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_check),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                    onClick = {
+                        expanded = false
+                        onSelect(index)
+                    },
+                )
+            }
         }
     }
 }
