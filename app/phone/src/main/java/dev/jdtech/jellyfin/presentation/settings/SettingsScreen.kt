@@ -25,7 +25,6 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceGroup
@@ -102,7 +101,7 @@ private fun SettingsScreenLayout(
         PaddingValues(
             start = MaterialTheme.spacings.gutter,
             end = MaterialTheme.spacings.gutter,
-            top = safePadding.statusTopSpacing(),
+            top = safePadding.top + MaterialTheme.spacings.gutter,
             bottom = MaterialTheme.spacings.gutter,
         )
 

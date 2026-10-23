@@ -36,7 +36,6 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.parallaxLayoutModifier
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 
 @Composable
 fun ItemHeader(
@@ -204,7 +203,11 @@ private fun ItemHeaderBase(
             )
         }
         // Inset the content from the top so taller headers never run under the top bar.
-        Box(modifier = Modifier.fillMaxSize().padding(top = safePadding.statusTopSpacing())) {
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(top = safePadding.top + MaterialTheme.spacings.gutter)
+        ) {
             content()
         }
         if (showLogo) {

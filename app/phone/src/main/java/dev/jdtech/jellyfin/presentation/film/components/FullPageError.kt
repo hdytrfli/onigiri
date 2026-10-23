@@ -33,7 +33,6 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 
 /**
  * A full-page error state: a warning icon, a short title, one line of explanation and the actions
@@ -63,7 +62,7 @@ fun FullPageError(
             contentPadding =
                 PaddingValues(
                     start = safePadding.start + MaterialTheme.spacings.gutter,
-                    top = safePadding.statusTopSpacing(),
+                    top = safePadding.top + MaterialTheme.spacings.gutter,
                     end = safePadding.end + MaterialTheme.spacings.gutter,
                     bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
                 ),

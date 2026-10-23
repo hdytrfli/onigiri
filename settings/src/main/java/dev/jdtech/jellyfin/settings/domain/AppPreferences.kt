@@ -48,6 +48,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val listDisplayFields = Preference("pref_list_display_fields", setOf("year", "rating", "age"))
     val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2.3333333")
+
+    /** The image header ratio in the player's media sheets, 4:3 by default. */
+    val playerSheetBackdropRatio = Preference("pref_player_sheet_backdrop_ratio", "1.3333334")
     val titlePortraitWidth = Preference("pref_title_portrait_width", "0.7")
     val titleLandscapeWidth = Preference("pref_title_landscape_width", "0.3")
     val titlePlayerWidth = Preference("pref_title_player_width", "0.2")

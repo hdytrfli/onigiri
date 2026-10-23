@@ -788,6 +788,10 @@ class PlayerActivity : BasePlayerActivity() {
                                 appPreferences
                                     .getValue(appPreferences.backdropLandscapeRatio)
                                     .toFloat(),
+                            playerSheet =
+                                appPreferences
+                                    .getValue(appPreferences.playerSheetBackdropRatio)
+                                    .toFloatOrNull() ?: (4f / 3f),
                         )
                 ) {
                     content(detailState)

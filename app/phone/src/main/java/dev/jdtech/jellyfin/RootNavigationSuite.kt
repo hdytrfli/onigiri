@@ -22,6 +22,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -41,7 +42,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.models.TabletUiMode
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 /** Horizontal space a screen must leave at the start edge for the rail-shaped suite. */
@@ -131,14 +131,8 @@ fun RootNavigationSuite(
                     modifier =
                         Modifier.height(
                             if (index == 0) {
-                                // The rail's own spine sits a touch tighter than the pages' gutter:
-                                // the status-bar inset plus 12dp, or plain 12dp when the status bar
-                                // is hidden and the inset is satisfied.
-                                if (LocalHideStatusBar.current) {
-                                    MaterialTheme.spacings.railTopGutter
-                                } else {
-                                    safeTop + MaterialTheme.spacings.railTopGutter
-                                }
+                                // The rail's own spine sits tighter than the pages' gutter.
+                                safeTop + MaterialTheme.spacings.railTopGutter
                             } else {
                                 MaterialTheme.spacings.small
                             }
@@ -150,6 +144,14 @@ fun RootNavigationSuite(
                     icon = { Icon(painterResource(item.icon), contentDescription = null) },
                     label = { Text(stringResource(item.title)) },
                     enabled = item.enabled,
+                    // The rail's selection pill follows the secondary button colour, unlike the
+                    // toolbar pills which are primary.
+                    colors =
+                        NavigationRailItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        ),
                 )
             }
         }

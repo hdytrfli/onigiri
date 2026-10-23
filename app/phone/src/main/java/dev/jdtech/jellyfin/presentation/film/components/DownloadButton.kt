@@ -56,7 +56,7 @@ fun DownloadButton(
             AppButtonGroup(modifier = modifier) {
                 AppButton(
                     onClick = onNavigateToDownloads,
-                    variant = AppButtonVariant.Overlay,
+                    variant = AppButtonVariant.Secondary,
                     content = {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
@@ -67,7 +67,7 @@ fun DownloadButton(
                 )
                 AppIconButton(
                     onClick = { cancelDialogOpen = true },
-                    variant = AppButtonVariant.Overlay,
+                    variant = AppButtonVariant.Secondary,
                     content = {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_x),
@@ -81,7 +81,7 @@ fun DownloadButton(
             AppIconButton(
                 onClick = { deleteDialogOpen = true },
                 modifier = modifier,
-                variant = AppButtonVariant.Overlay,
+                variant = AppButtonVariant.Secondary,
                 content = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_trash),
@@ -102,7 +102,7 @@ fun DownloadButton(
                     }
                 },
                 modifier = modifier,
-                variant = AppButtonVariant.Overlay,
+                variant = AppButtonVariant.Secondary,
                 content = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_arrow_down_to_line),

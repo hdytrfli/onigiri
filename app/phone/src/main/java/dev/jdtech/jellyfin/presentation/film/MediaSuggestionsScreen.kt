@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +37,6 @@ import dev.jdtech.jellyfin.film.presentation.media.MediaSuggestionsViewModel
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidGenre
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
@@ -92,13 +92,20 @@ private fun MediaPage(
         listViewModel.loadItems()
     }
 
+    // Back closes the search instead of leaving the page: the query is cleared on the way out so
+    // reopening starts fresh.
+    BackHandler(enabled = listState.searchExpanded) {
+        listViewModel.onAction(LibraryAction.SetSearchQuery(""))
+        listViewModel.onAction(LibraryAction.ToggleSearch)
+    }
+
     // Search and sort only exist on the list tab; the display-info trigger lives on every
     // tab and drives the one global listDisplayFields setting through the list ViewModel.
     val toolbarActions: @Composable RowScope.() -> Unit = {
         if (selectedTab == 0) {
             AppIconButton(
                 onClick = { listViewModel.onAction(LibraryAction.ToggleSearch) },
-                variant = AppButtonVariant.Overlay,
+                variant = AppButtonVariant.Secondary,
                 content = {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_search),
@@ -109,7 +116,7 @@ private fun MediaPage(
         }
         AppIconButton(
             onClick = { showDisplayDialog = true },
-            variant = AppButtonVariant.Overlay,
+            variant = AppButtonVariant.Secondary,
             content = {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_panel_left),
@@ -120,19 +127,10 @@ private fun MediaPage(
         if (selectedTab == 0) {
             AppIconButton(
                 onClick = { showSortDialog = true },
-                variant = AppButtonVariant.Overlay,
+                variant = AppButtonVariant.Secondary,
                 content = {
-                    // The icon carries the current direction: its ascending variant while sorting
-                    // ascending, its descending variant otherwise.
                     Icon(
-                        painter =
-                            painterResource(
-                                if (listState.sortOrder == SortOrder.ASCENDING) {
-                                    CoreR.drawable.ic_list_sort_ascending
-                                } else {
-                                    CoreR.drawable.ic_list_sort_descending
-                                }
-                            ),
+                        painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
                         contentDescription = stringResource(CoreR.string.sort_by),
                     )
                 },
@@ -165,6 +163,13 @@ private fun MediaPage(
                                 ),
                                 stringResource(FilmR.string.suggestions),
                                 stringResource(FilmR.string.genres),
+                            ),
+                        tabIcons =
+                            listOf(
+                                if (kind == MediaKind.Movies) CoreR.drawable.ic_film
+                                else CoreR.drawable.ic_tv,
+                                CoreR.drawable.ic_sparkles,
+                                CoreR.drawable.ic_layout_grid,
                             ),
                         selectedIndex = selectedTab,
                         onSelect = { selectedTab = it },

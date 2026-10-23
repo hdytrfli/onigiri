@@ -116,7 +116,8 @@ private fun SeasonScreenLayout(
 
     val spacingScale = LocalContentSpacingScale.current
 
-    // The show and season names only appear on tablet; on phone the backdrop is the header.
+    // The top bar's extra actions (home, series shortcut) are tablet-only; compact widths keep
+    // just the back button. The page content always shows the names.
     val showNamesInHeader =
         currentWindowAdaptiveInfo()
             .windowSizeClass
@@ -141,19 +142,17 @@ private fun SeasonScreenLayout(
                                     Modifier.align(Alignment.BottomStart)
                                         .padding(start = paddingStart, end = paddingEnd)
                             ) {
-                                if (showNamesInHeader) {
-                                    ItemTitle(
-                                        title = season.seriesName,
-                                        logoUri = season.images.showLogo,
-                                        maxLines = 1,
-                                    )
-                                    Text(
-                                        text = season.name,
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                }
+                                ItemTitle(
+                                    title = season.seriesName,
+                                    logoUri = season.images.showLogo,
+                                    maxLines = 1,
+                                )
+                                Text(
+                                    text = season.name,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
                             }
                         },
                     )
@@ -234,13 +233,13 @@ private fun SeasonScreenLayout(
             content =
                 if (showNamesInHeader) {
                     {
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
                         state.season?.let { season ->
                             AppButton(
                                 onClick = {
                                     onAction(SeasonAction.NavigateToSeries(season.seriesId))
                                 },
-                                variant = AppButtonVariant.Overlay,
+                                variant = AppButtonVariant.Secondary,
                             ) {
                                 Text(
                                     text = season.seriesName,

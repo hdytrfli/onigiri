@@ -18,7 +18,6 @@ import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 
 @Composable
 fun ItemTopBar(
@@ -36,7 +35,7 @@ fun ItemTopBar(
             Modifier.fillMaxWidth()
                 .padding(
                     start = safePadding.start + MaterialTheme.spacings.gutter,
-                    top = safePadding.statusTopSpacing(),
+                    top = safePadding.top + MaterialTheme.spacings.gutter,
                     end = safePadding.end + MaterialTheme.spacings.gutter,
                 )
     ) {
@@ -44,7 +43,7 @@ fun ItemTopBar(
             if (hasBackButton) {
                 AppIconButton(
                     onClick = onBackClick,
-                    variant = AppButtonVariant.Overlay,
+                    variant = AppButtonVariant.Secondary,
                     content = {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
@@ -56,7 +55,7 @@ fun ItemTopBar(
             if (hasHomeButton) {
                 AppIconButton(
                     onClick = onHomeClick,
-                    variant = AppButtonVariant.Overlay,
+                    variant = AppButtonVariant.Secondary,
                     content = {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_home),

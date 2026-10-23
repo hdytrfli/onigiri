@@ -163,7 +163,8 @@ private fun EpisodeScreenLayout(
 
     val spacingScale = LocalContentSpacingScale.current
 
-    // The show and season names only appear on tablet; on phone the poster/backdrop is the header.
+    // Tablet keeps the season line in the header and the extra top-bar actions; compact widths show
+    // only the episode name and the back button.
     val showNamesInHeader =
         currentWindowAdaptiveInfo()
             .windowSizeClass
@@ -308,14 +309,14 @@ private fun EpisodeScreenLayout(
             content =
                 if (showNamesInHeader) {
                     {
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
                         state.episode?.let { episode ->
                             AppButtonGroup {
                                 AppButton(
                                     onClick = {
                                         onAction(EpisodeAction.NavigateToShow(episode.seriesId))
                                     },
-                                    variant = AppButtonVariant.Overlay,
+                                    variant = AppButtonVariant.Secondary,
                                 ) {
                                     Text(
                                         text = episode.seriesName,
@@ -327,7 +328,7 @@ private fun EpisodeScreenLayout(
                                     onClick = {
                                         onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
                                     },
-                                    variant = AppButtonVariant.Overlay,
+                                    variant = AppButtonVariant.Secondary,
                                 ) {
                                     episode.seasonName?.let { seasonName -> Text(seasonName) }
                                         ?: run {

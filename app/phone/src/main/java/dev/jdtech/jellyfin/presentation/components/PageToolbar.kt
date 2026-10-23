@@ -63,6 +63,7 @@ fun PageToolbar(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    tabIcons: List<Int>? = null,
     dropdownOnCompact: Boolean = false,
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -75,6 +76,7 @@ fun PageToolbar(
                 tabs = tabs,
                 selectedIndex = selectedIndex,
                 onSelect = onSelect,
+                tabIcons = tabIcons,
             )
         } else {
             // Keep the tabs anchored to the leading edge whether or not a page has trailing
@@ -108,6 +110,7 @@ private fun TabDropdown(
     tabs: List<String>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
+    tabIcons: List<Int>?,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -116,7 +119,7 @@ private fun TabDropdown(
         Row(
             modifier =
                 Modifier.clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .background(MaterialTheme.colorScheme.primary)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -130,7 +133,7 @@ private fun TabDropdown(
             Text(
                 text = tabs.getOrElse(selectedIndex) { "" },
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -138,6 +141,7 @@ private fun TabDropdown(
                 painter = painterResource(CoreR.drawable.ic_chevron_down),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
 
@@ -145,6 +149,7 @@ private fun TabDropdown(
             tabs.forEachIndexed { index, title ->
                 MenuActionItem(
                     label = title,
+                    icon = tabIcons?.getOrNull(index),
                     selected = index == selectedIndex,
                     onClick = {
                         expanded = false
@@ -207,7 +212,7 @@ private fun PillTabs(
                     .fillMaxHeight()
                     .shadow(elevation = 1.dp, shape = CircleShape)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceBright,
+                        color = MaterialTheme.colorScheme.primary,
                         shape = CircleShape,
                     )
         )
@@ -223,7 +228,7 @@ private fun PillTabs(
                     animateColorAsState(
                         targetValue =
                             if (selected) {
-                                MaterialTheme.colorScheme.onSurface
+                                MaterialTheme.colorScheme.onPrimary
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             },

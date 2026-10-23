@@ -165,7 +165,9 @@ private fun BackdropHeader(backdropUri: String, title: String?) {
         }
     Box(
         modifier =
-            Modifier.fillMaxWidth().aspectRatio(LocalBackdropRatios.current.portrait).clipToBounds()
+            Modifier.fillMaxWidth()
+                .aspectRatio(LocalBackdropRatios.current.playerSheet)
+                .clipToBounds()
     ) {
         AsyncImage(
             model = backdrop,

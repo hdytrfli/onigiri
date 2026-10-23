@@ -98,13 +98,19 @@ fun HomeScreen(
                         stringResource(CoreR.string.title_favorite),
                         stringResource(CoreR.string.title_download),
                     ),
+                tabIcons =
+                    listOf(
+                        CoreR.drawable.ic_home,
+                        CoreR.drawable.ic_heart,
+                        CoreR.drawable.ic_download,
+                    ),
                 selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
                 dropdownOnCompact = true,
                 actions = {
                     AppIconButton(
                         onClick = { showDisplayDialog = true },
-                        variant = AppButtonVariant.Overlay,
+                        variant = AppButtonVariant.Secondary,
                         content = {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_panel_left),

@@ -109,6 +109,7 @@
     <string name="extra_info">Display Extra Info</string>
     <string name="extra_info_summary">Detailed audio, video and subtitle information</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
+    <string name="player_sheet_backdrop_ratio">Player sheet backdrop ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>
     <string name="title_image">Title image</string>
     <string name="title_portrait_width">Portrait width</string>
@@ -184,6 +185,7 @@
     <string name="pref_player_stats_summary">Show a stats button in the player</string>
     <string name="grid_spacing_summary">Amount of space between items in the grids</string>
     <string name="backdrop_portrait_ratio_summary">Aspect ratio of backdrops, portrait</string>
+    <string name="player_sheet_backdrop_ratio_summary">Aspect ratio of the image header in the player sheets</string>
     <string name="backdrop_landscape_ratio_summary">Aspect ratio of backdrops, landscape</string>
     <string name="title_image_summary">Title widths, portrait, landscape, and the player</string>
     <string name="home_suggestions_summary">Show suggested items on the home screen</string>

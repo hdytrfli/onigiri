@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.statusTopSpacing
 
 /** The top inset a root page's scrollable content needs so it starts below the floating header. */
 val LocalRootPageContentInset = compositionLocalOf { 0.dp }
@@ -33,8 +32,8 @@ fun RootPage(
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
     // The gutter above and below the 48dp floating header keeps the status bar (unless hidden),
-    // the header, and the content on one shared outer margin.
-    val headerTop = safePadding.statusTopSpacing()
+    // the header, and the content tight: 8dp on both sides of the bar.
+    val headerTop = safePadding.top + MaterialTheme.spacings.gutter
     val contentInset = headerTop + 48.dp + MaterialTheme.spacings.gutter
 
     CompositionLocalProvider(LocalRootPageContentInset provides contentInset) {

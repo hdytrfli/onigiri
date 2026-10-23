@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
@@ -17,26 +16,11 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import dev.jdtech.jellyfin.presentation.theme.spacings
 
 data class SafePadding(val start: Dp, val top: Dp, val end: Dp, val bottom: Dp)
 
 /** When true, the status bar is hidden and its top inset must not be reserved. */
 val LocalHideStatusBar = compositionLocalOf { false }
-
-/**
- * A page's top spacing: while the status bar is shown its inset is followed by the tight status
- * gutter (8dp) instead of the full gutter, which felt too generous right under the bar. With the
- * status bar hidden the inset is satisfied (this SafePadding's top is 0), so the page keeps the
- * plain gutter down from the screen edge.
- */
-@Composable
-fun SafePadding.statusTopSpacing(): Dp =
-    if (LocalHideStatusBar.current) {
-        MaterialTheme.spacings.gutter
-    } else {
-        MaterialTheme.spacings.statusGutter + top
-    }
 
 /**
  * Insets for a top app bar: the status bar and display cutout, collapsed to zero while the status

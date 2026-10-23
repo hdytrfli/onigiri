@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +47,6 @@ import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
@@ -152,7 +152,6 @@ private fun LibraryScreenLayout(
                             onRefresh = { onAction(LibraryAction.RefreshItems) },
                             onInfo = { showDisplayDialog = true },
                             onSort = { showSortByDialog = true },
-                            sortAscending = state.sortOrder == SortOrder.ASCENDING,
                         )
                     },
                     windowInsets = topBarWindowInsets(),
@@ -220,6 +219,13 @@ fun LibraryContent(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { onAction(LibraryAction.RefreshOpenedItem) }
 
     val focusRequester = remember { FocusRequester() }
+
+    // Back closes the search instead of leaving the screen: the query is cleared on the way out so
+    // reopening starts fresh.
+    BackHandler(enabled = showSearchField && state.searchExpanded) {
+        onAction(LibraryAction.SetSearchQuery(""))
+        onAction(LibraryAction.ToggleSearch)
+    }
 
     LaunchedEffect(state.searchExpanded) {
         if (showSearchField && state.searchExpanded) {
@@ -345,7 +351,6 @@ private fun LibraryActionButtons(
     onRefresh: () -> Unit,
     onInfo: () -> Unit,
     onSort: () -> Unit,
-    sortAscending: Boolean,
 ) {
     AppIconButton(
         onClick = onSearch,
@@ -381,16 +386,8 @@ private fun LibraryActionButtons(
         onClick = onSort,
         variant = AppButtonVariant.Ghost,
         content = {
-            // The icon carries the current direction, like the root pages' sort trigger.
             Icon(
-                painter =
-                    painterResource(
-                        if (sortAscending) {
-                            CoreR.drawable.ic_list_sort_ascending
-                        } else {
-                            CoreR.drawable.ic_list_sort_descending
-                        }
-                    ),
+                painter = painterResource(CoreR.drawable.ic_layout_arrow_down),
                 contentDescription = null,
             )
         },

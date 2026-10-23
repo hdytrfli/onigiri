@@ -58,6 +58,11 @@ fun CollectionsScreen(
                         stringResource(CoreR.string.movies_label),
                         stringResource(CoreR.string.shows_label),
                     ),
+                tabIcons =
+                    listOf(
+                        CoreR.drawable.ic_film,
+                        CoreR.drawable.ic_tv,
+                    ),
                 selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
                 dropdownOnCompact = true,

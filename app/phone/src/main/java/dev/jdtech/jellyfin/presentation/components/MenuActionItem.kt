@@ -11,10 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 /** Width shared by the app's dropdown menus, including the editor's per-tile menu. */
 val MenuWidth = 220.dp
+
+/** The gap between a dropdown's trigger and its menu, so the menu doesn't touch the button. */
+private val MenuOffset = DpOffset(x = 0.dp, y = 8.dp)
 
 /**
  * The app's dropdown menu: the shared [MenuWidth] popup, so every menu in the app has the same
@@ -31,6 +35,7 @@ fun AppDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = modifier.width(MenuWidth),
+        offset = MenuOffset,
         content = content,
     )
 }

@@ -110,7 +110,7 @@ fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
                 modifier = Modifier,
                 color = OnScrim,
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
+                maxLines = 1,
                 style = MaterialTheme.typography.titleLarge,
             )
         }

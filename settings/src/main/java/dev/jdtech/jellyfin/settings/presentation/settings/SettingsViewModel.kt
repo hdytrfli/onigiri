@@ -320,6 +320,18 @@ constructor(
                                                     options = R.array.backdrop_ratios,
                                                     optionValues = R.array.backdrop_ratios_values,
                                                 ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.player_sheet_backdrop_ratio,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .player_sheet_backdrop_ratio_summary,
+                                                    optionIcon = OptionIcon.Landscape,
+                                                    backendPreference =
+                                                        appPreferences.playerSheetBackdropRatio,
+                                                    options = R.array.backdrop_ratios,
+                                                    optionValues = R.array.backdrop_ratios_values,
+                                                ),
                                                 // One entry, one dialog: the title image's
                                                 // portrait, landscape, and player widths.
                                                 PreferenceSliders(

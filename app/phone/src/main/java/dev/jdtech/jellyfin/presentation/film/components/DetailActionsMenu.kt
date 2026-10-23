@@ -80,7 +80,7 @@ fun DetailActionsMenu(
     Box(modifier = modifier) {
         AppIconButton(
             onClick = { menuOpen = true },
-            variant = AppButtonVariant.Overlay,
+            variant = AppButtonVariant.Secondary,
             content = {
                 if (identifyState.isApplying) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
