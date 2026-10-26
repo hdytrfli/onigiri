@@ -3,8 +3,9 @@ package dev.jdtech.jellyfin.presentation.settings
 import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.core.presentation.theme.Dimens
+import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.settings.components.SettingsGroupCard
@@ -101,24 +101,23 @@ private fun SettingsScreenLayout(
     onBack: (() -> Unit)?,
     onAction: (SettingsAction) -> Unit,
 ) {
-    // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox, so this
-    // list only adds its own gutter and never reserves the suite's space again. The floating title
-    // bar owns the top spacing.
-    val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
-
+    // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox. The
+    // shared PageContent rule fills the width up to the content cap, centres it, and applies the
+    // global gutter; the floating title bar owns the top spacing.
     PageScaffold(topBar = { PageTopBar(title = pageTitle, onBack = onBack) }) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = contentPadding + innerPadding,
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            items(state.preferenceGroups) { group ->
-                SettingsGroupCard(
-                    group = group,
-                    onAction = onAction,
-                    modifier = Modifier.widthIn(max = Dimens.contentMaxWidth),
-                )
+        PageContent(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+            ) {
+                items(state.preferenceGroups) { group ->
+                    SettingsGroupCard(
+                        group = group,
+                        onAction = onAction,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         }
     }

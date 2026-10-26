@@ -125,7 +125,8 @@ private fun EditImageSearchLayout(
                 else ->
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(gridSize)),
-                        contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter),
                         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {

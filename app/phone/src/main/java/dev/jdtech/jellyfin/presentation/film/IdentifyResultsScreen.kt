@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -45,6 +44,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -118,7 +118,7 @@ private fun IdentifyResultsLayout(
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        PageContent(modifier = Modifier.padding(innerPadding)) {
             when {
                 state.isSearching ->
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -139,7 +139,8 @@ private fun IdentifyResultsLayout(
                 else ->
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                        contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
                         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {

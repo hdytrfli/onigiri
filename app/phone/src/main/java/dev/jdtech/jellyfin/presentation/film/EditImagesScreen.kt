@@ -140,9 +140,9 @@ private fun EditImagesScreenLayout(
                 modifier =
                     Modifier.fillMaxSize()
                         .padding(innerPadding)
-                        .padding(horizontal = MaterialTheme.spacings.default)
+                        .padding(horizontal = MaterialTheme.spacings.gutter)
                         .verticalScroll(rememberScrollState())
-                        .padding(vertical = MaterialTheme.spacings.default),
+                        .padding(vertical = MaterialTheme.spacings.gutter),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
                 // Labels sit above each tile, the same way the thumb/logo/art row does.
@@ -179,7 +179,8 @@ private fun EditImagesScreenLayout(
                     )
                 }
 
-                // No section label here: the Thumb/Logo/Art tiles already carry their own names.
+                // No section label here: the Thumb/Logo/Art tiles already carry their own
+                // names.
                 GridRows(
                     items = MiscImageTypes,
                     columns = gridColumns(GridSize.THUMBNAIL),
