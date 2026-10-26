@@ -126,9 +126,9 @@ private fun ShowScreenLayout(
 ) {
     val safePadding = rememberSafePadding()
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val scrollState = rememberScrollState()
 
@@ -270,9 +270,7 @@ private fun ShowScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
             onBackClick = { onAction(ShowAction.OnBackClick) },
-            onHomeClick = { onAction(ShowAction.OnHomeClick) },
             trailingContent = {
                 state.show?.let { show ->
                     DetailActionsMenu(

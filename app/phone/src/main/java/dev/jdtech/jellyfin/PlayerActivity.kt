@@ -89,6 +89,9 @@ private val playerSpeedTexts = listOf("0.5x", "0.75x", "1x", "1.25x", "1.5x", "1
 /** How long the player overlay takes to fade in or out. */
 private const val OVERLAY_FADE_DURATION_MS = 300L
 
+/** How far the stats panel slides down when the controls row is showing: 48dp row + 12dp gap. */
+private const val STATS_SHOWN_OFFSET_DP = 60f
+
 /** Material's standard easing: the overlay settles into place rather than stopping dead. */
 private val OverlayFadeInInterpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
 
@@ -111,6 +114,9 @@ class PlayerActivity : BasePlayerActivity() {
     /** Whether the stats overlay is switched on, and whether PiP is temporarily hiding it. */
     private val showStats = mutableStateOf(false)
     private val statsSuppressed = mutableStateOf(false)
+
+    /** Whether the controls overlay is showing; drives the stats panel's slide. */
+    private val playerControlsVisible = mutableStateOf(true)
 
     private lateinit var skipSegmentButton: Button
     private lateinit var playerTimeRight: TextView
@@ -171,6 +177,8 @@ class PlayerActivity : BasePlayerActivity() {
         binding.playerView.controllerShowTimeoutMs = 0
         binding.playerView.setControllerVisibilityListener(
             PlayerView.ControllerVisibilityListener { visibility ->
+                playerControlsVisible.value = visibility != View.GONE
+                positionStatsPanel(controlsVisible = visibility != View.GONE)
                 if (visibility == View.GONE) {
                     hideSystemUI()
                 } else {
@@ -191,9 +199,10 @@ class PlayerActivity : BasePlayerActivity() {
         isControlsLocked = false
         isVolumeBrightnessLocked = false
 
-        val reserveStatusBar = !appPreferences.getValue(appPreferences.hideStatusBar)
-        configureInsets(playerControls, reserveStatusBar)
-        configureInsets(lockedControls, reserveStatusBar)
+        // The player always hides the system bars, so it only ever reserves the display cutout,
+        // never the status-bar height.
+        configureInsets(playerControls)
+        configureInsets(lockedControls)
 
         playerGestureHelper =
             PlayerGestureHelper(
@@ -209,14 +218,16 @@ class PlayerActivity : BasePlayerActivity() {
 
         val videoNameTextView = binding.playerView.findViewById<TextView>(R.id.video_name)
         val videoLogoImageView = binding.playerView.findViewById<ImageView>(R.id.video_logo)
-        // Title logo sizing from settings (player width fraction and max width:height ratio).
+        // Title logo sizing from settings (player width fraction), capped at a fixed 16:9 box.
         val playerWidthFraction =
             appPreferences.getValue(appPreferences.titlePlayerWidth).toFloatOrNull() ?: 0.2f
         val logoMaxWidth = (resources.displayMetrics.widthPixels * playerWidthFraction).toInt()
-        val logoRatio =
-            appPreferences.getValue(appPreferences.titleImageRatio).toFloatOrNull() ?: 2f
         videoLogoImageView.maxWidth = logoMaxWidth
-        videoLogoImageView.maxHeight = (logoMaxWidth / logoRatio).toInt()
+        videoLogoImageView.maxHeight = (logoMaxWidth * 9f / 16f).toInt()
+        // Items without a logo fall back to the plain name; it follows the same width setting so
+        // the
+        // preference always has an effect.
+        videoNameTextView.maxWidth = logoMaxWidth
         val videoDescriptionTextView =
             binding.playerView.findViewById<TextView>(R.id.video_description)
         val videoEpisodeNameTextView =
@@ -626,7 +637,6 @@ class PlayerActivity : BasePlayerActivity() {
                         loadStats = { viewModel.player.playbackStats() },
                         streamInfo = streamInfo,
                         onRefreshStream = { viewModel.refreshStreamInfo() },
-                        onClick = { showPlayerControls() },
                     )
                 }
             }
@@ -634,7 +644,11 @@ class PlayerActivity : BasePlayerActivity() {
         statsButton.setOnClickListener {
             showStats.value = !showStats.value
             statsComposeView.isVisible = showStats.value
+            // Toggling the panel on while the controls are up places it below them immediately.
+            positionStatsPanel(playerControlsVisible.value, animate = false)
         }
+        // The controls start out visible, so the panel starts below them without a slide.
+        positionStatsPanel(controlsVisible = true, animate = false)
 
         // Set marker color
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(R.id.exo_progress)
@@ -789,6 +803,10 @@ class PlayerActivity : BasePlayerActivity() {
                                 appPreferences
                                     .getValue(appPreferences.backdropLandscapeRatio)
                                     .toFloat(),
+                            playerSheet =
+                                appPreferences
+                                    .getValue(appPreferences.playerSheetBackdropRatio)
+                                    .toFloatOrNull() ?: (4f / 3f),
                         )
                 ) {
                     content(detailState)
@@ -923,9 +941,33 @@ class PlayerActivity : BasePlayerActivity() {
      */
     internal fun showPlayerControls() {
         binding.playerView.showController()
+        playerControlsVisible.value = true
+        positionStatsPanel(controlsVisible = true)
         // media3 reports visibility changes only, and an overlay that is already visible does not
         // change, so the clock is restarted here as well as from the listener.
         schedulePlayerControlsHide()
+    }
+
+    /**
+     * Slides the stats panel between its resting spot (12dp from the corner) and the spot below the
+     * 48dp controls row (12 + 48 + 12dp). Animating the view's own translation keeps the panel
+     * inside the parent instead of clipping it like a Compose offset would.
+     */
+    private fun positionStatsPanel(controlsVisible: Boolean, animate: Boolean = true) {
+        val statsPanel = findViewById<View>(R.id.player_stats_compose) ?: return
+        val target =
+            if (controlsVisible) STATS_SHOWN_OFFSET_DP * resources.displayMetrics.density else 0f
+        statsPanel.animate().cancel()
+        if (!animate) {
+            statsPanel.translationY = target
+            return
+        }
+        statsPanel
+            .animate()
+            .translationY(target)
+            .setDuration(OVERLAY_FADE_DURATION_MS)
+            .setInterpolator(OverlayFadeInInterpolator)
+            .start()
     }
 
     /**
@@ -951,6 +993,8 @@ class PlayerActivity : BasePlayerActivity() {
         val controller = overlayController() ?: return
         handler.removeCallbacks(hidePlayerControlsAction)
         controller.animate().cancel()
+        playerControlsVisible.value = false
+        positionStatsPanel(controlsVisible = false)
         controller
             .animate()
             .alpha(0f)

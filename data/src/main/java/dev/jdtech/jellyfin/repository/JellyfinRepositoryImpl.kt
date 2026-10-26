@@ -1,13 +1,11 @@
 package dev.jdtech.jellyfin.repository
 
 import android.content.Context
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
+import dev.jdtech.jellyfin.models.FindroidGenre
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidPerson
@@ -15,6 +13,8 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidSegment
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.FindroidSource
+import dev.jdtech.jellyfin.models.RecommendationCategory
+import dev.jdtech.jellyfin.models.RecommendationKind
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.models.toFindroidCollection
@@ -30,7 +30,6 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.FileInfo
 import org.jellyfin.sdk.model.api.BaseItemDto
@@ -53,6 +52,7 @@ import org.jellyfin.sdk.model.api.PlaybackProgressInfo
 import org.jellyfin.sdk.model.api.PlaybackStartInfo
 import org.jellyfin.sdk.model.api.PlaybackStopInfo
 import org.jellyfin.sdk.model.api.PublicSystemInfo
+import org.jellyfin.sdk.model.api.RecommendationType
 import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
@@ -65,6 +65,7 @@ import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
+import org.jellyfin.sdk.model.api.request.GetGenresRequest
 import timber.log.Timber
 
 class JellyfinRepositoryImpl(
@@ -141,6 +142,8 @@ class JellyfinRepositoryImpl(
         sortOrder: SortOrder,
         startIndex: Int?,
         limit: Int?,
+        searchTerm: String?,
+        genreIds: List<UUID>?,
     ): List<FindroidItem> =
         withContext(Dispatchers.IO) {
             jellyfinApi.itemsApi
@@ -153,27 +156,27 @@ class JellyfinRepositoryImpl(
                     sortOrder = listOf(ItemSortOrder.fromName(sortOrder.sortString)),
                     startIndex = startIndex,
                     limit = limit,
+                    searchTerm = searchTerm,
+                    genreIds = genreIds,
                 )
                 .content
                 .items
                 .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
         }
 
-    override suspend fun getItemsPaging(
-        parentId: UUID?,
-        includeTypes: List<BaseItemKind>?,
-        recursive: Boolean,
-        sortBy: SortBy,
-        sortOrder: SortOrder,
-    ): Flow<PagingData<FindroidItem>> {
-        return Pager(
-                config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                pagingSourceFactory = {
-                    ItemsPagingSource(this, parentId, includeTypes, recursive, sortBy, sortOrder)
-                },
-            )
-            .flow
-    }
+    override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.genresApi
+                .getGenres(
+                    GetGenresRequest(
+                        userId = jellyfinApi.userId,
+                        includeItemTypes = includeTypes,
+                    )
+                )
+                .content
+                .items
+                .map { FindroidGenre(id = it.id, name = it.name.orEmpty()) }
+        }
 
     override suspend fun getPerson(personId: UUID): FindroidPerson =
         withContext(Dispatchers.IO) {
@@ -262,6 +265,49 @@ class JellyfinRepositoryImpl(
                 .getLatestMedia(jellyfinApi.userId!!, parentId = parentId, limit = 16)
                 .content
                 .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+        }
+
+    override suspend fun getMovieRecommendations(parentId: UUID?): List<RecommendationCategory> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.moviesApi
+                .getMovieRecommendations(
+                    jellyfinApi.userId!!,
+                    parentId = parentId,
+                    categoryLimit = 6,
+                    itemLimit = 20,
+                )
+                .content
+                .mapNotNull { dto ->
+                    val items =
+                        dto.items
+                            ?.mapNotNull {
+                                it.toFindroidItem(this@JellyfinRepositoryImpl, database)
+                            }
+                            .orEmpty()
+                    if (items.isEmpty()) {
+                        null
+                    } else {
+                        RecommendationCategory(
+                            kind =
+                                when (dto.recommendationType) {
+                                    RecommendationType.SIMILAR_TO_RECENTLY_PLAYED ->
+                                        RecommendationKind.BecauseYouWatched
+                                    RecommendationType.SIMILAR_TO_LIKED_ITEM ->
+                                        RecommendationKind.BecauseYouLike
+                                    RecommendationType.HAS_DIRECTOR_FROM_RECENTLY_PLAYED,
+                                    RecommendationType.HAS_LIKED_DIRECTOR ->
+                                        RecommendationKind.DirectedBy
+                                    RecommendationType.HAS_ACTOR_FROM_RECENTLY_PLAYED,
+                                    RecommendationType.HAS_LIKED_ACTOR ->
+                                        RecommendationKind.Starring
+                                    else -> RecommendationKind.Unknown
+                                },
+                            baselineName = dto.baselineItemName,
+                            categoryId = dto.categoryId,
+                            items = items,
+                        )
+                    }
+                }
         }
 
     override suspend fun getSeasons(seriesId: UUID, offline: Boolean): List<FindroidSeason> =

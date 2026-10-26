@@ -13,6 +13,7 @@ import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
 import coil3.network.cachecontrol.CacheControlCacheStrategy
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.CachePolicy
@@ -50,6 +51,13 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
         if (!appPreferences.getValue(appPreferences.mpvMigrated)) {
             scheduleMpvCleanup(workManager)
         }
+
+        // The subtitle-position slider used to run past the screen bottom (up to 120%); its range
+        // is 0-100 now, so a stored 110/120 would otherwise fall outside the options.
+        val subPosition = appPreferences.getValue(appPreferences.playerMpvSubPosition)
+        if ((subPosition.toIntOrNull() ?: 0) > 100) {
+            appPreferences.setValue(appPreferences.playerMpvSubPosition, "100")
+        }
     }
 
     @OptIn(ExperimentalCoilApi::class, ExperimentalTime::class)
@@ -71,7 +79,14 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
                     )
                     .build()
             }
-            .crossfade(true)
+            // Keep decoded cards around while scrolling. The default cache (25% of the app's heap)
+            // is quickly outgrown by a grid of large posters, which made every item that came back
+            // into view decode again. This pool is shared by every image (posters, backdrops,
+            // logos); 0.45 of this device's 256MB limit is ~115MB, still above the Java heap's
+            // own working set.
+            .memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.45).build() }
+            // Coil's default (200ms) felt abrupt; 300ms reads as a smooth fade.
+            .crossfade(300)
             .build()
     }
 

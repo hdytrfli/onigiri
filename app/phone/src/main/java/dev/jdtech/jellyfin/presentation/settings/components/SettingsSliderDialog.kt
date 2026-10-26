@@ -83,7 +83,7 @@ fun SettingsSliderDialog(
                 Text(
                     text = optionNames.firstOrNull().orEmpty(),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.outline,
                 )
                 SteppedSlider(
                     index = index,
@@ -94,7 +94,7 @@ fun SettingsSliderDialog(
                 Text(
                     text = optionNames.lastOrNull().orEmpty(),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
             preference.descriptionStringRes?.let {
@@ -116,7 +116,7 @@ private fun SettingsSliderDialogPreview() {
             preference =
                 PreferenceSlider(
                     nameStringResource = SettingsR.string.title_portrait_width,
-                    descriptionStringRes = SettingsR.string.title_portrait_width_summary,
+                    descriptionStringRes = SettingsR.string.title_image_summary,
                     optionIcon = OptionIcon.Width,
                     backendPreference = Preference("", "0.7"),
                     options = SettingsR.array.title_width_options,

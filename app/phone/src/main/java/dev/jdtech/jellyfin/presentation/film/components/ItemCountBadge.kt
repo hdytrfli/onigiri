@@ -11,10 +11,10 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @Composable
-fun ItemCountBadge(unplayedItemCount: Int, modifier: Modifier = Modifier) {
+fun ItemCountBadge(count: Int, modifier: Modifier = Modifier) {
     BaseBadge(modifier = modifier) {
         Text(
-            text = unplayedItemCount.toString(),
+            text = count.toString(),
             style = MaterialTheme.typography.labelMedium,
             modifier =
                 Modifier.align(Alignment.Center)

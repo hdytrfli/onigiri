@@ -1,8 +1,6 @@
 package dev.jdtech.jellyfin.presentation.player
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,7 +59,6 @@ fun PlayerStatsPanel(
     streamInfo: StreamInfo?,
     onRefreshStream: () -> Unit,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
     sampleIntervalMs: Long = SAMPLE_INTERVAL_MS,
 ) {
     var stats by remember { mutableStateOf(PlaybackStats()) }
@@ -83,25 +80,12 @@ fun PlayerStatsPanel(
         }
     }
 
-    val interactionSource = remember { MutableInteractionSource() }
-
     Column(
         modifier =
             modifier
                 .width(PANEL_WIDTH)
                 .clip(RoundedCornerShape(PANEL_CORNER))
                 .background(colorResource(CoreR.color.player_background))
-                .then(
-                    if (onClick == null) {
-                        Modifier
-                    } else {
-                        Modifier.clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = onClick,
-                        )
-                    }
-                )
                 .padding(MaterialTheme.spacings.medium),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
     ) {

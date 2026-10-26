@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Going back: the closing window fades while sliding 5% to the left, mirroring the open move. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/fast_out_slow_in">
+    <alpha
+        android:duration="280"
+        android:fromAlpha="1"
+        android:toAlpha="0" />
+    <translate
+        android:duration="280"
+        android:fromXDelta="0"
+        android:toXDelta="-5%p" />
+</set>

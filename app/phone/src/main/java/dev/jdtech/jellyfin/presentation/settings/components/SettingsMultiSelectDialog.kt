@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,8 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.drawableRes
@@ -36,20 +33,11 @@ fun SettingsMultiSelectDialog(
 
     var selectedOptions by remember { mutableStateOf(preference.value) }
 
+    // No action row: a multi-select applies each toggle immediately, like the single-select dialog.
     BaseDialog(
         title = stringResource(preference.nameStringResource),
         description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
-        negativeButton = {
-            AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Secondary) {
-                Text(text = stringResource(SettingsR.string.cancel))
-            }
-        },
-        positiveButton = {
-            AppButton(onClick = { onUpdate(selectedOptions) }) {
-                Text(text = stringResource(SettingsR.string.save))
-            }
-        },
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
@@ -60,12 +48,14 @@ fun SettingsMultiSelectDialog(
                 AppOptionRow(
                     text = option.second,
                     onClick = {
-                        selectedOptions =
+                        val updatedOptions =
                             if (checked) {
                                 selectedOptions - setOfNotNull(option.first)
                             } else {
                                 selectedOptions + listOfNotNull(option.first)
                             }
+                        selectedOptions = updatedOptions
+                        onUpdate(updatedOptions)
                     },
                     selected = checked,
                     role = Role.Checkbox,

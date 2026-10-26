@@ -10,20 +10,14 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -48,15 +41,16 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImagesViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
+import dev.jdtech.jellyfin.presentation.components.MenuActionItem
+import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
-import dev.jdtech.jellyfin.presentation.film.components.MenuActionItem
-import dev.jdtech.jellyfin.presentation.film.components.MenuWidth
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageInfo
@@ -115,32 +109,13 @@ private fun EditImagesScreenLayout(
     onDismissError: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-    Scaffold(
-        modifier =
-            Modifier.fillMaxSize()
-                .recalculateWindowInsets()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+    PageScaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(CoreR.string.edit_images)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
+            PageTopBar(
+                title = stringResource(CoreR.string.edit_images),
+                onBack = navigateBack,
             )
-        },
+        }
     ) { innerPadding ->
         if (state.isLoading && state.images.isEmpty()) {
             Box(
@@ -165,9 +140,9 @@ private fun EditImagesScreenLayout(
                 modifier =
                     Modifier.fillMaxSize()
                         .padding(innerPadding)
-                        .padding(horizontal = MaterialTheme.spacings.default)
+                        .padding(horizontal = MaterialTheme.spacings.gutter)
                         .verticalScroll(rememberScrollState())
-                        .padding(vertical = MaterialTheme.spacings.default),
+                        .padding(vertical = MaterialTheme.spacings.gutter),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
                 // Labels sit above each tile, the same way the thumb/logo/art row does.
@@ -204,7 +179,8 @@ private fun EditImagesScreenLayout(
                     )
                 }
 
-                // No section label here: the Thumb/Logo/Art tiles already carry their own names.
+                // No section label here: the Thumb/Logo/Art tiles already carry their own
+                // names.
                 GridRows(
                     items = MiscImageTypes,
                     columns = gridColumns(GridSize.THUMBNAIL),
@@ -399,10 +375,9 @@ private fun ImagePreview(
                     )
                 },
             )
-            DropdownMenu(
+            AppDropdownMenu(
                 expanded = menuOpen,
                 onDismissRequest = { menuOpen = false },
-                modifier = Modifier.width(MenuWidth),
             ) {
                 // A backdrop is multi-image: adding an image appends, so "Replace" is misleading.
                 if (type != ImageType.BACKDROP) {

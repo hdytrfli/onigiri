@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +46,7 @@ fun AppTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    shape: Shape = MaterialTheme.shapes.small,
 ) {
     Column(
         modifier = modifier,
@@ -86,7 +88,7 @@ fun AppTextField(
                 Row(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .clip(MaterialTheme.shapes.small)
+                            .clip(shape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                             .padding(
                                 horizontal = MaterialTheme.spacings.medium,

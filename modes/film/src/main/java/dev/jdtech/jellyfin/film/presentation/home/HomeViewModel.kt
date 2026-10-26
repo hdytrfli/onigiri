@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.film.R as FilmR
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.HomeSection
@@ -55,6 +56,7 @@ constructor(
         }
         viewModelScope.launch(Dispatchers.Default) {
             try {
+                loadDisplayFields()
                 loadResumeItems()
                 loadNextUpItems()
                 loadViews()
@@ -73,6 +75,7 @@ constructor(
                     loadServerName(serverId)
                 }
 
+                loadDisplayFields()
                 loadSuggestions()
                 loadResumeItems()
                 loadNextUpItems()
@@ -82,6 +85,17 @@ constructor(
             }
             _state.emit(_state.value.copy(isLoading = false))
         }
+    }
+
+    private suspend fun loadDisplayFields() {
+        _state.emit(
+            _state.value.copy(
+                displayFields =
+                    ListDisplayField.fromKeys(
+                        appPreferences.getValue(appPreferences.listDisplayFields)
+                    )
+            )
+        )
     }
 
     private suspend fun loadServerName(serverId: String) {
@@ -175,6 +189,17 @@ constructor(
         when (action) {
             is HomeAction.OnRetryClick -> {
                 loadData()
+            }
+            is HomeAction.ToggleDisplayField -> {
+                val fields = _state.value.displayFields.toMutableSet()
+                if (!fields.add(action.field)) {
+                    fields.remove(action.field)
+                }
+                appPreferences.setValue(
+                    appPreferences.listDisplayFields,
+                    fields.map { it.key }.toSet(),
+                )
+                _state.value = _state.value.copy(displayFields = fields)
             }
             else -> Unit
         }

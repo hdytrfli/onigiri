@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -17,27 +18,39 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSection
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSuggestions
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeView
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyServer
+import dev.jdtech.jellyfin.film.R as FilmR
+import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsViewModel
+import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
 import dev.jdtech.jellyfin.film.presentation.home.HomeState
 import dev.jdtech.jellyfin.film.presentation.home.HomeViewModel
+import dev.jdtech.jellyfin.film.presentation.media.MediaSection
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.presentation.components.ErrorDialog
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.PageToolbar
+import dev.jdtech.jellyfin.presentation.components.RootPage
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
-import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
+import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
+import dev.jdtech.jellyfin.presentation.film.components.Section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
@@ -52,23 +65,107 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Favorites and Downloads render inside this page but their display options are edited from
+    // the shared toolbar, so their ViewModels are hoisted here and handed down.
+    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    val favoritesState by favoritesViewModel.state.collectAsStateWithLifecycle()
+    val downloadsViewModel: DownloadsViewModel = hiltViewModel()
+    val downloadsState by downloadsViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.refresh() }
 
-    HomeScreenLayout(
-        state = state,
-        onAction = { action ->
-            when (action) {
-                is HomeAction.OnItemClick -> onItemClick(action.item)
-                is HomeAction.OnLibraryClick -> onLibraryClick(action.library)
-                is HomeAction.OnSearchClick -> onSearchClick()
-                is HomeAction.OnSettingsClick -> onSettingsClick()
-                is HomeAction.OnManageServers -> onManageServers()
-                else -> Unit
-            }
-            viewModel.onAction(action)
-        },
-    )
+    var selectedTab by rememberSaveable { mutableStateOf(0) }
+    var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
+
+    val onAction: (HomeAction) -> Unit = { action ->
+        when (action) {
+            is HomeAction.OnItemClick -> onItemClick(action.item)
+            is HomeAction.OnLibraryClick -> onLibraryClick(action.library)
+            is HomeAction.OnSearchClick -> onSearchClick()
+            is HomeAction.OnSettingsClick -> onSettingsClick()
+            is HomeAction.OnManageServers -> onManageServers()
+            else -> Unit
+        }
+        viewModel.onAction(action)
+    }
+
+    RootPage(
+        header = {
+            PageToolbar(
+                tabs =
+                    listOf(
+                        stringResource(CoreR.string.title_home),
+                        stringResource(CoreR.string.title_favorite),
+                        stringResource(CoreR.string.title_download),
+                    ),
+                tabIcons =
+                    listOf(
+                        CoreR.drawable.ic_home,
+                        CoreR.drawable.ic_heart,
+                        CoreR.drawable.ic_download,
+                    ),
+                selectedIndex = selectedTab,
+                onSelect = { selectedTab = it },
+                dropdownOnCompact = true,
+                actions = {
+                    AppIconButton(
+                        onClick = { showDisplayDialog = true },
+                        variant = AppButtonVariant.Secondary,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_tv_minimal),
+                                contentDescription = null,
+                            )
+                        },
+                    )
+                },
+            )
+        }
+    ) {
+        when (selectedTab) {
+            0 -> HomeScreenLayout(state = state, onAction = onAction)
+            1 ->
+                FavoritesScreen(
+                    onItemClick = onItemClick,
+                    onSearchClick = onSearchClick,
+                    onSettingsClick = onSettingsClick,
+                    embedded = true,
+                    viewModel = favoritesViewModel,
+                )
+            else ->
+                DownloadsScreen(
+                    onItemClick = onItemClick,
+                    embedded = true,
+                    viewModel = downloadsViewModel,
+                )
+        }
+    }
+
+    // The dialog edits the fields of the tab it was opened from; the other pages pick the shared
+    // preference up when they next load.
+    if (showDisplayDialog) {
+        val onDismiss = { showDisplayDialog = false }
+        when (selectedTab) {
+            0 ->
+                DisplayInfoDialog(
+                    fields = state.displayFields,
+                    onToggle = { viewModel.onAction(HomeAction.ToggleDisplayField(it)) },
+                    onDismiss = onDismiss,
+                )
+            1 ->
+                DisplayInfoDialog(
+                    fields = favoritesState.displayFields,
+                    onToggle = { favoritesViewModel.toggleDisplayField(it) },
+                    onDismiss = onDismiss,
+                )
+            else ->
+                DisplayInfoDialog(
+                    fields = downloadsState.displayFields,
+                    onToggle = { downloadsViewModel.toggleDisplayField(it) },
+                    onDismiss = onDismiss,
+                )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,19 +173,28 @@ fun HomeScreen(
 private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingTop = safePadding.top + MaterialTheme.spacings.small
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
-    val contentPaddingTop = safePadding.top + 88.dp
+    val contentPaddingTop = LocalRootPageContentInset.current
 
-    var showErrorDialog by rememberSaveable { mutableStateOf(false) }
+    if (state.error != null && state.suggestionsSection == null && state.views.isEmpty()) {
+        FullPageError(
+            onRefresh = { onAction(HomeAction.OnRetryClick) },
+            isRefreshing = state.isLoading,
+            error = state.error,
+        )
+        return
+    }
 
     Box(modifier = Modifier.fillMaxSize().semantics { isTraversalGroup = true }) {
-        PullToRefreshBox(isRefreshing = false, onRefresh = { onAction(HomeAction.OnRetryClick) }) {
+        PullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = { onAction(HomeAction.OnRetryClick) },
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().semantics { traversalIndex = 1f },
                 contentPadding = PaddingValues(top = contentPaddingTop, bottom = paddingBottom),
@@ -96,21 +202,33 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
             ) {
                 state.suggestionsSection?.let { section ->
                     item(key = section.id) {
-                        HomeCarousel(
-                            items = section.items,
-                            itemsPadding = itemsPadding,
-                            onAction = onAction,
-                        )
+                        Section(
+                            title = stringResource(FilmR.string.suggestions),
+                            titleModifier =
+                                Modifier.padding(start = paddingStart, end = paddingEnd),
+                        ) {
+                            HomeCarousel(
+                                items = section.items,
+                                itemsPadding = itemsPadding,
+                                onAction = onAction,
+                            )
+                        }
                     }
                 }
                 state.resumeSection?.let { section ->
                     item(key = section.id) {
-                        HomeSection(
-                            section = section.homeSection,
-                            itemsPadding = itemsPadding,
-                            onAction = onAction,
+                        MediaSectionRow(
+                            section =
+                                MediaSection(
+                                    id = section.id.toString(),
+                                    title = section.homeSection.name,
+                                    items = section.homeSection.items,
+                                    useThumbnails = true,
+                                    showRemainingTime = true,
+                                ),
+                            displayFields = state.displayFields,
+                            onItemClick = { item -> onAction(HomeAction.OnItemClick(item)) },
                             modifier = Modifier.animateItem(),
-                            showRemainingTime = true,
                         )
                     }
                 }
@@ -121,6 +239,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                             itemsPadding = itemsPadding,
                             onAction = onAction,
                             modifier = Modifier.animateItem(),
+                            displayFields = state.displayFields,
                         )
                     }
                 }
@@ -130,26 +249,12 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                         itemsPadding = itemsPadding,
                         onAction = onAction,
                         modifier = Modifier.animateItem(),
+                        displayFields = state.displayFields,
                     )
                 }
             }
         }
-
-        if (state.error != null && showErrorDialog) {
-            ErrorDialog(exception = state.error!!, onDismissRequest = { showErrorDialog = false })
-        }
     }
-
-    HomeHeader(
-        serverName = state.server?.name ?: "",
-        isLoading = state.isLoading,
-        isError = state.error != null,
-        onErrorClick = { showErrorDialog = true },
-        onRetryClick = { onAction(HomeAction.OnRetryClick) },
-        onSearchClick = { onAction(HomeAction.OnSearchClick) },
-        onUserClick = { onAction(HomeAction.OnSettingsClick) },
-        modifier = Modifier.padding(start = paddingStart, top = paddingTop, end = paddingEnd),
-    )
 }
 
 @PreviewScreenSizes

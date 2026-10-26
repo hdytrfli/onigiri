@@ -22,9 +22,7 @@ import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 @Composable
 fun ItemTopBar(
     hasBackButton: Boolean,
-    hasHomeButton: Boolean,
     onBackClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {},
     trailingContent: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable (RowScope.() -> Unit) = {},
 ) {
@@ -34,31 +32,19 @@ fun ItemTopBar(
         modifier =
             Modifier.fillMaxWidth()
                 .padding(
-                    start = safePadding.start + MaterialTheme.spacings.small,
-                    top = safePadding.top + MaterialTheme.spacings.small,
-                    end = safePadding.end + MaterialTheme.spacings.small,
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                    top = safePadding.top + MaterialTheme.spacings.gutter,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
                 )
     ) {
         AppButtonGroup {
             if (hasBackButton) {
                 AppIconButton(
                     onClick = onBackClick,
-                    variant = AppButtonVariant.Overlay,
+                    variant = AppButtonVariant.Secondary,
                     content = {
                         Icon(
                             painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = null,
-                        )
-                    },
-                )
-            }
-            if (hasHomeButton) {
-                AppIconButton(
-                    onClick = onHomeClick,
-                    variant = AppButtonVariant.Overlay,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_home),
                             contentDescription = null,
                         )
                     },
@@ -74,5 +60,5 @@ fun ItemTopBar(
 @Composable
 @Preview(showBackground = true)
 private fun ItemTopBarPreview() {
-    FindroidTheme { ItemTopBar(hasBackButton = true, hasHomeButton = true) }
+    FindroidTheme { ItemTopBar(hasBackButton = true) }
 }

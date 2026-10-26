@@ -13,32 +13,44 @@ data class FindroidImages(
     val showPrimary: Uri? = null,
     val showBackdrop: Uri? = null,
     val showLogo: Uri? = null,
+    val primaryBlurHash: String? = null,
+    val backdropBlurHash: String? = null,
 )
+
+/**
+ * Card-sized sources: the server renders at most this wide, so grids stay cheap to fetch/decode.
+ */
+private const val POSTER_IMAGE_WIDTH = 800
+private const val BACKDROP_IMAGE_WIDTH = 1600
+private const val LOGO_IMAGE_WIDTH = 600
 
 fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): FindroidImages {
     val baseUrl = Uri.parse(jellyfinRepository.getBaseUrl())
-    val primary =
-        imageTags?.get(ImageType.PRIMARY)?.let { tag ->
-            baseUrl
-                .buildUpon()
-                .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
-                .appendQueryParameter("tag", tag)
-                .build()
-        }
-    val backdrop =
-        backdropImageTags?.firstOrNull()?.let { tag ->
-            baseUrl
-                .buildUpon()
-                .appendEncodedPath("items/$id/Images/${ImageType.BACKDROP}/0")
-                .appendQueryParameter("tag", tag)
-                .build()
-        }
+    val primaryTag = imageTags?.get(ImageType.PRIMARY)
+    val primary = primaryTag?.let { tag ->
+        baseUrl
+            .buildUpon()
+            .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
+            .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", POSTER_IMAGE_WIDTH.toString())
+            .build()
+    }
+    val backdropTag = backdropImageTags?.firstOrNull()
+    val backdrop = backdropTag?.let { tag ->
+        baseUrl
+            .buildUpon()
+            .appendEncodedPath("items/$id/Images/${ImageType.BACKDROP}/0")
+            .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", BACKDROP_IMAGE_WIDTH.toString())
+            .build()
+    }
     val logo =
         imageTags?.get(ImageType.LOGO)?.let { tag ->
             baseUrl
                 .buildUpon()
                 .appendEncodedPath("items/$id/Images/${ImageType.LOGO}")
                 .appendQueryParameter("tag", tag)
+                .appendQueryParameter("maxWidth", LOGO_IMAGE_WIDTH.toString())
                 .build()
         }
     val showPrimary = seriesPrimaryImageTag?.let { tag ->
@@ -46,6 +58,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$seriesId/Images/${ImageType.PRIMARY}")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", POSTER_IMAGE_WIDTH.toString())
             .build()
     }
     val showBackdrop = seriesPrimaryImageTag?.let { tag ->
@@ -53,6 +66,7 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$seriesId/Images/${ImageType.BACKDROP}/0")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", BACKDROP_IMAGE_WIDTH.toString())
             .build()
     }
     val showLogo = seriesPrimaryImageTag?.let { tag ->
@@ -60,8 +74,11 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
             .buildUpon()
             .appendEncodedPath("items/$seriesId/Images/${ImageType.LOGO}")
             .appendQueryParameter("tag", tag)
+            .appendQueryParameter("maxWidth", LOGO_IMAGE_WIDTH.toString())
             .build()
     }
+    val primaryBlurHash = primaryTag?.let { imageBlurHashes?.get(ImageType.PRIMARY)?.get(it) }
+    val backdropBlurHash = backdropTag?.let { imageBlurHashes?.get(ImageType.BACKDROP)?.get(it) }
 
     return FindroidImages(
         primary = primary,
@@ -70,6 +87,8 @@ fun BaseItemDto.toFindroidImages(jellyfinRepository: JellyfinRepository): Findro
         showPrimary = showPrimary,
         showBackdrop = showBackdrop,
         showLogo = showLogo,
+        primaryBlurHash = primaryBlurHash,
+        backdropBlurHash = backdropBlurHash,
     )
 }
 

@@ -26,10 +26,12 @@ import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
 import dev.jdtech.jellyfin.presentation.utils.GridColumns
 import dev.jdtech.jellyfin.presentation.utils.GridGapBase
 import dev.jdtech.jellyfin.presentation.utils.LocalBackdropRatios
+import dev.jdtech.jellyfin.presentation.utils.LocalBlurHash
 import dev.jdtech.jellyfin.presentation.utils.LocalGridColumns
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -93,6 +95,9 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         CompositionLocalProvider(
                             LocalOfflineMode provides state.isOfflineMode,
+                            LocalBlurHash provides state.blurHash,
+                            LocalPredictiveBack provides state.predictiveBack,
+                            LocalTabletUiMode provides state.tabletUiMode,
                             LocalBackdropRatios provides
                                 BackdropRatios(
                                     portrait = state.backdropPortraitRatio,
@@ -104,7 +109,6 @@ class MainActivity : AppCompatActivity() {
                                 TitleImageConfig(
                                     portraitWidth = state.titlePortraitWidth,
                                     landscapeWidth = state.titleLandscapeWidth,
-                                    ratio = state.titleImageRatio,
                                 ),
                             LocalGridColumns provides
                                 GridColumns(
@@ -112,6 +116,8 @@ class MainActivity : AppCompatActivity() {
                                     posterLandscape = state.gridPosterLandscape,
                                     thumbnailPortrait = state.gridThumbnailPortrait,
                                     thumbnailLandscape = state.gridThumbnailLandscape,
+                                    suggestionPortrait = state.gridSuggestionPortrait,
+                                    suggestionLandscape = state.gridSuggestionLandscape,
                                 ),
                             LocalGridGap provides GridGapBase * state.gridGapScale,
                         ) {

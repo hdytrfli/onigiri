@@ -231,9 +231,6 @@ enum class AppButtonVariant {
     /** An action with no container of its own: top bars, steppers, anything that inherits. */
     Ghost,
 
-    /** An action over artwork, given its own dark scrim so it stays legible. */
-    Overlay,
-
     /** Something destructive or in an error state. */
     Destructive,
 }
@@ -255,16 +252,12 @@ private const val TintAlpha = 0.12f
 /** The ghost variant's press hint: a little stronger, because it has no container to tint. */
 private const val GhostTintAlpha = 0.16f
 
-/** Opacity of the [AppButtonVariant.Overlay] scrim. */
-private const val ScrimAlpha = 0.7f
-
 @Composable
 private fun AppButtonVariant.containerColor(): Color =
     when (this) {
         AppButtonVariant.Primary -> MaterialTheme.colorScheme.primary
         AppButtonVariant.Secondary -> MaterialTheme.colorScheme.secondaryContainer
         AppButtonVariant.Ghost -> Color.Transparent
-        AppButtonVariant.Overlay -> MaterialTheme.colorScheme.scrim.copy(alpha = ScrimAlpha)
         AppButtonVariant.Destructive -> MaterialTheme.colorScheme.errorContainer
     }
 
@@ -274,7 +267,6 @@ private fun AppButtonVariant.contentColor(): Color =
         AppButtonVariant.Primary -> MaterialTheme.colorScheme.onPrimary
         AppButtonVariant.Secondary -> MaterialTheme.colorScheme.onSecondaryContainer
         AppButtonVariant.Ghost -> LocalContentColor.current
-        AppButtonVariant.Overlay -> OnScrim
         AppButtonVariant.Destructive -> MaterialTheme.colorScheme.onErrorContainer
     }
 

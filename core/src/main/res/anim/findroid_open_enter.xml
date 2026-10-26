@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The window slides in from 5% of the width with a fade: a single-axis move, no scaling. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/fast_out_slow_in">
+    <alpha
+        android:duration="300"
+        android:fromAlpha="0"
+        android:toAlpha="1" />
+    <translate
+        android:duration="300"
+        android:fromXDelta="5%p"
+        android:toXDelta="0" />
+</set>

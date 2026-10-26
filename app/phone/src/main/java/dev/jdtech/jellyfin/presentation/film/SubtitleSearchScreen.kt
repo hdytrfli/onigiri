@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -31,10 +30,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -61,9 +56,11 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.PageContent
+import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.plus
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
@@ -113,110 +110,65 @@ private fun SubtitleSearchScreenLayout(
     val languageValues = stringArrayResource(SettingsR.array.languages_values)
     var languagePickerOpen by remember { mutableStateOf(false) }
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val contentPadding = PaddingValues(all = MaterialTheme.spacings.default)
+    val contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter)
 
-    Scaffold(
-        modifier =
-            Modifier.fillMaxSize()
-                .recalculateWindowInsets()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+    PageScaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(CoreR.string.search_subtitles)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
+            PageTopBar(
+                title = stringResource(CoreR.string.search_subtitles),
+                onBack = navigateBack,
             )
-        },
+        }
     ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize().padding(innerPadding),
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = contentPadding,
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                item {
-                    SettingsSection {
-                        LanguageSelectRow(
-                            label = languageLabel(state.language, languageNames, languageValues),
-                            onClick = { languagePickerOpen = true },
-                        )
-                    }
-                }
-                item {
-                    Box(
-                        modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd,
-                    ) {
-                        AppButton(onClick = onSearch, enabled = !state.isSearching) {
-                            Text(text = stringResource(CoreR.string.search))
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                                contentDescription = null,
+            PageContent {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding,
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    item {
+                        SettingsSection {
+                            LanguageSelectRow(
+                                label =
+                                    languageLabel(state.language, languageNames, languageValues),
+                                onClick = { languagePickerOpen = true },
                             )
                         }
                     }
-                }
-
-                if (state.existing.isNotEmpty()) {
                     item {
-                        SettingsSection(title = stringResource(CoreR.string.existing_subtitles)) {
-                            state.existing.forEachIndexed { index, stream ->
-                                ExistingSubtitleRow(
-                                    stream = stream,
-                                    deleting = state.deletingIndex == stream.index,
-                                    onDelete = { onDelete(stream.index) },
+                        Box(
+                            modifier =
+                                Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd,
+                        ) {
+                            AppButton(onClick = onSearch, enabled = !state.isSearching) {
+                                Text(text = stringResource(CoreR.string.search))
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                    contentDescription = null,
                                 )
-                                if (index < state.existing.lastIndex) {
-                                    HorizontalDivider(
-                                        color = DividerDefaults.color.copy(alpha = 0.2f)
-                                    )
-                                }
                             }
                         }
                     }
-                }
 
-                if (state.isSearching || state.results.isNotEmpty()) {
-                    item {
-                        SettingsSection(title = stringResource(CoreR.string.available_subtitles)) {
-                            if (state.isSearching) {
-                                Box(
-                                    modifier =
-                                        Modifier.fillMaxWidth()
-                                            .padding(MaterialTheme.spacings.medium),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                                }
-                            } else {
-                                state.results.forEachIndexed { index, result ->
-                                    RemoteSubtitleRow(
-                                        result = result,
-                                        isDownloading =
-                                            state.downloadingId != null &&
-                                                state.downloadingId == result.id,
-                                        onDownload = { result.id?.let(onDownload) },
-                                        onInfo = { onInfo(result) },
+                    if (state.existing.isNotEmpty()) {
+                        item {
+                            SettingsSection(
+                                title = stringResource(CoreR.string.existing_subtitles)
+                            ) {
+                                state.existing.forEachIndexed { index, stream ->
+                                    ExistingSubtitleRow(
+                                        stream = stream,
+                                        deleting = state.deletingIndex == stream.index,
+                                        onDelete = { onDelete(stream.index) },
                                     )
-                                    if (index < state.results.lastIndex) {
+                                    if (index < state.existing.lastIndex) {
                                         HorizontalDivider(
                                             color = DividerDefaults.color.copy(alpha = 0.2f)
                                         )
@@ -225,28 +177,66 @@ private fun SubtitleSearchScreenLayout(
                             }
                         }
                     }
-                } else {
-                    // Plain empty/error state: no card, so it doesn't look like a list item.
-                    item {
-                        Column(modifier = Modifier.widthIn(max = Dimens.contentMaxWidth)) {
-                            Text(
-                                text = stringResource(CoreR.string.available_subtitles),
-                                modifier = Modifier.padding(start = MaterialTheme.spacings.medium),
-                                style = MaterialTheme.typography.titleSmall,
-                            )
-                            Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
-                            Text(
-                                text =
-                                    if (state.error != null)
-                                        stringResource(CoreR.string.search_subtitles_error)
-                                    else stringResource(CoreR.string.search_subtitles_empty),
-                                color =
-                                    if (state.error != null) MaterialTheme.colorScheme.error
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier =
-                                    Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                            )
+
+                    if (state.isSearching || state.results.isNotEmpty()) {
+                        item {
+                            SettingsSection(
+                                title = stringResource(CoreR.string.available_subtitles)
+                            ) {
+                                if (state.isSearching) {
+                                    Box(
+                                        modifier =
+                                            Modifier.fillMaxWidth()
+                                                .padding(MaterialTheme.spacings.medium),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
+                                    }
+                                } else {
+                                    state.results.forEachIndexed { index, result ->
+                                        RemoteSubtitleRow(
+                                            result = result,
+                                            isDownloading =
+                                                state.downloadingId != null &&
+                                                    state.downloadingId == result.id,
+                                            onDownload = { result.id?.let(onDownload) },
+                                            onInfo = { onInfo(result) },
+                                        )
+                                        if (index < state.results.lastIndex) {
+                                            HorizontalDivider(
+                                                color = DividerDefaults.color.copy(alpha = 0.2f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Plain empty/error state: no card, so it doesn't look like a list item.
+                        item {
+                            Column(modifier = Modifier.widthIn(max = Dimens.contentMaxWidth)) {
+                                Text(
+                                    text = stringResource(CoreR.string.available_subtitles),
+                                    modifier =
+                                        Modifier.padding(start = MaterialTheme.spacings.medium),
+                                    style = MaterialTheme.typography.titleSmall,
+                                )
+                                Spacer(modifier = Modifier.height(MaterialTheme.spacings.small))
+                                Text(
+                                    text =
+                                        if (state.error != null)
+                                            stringResource(CoreR.string.search_subtitles_error)
+                                        else stringResource(CoreR.string.search_subtitles_empty),
+                                    color =
+                                        if (state.error != null) MaterialTheme.colorScheme.error
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier =
+                                        Modifier.padding(
+                                            horizontal = MaterialTheme.spacings.medium
+                                        ),
+                                )
+                            }
                         }
                     }
                 }

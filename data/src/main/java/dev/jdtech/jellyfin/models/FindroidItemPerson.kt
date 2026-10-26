@@ -18,6 +18,7 @@ fun BaseItemPerson.toFindroidImage(repository: JellyfinRepository): FindroidItem
                     .buildUpon()
                     .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
                     .appendQueryParameter("tag", tag)
+                    .appendQueryParameter("maxWidth", "400")
                     .build()
             },
         blurHash = imageBlurHashes?.get(ImageType.PRIMARY)?.get(primaryImageTag),

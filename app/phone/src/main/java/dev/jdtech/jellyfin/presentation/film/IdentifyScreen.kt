@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -28,18 +27,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,10 +47,10 @@ import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyState
 import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.PageContent
+import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 
 /**
@@ -105,117 +100,102 @@ private fun IdentifyScreenLayout(
     onSearch: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-    Scaffold(
-        modifier =
-            Modifier.fillMaxSize()
-                .recalculateWindowInsets()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+    PageScaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(CoreR.string.identify)) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = navigateBack,
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
+            PageTopBar(
+                title = stringResource(CoreR.string.identify),
+                onBack = navigateBack,
             )
-        },
+        }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(innerPadding),
-            contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item {
-                IdentifyCard {
-                    IdentifyField(
-                        label = stringResource(CoreR.string.identify_name),
-                        hint = stringResource(CoreR.string.identify_name_hint),
-                        icon = CoreR.drawable.ic_film,
-                        value = state.query,
-                        onValueChange = onQueryChange,
-                        modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                    )
-                    // The advanced fields stay in the same group, right below the title, two per
-                    // row.
-                    AnimatedVisibility(visible = state.advanced) {
-                        Column(
-                            verticalArrangement =
-                                Arrangement.spacedBy(MaterialTheme.spacings.medium)
-                        ) {
-                            AdvancedFieldRow {
-                                IdentifyField(
-                                    label = stringResource(CoreR.string.identify_year),
-                                    hint = stringResource(CoreR.string.identify_year_field_hint),
-                                    icon = CoreR.drawable.ic_calendar,
-                                    value = state.year,
-                                    onValueChange = onYearChange,
-                                    keyboardType = KeyboardType.Number,
-                                    modifier = Modifier.weight(1f),
-                                )
-                                IdentifyField(
-                                    label = stringResource(CoreR.string.identify_imdb),
-                                    hint = stringResource(CoreR.string.identify_imdb_hint),
-                                    icon = CoreR.drawable.ic_video,
-                                    value = state.imdbId,
-                                    onValueChange = onImdbChange,
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                            AdvancedFieldRow {
-                                IdentifyField(
-                                    label = stringResource(CoreR.string.identify_tmdb),
-                                    hint = stringResource(CoreR.string.identify_tmdb_hint),
-                                    icon = CoreR.drawable.ic_video,
-                                    value = state.tmdbId,
-                                    onValueChange = onTmdbChange,
-                                    keyboardType = KeyboardType.Number,
-                                    modifier = Modifier.weight(1f),
-                                )
-                                IdentifyField(
-                                    label = stringResource(CoreR.string.identify_tvdb),
-                                    hint = stringResource(CoreR.string.identify_tvdb_hint),
-                                    icon = CoreR.drawable.ic_video,
-                                    value = state.tvdbId,
-                                    onValueChange = onTvdbChange,
-                                    keyboardType = KeyboardType.Number,
-                                    modifier = Modifier.weight(1f),
-                                )
+        PageContent(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                item {
+                    IdentifyCard {
+                        IdentifyField(
+                            label = stringResource(CoreR.string.identify_name),
+                            hint = stringResource(CoreR.string.identify_name_hint),
+                            icon = CoreR.drawable.ic_film,
+                            value = state.query,
+                            onValueChange = onQueryChange,
+                            modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
+                        )
+                        // The advanced fields stay in the same group, right below the title, two
+                        // per
+                        // row.
+                        AnimatedVisibility(visible = state.advanced) {
+                            Column(
+                                verticalArrangement =
+                                    Arrangement.spacedBy(MaterialTheme.spacings.medium)
+                            ) {
+                                AdvancedFieldRow {
+                                    IdentifyField(
+                                        label = stringResource(CoreR.string.identify_year),
+                                        hint =
+                                            stringResource(CoreR.string.identify_year_field_hint),
+                                        icon = CoreR.drawable.ic_calendar,
+                                        value = state.year,
+                                        onValueChange = onYearChange,
+                                        keyboardType = KeyboardType.Number,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    IdentifyField(
+                                        label = stringResource(CoreR.string.identify_imdb),
+                                        hint = stringResource(CoreR.string.identify_imdb_hint),
+                                        icon = CoreR.drawable.ic_video,
+                                        value = state.imdbId,
+                                        onValueChange = onImdbChange,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                                AdvancedFieldRow {
+                                    IdentifyField(
+                                        label = stringResource(CoreR.string.identify_tmdb),
+                                        hint = stringResource(CoreR.string.identify_tmdb_hint),
+                                        icon = CoreR.drawable.ic_video,
+                                        value = state.tmdbId,
+                                        onValueChange = onTmdbChange,
+                                        keyboardType = KeyboardType.Number,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    IdentifyField(
+                                        label = stringResource(CoreR.string.identify_tvdb),
+                                        hint = stringResource(CoreR.string.identify_tvdb_hint),
+                                        icon = CoreR.drawable.ic_video,
+                                        value = state.tvdbId,
+                                        onValueChange = onTvdbChange,
+                                        keyboardType = KeyboardType.Number,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
                             }
                         }
-                    }
-                    // Only the advanced toggle is separated, so the fields read as one group.
-                    IdentifyDivider()
-                    AdvancedRow(
-                        checked = state.advanced,
-                        onCheckedChange = onAdvancedChange,
-                    )
-                }
-            }
-
-            item {
-                Box(
-                    modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd,
-                ) {
-                    AppButton(onClick = onSearch, enabled = state.query.isNotBlank()) {
-                        Text(text = stringResource(CoreR.string.search))
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_up_right),
-                            contentDescription = null,
+                        // Only the advanced toggle is separated, so the fields read as one group.
+                        IdentifyDivider()
+                        AdvancedRow(
+                            checked = state.advanced,
+                            onCheckedChange = onAdvancedChange,
                         )
+                    }
+                }
+
+                item {
+                    Box(
+                        modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        AppButton(onClick = onSearch, enabled = state.query.isNotBlank()) {
+                            Text(text = stringResource(CoreR.string.search))
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                                contentDescription = null,
+                            )
+                        }
                     }
                 }
             }

@@ -9,11 +9,13 @@ import kotlin.time.toDuration
 import org.jellyfin.sdk.api.client.HttpClientOptions
 import org.jellyfin.sdk.api.client.extensions.brandingApi
 import org.jellyfin.sdk.api.client.extensions.devicesApi
+import org.jellyfin.sdk.api.client.extensions.genresApi
 import org.jellyfin.sdk.api.client.extensions.imageApi
 import org.jellyfin.sdk.api.client.extensions.itemLookupApi
 import org.jellyfin.sdk.api.client.extensions.itemsApi
 import org.jellyfin.sdk.api.client.extensions.mediaInfoApi
 import org.jellyfin.sdk.api.client.extensions.mediaSegmentsApi
+import org.jellyfin.sdk.api.client.extensions.moviesApi
 import org.jellyfin.sdk.api.client.extensions.playStateApi
 import org.jellyfin.sdk.api.client.extensions.quickConnectApi
 import org.jellyfin.sdk.api.client.extensions.remoteImageApi
@@ -67,11 +69,13 @@ class JellyfinApi(
 
     val brandingApi = api.brandingApi
     val devicesApi = api.devicesApi
+    val genresApi = api.genresApi
     val imageApi = api.imageApi
     val itemsApi = api.itemsApi
     val itemLookupApi = api.itemLookupApi
     val mediaInfoApi = api.mediaInfoApi
     val mediaSegmentsApi = api.mediaSegmentsApi
+    val moviesApi = api.moviesApi
     val playStateApi = api.playStateApi
     val quickConnectApi = api.quickConnectApi
     val remoteImageApi = api.remoteImageApi

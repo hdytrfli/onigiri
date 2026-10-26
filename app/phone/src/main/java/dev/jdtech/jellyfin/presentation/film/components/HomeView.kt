@@ -1,31 +1,24 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.home.HomeAction
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
-import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 
@@ -35,20 +28,13 @@ fun HomeView(
     itemsPadding: PaddingValues,
     onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier,
+    displayFields: Set<ListDisplayField> = emptySet(),
 ) {
-    Column(modifier = modifier) {
-        Row(
-            modifier =
-                Modifier.fillMaxWidth().height(AppButtonSize.Default.value).padding(itemsPadding),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(FilmR.string.latest_library, view.view.name),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+    Section(
+        title = stringResource(FilmR.string.latest_library, view.view.name),
+        modifier = modifier,
+        titleModifier = Modifier.padding(itemsPadding),
+        trailingContent = {
             AppIconButton(
                 onClick = {
                     onAction(
@@ -62,16 +48,18 @@ fun HomeView(
                         )
                     )
                 },
+                size = AppButtonSize.Decorator,
                 variant = AppButtonVariant.Ghost,
                 content = {
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_arrow_up_right),
+                        painter = painterResource(CoreR.drawable.ic_ellipsis),
                         contentDescription = null,
+                        modifier = Modifier.size(20.dp),
                     )
                 },
             )
-        }
-        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+        },
+    ) {
         GridRows(
             items = view.view.items,
             columns = gridColumns(GridSize.POSTER),
@@ -82,6 +70,9 @@ fun HomeView(
                 direction = Direction.VERTICAL,
                 onClick = { onAction(HomeAction.OnItemClick(item)) },
                 fillWidth = true,
+                showYear = ListDisplayField.Year in displayFields,
+                showCommunityRating = ListDisplayField.CommunityRating in displayFields,
+                showAgeRating = ListDisplayField.AgeRating in displayFields,
             )
         }
     }

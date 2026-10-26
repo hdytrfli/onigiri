@@ -73,28 +73,17 @@ abstract class BasePlayerActivity : AppCompatActivity() {
     }
 
     /**
-     * Reserves the same top inset the rest of the app uses for its top bars. The player hides the
-     * system bars, so the status-bar height is read with `getInsetsIgnoringVisibility` - this keeps
-     * the player's top row at the same offset as a detail top bar and stops it jumping up when
-     * playback opens. When the user hides the status bar in the interface settings, only the
-     * display cutout is reserved, exactly like
-     * [dev.jdtech.jellyfin.presentation.utils.rememberSafePadding].
+     * Reserves the display cutout vertically for the player's controls. The player hides the system
+     * bars and uses the full screen width - the video and controls run under a side camera cutout
+     * instead of leaving a dead strip - so only the top/bottom cutout insets are padded.
      */
-    protected fun configureInsets(playerControls: View, reserveStatusBar: Boolean) {
+    protected fun configureInsets(playerControls: View) {
         playerControls.setOnApplyWindowInsetsListener { _, windowInsets ->
             val cutout = windowInsets.displayCutout
-            val statusBarTop =
-                if (reserveStatusBar) {
-                    windowInsets
-                        .getInsetsIgnoringVisibility(WindowInsetsCompat.Type.statusBars())
-                        .top
-                } else {
-                    0
-                }
             playerControls.updatePadding(
-                left = cutout?.safeInsetLeft ?: 0,
-                top = maxOf(cutout?.safeInsetTop ?: 0, statusBarTop),
-                right = cutout?.safeInsetRight ?: 0,
+                left = 0,
+                top = cutout?.safeInsetTop ?: 0,
+                right = 0,
                 bottom = cutout?.safeInsetBottom ?: 0,
             )
             return@setOnApplyWindowInsetsListener windowInsets

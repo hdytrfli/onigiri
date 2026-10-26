@@ -27,8 +27,6 @@ fun SettingsSelectDialog(
 ) {
     val lazyListState = rememberLazyListState()
 
-    val optionIcon = preference.optionIcon?.drawableRes()
-
     BaseDialog(
         title = stringResource(preference.nameStringResource),
         description = preference.descriptionStringRes?.let { stringResource(it) },
@@ -40,7 +38,7 @@ fun SettingsSelectDialog(
                     text = option.second,
                     onClick = { onUpdate(option.first) },
                     selected = option.first == preference.value,
-                    iconDrawableId = optionIcon,
+                    iconDrawableId = preference.optionIcon?.drawableRes(option.first),
                     role = Role.RadioButton,
                 )
             }

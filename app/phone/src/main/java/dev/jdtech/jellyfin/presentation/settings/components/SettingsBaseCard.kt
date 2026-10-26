@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.settings.presentation.models.Preference
-import dev.jdtech.jellyfin.settings.presentation.models.PreferenceCategory
 
 /** Maximum fraction of a row's width its trailing value may take before it ellipsises. */
 private const val TRAILING_VALUE_MAX_WIDTH_FRACTION = 0.45f
@@ -33,9 +32,9 @@ private const val DISABLED_ALPHA = 0.38f
 
 /**
  * One settings row: title with its description underneath, and an optional trailing value and/or
- * trailing content. A leading icon is reserved for category rows (the root settings); child
- * settings never show one. The title column always takes the remaining width so a long trailing
- * value can never squeeze it.
+ * trailing content. A leading icon is drawn whenever the preference provides one (the root
+ * settings' categories, plus toggles like offline mode); rows without an icon never show one. The
+ * title column always takes the remaining width so a long trailing value can never squeeze it.
  *
  * Pass [onClick] to make the whole row clickable (the common case) or leave it null for rows whose
  * only interactions are their trailing controls, such as [SettingsStepperCard].
@@ -96,7 +95,7 @@ private fun SettingsCardRow(
             modifier = Modifier.padding(MaterialTheme.spacings.medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (preference is PreferenceCategory && preference.iconDrawableId != null) {
+            if (preference.iconDrawableId != null) {
                 Icon(
                     painter = painterResource(preference.iconDrawableId!!),
                     contentDescription = null,

@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,6 +56,9 @@ fun MediaScreen(
 
     LaunchedEffect(true) { viewModel.loadData() }
 
+    // Back closes the search instead of leaving the page.
+    BackHandler(enabled = searchExpanded) { onSearchExpand(false) }
+
     MediaScreenLayout(
         state = state,
         searchState = searchState,
@@ -90,10 +94,10 @@ private fun MediaScreenLayout(
 ) {
     val safePadding = rememberSafePadding(handleStartInsets = false)
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingTop = safePadding.top + MaterialTheme.spacings.small
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val contentPaddingTop = safePadding.top + 88.dp
 

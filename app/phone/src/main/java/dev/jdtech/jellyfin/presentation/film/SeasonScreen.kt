@@ -34,8 +34,6 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
-import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
@@ -44,6 +42,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.ParentNavMenu
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -104,9 +103,9 @@ private fun SeasonScreenLayout(
 ) {
     val safePadding = rememberSafePadding()
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val lazyListState = rememberLazyListState()
 
@@ -208,9 +207,7 @@ private fun SeasonScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
             onBackClick = { onAction(SeasonAction.OnBackClick) },
-            onHomeClick = { onAction(SeasonAction.OnHomeClick) },
             trailingContent = {
                 state.season?.let { season ->
                     DetailActionsMenu(
@@ -220,17 +217,15 @@ private fun SeasonScreenLayout(
                     )
                 }
             },
-        ) {
-            Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
-            state.season?.let { season ->
-                AppButton(
-                    onClick = { onAction(SeasonAction.NavigateToSeries(season.seriesId)) },
-                    variant = AppButtonVariant.Overlay,
-                ) {
-                    Text(text = season.seriesName, overflow = TextOverflow.Ellipsis, maxLines = 1)
+            content = {
+                state.season?.let { season ->
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    ParentNavMenu(
+                        onShowClick = { onAction(SeasonAction.NavigateToSeries(season.seriesId)) }
+                    )
                 }
-            }
-        }
+            },
+        )
     }
 }
 

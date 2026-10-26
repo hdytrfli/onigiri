@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.PlayerActivity
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderAction
@@ -43,9 +45,7 @@ import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
-import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
@@ -56,6 +56,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
+import dev.jdtech.jellyfin.presentation.film.components.ParentNavMenu
 import dev.jdtech.jellyfin.presentation.film.components.VideoMetadataBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
@@ -153,13 +154,20 @@ private fun EpisodeScreenLayout(
 ) {
     val safePadding = rememberSafePadding()
 
-    val paddingStart = safePadding.start + MaterialTheme.spacings.default
-    val paddingEnd = safePadding.end + MaterialTheme.spacings.default
-    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.default
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
 
     val scrollState = rememberScrollState()
 
     val spacingScale = LocalContentSpacingScale.current
+
+    // Tablet keeps the season line in the header and the extra top-bar actions; compact widths show
+    // only the episode name and the back button.
+    val showNamesInHeader =
+        currentWindowAdaptiveInfo()
+            .windowSizeClass
+            .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.episode?.let { episode ->
@@ -181,16 +189,18 @@ private fun EpisodeScreenLayout(
                                             episode.parentIndexNumber,
                                         )
                                     }
-                            Text(
-                                text =
-                                    "$seasonName - " +
-                                        stringResource(
-                                            id = CoreR.string.episode_number,
-                                            episode.indexNumber,
-                                        ),
-                                maxLines = 1,
-                                style = MaterialTheme.typography.labelLarge,
-                            )
+                            if (showNamesInHeader) {
+                                Text(
+                                    text =
+                                        "$seasonName - " +
+                                            stringResource(
+                                                id = CoreR.string.episode_number,
+                                                episode.indexNumber,
+                                            ),
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
                             Text(
                                 text = episode.name,
                                 overflow = TextOverflow.Ellipsis,
@@ -291,40 +301,16 @@ private fun EpisodeScreenLayout(
 
         ItemTopBar(
             hasBackButton = true,
-            hasHomeButton = true,
             onBackClick = { onAction(EpisodeAction.OnBackClick) },
-            onHomeClick = { onAction(EpisodeAction.OnHomeClick) },
             content = {
-                Spacer(modifier = Modifier.width(MaterialTheme.spacings.extraSmall))
                 state.episode?.let { episode ->
-                    AppButtonGroup {
-                        AppButton(
-                            onClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
-                            variant = AppButtonVariant.Overlay,
-                        ) {
-                            Text(
-                                text = episode.seriesName,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                            )
-                        }
-                        AppButton(
-                            onClick = {
-                                onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
-                            },
-                            variant = AppButtonVariant.Overlay,
-                        ) {
-                            episode.seasonName?.let { seasonName -> Text(seasonName) }
-                                ?: run {
-                                    Text(
-                                        stringResource(
-                                            CoreR.string.season_number,
-                                            episode.parentIndexNumber,
-                                        )
-                                    )
-                                }
-                        }
-                    }
+                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                    ParentNavMenu(
+                        onShowClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
+                        onSeasonClick = {
+                            onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
+                        },
+                    )
                 }
             },
             trailingContent = {

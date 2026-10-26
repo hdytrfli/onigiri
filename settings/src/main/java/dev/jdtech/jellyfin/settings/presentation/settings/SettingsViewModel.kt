@@ -20,6 +20,7 @@ import dev.jdtech.jellyfin.settings.presentation.models.PreferenceLongInput
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceMultiSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSelect
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSlider
+import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSliders
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceStepper
 import dev.jdtech.jellyfin.settings.presentation.models.PreferenceSwitch
 import javax.inject.Inject
@@ -66,6 +67,7 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_languages,
                                         preferences =
                                             listOf(
                                                 PreferenceAppLanguage(
@@ -75,12 +77,7 @@ constructor(
                                                     enabled =
                                                         Build.VERSION.SDK_INT >=
                                                             Build.VERSION_CODES.TIRAMISU,
-                                                )
-                                            )
-                                    ),
-                                    PreferenceGroup(
-                                        preferences =
-                                            listOf(
+                                                ),
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.settings_preferred_audio_language,
@@ -116,8 +113,8 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.playerAlwaysPlaySubtitles,
                                                 ),
-                                            )
-                                    ),
+                                            ),
+                                    )
                                 ),
                         )
                     )
@@ -141,6 +138,41 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.general,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource = R.string.tablet_mode,
+                                                    descriptionStringRes =
+                                                        R.string.tablet_mode_summary,
+                                                    optionIcon = OptionIcon.TabletMode,
+                                                    backendPreference = appPreferences.tabletUiMode,
+                                                    options = R.array.tablet_ui_modes_options,
+                                                    optionValues = R.array.tablet_ui_modes_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.predictive_back,
+                                                    descriptionStringRes =
+                                                        R.string.predictive_back_summary,
+                                                    backendPreference =
+                                                        appPreferences.predictiveBack,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.blur_hash,
+                                                    descriptionStringRes =
+                                                        R.string.blur_hash_summary,
+                                                    backendPreference = appPreferences.blurHash,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.extra_info,
+                                                    descriptionStringRes =
+                                                        R.string.extra_info_summary,
+                                                    backendPreference =
+                                                        appPreferences.displayExtraInfo,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
                                         nameStringResource = R.string.settings_category_appearance,
                                         preferences =
                                             listOf(
@@ -150,19 +182,6 @@ constructor(
                                                         R.string.hide_status_bar_summary,
                                                     backendPreference =
                                                         appPreferences.hideStatusBar,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.offline_mode,
-                                                    descriptionStringRes =
-                                                        R.string.offline_mode_summary,
-                                                    onClick = {
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.RestartActivity
-                                                            )
-                                                        }
-                                                    },
-                                                    backendPreference = appPreferences.offlineMode,
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource = R.string.confirm_exit,
@@ -182,46 +201,87 @@ constructor(
                                         nameStringResource = R.string.settings_group_layout_grid,
                                         preferences =
                                             listOf(
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.grid_poster_portrait,
+                                                PreferenceSliders(
+                                                    nameStringResource = R.string.grid_posters,
                                                     descriptionStringRes =
-                                                        R.string.grid_poster_portrait_summary,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
-                                                    backendPreference =
-                                                        appPreferences.gridPosterColumnsPortrait,
+                                                        R.string.grid_posters_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.grid_poster_portrait,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridPosterColumnsPortrait,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.grid_poster_landscape,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridPosterColumnsLandscape,
+                                                            ),
+                                                        ),
                                                 ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.grid_poster_landscape,
+                                                PreferenceSliders(
+                                                    nameStringResource = R.string.grid_thumbnails,
                                                     descriptionStringRes =
-                                                        R.string.grid_poster_landscape_summary,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
-                                                    backendPreference =
-                                                        appPreferences.gridPosterColumnsLandscape,
+                                                        R.string.grid_thumbnails_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .grid_thumbnail_portrait,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridThumbnailColumnsPortrait,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .grid_thumbnail_landscape,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridThumbnailColumnsLandscape,
+                                                            ),
+                                                        ),
                                                 ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.grid_thumbnail_portrait,
+                                                PreferenceSliders(
+                                                    nameStringResource = R.string.grid_suggestions,
                                                     descriptionStringRes =
-                                                        R.string.grid_thumbnail_portrait_summary,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
-                                                    backendPreference =
-                                                        appPreferences.gridThumbnailColumnsPortrait,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.grid_thumbnail_landscape,
-                                                    descriptionStringRes =
-                                                        R.string.grid_thumbnail_landscape_summary,
-                                                    options = R.array.grid_columns,
-                                                    optionValues = R.array.grid_columns,
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .gridThumbnailColumnsLandscape,
+                                                        R.string.grid_suggestions_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .grid_suggestion_portrait,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridSuggestionColumnsPortrait,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .grid_suggestion_landscape,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridSuggestionColumnsLandscape,
+                                                            ),
+                                                        ),
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.grid_spacing,
@@ -235,7 +295,7 @@ constructor(
                                             ),
                                     ),
                                     PreferenceGroup(
-                                        nameStringResource = R.string.backdrop,
+                                        nameStringResource = R.string.settings_group_artwork,
                                         preferences =
                                             listOf(
                                                 PreferenceSelect(
@@ -260,54 +320,59 @@ constructor(
                                                     options = R.array.backdrop_ratios,
                                                     optionValues = R.array.backdrop_ratios_values,
                                                 ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.title_image,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.title_portrait_width,
-                                                    descriptionStringRes =
-                                                        R.string.title_portrait_width_summary,
-                                                    optionIcon = OptionIcon.Width,
-                                                    backendPreference =
-                                                        appPreferences.titlePortraitWidth,
-                                                    options = R.array.title_width_options,
-                                                    optionValues = R.array.title_width_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.title_landscape_width,
-                                                    descriptionStringRes =
-                                                        R.string.title_landscape_width_summary,
-                                                    optionIcon = OptionIcon.Width,
-                                                    backendPreference =
-                                                        appPreferences.titleLandscapeWidth,
-                                                    options = R.array.title_width_options_low,
-                                                    optionValues = R.array.title_width_values_low,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.title_player_width,
-                                                    descriptionStringRes =
-                                                        R.string.title_player_width_summary,
-                                                    optionIcon = OptionIcon.Width,
-                                                    backendPreference =
-                                                        appPreferences.titlePlayerWidth,
-                                                    options = R.array.title_width_options_low,
-                                                    optionValues = R.array.title_width_values_low,
-                                                ),
                                                 PreferenceSelect(
-                                                    nameStringResource = R.string.title_image_ratio,
+                                                    nameStringResource =
+                                                        R.string.player_sheet_backdrop_ratio,
                                                     descriptionStringRes =
-                                                        R.string.title_image_ratio_summary,
-                                                    optionIcon = OptionIcon.Ratio,
+                                                        R.string
+                                                            .player_sheet_backdrop_ratio_summary,
+                                                    optionIcon = OptionIcon.Landscape,
                                                     backendPreference =
-                                                        appPreferences.titleImageRatio,
-                                                    options = R.array.title_ratio_options,
-                                                    optionValues = R.array.title_ratio_values,
+                                                        appPreferences.playerSheetBackdropRatio,
+                                                    options = R.array.backdrop_ratios,
+                                                    optionValues = R.array.backdrop_ratios_values,
+                                                ),
+                                                // One entry, one dialog: the title image's
+                                                // portrait, landscape, and player widths.
+                                                PreferenceSliders(
+                                                    nameStringResource = R.string.title_image,
+                                                    descriptionStringRes =
+                                                        R.string.title_image_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.title_portrait_width,
+                                                                options =
+                                                                    R.array.title_width_options,
+                                                                optionValues =
+                                                                    R.array.title_width_values,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .titlePortraitWidth,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.title_landscape_width,
+                                                                options =
+                                                                    R.array.title_width_options_low,
+                                                                optionValues =
+                                                                    R.array.title_width_values_low,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .titleLandscapeWidth,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.title_player_width,
+                                                                options =
+                                                                    R.array.title_width_options_low,
+                                                                optionValues =
+                                                                    R.array.title_width_values_low,
+                                                                backendPreference =
+                                                                    appPreferences.titlePlayerWidth,
+                                                            ),
+                                                        ),
                                                 ),
                                             ),
                                     ),
@@ -344,18 +409,6 @@ constructor(
                                                 ),
                                             ),
                                     ),
-                                    PreferenceGroup(
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.extra_info,
-                                                    descriptionStringRes =
-                                                        R.string.extra_info_summary,
-                                                    backendPreference =
-                                                        appPreferences.displayExtraInfo,
-                                                )
-                                            )
-                                    ),
                                 ),
                         )
                     )
@@ -379,7 +432,6 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
-                                        nameStringResource = R.string.player_options,
                                         preferences =
                                             listOf(
                                                 PreferenceCategory(
@@ -402,6 +454,8 @@ constructor(
                                                     nestedPreferenceGroups =
                                                         listOf(
                                                             PreferenceGroup(
+                                                                nameStringResource =
+                                                                    R.string.settings_group_output,
                                                                 preferences =
                                                                     listOf(
                                                                         PreferenceSelect(
@@ -459,7 +513,7 @@ constructor(
                                                                             optionValues =
                                                                                 R.array.mpv_aos,
                                                                         ),
-                                                                    )
+                                                                    ),
                                                             ),
                                                             PreferenceGroup(
                                                                 nameStringResource =
@@ -516,7 +570,7 @@ constructor(
                                                             ),
                                                         ),
                                                 )
-                                            ),
+                                            )
                                     ),
                                     PreferenceGroup(
                                         nameStringResource = R.string.player_time_display,
@@ -633,10 +687,18 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.playerGesturesDoubleTap,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.picture_in_picture_gesture,
+                                                    descriptionStringRes =
+                                                        R.string.picture_in_picture_gesture_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerPipGesture,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
-                                        nameStringResource = R.string.player_overlay,
+                                        nameStringResource = R.string.settings_group_controls,
                                         preferences =
                                             listOf(
                                                 PreferenceSelect(
@@ -651,13 +713,7 @@ constructor(
                                                         R.array.player_controls_timeout_options,
                                                     optionValues =
                                                         R.array.player_controls_timeout_values,
-                                                )
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.seeking,
-                                        preferences =
-                                            listOf(
+                                                ),
                                                 PreferenceLongInput(
                                                     nameStringResource =
                                                         R.string.seek_back_increment,
@@ -827,20 +883,6 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.playerGesturesSeekTrickplay,
                                                 ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.picture_in_picture,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.picture_in_picture_gesture,
-                                                    descriptionStringRes =
-                                                        R.string.picture_in_picture_gesture_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerPipGesture,
-                                                )
                                             ),
                                     ),
                                 ),
@@ -1028,7 +1070,7 @@ constructor(
                                                     optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubPosition,
-                                                    options = R.array.mpv_sub_pos,
+                                                    options = R.array.mpv_sub_pos_options,
                                                     optionValues = R.array.mpv_sub_pos,
                                                 ),
                                                 PreferenceSwitch(
@@ -1079,6 +1121,22 @@ constructor(
             PreferenceGroup(
                 preferences =
                     listOf(
+                        PreferenceSwitch(
+                            nameStringResource = R.string.offline_mode,
+                            descriptionStringRes = R.string.offline_mode_summary,
+                            iconDrawableId = R.drawable.ic_server,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(SettingsEvent.RestartActivity)
+                                }
+                            },
+                            backendPreference = appPreferences.offlineMode,
+                        )
+                    )
+            ),
+            PreferenceGroup(
+                preferences =
+                    listOf(
                         PreferenceCategory(
                             nameStringResource = R.string.title_download,
                             descriptionStringRes = R.string.title_download_summary,
@@ -1095,6 +1153,7 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_mobile_data,
                                         preferences =
                                             listOf(
                                                 PreferenceSwitch(
@@ -1116,7 +1175,7 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.downloadWhenRoaming,
                                                 ),
-                                            )
+                                            ),
                                     )
                                 ),
                         )
@@ -1141,6 +1200,7 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_timeouts,
                                         preferences =
                                             listOf(
                                                 PreferenceLongInput(
@@ -1170,7 +1230,7 @@ constructor(
                                                         appPreferences.socketTimeout,
                                                     suffixRes = R.string.ms,
                                                 ),
-                                            )
+                                            ),
                                     )
                                 ),
                         )
@@ -1195,6 +1255,7 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_image_cache,
                                         preferences =
                                             listOf(
                                                 PreferenceSwitch(
@@ -1215,7 +1276,7 @@ constructor(
                                                         appPreferences.imageCacheSize,
                                                     suffixRes = R.string.mb,
                                                 ),
-                                            )
+                                            ),
                                     )
                                 ),
                         )
@@ -1263,16 +1324,13 @@ constructor(
                 return@launch
             }
 
-            val isRootLevel = indexes.isEmpty() || indexes.contains(R.string.title_settings)
+            val isRootLevel = indexes.isEmpty()
 
             var preferences = topLevelPreferences
 
-            // Show preferences based on the name of the parent
+            // Resolve the page's parent: indexes accumulate one entry per pushed settings
+            // subpage, and every non-empty list names a visible category.
             for (index in indexes) {
-                // If index is root (Settings) don't search for category
-                if (index == R.string.title_settings) {
-                    break
-                }
                 val preference =
                     preferences
                         .flatMap { it.preferences }
@@ -1330,6 +1388,24 @@ constructor(
                                                         appPreferences.getValue(
                                                             preference.backendPreference
                                                         ),
+                                                )
+                                            }
+                                            is PreferenceSliders -> {
+                                                preference.copy(
+                                                    enabled =
+                                                        preference.enabled &&
+                                                            preference.dependencies.all {
+                                                                appPreferences.getValue(it)
+                                                            },
+                                                    sliders =
+                                                        preference.sliders.map { slider ->
+                                                            slider.copy(
+                                                                value =
+                                                                    appPreferences.getValue(
+                                                                        slider.backendPreference
+                                                                    )
+                                                            )
+                                                        },
                                                 )
                                             }
                                             is PreferenceSlider -> {
@@ -1435,21 +1511,20 @@ constructor(
         fun headerFor(group: PreferenceGroup): Int? {
             val preference = group.preferences.firstOrNull()
             return when {
-                preference is PreferenceSwitch -> R.string.settings_group_general
+                // Offline mode is about reaching the server, so it rides with the server section.
+                preference is PreferenceSwitch -> R.string.settings_group_server
                 preference !is PreferenceCategory -> null
                 preference.nameStringResource == R.string.settings_category_language ||
-                    preference.nameStringResource == R.string.settings_category_interface ->
-                    R.string.settings_group_general
-                preference.nameStringResource == R.string.settings_category_player ->
-                    R.string.settings_group_playback
+                    preference.nameStringResource == R.string.settings_category_interface ||
+                    preference.nameStringResource == R.string.settings_category_player ->
+                    R.string.settings_group_app
                 preference.nameStringResource == R.string.users ||
-                    preference.nameStringResource == R.string.settings_category_servers ->
+                    preference.nameStringResource == R.string.settings_category_servers ||
+                    preference.nameStringResource == R.string.settings_category_network ->
                     R.string.settings_group_server
                 preference.nameStringResource == R.string.title_download ||
                     preference.nameStringResource == R.string.settings_category_cache ->
                     R.string.settings_group_storage
-                preference.nameStringResource == R.string.settings_category_network ->
-                    R.string.settings_group_network
                 else -> null
             }
         }

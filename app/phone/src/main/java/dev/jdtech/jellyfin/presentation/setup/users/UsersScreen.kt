@@ -166,14 +166,6 @@ private fun UsersScreenLayout(
                 },
             )
         }
-        AppIconButton(
-            onClick = { onAction(UsersAction.OnChangeServerClick) },
-            modifier = Modifier.align(Alignment.TopEnd).padding(end = MaterialTheme.spacings.small),
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(painter = painterResource(CoreR.drawable.ic_server), contentDescription = null)
-            },
-        )
         ExtendedFloatingActionButton(
             onClick = { onAction(UsersAction.OnAddClick) },
             icon = { Icon(painterResource(CoreR.drawable.ic_plus), contentDescription = null) },

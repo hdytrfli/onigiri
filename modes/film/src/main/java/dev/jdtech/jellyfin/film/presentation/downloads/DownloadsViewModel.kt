@@ -4,15 +4,14 @@ import android.app.DownloadManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.jdtech.jellyfin.core.Constants
-import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
-import dev.jdtech.jellyfin.models.CollectionSection
+import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSourceType
-import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.models.isDownloading
+import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.Downloader
 import java.util.UUID
 import javax.inject.Inject
@@ -28,6 +27,7 @@ class DownloadsViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val downloader: Downloader,
+    private val appPreferences: AppPreferences,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
@@ -41,26 +41,31 @@ constructor(
             try {
                 val items = repository.getDownloads()
 
-                // No Movies/Shows grouping: the downloads page shows one flat list.
-                val sections =
-                    if (items.isEmpty()) {
-                        emptyList()
-                    } else {
-                        listOf(
-                            CollectionSection(
-                                Constants.FAVORITE_TYPE_MOVIES,
-                                UiText.StringResource(CoreR.string.movies_label),
-                                items,
-                            )
-                        )
-                    }
-
-                _state.value = _state.value.copy(isLoading = false, sections = sections)
+                _state.value =
+                    _state.value.copy(
+                        isLoading = false,
+                        items = items,
+                        sections = mediaSections(items),
+                        displayFields =
+                            ListDisplayField.fromKeys(
+                                appPreferences.getValue(appPreferences.listDisplayFields)
+                            ),
+                    )
                 startProgressPolling(items)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(isLoading = false, error = e)
             }
         }
+    }
+
+    /** Flips [field] in the shared list display preference every list page reads. */
+    fun toggleDisplayField(field: ListDisplayField) {
+        val fields = _state.value.displayFields.toMutableSet()
+        if (!fields.add(field)) {
+            fields.remove(field)
+        }
+        appPreferences.setValue(appPreferences.listDisplayFields, fields.map { it.key }.toSet())
+        _state.value = _state.value.copy(displayFields = fields)
     }
 
     /** Polls the progress of in-progress downloads so the grid can overlay the percentage. */

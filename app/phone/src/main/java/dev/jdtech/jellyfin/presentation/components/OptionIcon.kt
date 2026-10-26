@@ -5,10 +5,22 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.settings.presentation.models.OptionIcon
 
-/** Resolves the settings model's option icon to the drawable the UI owns. */
+/**
+ * Resolves the settings model's option icon to the drawable the UI owns. Icons that describe a
+ * family of options take the row's option value: the tablet-mode dialog gives each mode its own
+ * glyph, while single-semantic icons ignore the value.
+ */
 @DrawableRes
-fun OptionIcon.drawableRes(): Int =
+fun OptionIcon.drawableRes(optionValue: String? = null): Int =
     when (this) {
+        OptionIcon.TabletMode ->
+            when (optionValue) {
+                "auto" -> CoreR.drawable.ic_sparkles
+                "always" -> CoreR.drawable.ic_monitor
+                "landscape" -> CoreR.drawable.ic_rectangle_horizontal
+                "never" -> CoreR.drawable.ic_smartphone
+                else -> CoreR.drawable.ic_monitor
+            }
         OptionIcon.Audio -> CoreR.drawable.ic_music
         OptionIcon.AudioOutput -> CoreR.drawable.ic_speaker
         OptionIcon.Subtitle -> CoreR.drawable.ic_case_sensitive

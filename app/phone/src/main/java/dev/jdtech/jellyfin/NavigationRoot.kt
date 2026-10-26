@@ -4,31 +4,22 @@ import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -39,8 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -51,7 +40,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.window.core.layout.WindowSizeClass
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimMedium
@@ -67,6 +55,7 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
+import dev.jdtech.jellyfin.presentation.film.CollectionsScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
 import dev.jdtech.jellyfin.presentation.film.EditImageSearchScreen
 import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
@@ -78,9 +67,11 @@ import dev.jdtech.jellyfin.presentation.film.IdentifyScreen
 import dev.jdtech.jellyfin.presentation.film.LibraryScreen
 import dev.jdtech.jellyfin.presentation.film.MediaScreen
 import dev.jdtech.jellyfin.presentation.film.MovieScreen
+import dev.jdtech.jellyfin.presentation.film.MoviesScreen
 import dev.jdtech.jellyfin.presentation.film.PersonScreen
 import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
+import dev.jdtech.jellyfin.presentation.film.ShowsScreen
 import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
@@ -93,14 +84,17 @@ import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
 import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
 import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ImageType
 
-private val TOP_LEVEL_ROUTES = setOf(HomeRoute, MediaRoute, FavoritesRoute, DownloadsRoute)
+private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
+
+private val TOP_LEVEL_ROUTES =
+    setOf(HomeRoute, MoviesRoute, ShowsRoute, CollectionsRoute, SETTINGS_ROOT_ROUTE)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
 
 data class TabBarItem(
@@ -113,25 +107,32 @@ data class TabBarItem(
 val homeTab =
     TabBarItem(title = CoreR.string.title_home, icon = CoreR.drawable.ic_home, route = HomeRoute)
 
-val mediaTab =
+val moviesTab =
     TabBarItem(
-        title = CoreR.string.title_media,
-        icon = CoreR.drawable.ic_library,
-        route = MediaRoute,
+        title = CoreR.string.movies_label,
+        icon = CoreR.drawable.ic_clapperboard,
+        route = MoviesRoute,
     )
 
-val downloadsTab =
+val showsTab =
     TabBarItem(
-        title = CoreR.string.title_download,
-        icon = CoreR.drawable.ic_download,
-        route = DownloadsRoute,
+        title = CoreR.string.shows_label,
+        icon = CoreR.drawable.ic_tv,
+        route = ShowsRoute,
     )
 
-val favoritesTab =
+val collectionsTab =
     TabBarItem(
-        title = CoreR.string.title_favorite,
-        icon = CoreR.drawable.ic_heart,
-        route = FavoritesRoute,
+        title = CoreR.string.collections_label,
+        icon = CoreR.drawable.ic_package_2,
+        route = CollectionsRoute,
+    )
+
+val settingsTab =
+    TabBarItem(
+        title = CoreR.string.title_settings,
+        icon = CoreR.drawable.ic_user,
+        route = SETTINGS_ROOT_ROUTE,
     )
 
 @Composable
@@ -226,16 +227,10 @@ private fun MainNavigation(
     val snackbarHostState = remember { SnackbarHostState() }
     var exitPending by remember { mutableStateOf(false) }
 
-    val navigationItems =
-        when (isOfflineMode) {
-            false -> listOf(homeTab, mediaTab, favoritesTab, downloadsTab)
-            true -> listOf(homeTab, favoritesTab, downloadsTab)
-        }
-    val tabRoutes = navigationItems.map { it.route }
+    val tabRoutes =
+        listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab).map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
-    val atTabRoot = navigationState.currentBackStack().last() == topLevelRoute
-    val showBottomBar = atTabRoot && topLevelRoute in tabRoutes && !searchExpanded.value
 
     // Press back twice to exit from the start route's root.
     val atExitRoot =
@@ -265,30 +260,6 @@ private fun MainNavigation(
         }
     }
 
-    val navigationSuiteScaffoldState = rememberNavigationSuiteScaffoldState()
-
-    LaunchedEffect(showBottomBar) {
-        if (showBottomBar) {
-            navigationSuiteScaffoldState.show()
-        } else {
-            navigationSuiteScaffoldState.hide()
-        }
-    }
-
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val customNavSuiteType =
-        with(windowAdaptiveInfo) {
-            if (
-                windowSizeClass.isWidthAtLeastBreakpoint(
-                    WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
-                )
-            ) {
-                NavigationSuiteType.NavigationRail
-            } else {
-                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(this)
-            }
-        }
-
     val entryProvider = entryProvider {
         mainEntries(
             navigator = navigator,
@@ -300,73 +271,77 @@ private fun MainNavigation(
         )
     }
 
-    // Consume the hidden status-bar/cutout top inset here as well, right above the navigation
-    // suite, so the rail does not reserve space when the status bar is hidden.
-    val navSuiteInsets =
-        if (LocalHideStatusBar.current) {
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-        } else {
-            WindowInsets(0, 0, 0, 0)
-        }
-    Box(modifier = Modifier.fillMaxSize().consumeWindowInsets(navSuiteInsets)) {
-        val isRail = customNavSuiteType == NavigationSuiteType.NavigationRail
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                navigationItems.forEachIndexed { index, item ->
-                    item(
-                        selected = topLevelRoute == item.route,
-                        onClick = {
-                            if (item.route == MediaRoute && topLevelRoute == MediaRoute) {
-                                searchExpanded.value = true
-                            }
-
-                            navigator.navigate(item.route)
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(item.icon),
-                                contentDescription = stringResource(item.title),
-                            )
-                        },
-                        modifier =
-                            if (isRail) {
-                                // Match the top bar's top padding on the rail (first item only, so
-                                // the items keep their normal spacing).
-                                if (index == 0) Modifier.padding(top = MaterialTheme.spacings.small)
-                                else Modifier
-                            } else {
-                                Modifier.padding(vertical = MaterialTheme.spacings.small)
-                            },
-                        enabled = item.enabled,
-                        label = { Text(text = stringResource(item.title)) },
-                    )
+    val suiteType = rememberNavigationSuiteType()
+    val predictiveBack = LocalPredictiveBack.current
+    val currentRoute = navigationState.currentBackStack().last()
+    CompositionLocalProvider(
+        LocalSuiteStartInset provides suiteType.suiteStartInset(),
+        LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            NavDisplay(
+                entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
+                onBack = { navigator.goBack() },
+                transitionSpec = {
+                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
+                },
+                popTransitionSpec = {
+                    if (isTabSwitch(tabRoutes)) TAB_TRANSITION_SPEC else PAGE_TRANSITION_SPEC
+                },
+                predictivePopTransitionSpec = { _ ->
+                    if (predictiveBack) {
+                        PAGE_TRANSITION_SPEC
+                    } else {
+                        NO_PREVIEW_TRANSITION_SPEC
+                    }
+                },
+            )
+            // Predictive back drives NavDisplay's own animation session, whose commit is the
+            // predictive transform (a no-op when the preview is off). Intercept the gesture with a
+            // plain callback instead, so it commits straight into the normal pop transition -
+            // exactly like the in-app back button, and with no preview while dragging.
+            if (!predictiveBack) {
+                BackHandler(enabled = navigationState.currentBackStack().size > 1) {
+                    navigator.goBack()
                 }
-            },
-            layoutType = customNavSuiteType,
-            state = navigationSuiteScaffoldState,
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                NavDisplay(
-                    entries = navigationState.toDecoratedEntries(entryDecorators, entryProvider),
-                    onBack = { navigator.goBack() },
-                    transitionSpec = { GLOBAL_TRANSITION_SPEC },
-                    popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
-                    predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
+            }
+            // The suite is drawn over the content, outside the NavDisplay, so a page transition
+            // never moves it: switching tabs animates only the content behind it. Its presence is
+            // animated, so hiding it on immersive pages is a quick fade instead of a pop.
+            AnimatedVisibility(
+                visible = currentRoute.drawsNavigationSuite(tabRoutes),
+                enter = SUITE_ENTER_TRANSITION,
+                exit = SUITE_EXIT_TRANSITION,
+                modifier =
+                    Modifier.align(
+                        if (suiteType == NavigationSuiteType.NavigationRail) {
+                            Alignment.CenterStart
+                        } else {
+                            Alignment.BottomCenter
+                        }
+                    ),
+            ) {
+                RootNavigationSuite(
+                    navigator = navigator,
+                    selectedRoute = topLevelRoute,
+                    suiteType = suiteType,
                 )
-                // Keep the snackbar above the bottom navigation bar, otherwise its
-                // translucent background reveals the (light) navigation bar behind it.
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier =
-                        Modifier.align(Alignment.BottomCenter)
-                            .padding(bottom = MaterialTheme.spacings.medium),
-                ) { data ->
-                    Snackbar(
-                        snackbarData = data,
-                        containerColor = ScrimMedium,
-                        contentColor = OnScrim,
-                    )
-                }
+            }
+            // Keep the snackbar above the bottom navigation bar, otherwise its translucent
+            // background reveals the (light) navigation bar behind it.
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier =
+                    Modifier.align(Alignment.BottomCenter)
+                        .padding(
+                            bottom = MaterialTheme.spacings.medium + LocalSuiteBottomInset.current
+                        ),
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = ScrimMedium,
+                    contentColor = OnScrim,
+                )
             }
         }
     }
@@ -476,33 +451,80 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         onSetupComplete = { navigator.navigateHome() },
     )
     entry<HomeRoute> {
-        HomeScreen(
-            onLibraryClick =
-                resumedAction { library ->
+        SuiteInsetBox {
+            HomeScreen(
+                onLibraryClick =
+                    resumedAction { library ->
+                        navigator.navigate(
+                            LibraryRoute(
+                                libraryId = library.id.toString(),
+                                libraryName = library.name,
+                                libraryType = library.type,
+                            )
+                        )
+                    },
+                onSearchClick = dropUnlessResumed { onSearchClick() },
+                onSettingsClick =
+                    dropUnlessResumed { navigator.navigate(SettingsRoute(indexes = emptyList())) },
+                onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            )
+        }
+    }
+    entry<MoviesRoute> {
+        SuiteInsetBox {
+            MoviesScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+                onGenreClick = { genre ->
                     navigator.navigate(
-                        LibraryRoute(
-                            libraryId = library.id.toString(),
-                            libraryName = library.name,
-                            libraryType = library.type,
+                        GenreListRoute(
+                            genreId = genre.id.toString(),
+                            genreName = genre.name,
+                            movies = true,
                         )
                     )
                 },
-            onSearchClick = dropUnlessResumed { onSearchClick() },
-            onSettingsClick =
-                dropUnlessResumed {
-                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
-                },
-            onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
+            )
+        }
+    }
+    entry<GenreListRoute> { key ->
+        LibraryScreen(
+            libraryId = null,
+            libraryName = key.genreName,
+            libraryType = if (key.movies) CollectionType.Movies else CollectionType.TvShows,
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            showTopBar = true,
+            genreIds = listOf(UUID.fromString(key.genreId)),
         )
+    }
+    entry<ShowsRoute> {
+        SuiteInsetBox {
+            ShowsScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+                onGenreClick = { genre ->
+                    navigator.navigate(
+                        GenreListRoute(
+                            genreId = genre.id.toString(),
+                            genreName = genre.name,
+                            movies = false,
+                        )
+                    )
+                },
+            )
+        }
+    }
+    entry<CollectionsRoute> {
+        SuiteInsetBox {
+            CollectionsScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) }
+            )
+        }
     }
     entry<MediaRoute> {
         MediaScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onSettingsClick =
-                dropUnlessResumed {
-                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
-                },
+            onSettingsClick = dropUnlessResumed { navigator.navigate(SETTINGS_ROOT_ROUTE) },
             searchExpanded = searchExpanded.value,
             onSearchExpand = { searchExpanded.value = it },
         )
@@ -547,10 +569,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     searchExpanded.value = true
                     navigator.navigate(MediaRoute)
                 },
-            onSettingsClick =
-                dropUnlessResumed {
-                    navigator.navigate(SettingsRoute(indexes = listOf(CoreR.string.title_settings)))
-                },
+            onSettingsClick = dropUnlessResumed { navigator.navigate(SETTINGS_ROOT_ROUTE) },
         )
     }
     entry<MovieRoute> { key ->
@@ -733,31 +752,44 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 },
         )
     }
+    // Every settings page keeps the navigation suite, so every one of them reserves its space:
+    // a constant inset keeps the bar in place instead of laying one out per page.
     entry<SettingsRoute> { key ->
-        SettingsScreen(
-            indexes = key.indexes,
-            navigateToSettings =
-                resumedAction { indexes -> navigator.navigate(SettingsRoute(indexes = indexes)) },
-            navigateToSettingsFileEdit =
-                resumedAction { filePath ->
-                    navigator.navigate(SettingsFileEditRoute(filePath = filePath))
-                },
-            navigateToServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
-            navigateToUsers = dropUnlessResumed { navigator.navigate(UsersRoute) },
-            navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
-            navigateToSubtitleFont = dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
-            navigateBack = dropUnlessResumed { navigator.goBack() },
-        )
+        SuiteInsetBox {
+            SettingsScreen(
+                indexes = key.indexes,
+                navigateToSettings =
+                    resumedAction { indexes ->
+                        navigator.navigate(SettingsRoute(indexes = indexes))
+                    },
+                navigateToSettingsFileEdit =
+                    resumedAction { filePath ->
+                        navigator.navigate(SettingsFileEditRoute(filePath = filePath))
+                    },
+                navigateToServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
+                navigateToUsers = dropUnlessResumed { navigator.navigate(UsersRoute) },
+                navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
+                navigateToSubtitleFont =
+                    dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
+                navigateBack = dropUnlessResumed { navigator.goBack() },
+            )
+        }
     }
     entry<SettingsFileEditRoute> { key ->
-        SettingsFileEditScreen(
-            filePath = key.filePath,
-            navigateBack = dropUnlessResumed { navigator.goBack() },
-        )
+        SuiteInsetBox {
+            SettingsFileEditScreen(
+                filePath = key.filePath,
+                navigateBack = dropUnlessResumed { navigator.goBack() },
+            )
+        }
     }
-    entry<AboutRoute> { AboutScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
+    entry<AboutRoute> {
+        SuiteInsetBox { AboutScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
+    }
     entry<SubtitleFontRoute> {
-        SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
+        SuiteInsetBox {
+            SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
+        }
     }
 }
 

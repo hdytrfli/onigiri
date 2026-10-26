@@ -5,12 +5,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <!-- Fade between the app and the player instead of a hard cut. -->
+    <!-- Pages emerge over the previous one: a short fade with a barely-there scale, no slide. -->
     <style name="Animation.Findroid.Activity" parent="@android:style/Animation.Activity">
-        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
-        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityOpenEnterAnimation">@anim/findroid_open_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/findroid_open_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/findroid_close_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/findroid_close_exit</item>
     </style>
 
     <!-- Base application theme. Dark-only. -->
