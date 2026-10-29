@@ -124,6 +124,13 @@ fun FindroidEpisodeDto.toLocalFindroidImages(itemId: UUID): FindroidImages {
     )
 }
 
+fun FindroidBookDto.toLocalFindroidImages(itemId: UUID): FindroidImages {
+    return FindroidImages(
+        primary = Uri.Builder().appendEncodedPath("images/$itemId/primary").build(),
+        backdrop = Uri.Builder().appendEncodedPath("images/$itemId/backdrop").build(),
+    )
+}
+
 /**
  * Builds the URL for an item image of [type], optionally at [index], with the cache-busting [tag]
  * from [org.jellyfin.sdk.model.api.ImageInfo]. Mirrors the URLs built by [toFindroidImages] so the

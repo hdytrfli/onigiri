@@ -17,6 +17,7 @@ import dev.jdtech.jellyfin.models.RecommendationCategory
 import dev.jdtech.jellyfin.models.RecommendationKind
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
+import dev.jdtech.jellyfin.models.toFindroidBook
 import dev.jdtech.jellyfin.models.toFindroidCollection
 import dev.jdtech.jellyfin.models.toFindroidEpisode
 import dev.jdtech.jellyfin.models.toFindroidItem
@@ -131,7 +132,7 @@ class JellyfinRepositoryImpl(
             jellyfinApi.userLibraryApi
                 .getItem(itemId = itemId, userId = jellyfinApi.userId!!)
                 .content
-                .toFindroidItem(this@JellyfinRepositoryImpl)
+                .toFindroidItem(this@JellyfinRepositoryImpl, database)
         }
 
     override suspend fun getItems(
@@ -211,7 +212,13 @@ class JellyfinRepositoryImpl(
                     jellyfinApi.userId!!,
                     filters = listOf(ItemFilter.IS_FAVORITE),
                     includeItemTypes =
-                        listOf(BaseItemKind.MOVIE, BaseItemKind.SERIES, BaseItemKind.EPISODE),
+                        listOf(
+                            BaseItemKind.MOVIE,
+                            BaseItemKind.SERIES,
+                            BaseItemKind.EPISODE,
+                            BaseItemKind.BOOK,
+                            BaseItemKind.AUDIO_BOOK,
+                        ),
                     recursive = true,
                 )
                 .content
@@ -791,6 +798,11 @@ class JellyfinRepositoryImpl(
                 database
                     .getMoviesByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
                     .map { it.toFindroidMovie(database, jellyfinApi.userId!!) }
+            )
+            items.addAll(
+                database
+                    .getBooksByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
+                    .map { it.toFindroidBook(database, jellyfinApi.userId!!) }
             )
             items.addAll(
                 database

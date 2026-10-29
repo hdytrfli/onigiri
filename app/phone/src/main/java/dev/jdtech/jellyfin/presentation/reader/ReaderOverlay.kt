@@ -26,6 +26,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,8 +66,8 @@ data class ReaderUiState(
 
 private val ReaderScrim =
     Brush.verticalGradient(
-        0f to Color.Black.copy(alpha = 0.1f),
-        1f to Color.Black.copy(alpha = 0.8f),
+        0f to Color(0x33000000),
+        1f to Color(0xDD000000),
     )
 
 /**
@@ -85,6 +86,8 @@ fun ReaderOverlay(
     onInteraction: () -> Unit,
 ) {
     var scrubValue by remember { mutableStateOf<Float?>(null) }
+    var isScrubbing by remember { mutableStateOf(false) }
+    LaunchedEffect(state.page) { if (!isScrubbing) scrubValue = null }
     val displayedPage =
         scrubValue?.let { value ->
             if (state.pageCount > 1) {
@@ -216,12 +219,13 @@ fun ReaderOverlay(
                             value = scrubValue ?: state.progress,
                             onValueChange = { value ->
                                 if (state.pageCount > 1) {
+                                    isScrubbing = true
                                     scrubValue = value
                                     onInteraction()
                                     onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
                                 }
                             },
-                            onValueChangeFinished = { scrubValue = null },
+                            onValueChangeFinished = { isScrubbing = false },
                             colors =
                                 SliderDefaults.colors(
                                     thumbColor = Color.White,

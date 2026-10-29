@@ -32,6 +32,7 @@ fun ItemButtonsBar(
     playLabel: String? = null,
     @DrawableRes playIconRes: Int = CoreR.drawable.ic_play,
     showRestartButton: Boolean = true,
+    hasProgress: Boolean = item.playbackPositionTicks > 0,
     forcePlayEnabled: Boolean = false,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
@@ -52,7 +53,7 @@ fun ItemButtonsBar(
                     label = playLabel,
                     iconRes = playIconRes,
                 )
-                if (showRestartButton && item.playbackPositionTicks.div(600000000) > 0) {
+                if (showRestartButton && hasProgress) {
                     AppIconButton(
                         onClick = { onPlayClick(true) },
                         content = {
@@ -78,7 +79,7 @@ fun ItemButtonsBar(
                     label = playLabel,
                     iconRes = playIconRes,
                 )
-                if (showRestartButton && item.playbackPositionTicks.div(600000000) > 0) {
+                if (showRestartButton && hasProgress) {
                     AppIconButton(
                         onClick = { onPlayClick(true) },
                         content = {

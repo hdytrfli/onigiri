@@ -105,6 +105,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val readerMode = Preference("pref_reader_mode", "single")
     val readerTextAlign = Preference("pref_reader_text_align", "default")
     val readerTextNormalization = Preference("pref_reader_normalize", true)
+    val readerHyphenation = Preference("pref_reader_hyphenation", false)
     val readerTapTurn = Preference("pref_reader_tap_turn", true)
     val readerMaxWidth = Preference("pref_reader_max_width", "default")
     val readerLineHeight = Preference("pref_reader_line_height", "1.5")

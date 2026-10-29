@@ -17,10 +17,20 @@ fun mediaSections(items: List<FindroidItem>): List<CollectionSection> {
     val episodes = items.filter { it is FindroidEpisode }
     val seasons = items.filter { it is FindroidSeason }
     val shows = items.filter { it is FindroidShow }
+    val books = items.filter { it is FindroidBook }
     val movies = items.filterNot {
-        it is FindroidShow || it is FindroidSeason || it is FindroidEpisode
+        it is FindroidShow || it is FindroidSeason || it is FindroidEpisode || it is FindroidBook
     }
     return buildList {
+        if (books.isNotEmpty()) {
+            add(
+                CollectionSection(
+                    id = Constants.FAVORITE_TYPE_BOOKS,
+                    name = UiText.StringResource(CoreR.string.books_label),
+                    items = books,
+                )
+            )
+        }
         if (movies.isNotEmpty()) {
             add(
                 CollectionSection(

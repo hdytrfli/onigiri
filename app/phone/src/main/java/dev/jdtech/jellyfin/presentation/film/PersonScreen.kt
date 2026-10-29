@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -237,6 +238,17 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
         ItemTopBar(
             hasBackButton = true,
             onBackClick = { onAction(PersonAction.NavigateBack) },
+            content = {
+                state.person?.let { person ->
+                    Text(
+                        text = person.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(start = MaterialTheme.spacings.small),
+                    )
+                }
+            },
         )
     }
 }

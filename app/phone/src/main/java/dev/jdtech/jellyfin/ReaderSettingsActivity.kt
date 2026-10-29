@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin
 
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +44,8 @@ class ReaderSettingsActivity : AppCompatActivity() {
             CompositionLocalProvider(LocalHideStatusBar provides hideStatusBar) {
                 FindroidTheme {
                     var showFontPicker by remember { mutableStateOf(false) }
+
+                    BackHandler(enabled = showFontPicker) { showFontPicker = false }
 
                     if (showFontPicker) {
                         ReaderFontScreen(navigateBack = { showFontPicker = false })

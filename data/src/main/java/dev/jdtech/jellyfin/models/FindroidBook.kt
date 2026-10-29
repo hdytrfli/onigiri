@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.models
 
+import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemDto
@@ -34,13 +35,21 @@ data class FindroidBook(
     val people: List<FindroidItemPerson> = emptyList(),
 ) : FindroidItem
 
-suspend fun BaseItemDto.toFindroidBook(jellyfinRepository: JellyfinRepository): FindroidBook {
+suspend fun BaseItemDto.toFindroidBook(
+    jellyfinRepository: JellyfinRepository,
+    serverDatabase: ServerDatabaseDao? = null,
+): FindroidBook {
+    val sources = mutableListOf<FindroidSource>()
+    sources.addAll(mediaSources?.map { it.toFindroidSource(jellyfinRepository, id) } ?: emptyList())
+    if (serverDatabase != null) {
+        sources.addAll(serverDatabase.getSources(id).map { it.toFindroidSource(serverDatabase) })
+    }
     return FindroidBook(
         id = id,
         name = name.orEmpty(),
         originalTitle = originalTitle,
         overview = overview.orEmpty(),
-        sources = mediaSources?.map { it.toFindroidSource(jellyfinRepository, id) } ?: emptyList(),
+        sources = sources,
         played = userData?.played == true,
         favorite = userData?.isFavorite == true,
         canPlay = playAccess != PlayAccess.NONE,
@@ -87,4 +96,32 @@ fun BaseItemDto.isReadableBook(): Boolean {
     if (isAudiobookItem()) return false
     if (candidates.isEmpty()) return true
     return candidates.any { it in READABLE_BOOK_CONTAINERS }
+}
+
+suspend fun FindroidBookDto.toFindroidBook(
+    database: ServerDatabaseDao,
+    userId: UUID,
+): FindroidBook {
+    val userData = database.getUserDataOrCreateNew(id, userId)
+    return FindroidBook(
+        id = id,
+        name = name,
+        originalTitle = originalTitle,
+        overview = overview,
+        sources = database.getSources(id).map { it.toFindroidSource(database) },
+        played = userData.played,
+        favorite = userData.favorite,
+        canPlay = true,
+        canDownload = false,
+        runtimeTicks = 0,
+        playbackPositionTicks = userData.playbackPositionTicks,
+        images = toLocalFindroidImages(itemId = id),
+        chapters = emptyList(),
+        isAudiobook = isAudiobook,
+        productionYear = productionYear,
+        premiereDate = premiereDate,
+        genres = emptyList(),
+        studios = studios.split("\u0001").filter { it.isNotEmpty() },
+        people = emptyList(),
+    )
 }

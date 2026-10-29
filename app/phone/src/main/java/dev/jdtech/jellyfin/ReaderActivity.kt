@@ -112,6 +112,8 @@ class ReaderActivity : AppCompatActivity() {
     private var locatorJob: Job? = null
     private var appliedMaxWidth: Double? = null
     private var maxWidthHref: String? = null
+    private var startFromBeginning = false
+    private var markedPlayed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,6 +137,7 @@ class ReaderActivity : AppCompatActivity() {
             return
         }
         bookId = id
+        startFromBeginning = intent.getBooleanExtra(EXTRA_START_FROM_BEGINNING, false)
 
         binding = ActivityReaderBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -263,7 +266,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun showPublication(publication: Publication, id: UUID, title: String) {
         this.publication = publication
-        val initialLocator = storedLocator(id)
+        val initialLocator = if (startFromBeginning) null else storedLocator(id)
         val settings = appPreferences.readerSettings()
         val epubPreferences = settings.toEpubPreferences()
 
@@ -371,6 +374,15 @@ class ReaderActivity : AppCompatActivity() {
                     val maxWidth = appPreferences.readerSettings().maxLineLengthRem
                     lifecycleScope.launch { applyMaxWidth(maxWidth, force = true) }
                 }
+                val atEnd =
+                    (locator.locations.totalProgression ?: 0.0) >= 0.999 ||
+                        (positions.isNotEmpty() && locator.locations.position == positions.size)
+                if (!markedPlayed && atEnd) {
+                    markedPlayed = true
+                    lifecycleScope.launch {
+                        runCatching { jellyfinApi.playStateApi.markPlayedItem(id) }
+                    }
+                }
             }
         }
     }
@@ -419,6 +431,7 @@ class ReaderActivity : AppCompatActivity() {
         private const val EXTRA_BOOK_TITLE = "book_title"
         private const val EXTRA_AUDIOBOOK = "audiobook"
         private const val EXTRA_OVERVIEW = "overview"
+        private const val EXTRA_START_FROM_BEGINNING = "start_from_beginning"
         private const val FRAGMENT_TAG = "reader_navigator_fragment"
 
         fun intent(
@@ -427,11 +440,13 @@ class ReaderActivity : AppCompatActivity() {
             title: String,
             overview: String = "",
             audiobook: Boolean = false,
+            startFromBeginning: Boolean = false,
         ): Intent =
             Intent(context, ReaderActivity::class.java)
                 .putExtra(EXTRA_BOOK_ID, bookId.toString())
                 .putExtra(EXTRA_BOOK_TITLE, title)
                 .putExtra(EXTRA_OVERVIEW, overview)
                 .putExtra(EXTRA_AUDIOBOOK, audiobook)
+                .putExtra(EXTRA_START_FROM_BEGINNING, startFromBeginning)
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -12,16 +13,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 data class BookDetailState(
     val item: FindroidBook? = null,
     val isLoading: Boolean = true,
     val error: Exception? = null,
+    /** 0..1 progression stored by the in-app reader. */
+    val readingProgress: Float = 0f,
 )
 
 @HiltViewModel
-class BookDetailViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class BookDetailViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val appPreferences: AppPreferences,
+) : ViewModel() {
     private val _state = MutableStateFlow(BookDetailState())
     val state = _state.asStateFlow()
 
@@ -40,6 +48,7 @@ class BookDetailViewModel @Inject constructor(private val repository: JellyfinRe
                             item = item as? FindroidBook,
                             isLoading = false,
                             error = if (item is FindroidBook) null else Exception("Not a book"),
+                            readingProgress = readerProgress(bookId),
                         )
                     },
                     onFailure = { BookDetailState(isLoading = false, error = it as? Exception) },
@@ -47,18 +56,34 @@ class BookDetailViewModel @Inject constructor(private val repository: JellyfinRe
         }
     }
 
-    fun markAsPlayed(bookId: UUID) = update(bookId) { repository.markAsPlayed(bookId) }
+    fun setPlayed(bookId: UUID, played: Boolean) {
+        _state.value = _state.value.copy(item = _state.value.item?.copy(played = played))
+        update(bookId) {
+            if (played) repository.markAsPlayed(bookId) else repository.markAsUnplayed(bookId)
+        }
+    }
 
-    fun markAsUnplayed(bookId: UUID) = update(bookId) { repository.markAsUnplayed(bookId) }
-
-    fun markAsFavorite(bookId: UUID) = update(bookId) { repository.markAsFavorite(bookId) }
-
-    fun unmarkAsFavorite(bookId: UUID) = update(bookId) { repository.unmarkAsFavorite(bookId) }
+    fun setFavorite(bookId: UUID, favorite: Boolean) {
+        _state.value = _state.value.copy(item = _state.value.item?.copy(favorite = favorite))
+        update(bookId) {
+            if (favorite) repository.markAsFavorite(bookId) else repository.unmarkAsFavorite(bookId)
+        }
+    }
 
     private fun update(bookId: UUID, block: suspend () -> Unit) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) { runCatching { block() } }
-            load(bookId, force = true)
-        }
+        viewModelScope.launch { withContext(Dispatchers.IO) { runCatching { block() } } }
+    }
+
+    private fun readerProgress(bookId: UUID): Float {
+        val json =
+            appPreferences.sharedPreferences.getString("reader_locator_$bookId", null) ?: return 0f
+        return runCatching {
+                JSONObject(json)
+                    .optJSONObject("locations")
+                    ?.optDouble("totalProgression", 0.0)
+                    ?.toFloat() ?: 0f
+            }
+            .getOrDefault(0f)
+            .coerceIn(0f, 1f)
     }
 }

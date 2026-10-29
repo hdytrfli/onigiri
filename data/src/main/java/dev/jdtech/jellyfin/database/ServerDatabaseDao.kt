@@ -6,6 +6,7 @@ import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Update
+import dev.jdtech.jellyfin.models.FindroidBookDto
 import dev.jdtech.jellyfin.models.FindroidEpisodeDto
 import dev.jdtech.jellyfin.models.FindroidMediaStreamDto
 import dev.jdtech.jellyfin.models.FindroidMovieDto
@@ -93,10 +94,14 @@ interface ServerDatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertMovie(movie: FindroidMovieDto)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertBook(book: FindroidBookDto)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSource(source: FindroidSourceDto)
 
     @Query("SELECT * FROM movies WHERE id = :id") suspend fun getMovie(id: UUID): FindroidMovieDto
+
+    @Query("SELECT * FROM books WHERE id = :id") suspend fun getBook(id: UUID): FindroidBookDto?
 
     @Query("SELECT * FROM sources WHERE itemId = :itemId")
     suspend fun getSources(itemId: UUID): List<FindroidSourceDto>
@@ -110,6 +115,8 @@ interface ServerDatabaseDao {
     @Query("DELETE FROM sources WHERE id = :id") suspend fun deleteSource(id: String)
 
     @Query("DELETE FROM movies WHERE id = :id") suspend fun deleteMovie(id: UUID)
+
+    @Query("DELETE FROM books WHERE id = :id") suspend fun deleteBook(id: UUID)
 
     @Query(
         "UPDATE userdata SET playbackPositionTicks = :playbackPositionTicks WHERE itemId = :itemId AND userid = :userId"
@@ -146,6 +153,9 @@ interface ServerDatabaseDao {
 
     @Query("SELECT * FROM movies WHERE serverId = :serverId ORDER BY name ASC")
     suspend fun getMoviesByServerId(serverId: String): List<FindroidMovieDto>
+
+    @Query("SELECT * FROM books WHERE serverId = :serverId ORDER BY name ASC")
+    suspend fun getBooksByServerId(serverId: String): List<FindroidBookDto>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertShow(show: FindroidShowDto)
 

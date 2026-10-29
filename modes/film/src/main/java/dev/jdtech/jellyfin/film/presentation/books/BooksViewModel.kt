@@ -41,8 +41,8 @@ constructor(
 
     private var loaded = false
 
-    fun load() {
-        if (loaded) return
+    fun load(force: Boolean = false) {
+        if (!force && loaded) return
         loaded = true
         viewModelScope.launch(Dispatchers.IO) {
             _state.emit(

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.BooksRoute
 import dev.jdtech.jellyfin.LocalTabReselect
@@ -62,7 +63,10 @@ fun BooksScreen(
             .collect { selectedTab = (selectedTab + 1) % 2 }
     }
 
-    LaunchedEffect(true) { viewModel.load() }
+    LifecycleResumeEffect(Unit) {
+        viewModel.load(force = true)
+        onPauseOrDispose {}
+    }
 
     val audiobooks = selectedTab == 1
     val sectionTitle =

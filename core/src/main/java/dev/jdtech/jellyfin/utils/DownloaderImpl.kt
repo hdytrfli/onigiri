@@ -12,6 +12,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -19,6 +20,7 @@ import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.FindroidSources
 import dev.jdtech.jellyfin.models.FindroidTrickplayInfo
 import dev.jdtech.jellyfin.models.UiText
+import dev.jdtech.jellyfin.models.toFindroidBookDto
 import dev.jdtech.jellyfin.models.toFindroidEpisodeDto
 import dev.jdtech.jellyfin.models.toFindroidMediaStreamDto
 import dev.jdtech.jellyfin.models.toFindroidMovieDto
@@ -113,6 +115,13 @@ class DownloaderImpl(
                         )
                     )
                 }
+                is FindroidBook -> {
+                    database.insertBook(
+                        item.toFindroidBookDto(
+                            appPreferences.getValue(appPreferences.currentServer)
+                        )
+                    )
+                }
                 is FindroidEpisode -> {
                     val show = jellyfinRepository.getShow(item.seriesId)
                     database.insertShow(
@@ -175,6 +184,9 @@ class DownloaderImpl(
         when (item) {
             is FindroidMovie -> {
                 database.deleteMovie(item.id)
+            }
+            is FindroidBook -> {
+                database.deleteBook(item.id)
             }
             is FindroidEpisode -> {
                 database.deleteEpisode(item.id)

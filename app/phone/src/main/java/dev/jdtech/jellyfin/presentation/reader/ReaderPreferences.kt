@@ -19,6 +19,7 @@ data class ReaderSettings(
     val columnCount: Int = 1,
     val textAlign: String = "",
     val textNormalization: Boolean = true,
+    val hyphenation: Boolean = false,
     val maxWidth: String = "default",
     val lineHeight: Float = 1.5f,
     val paragraphSpacing: Float = 1.3f,
@@ -53,6 +54,7 @@ fun AppPreferences.readerSettings(): ReaderSettings {
         columnCount = if (getValue(readerMode) == "dual") 2 else 1,
         textAlign = getValue(readerTextAlign).takeIf { it != "default" }.orEmpty(),
         textNormalization = getValue(readerTextNormalization),
+        hyphenation = getValue(readerHyphenation),
         maxWidth = getValue(readerMaxWidth),
         lineHeight = float(readerLineHeight, 1.5f),
         paragraphSpacing = float(readerParagraphSpacing, 1.3f),
@@ -78,6 +80,7 @@ fun AppPreferences.setReaderSettings(settings: ReaderSettings) {
     )
     setValue(readerTextAlign, settings.textAlign.ifBlank { "default" })
     setValue(readerTextNormalization, settings.textNormalization)
+    setValue(readerHyphenation, settings.hyphenation)
     setValue(readerMaxWidth, settings.maxWidth)
     setValue(readerLineHeight, settings.lineHeight.toString())
     setValue(readerParagraphSpacing, settings.paragraphSpacing.toString())
@@ -114,6 +117,7 @@ fun ReaderSettings.toEpubPreferences(): EpubPreferences =
                 else -> null
             },
         textNormalization = textNormalization,
+        hyphens = hyphenation,
         lineHeight = lineHeight.toDouble(),
         paragraphSpacing = paragraphSpacing.toDouble(),
         wordSpacing = wordSpacing.toDouble(),

@@ -250,6 +250,8 @@
     <string name="settings_reader_alignment_summary">Publisher default, left aligned or justified</string>
     <string name="settings_reader_normalization">Normalise text styles</string>
     <string name="settings_reader_normalization_summary">Even out publisher typography for readability</string>
+    <string name="settings_reader_hyphenation">Hyphenation</string>
+    <string name="settings_reader_hyphenation_summary">Break long words at line endings</string>
     <string name="settings_reader_font">Font</string>
     <string name="settings_reader_font_summary">Typeface used for the book text</string>
     <string name="settings_reader_font_size">Font size</string>
@@ -261,7 +263,7 @@
     <string name="settings_reader_max_width">Page width</string>
     <string name="settings_reader_max_width_summary">Maximum text width on large screens</string>
     <string name="settings_reader_tap_turn">Tap to turn pages</string>
-    <string name="settings_reader_tap_turn_summary">Tap the left or right 30% of the page</string>
+    <string name="settings_reader_tap_turn_summary">Tap on the sides of the page</string>
     <string name="settings_reader_margins">Page margins</string>
     <string name="settings_reader_margins_summary">Space at the sides of the page</string>
     <string name="settings_reader_line_height">Line spacing</string>

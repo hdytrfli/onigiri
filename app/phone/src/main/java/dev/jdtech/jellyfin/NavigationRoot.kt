@@ -561,7 +561,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         BookDetailScreen(
             bookId = UUID.fromString(key.bookId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
-            onRead = { item ->
+            onRead = { item, startFromBeginning ->
                 context.startActivity(
                     ReaderActivity.intent(
                         context = context,
@@ -569,9 +569,11 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         title = item.name,
                         overview = item.overview,
                         audiobook = item.isAudiobook,
+                        startFromBeginning = startFromBeginning,
                     )
                 )
             },
+            navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
             onAuthorClick = { personId -> navigator.navigate(PersonRoute(personId.toString())) },
         )
     }

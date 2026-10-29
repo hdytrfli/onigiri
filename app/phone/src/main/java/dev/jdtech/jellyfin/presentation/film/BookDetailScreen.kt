@@ -21,11 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderAction
+import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderEvent
+import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.film.presentation.book.BookDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
+import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -34,20 +40,35 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /** A book's detail page, built from the same components as the movie detail page. */
 @Composable
 fun BookDetailScreen(
     bookId: UUID,
     navigateBack: () -> Unit,
-    onRead: (FindroidBook) -> Unit,
+    onRead: (FindroidBook, Boolean) -> Unit,
+    navigateToDownloads: () -> Unit,
     onAuthorClick: (UUID) -> Unit = {},
     viewModel: BookDetailViewModel = hiltViewModel(),
+    downloaderViewModel: DownloaderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val downloaderState by downloaderViewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(bookId) { viewModel.load(bookId) }
+    LifecycleResumeEffect(bookId) {
+        viewModel.load(bookId, force = true)
+        onPauseOrDispose {}
+    }
+    LaunchedEffect(state.item) { state.item?.let { item -> downloaderViewModel.update(item) } }
+    ObserveAsEvents(downloaderViewModel.events) { event ->
+        when (event) {
+            is DownloaderEvent.Successful,
+            is DownloaderEvent.Deleted -> viewModel.load(bookId, force = true)
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -62,6 +83,8 @@ fun BookDetailScreen(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             else -> {
                 val item = state.item!!
+                val progress = state.readingProgress
+                val percentLeft = ((1f - progress) * 100).roundToInt().coerceIn(0, 100)
                 val safePadding = rememberSafePadding()
                 val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
                 val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
@@ -85,29 +108,22 @@ fun BookDetailScreen(
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
                         ItemButtonsBar(
                             item = item,
-                            onPlayClick = { onRead(item) },
-                            onMarkAsPlayedClick = {
-                                if (item.played) {
-                                    viewModel.markAsUnplayed(item.id)
-                                } else {
-                                    viewModel.markAsPlayed(item.id)
-                                }
+                            onPlayClick = { startFromBeginning ->
+                                onRead(item, startFromBeginning)
                             },
+                            onMarkAsPlayedClick = { viewModel.setPlayed(item.id, !item.played) },
                             onMarkAsFavoriteClick = {
-                                if (item.favorite) {
-                                    viewModel.unmarkAsFavorite(item.id)
-                                } else {
-                                    viewModel.markAsFavorite(item.id)
-                                }
+                                viewModel.setFavorite(item.id, !item.favorite)
                             },
                             playLabel =
-                                if (item.playbackPositionTicks > 0) {
-                                    "Continue reading"
+                                if (progress > 0f) {
+                                    "Continue reading · $percentLeft% left"
                                 } else {
                                     "Read book"
                                 },
                             playIconRes = CoreR.drawable.ic_book_open,
-                            showRestartButton = false,
+                            showRestartButton = true,
+                            hasProgress = progress > 0f,
                             forcePlayEnabled = true,
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -140,7 +156,34 @@ fun BookDetailScreen(
                     }
                 }
 
-                ItemTopBar(hasBackButton = true, onBackClick = navigateBack)
+                ItemTopBar(
+                    hasBackButton = true,
+                    onBackClick = navigateBack,
+                    trailingContent = {
+                        AppButtonGroup {
+                            DownloadButton(
+                                item = item,
+                                downloaderState = downloaderState,
+                                onDownloadClick = { storageIndex ->
+                                    downloaderViewModel.onAction(
+                                        DownloaderAction.Download(item, storageIndex)
+                                    )
+                                },
+                                onCancelDownloadClick = {
+                                    downloaderViewModel.onAction(
+                                        DownloaderAction.CancelDownload(item)
+                                    )
+                                },
+                                onDeleteDownloadClick = {
+                                    downloaderViewModel.onAction(
+                                        DownloaderAction.DeleteDownload(item)
+                                    )
+                                },
+                                onNavigateToDownloads = navigateToDownloads,
+                            )
+                        }
+                    },
+                )
             }
         }
     }

@@ -17,6 +17,7 @@ import dev.jdtech.jellyfin.models.FindroidSource
 import dev.jdtech.jellyfin.models.RecommendationCategory
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
+import dev.jdtech.jellyfin.models.toFindroidBook
 import dev.jdtech.jellyfin.models.toFindroidEpisode
 import dev.jdtech.jellyfin.models.toFindroidMovie
 import dev.jdtech.jellyfin.models.toFindroidSeason
@@ -81,7 +82,9 @@ class JellyfinRepositoryOfflineImpl(
     }
 
     override suspend fun getItem(itemId: UUID): FindroidItem? {
-        return null
+        return withContext(Dispatchers.IO) {
+            database.getBook(itemId)?.toFindroidBook(database, jellyfinApi.userId!!)
+        }
     }
 
     override suspend fun getItems(
@@ -386,6 +389,11 @@ class JellyfinRepositoryOfflineImpl(
                 database
                     .getMoviesByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
                     .map { it.toFindroidMovie(database, jellyfinApi.userId!!) }
+            )
+            items.addAll(
+                database
+                    .getBooksByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
+                    .map { it.toFindroidBook(database, jellyfinApi.userId!!) }
             )
             items.addAll(
                 database

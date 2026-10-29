@@ -490,6 +490,15 @@ constructor(
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
+                                                        R.string.settings_reader_hyphenation,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_hyphenation_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerHyphenation,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
                                                         R.string.settings_reader_tap_turn,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_tap_turn_summary,
@@ -546,82 +555,65 @@ constructor(
                                         nameStringResource = R.string.settings_group_spacing,
                                         preferences =
                                             listOf(
-                                                PreferenceSliders(
+                                                PreferenceSlider(
                                                     nameStringResource =
-                                                        R.string.settings_reader_spacing,
+                                                        R.string.settings_reader_margins,
                                                     descriptionStringRes =
-                                                        R.string.settings_reader_spacing_summary,
-                                                    sliders =
-                                                        listOf(
-                                                            PreferenceSlider(
-                                                                nameStringResource =
-                                                                    R.string
-                                                                        .settings_reader_margins,
-                                                                options =
-                                                                    R.array.reader_margins_options,
-                                                                optionValues =
-                                                                    R.array.reader_margins_values,
-                                                                backendPreference =
-                                                                    appPreferences
-                                                                        .readerPageMargins,
-                                                            ),
-                                                            PreferenceSlider(
-                                                                nameStringResource =
-                                                                    R.string
-                                                                        .settings_reader_line_height,
-                                                                options =
-                                                                    R.array
-                                                                        .reader_line_height_options,
-                                                                optionValues =
-                                                                    R.array
-                                                                        .reader_line_height_values,
-                                                                backendPreference =
-                                                                    appPreferences.readerLineHeight,
-                                                            ),
-                                                            PreferenceSlider(
-                                                                nameStringResource =
-                                                                    R.string
-                                                                        .settings_reader_paragraph_spacing,
-                                                                options =
-                                                                    R.array
-                                                                        .reader_paragraph_spacing_options,
-                                                                optionValues =
-                                                                    R.array
-                                                                        .reader_paragraph_spacing_values,
-                                                                backendPreference =
-                                                                    appPreferences
-                                                                        .readerParagraphSpacing,
-                                                            ),
-                                                            PreferenceSlider(
-                                                                nameStringResource =
-                                                                    R.string
-                                                                        .settings_reader_word_spacing,
-                                                                options =
-                                                                    R.array
-                                                                        .reader_word_spacing_options,
-                                                                optionValues =
-                                                                    R.array
-                                                                        .reader_word_spacing_values,
-                                                                backendPreference =
-                                                                    appPreferences
-                                                                        .readerWordSpacing,
-                                                            ),
-                                                            PreferenceSlider(
-                                                                nameStringResource =
-                                                                    R.string
-                                                                        .settings_reader_letter_spacing,
-                                                                options =
-                                                                    R.array
-                                                                        .reader_letter_spacing_options,
-                                                                optionValues =
-                                                                    R.array
-                                                                        .reader_letter_spacing_values,
-                                                                backendPreference =
-                                                                    appPreferences
-                                                                        .readerLetterSpacing,
-                                                            ),
-                                                        ),
-                                                )
+                                                        R.string.settings_reader_margins_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerPageMargins,
+                                                    options = R.array.reader_margins_options,
+                                                    optionValues = R.array.reader_margins_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_line_height,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_line_height_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerLineHeight,
+                                                    options = R.array.reader_line_height_options,
+                                                    optionValues =
+                                                        R.array.reader_line_height_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_paragraph_spacing,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_paragraph_spacing_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerParagraphSpacing,
+                                                    options =
+                                                        R.array.reader_paragraph_spacing_options,
+                                                    optionValues =
+                                                        R.array.reader_paragraph_spacing_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_word_spacing,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_word_spacing_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerWordSpacing,
+                                                    options = R.array.reader_word_spacing_options,
+                                                    optionValues =
+                                                        R.array.reader_word_spacing_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_letter_spacing,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_letter_spacing_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerLetterSpacing,
+                                                    options = R.array.reader_letter_spacing_options,
+                                                    optionValues =
+                                                        R.array.reader_letter_spacing_values,
+                                                ),
                                             ),
                                     ),
                                 ),
