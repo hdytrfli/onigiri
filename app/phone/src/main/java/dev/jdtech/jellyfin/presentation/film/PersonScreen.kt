@@ -202,6 +202,31 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
                                 }
                             }
                         }
+
+                        if (state.starredInBooks.isNotEmpty()) {
+                            Column {
+                                Text(
+                                    text = stringResource(CoreR.string.books_label),
+                                    modifier = Modifier.padding(itemsPadding),
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                Spacer(
+                                    modifier = Modifier.height(MaterialTheme.spacings.extraSmall)
+                                )
+                                GridRows(
+                                    items = state.starredInBooks,
+                                    columns = gridColumns(GridSize.POSTER),
+                                    modifier = Modifier.padding(itemsPadding),
+                                ) { item ->
+                                    ItemCard(
+                                        item = item,
+                                        direction = Direction.VERTICAL,
+                                        onClick = { onAction(PersonAction.NavigateToItem(item)) },
+                                        fillWidth = true,
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     Spacer(Modifier.height(paddingBottom))

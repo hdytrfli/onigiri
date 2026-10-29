@@ -44,6 +44,7 @@ fun BookDetailScreen(
     bookId: UUID,
     navigateBack: () -> Unit,
     onRead: (FindroidBook) -> Unit,
+    onAuthorClick: (UUID) -> Unit = {},
     viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -115,7 +116,7 @@ fun BookDetailScreen(
                     if (item.people.isNotEmpty()) {
                         ActorsRow(
                             actors = item.people,
-                            onActorClick = {},
+                            onActorClick = onAuthorClick,
                             contentPadding =
                                 androidx.compose.foundation.layout.PaddingValues(
                                     start = paddingStart,

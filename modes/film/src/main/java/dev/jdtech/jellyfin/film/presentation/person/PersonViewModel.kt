@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.film.presentation.person
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.repository.JellyfinRepository
@@ -27,18 +28,26 @@ class PersonViewModel @Inject internal constructor(private val repository: Jelly
                 val items =
                     repository.getPersonItems(
                         personIds = listOf(personId),
-                        includeTypes = listOf(BaseItemKind.MOVIE, BaseItemKind.SERIES),
+                        includeTypes =
+                            listOf(
+                                BaseItemKind.MOVIE,
+                                BaseItemKind.SERIES,
+                                BaseItemKind.BOOK,
+                                BaseItemKind.AUDIO_BOOK,
+                            ),
                         recursive = true,
                     )
 
                 val movies = items.filterIsInstance<FindroidMovie>()
                 val shows = items.filterIsInstance<FindroidShow>()
+                val books = items.filterIsInstance<FindroidBook>()
 
                 _state.emit(
                     _state.value.copy(
                         person = person,
                         starredInMovies = movies,
                         starredInShows = shows,
+                        starredInBooks = books,
                     )
                 )
             } catch (e: Exception) {

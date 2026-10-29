@@ -572,6 +572,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     )
                 )
             },
+            onAuthorClick = { personId -> navigator.navigate(PersonRoute(personId.toString())) },
         )
     }
     entry<CollectionRoute> { key ->

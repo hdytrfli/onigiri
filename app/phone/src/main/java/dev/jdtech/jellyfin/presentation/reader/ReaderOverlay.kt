@@ -168,7 +168,7 @@ fun ReaderOverlay(
                     ) {
                         Text(
                             text = state.title,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.headlineMedium,
                             color = Color.White,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -176,7 +176,7 @@ fun ReaderOverlay(
                         if (state.overview.isNotBlank()) {
                             Text(
                                 text = state.overview,
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.72f),
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,

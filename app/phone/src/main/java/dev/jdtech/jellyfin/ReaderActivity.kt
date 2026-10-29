@@ -30,7 +30,6 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -44,12 +43,12 @@ import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.image.ImageNavigatorFragment
-import org.readium.r2.navigator.input.DragEvent
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.preferences.FontFamily
+import org.readium.r2.shared.DelicateReadiumApi
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Locator
@@ -67,7 +66,7 @@ import timber.log.Timber
  * settings), PDF or CBZ/Divina (fixed layout). The controls overlay matches the player's chrome.
  */
 @AndroidEntryPoint
-@OptIn(ExperimentalReadiumApi::class, InternalReadiumApi::class)
+@OptIn(ExperimentalReadiumApi::class, InternalReadiumApi::class, DelicateReadiumApi::class)
 class ReaderActivity : AppCompatActivity() {
 
     @Inject lateinit var appPreferences: AppPreferences
@@ -86,26 +85,6 @@ class ReaderActivity : AppCompatActivity() {
             override fun onTap(event: TapEvent): Boolean {
                 toggleControls()
                 return false
-            }
-
-            override fun onDrag(event: DragEvent): Boolean {
-                if (event.type != DragEvent.Type.End) return false
-                if (appPreferences.getValue(appPreferences.readerMode) != "scroll") return false
-                if (!appPreferences.getValue(appPreferences.readerChaptersGesture)) return false
-
-                val dx = event.offset.x
-                val dy = event.offset.y
-                if (abs(dx) < 80f || abs(dx) <= abs(dy)) return false
-
-                val current = lastLocator ?: return false
-                val order = publication?.readingOrder ?: return false
-                val currentIndex = order.indexOfLast { link ->
-                    current.href.toString().startsWith(link.href.toString().substringBefore("#"))
-                }
-                if (currentIndex < 0) return false
-                val targetIndex = if (dx > 0) currentIndex - 1 else currentIndex + 1
-                val target = order.getOrNull(targetIndex) ?: return false
-                return navigator?.go(target) ?: false
             }
         }
 
@@ -278,6 +257,10 @@ class ReaderActivity : AppCompatActivity() {
                     // Serve the bundled font files and declare them, so the same families as
                     // the subtitle font setting can be selected for the book text.
                     servedAssets += "subtitle-fonts/.*"
+                    // Readium turns resources on horizontal swipes while scrolling unless this
+                    // is disabled; the setting is the inverse of that flag.
+                    disablePageTurnsWhileScrolling =
+                        !appPreferences.getValue(appPreferences.readerChaptersGesture)
                     SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
                         ->
                         addFontFamilyDeclaration(FontFamily(family)) {
