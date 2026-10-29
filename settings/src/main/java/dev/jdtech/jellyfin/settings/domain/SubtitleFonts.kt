@@ -82,22 +82,19 @@ object SubtitleFonts {
     private val bundled =
         listOf(
             Bundled("Geist", listOf("Geist-Variable.ttf")),
-            Bundled("Geist Mono", listOf("GeistMono-Variable.ttf")),
-            Bundled("Inter", listOf("Inter-Variable.ttf")),
             Bundled("Roboto", listOf("Roboto-Variable.ttf")),
             Bundled("Open Sans", listOf("OpenSans-Variable.ttf")),
             Bundled("Noto Sans", listOf("NotoSans-Variable.ttf")),
-            Bundled("Source Sans 3", listOf("SourceSans3-Variable.ttf")),
             Bundled("IBM Plex Sans", listOf("IBMPlexSans-Variable.ttf")),
             Bundled("Work Sans", listOf("WorkSans-Variable.ttf")),
             Bundled("DM Sans", listOf("DMSans-Variable.ttf")),
             Bundled("Figtree", listOf("Figtree-Variable.ttf")),
             Bundled("Archivo", listOf("Archivo-Variable.ttf")),
             Bundled("Rubik", listOf("Rubik-Variable.ttf")),
-            Bundled("Montserrat", listOf("Montserrat-Variable.ttf")),
             Bundled("Lexend", listOf("Lexend-Variable.ttf")),
             Bundled("Atkinson Hyperlegible Next", listOf("AtkinsonHyperlegibleNext-Variable.ttf")),
             Bundled("Libre Baskerville", listOf("LibreBaskerville-Variable.ttf")),
+            Bundled("Vollkorn", listOf("Vollkorn-Variable.ttf")),
         )
 
     /**
@@ -112,6 +109,15 @@ object SubtitleFonts {
             "Geist-BoldItalic.ttf",
             "GeistMono-Regular.ttf",
             "GeistMono-Bold.ttf",
+        )
+
+    /** Bundled families dropped from the app; remove their old copies from existing installs. */
+    private val removedAssets =
+        listOf(
+            "GeistMono-Variable.ttf",
+            "Inter-Variable.ttf",
+            "SourceSans3-Variable.ttf",
+            "Montserrat-Variable.ttf",
         )
 
     /**
@@ -232,6 +238,7 @@ object SubtitleFonts {
         if (!dir.exists() && !dir.mkdirs()) return
 
         var changed = replacedAssets.count { File(dir, it).delete() } > 0
+        changed = removedAssets.count { File(dir, it).delete() } > 0 || changed
 
         for (font in bundled) {
             for (asset in font.assets) {

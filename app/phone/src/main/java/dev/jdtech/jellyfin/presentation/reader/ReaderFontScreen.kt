@@ -212,7 +212,7 @@ private fun ReaderFontScreenPreview() {
         ) {
             Text(text = "Geist", fontFamily = FontFamily.SansSerif)
             Text(text = "Libre Baskerville", fontFamily = FontFamily.Serif)
-            Text(text = "Geist Mono", fontFamily = FontFamily.Monospace)
+            Text(text = "Vollkorn", fontFamily = FontFamily.Serif)
         }
     }
 }

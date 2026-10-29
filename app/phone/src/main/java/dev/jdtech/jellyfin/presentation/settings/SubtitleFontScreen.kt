@@ -311,7 +311,7 @@ private fun SubtitleFontScreenLayoutPreview() {
                 listOf(
                     SubtitleFonts.Font("sans-serif", "Default (Roboto)", file = null),
                     SubtitleFonts.Font("Geist", "Geist", file = null),
-                    SubtitleFonts.Font("Geist Mono", "Geist Mono", file = null),
+                    SubtitleFonts.Font("Vollkorn", "Vollkorn", file = null),
                 ),
             selectedFamily = "sans-serif",
             onBack = {},
