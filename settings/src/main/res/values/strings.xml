@@ -256,6 +256,12 @@
     <string name="settings_reader_font_size_summary">Size of the book text</string>
     <string name="settings_reader_font_weight">Font weight</string>
     <string name="settings_reader_font_weight_summary">Thickness of the book text</string>
+    <string name="settings_reader_spacing">Spacing</string>
+    <string name="settings_reader_spacing_summary">Margins and spacing between lines, words and letters</string>
+    <string name="settings_reader_max_width">Page width</string>
+    <string name="settings_reader_max_width_summary">Maximum text width on large screens</string>
+    <string name="settings_reader_tap_turn">Tap to turn pages</string>
+    <string name="settings_reader_tap_turn_summary">Tap the left or right 30% of the page</string>
     <string name="settings_reader_margins">Page margins</string>
     <string name="settings_reader_margins_summary">Space at the sides of the page</string>
     <string name="settings_reader_line_height">Line spacing</string>

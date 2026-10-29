@@ -39,9 +39,12 @@ import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
 import org.readium.adapter.pdfium.navigator.PdfiumEngineProvider
 import org.readium.adapter.pdfium.navigator.PdfiumPreferences
 import org.readium.r2.navigator.Navigator
+import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.epub.css.Length
+import org.readium.r2.navigator.epub.css.RsProperties
 import org.readium.r2.navigator.image.ImageNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
@@ -82,6 +85,17 @@ class ReaderActivity : AppCompatActivity() {
     private val tapListener =
         object : InputListener {
             override fun onTap(event: TapEvent): Boolean {
+                if (appPreferences.getValue(appPreferences.readerTapTurn)) {
+                    val width = binding.readerNavigator.width
+                    if (width > 0) {
+                        when {
+                            event.point.x < width * 0.3f ->
+                                return overflowableNavigator?.goBackward() == true
+                            event.point.x > width * 0.7f ->
+                                return overflowableNavigator?.goForward() == true
+                        }
+                    }
+                }
                 toggleControls()
                 return false
             }
@@ -89,11 +103,15 @@ class ReaderActivity : AppCompatActivity() {
 
     private var bookId: UUID? = null
     private var navigator: Navigator? = null
+    private var visualNavigator: VisualNavigator? = null
+    private var overflowableNavigator: OverflowableNavigator? = null
     private var epubNavigator: EpubNavigatorFragment? = null
     private var positions: List<Locator> = emptyList()
     private var publication: Publication? = null
     private var lastLocator: Locator? = null
     private var locatorJob: Job? = null
+    private var appliedMaxWidth: Double? = null
+    private var maxWidthHref: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -170,8 +188,10 @@ class ReaderActivity : AppCompatActivity() {
         super.onResume()
         // Settings opened from the reader are visible behind this activity when we come back.
         if (::binding.isInitialized) {
-            binding.readerDim.alpha = brightnessOverlay(appPreferences.readerSettings().brightness)
-            epubNavigator?.submitPreferences(appPreferences.readerSettings().toEpubPreferences())
+            val settings = appPreferences.readerSettings()
+            binding.readerDim.alpha = brightnessOverlay(settings.brightness)
+            epubNavigator?.submitPreferences(settings.toEpubPreferences())
+            lifecycleScope.launch { applyMaxWidth(settings.maxLineLengthRem, force = true) }
         }
     }
 
@@ -244,7 +264,8 @@ class ReaderActivity : AppCompatActivity() {
     private fun showPublication(publication: Publication, id: UUID, title: String) {
         this.publication = publication
         val initialLocator = storedLocator(id)
-        val epubPreferences = appPreferences.readerSettings().toEpubPreferences()
+        val settings = appPreferences.readerSettings()
+        val epubPreferences = settings.toEpubPreferences()
 
         val fragmentClass: Class<out Fragment>
         val fragmentFactory: androidx.fragment.app.FragmentFactory
@@ -256,6 +277,8 @@ class ReaderActivity : AppCompatActivity() {
                     // Serve the bundled font files and declare them, so the same families as
                     // the subtitle font setting can be selected for the book text.
                     servedAssets += "subtitle-fonts/.*"
+                    readiumCssRsProperties =
+                        RsProperties(maxLineLength = Length.Rem(settings.maxLineLengthRem))
                     SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
                         ->
                         addFontFamilyDeclaration(FontFamily(family)) {
@@ -304,9 +327,12 @@ class ReaderActivity : AppCompatActivity() {
 
         val fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
         navigator = fragment as? Navigator
+        visualNavigator = fragment as? VisualNavigator
+        overflowableNavigator = fragment as? OverflowableNavigator
         epubNavigator = fragment as? EpubNavigatorFragment
 
-        (navigator as? VisualNavigator)?.addInputListener(tapListener)
+        visualNavigator?.addInputListener(tapListener)
+        appliedMaxWidth = settings.maxLineLengthRem
 
         val pageCount = positions.size
         uiState.value =
@@ -328,7 +354,8 @@ class ReaderActivity : AppCompatActivity() {
         locatorJob?.cancel()
         locatorJob = lifecycleScope.launch {
             navigator?.currentLocator?.collect { locator ->
-                if (locator.href.toString().isEmpty()) return@collect
+                val href = locator.href.toString()
+                if (href.isEmpty()) return@collect
                 lastLocator = locator
                 appPreferences.sharedPreferences
                     .edit()
@@ -339,8 +366,34 @@ class ReaderActivity : AppCompatActivity() {
                         page = locator.locations.position ?: uiState.value.page,
                         pageCount = positions.size.takeIf { it > 0 } ?: uiState.value.pageCount,
                     )
+                if (href != maxWidthHref) {
+                    maxWidthHref = href
+                    val maxWidth = appPreferences.readerSettings().maxLineLengthRem
+                    lifecycleScope.launch { applyMaxWidth(maxWidth, force = true) }
+                }
             }
         }
+    }
+
+    /**
+     * Applies the page-width cap to the resource currently on screen. Readium's CSS property is
+     * injected at creation, but changing the setting while the reader is open needs a live update.
+     */
+    private suspend fun applyMaxWidth(rem: Double, force: Boolean) {
+        if (!force && rem == appliedMaxWidth) return
+        appliedMaxWidth = rem
+        val script =
+            """
+            (function() {
+              var width = '${rem}rem';
+              document.documentElement.style.setProperty('--RS__maxLineLength', width);
+              if (document.body) {
+                document.body.style.setProperty('max-width', width, 'important');
+              }
+            })();
+            """
+                .trimIndent()
+        runCatching { epubNavigator?.evaluateJavascript(script) }
     }
 
     private fun storedLocator(id: UUID): Locator? {

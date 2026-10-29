@@ -52,7 +52,7 @@ fun SettingsSlidersDialog(
                 nameStringResource = slider.nameStringResource,
                 names = names,
                 values = values,
-                startIndex = values.indexOfFirst { it == slider.value }.coerceAtLeast(0),
+                startIndex = sliderIndex(values, slider.value),
             )
         }
     val indexes: SnapshotStateList<Int> =

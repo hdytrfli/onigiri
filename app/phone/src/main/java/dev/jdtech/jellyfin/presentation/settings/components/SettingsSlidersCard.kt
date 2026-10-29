@@ -29,7 +29,7 @@ fun SettingsSlidersCard(
             .map { slider ->
                 val names = stringArrayResource(slider.options)
                 val values = stringArrayResource(slider.optionValues)
-                val index = values.indexOfFirst { it == slider.value }.coerceAtLeast(0)
+                val index = sliderIndex(values.toList(), slider.value)
                 names.getOrElse(index) { "" }
             }
             .joinToString(" · ")

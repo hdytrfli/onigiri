@@ -5,8 +5,8 @@ import androidx.annotation.StringRes
 import dev.jdtech.jellyfin.settings.domain.models.Preference as PreferenceBackend
 
 /**
- * A preference shown as a row with its title/description on the left and the current value followed
- * by a chevron on the right.
+ * A preference shown as a row with its title/description on the left and the current value on the
+ * right.
  *
  * Unlike [PreferenceSelect] it does not open a dialog and, unlike [PreferenceCategory], it shows a
  * value; its [onClick] typically navigates to a bespoke screen. The value is read from

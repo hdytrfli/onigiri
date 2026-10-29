@@ -443,7 +443,17 @@ constructor(
                                                     backendPreference = appPreferences.readerTheme,
                                                     options = R.array.reader_themes_options,
                                                     optionValues = R.array.reader_themes_values,
-                                                )
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_max_width,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_max_width_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerMaxWidth,
+                                                    options = R.array.reader_max_width_options,
+                                                    optionValues = R.array.reader_max_width_values,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
@@ -478,17 +488,28 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.readerTextNormalization,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_tap_turn,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_tap_turn_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerTapTurn,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
                                         nameStringResource = R.string.settings_group_typography,
                                         preferences =
                                             listOf(
-                                                PreferenceCategory(
+                                                PreferenceAction(
                                                     nameStringResource =
                                                         R.string.settings_reader_font,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_font_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerFontFamily,
+                                                    formatValue = { readerFontDisplayName(it) },
                                                     onClick = {
                                                         viewModelScope.launch {
                                                             eventsChannel.send(
@@ -525,65 +546,82 @@ constructor(
                                         nameStringResource = R.string.settings_group_spacing,
                                         preferences =
                                             listOf(
-                                                PreferenceSlider(
+                                                PreferenceSliders(
                                                     nameStringResource =
-                                                        R.string.settings_reader_margins,
+                                                        R.string.settings_reader_spacing,
                                                     descriptionStringRes =
-                                                        R.string.settings_reader_margins_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerPageMargins,
-                                                    options = R.array.reader_margins_options,
-                                                    optionValues = R.array.reader_margins_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_line_height,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_line_height_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerLineHeight,
-                                                    options = R.array.reader_line_height_options,
-                                                    optionValues =
-                                                        R.array.reader_line_height_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_paragraph_spacing,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_paragraph_spacing_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerParagraphSpacing,
-                                                    options =
-                                                        R.array.reader_paragraph_spacing_options,
-                                                    optionValues =
-                                                        R.array.reader_paragraph_spacing_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_word_spacing,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_word_spacing_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerWordSpacing,
-                                                    options = R.array.reader_word_spacing_options,
-                                                    optionValues =
-                                                        R.array.reader_word_spacing_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_letter_spacing,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_letter_spacing_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerLetterSpacing,
-                                                    options = R.array.reader_letter_spacing_options,
-                                                    optionValues =
-                                                        R.array.reader_letter_spacing_values,
-                                                ),
+                                                        R.string.settings_reader_spacing_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .settings_reader_margins,
+                                                                options =
+                                                                    R.array.reader_margins_options,
+                                                                optionValues =
+                                                                    R.array.reader_margins_values,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .readerPageMargins,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .settings_reader_line_height,
+                                                                options =
+                                                                    R.array
+                                                                        .reader_line_height_options,
+                                                                optionValues =
+                                                                    R.array
+                                                                        .reader_line_height_values,
+                                                                backendPreference =
+                                                                    appPreferences.readerLineHeight,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .settings_reader_paragraph_spacing,
+                                                                options =
+                                                                    R.array
+                                                                        .reader_paragraph_spacing_options,
+                                                                optionValues =
+                                                                    R.array
+                                                                        .reader_paragraph_spacing_values,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .readerParagraphSpacing,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .settings_reader_word_spacing,
+                                                                options =
+                                                                    R.array
+                                                                        .reader_word_spacing_options,
+                                                                optionValues =
+                                                                    R.array
+                                                                        .reader_word_spacing_values,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .readerWordSpacing,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string
+                                                                        .settings_reader_letter_spacing,
+                                                                options =
+                                                                    R.array
+                                                                        .reader_letter_spacing_options,
+                                                                optionValues =
+                                                                    R.array
+                                                                        .reader_letter_spacing_values,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .readerLetterSpacing,
+                                                            ),
+                                                        ),
+                                                )
                                             ),
                                     ),
                                 ),
@@ -1486,6 +1524,14 @@ constructor(
         when (family) {
             null -> null
             SubtitleFonts.DEFAULT_FAMILY -> context.getString(R.string.subtitle_font_default)
+            else -> family
+        }
+
+    /** The same display style as the subtitle-font row, with the reader's own default sentinel. */
+    private fun readerFontDisplayName(family: String?): String? =
+        when (family) {
+            null,
+            "default" -> context.getString(R.string.subtitle_font_default)
             else -> family
         }
 

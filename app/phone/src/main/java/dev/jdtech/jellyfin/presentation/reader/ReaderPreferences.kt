@@ -19,12 +19,23 @@ data class ReaderSettings(
     val columnCount: Int = 1,
     val textAlign: String = "",
     val textNormalization: Boolean = true,
+    val maxWidth: String = "default",
     val lineHeight: Float = 1.5f,
     val paragraphSpacing: Float = 1.3f,
     val wordSpacing: Float = 0f,
     val letterSpacing: Float = 0f,
     val brightness: Float = 1f,
-)
+) {
+    /** The Readium CSS max line length, in rem; a huge value removes the cap. */
+    val maxLineLengthRem: Double
+        get() =
+            when (maxWidth) {
+                "narrow" -> 32.0
+                "wide" -> 60.0
+                "none" -> 999.0
+                else -> 40.0
+            }
+}
 
 fun AppPreferences.readerSettings(): ReaderSettings {
     fun float(
@@ -42,6 +53,7 @@ fun AppPreferences.readerSettings(): ReaderSettings {
         columnCount = if (getValue(readerMode) == "dual") 2 else 1,
         textAlign = getValue(readerTextAlign).takeIf { it != "default" }.orEmpty(),
         textNormalization = getValue(readerTextNormalization),
+        maxWidth = getValue(readerMaxWidth),
         lineHeight = float(readerLineHeight, 1.5f),
         paragraphSpacing = float(readerParagraphSpacing, 1.3f),
         wordSpacing = float(readerWordSpacing, 0f),
@@ -66,6 +78,7 @@ fun AppPreferences.setReaderSettings(settings: ReaderSettings) {
     )
     setValue(readerTextAlign, settings.textAlign.ifBlank { "default" })
     setValue(readerTextNormalization, settings.textNormalization)
+    setValue(readerMaxWidth, settings.maxWidth)
     setValue(readerLineHeight, settings.lineHeight.toString())
     setValue(readerParagraphSpacing, settings.paragraphSpacing.toString())
     setValue(readerWordSpacing, settings.wordSpacing.toString())

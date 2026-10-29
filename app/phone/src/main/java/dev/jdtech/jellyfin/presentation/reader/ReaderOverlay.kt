@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,8 +65,8 @@ data class ReaderUiState(
 
 private val ReaderScrim =
     Brush.verticalGradient(
-        0f to Color(0x33000000),
-        1f to Color(0xB3000000),
+        0f to Color.Black.copy(alpha = 0.1f),
+        1f to Color.Black.copy(alpha = 0.8f),
     )
 
 /**
@@ -129,11 +128,9 @@ fun ReaderOverlay(
                     enter = fadeIn(tween(300)),
                     exit = fadeOut(tween(300)),
                 ) {
-                    // The player dims the content behind its controls; the top buttons need that
-                    // contrast even though the gradient itself lives at the bottom.
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f))
-                    )
+                    // One gradient for the whole reader chrome: light at the top, darker at the
+                    // bottom where the title and scrubber sit.
+                    Box(modifier = Modifier.fillMaxSize().background(ReaderScrim))
                 }
                 AnimatedVisibility(
                     visible = controlsVisible,
@@ -173,7 +170,6 @@ fun ReaderOverlay(
                     Column(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .background(ReaderScrim)
                                 .navigationBarsPadding()
                                 .padding(horizontal = 24.dp, vertical = 16.dp)
                     ) {
@@ -197,7 +193,6 @@ fun ReaderOverlay(
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Text(
                                 text = displayedPage.toString(),
@@ -206,31 +201,8 @@ fun ReaderOverlay(
                                         fontSize = 14.sp,
                                         color = Color.White,
                                     ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.width(40.dp),
                             )
-                            Slider(
-                                value = scrubValue ?: state.progress,
-                                onValueChange = { value ->
-                                    if (state.pageCount > 1) {
-                                        scrubValue = value
-                                        onInteraction()
-                                        onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
-                                    }
-                                },
-                                onValueChangeFinished = { scrubValue = null },
-                                colors =
-                                    SliderDefaults.colors(
-                                        thumbColor = Color.White,
-                                        activeTrackColor = Color.White,
-                                        inactiveTrackColor = Color(0x33FFFFFF),
-                                        activeTickColor = Color.Transparent,
-                                        inactiveTickColor = Color.Transparent,
-                                    ),
-                                thumb = { ReaderSliderThumb() },
-                                modifier = Modifier.weight(1f),
-                                enabled = state.pageCount > 1,
-                            )
+                            Spacer(modifier = Modifier.weight(1f))
                             Text(
                                 text = state.pageCount.toString(),
                                 style =
@@ -238,10 +210,30 @@ fun ReaderOverlay(
                                         fontSize = 14.sp,
                                         color = Color.White,
                                     ),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.width(40.dp),
                             )
                         }
+                        Slider(
+                            value = scrubValue ?: state.progress,
+                            onValueChange = { value ->
+                                if (state.pageCount > 1) {
+                                    scrubValue = value
+                                    onInteraction()
+                                    onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
+                                }
+                            },
+                            onValueChangeFinished = { scrubValue = null },
+                            colors =
+                                SliderDefaults.colors(
+                                    thumbColor = Color.White,
+                                    activeTrackColor = Color.White,
+                                    inactiveTrackColor = Color(0x33FFFFFF),
+                                    activeTickColor = Color.Transparent,
+                                    inactiveTickColor = Color.Transparent,
+                                ),
+                            thumb = { ReaderSliderThumb() },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = state.pageCount > 1,
+                        )
                     }
                 }
             }
