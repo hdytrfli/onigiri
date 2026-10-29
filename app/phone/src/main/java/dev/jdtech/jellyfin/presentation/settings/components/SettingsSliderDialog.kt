@@ -43,7 +43,7 @@ fun SettingsSliderDialog(
     onUpdate: (String?) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    val startIndex = optionValues.indexOfFirst { it == preference.value }.coerceAtLeast(0)
+    val startIndex = sliderIndex(optionValues, preference.value)
     var index by remember { mutableIntStateOf(startIndex) }
     val currentValue = optionNames.getOrElse(index) { "" }
     val currentValuePrefix = stringResource(SettingsR.string.current_value)

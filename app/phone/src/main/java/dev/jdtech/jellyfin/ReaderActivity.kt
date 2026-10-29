@@ -48,7 +48,6 @@ import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.preferences.FontFamily
-import org.readium.r2.shared.DelicateReadiumApi
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Locator
@@ -66,7 +65,7 @@ import timber.log.Timber
  * settings), PDF or CBZ/Divina (fixed layout). The controls overlay matches the player's chrome.
  */
 @AndroidEntryPoint
-@OptIn(ExperimentalReadiumApi::class, InternalReadiumApi::class, DelicateReadiumApi::class)
+@OptIn(ExperimentalReadiumApi::class, InternalReadiumApi::class)
 class ReaderActivity : AppCompatActivity() {
 
     @Inject lateinit var appPreferences: AppPreferences
@@ -257,10 +256,6 @@ class ReaderActivity : AppCompatActivity() {
                     // Serve the bundled font files and declare them, so the same families as
                     // the subtitle font setting can be selected for the book text.
                     servedAssets += "subtitle-fonts/.*"
-                    // Readium turns resources on horizontal swipes while scrolling unless this
-                    // is disabled; the setting is the inverse of that flag.
-                    disablePageTurnsWhileScrolling =
-                        !appPreferences.getValue(appPreferences.readerChaptersGesture)
                     SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
                         ->
                         addFontFamilyDeclaration(FontFamily(family)) {

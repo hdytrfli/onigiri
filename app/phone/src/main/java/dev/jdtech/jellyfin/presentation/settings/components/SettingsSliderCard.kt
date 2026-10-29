@@ -22,7 +22,7 @@ fun SettingsSliderCard(
 ) {
     val optionNames = stringArrayResource(preference.options)
     val optionValues = stringArrayResource(preference.optionValues)
-    val index = optionValues.indexOfFirst { it == preference.value }.coerceAtLeast(0)
+    val index = sliderIndex(optionValues.toList(), preference.value)
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -45,6 +45,14 @@ fun SettingsSliderCard(
             onDismissRequest = { showDialog = false },
         )
     }
+}
+
+/** Finds a stored value in the slider options, tolerating `1.5` vs `1.50` formatting. */
+internal fun sliderIndex(optionValues: List<String>, value: String?): Int {
+    val exact = optionValues.indexOfFirst { it == value }
+    if (exact >= 0) return exact
+    val number = value?.toFloatOrNull() ?: return 0
+    return optionValues.indexOfFirst { it.toFloatOrNull() == number }.coerceAtLeast(0)
 }
 
 @Preview

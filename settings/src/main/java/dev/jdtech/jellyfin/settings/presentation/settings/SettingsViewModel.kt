@@ -478,20 +478,6 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.readerTextNormalization,
                                                 ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_chapters_gesture,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_chapters_gesture_summary,
-                                                    enabled =
-                                                        appPreferences.getValue(
-                                                            appPreferences.readerMode
-                                                        ) == "scroll",
-                                                    hideWhenDisabled = true,
-                                                    backendPreference =
-                                                        appPreferences.readerChaptersGesture,
-                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
