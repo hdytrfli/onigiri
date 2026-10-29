@@ -24,6 +24,7 @@ import dev.jdtech.jellyfin.presentation.reader.ReaderUiState
 import dev.jdtech.jellyfin.presentation.reader.readerSettings
 import dev.jdtech.jellyfin.presentation.reader.toEpubPreferences
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
 import java.io.File
@@ -74,6 +75,8 @@ class ReaderActivity : AppCompatActivity() {
     @Inject lateinit var appPreferences: AppPreferences
 
     @Inject lateinit var jellyfinApi: JellyfinApi
+
+    @Inject lateinit var repository: JellyfinRepository
 
     private lateinit var binding: ActivityReaderBinding
 
@@ -383,9 +386,7 @@ class ReaderActivity : AppCompatActivity() {
                         (positions.isNotEmpty() && locator.locations.position == positions.size)
                 if (!markedPlayed && atEnd) {
                     markedPlayed = true
-                    lifecycleScope.launch {
-                        runCatching { jellyfinApi.playStateApi.markPlayedItem(id) }
-                    }
+                    lifecycleScope.launch { runCatching { repository.markAsPlayed(id) } }
                 }
             }
         }

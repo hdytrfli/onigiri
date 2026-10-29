@@ -574,7 +574,9 @@ class JellyfinRepositoryImpl(
 
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setFavorite(jellyfinApi.userId!!, itemId, true)
+            val userId = jellyfinApi.userId!!
+            database.getUserDataOrCreateNew(itemId, userId)
+            database.setFavorite(userId, itemId, true)
             try {
                 jellyfinApi.userLibraryApi.markFavoriteItem(itemId)
             } catch (_: Exception) {
@@ -585,7 +587,9 @@ class JellyfinRepositoryImpl(
 
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setFavorite(jellyfinApi.userId!!, itemId, false)
+            val userId = jellyfinApi.userId!!
+            database.getUserDataOrCreateNew(itemId, userId)
+            database.setFavorite(userId, itemId, false)
             try {
                 jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId)
             } catch (_: Exception) {
@@ -596,7 +600,9 @@ class JellyfinRepositoryImpl(
 
     override suspend fun markAsPlayed(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setPlayed(jellyfinApi.userId!!, itemId, true)
+            val userId = jellyfinApi.userId!!
+            database.getUserDataOrCreateNew(itemId, userId)
+            database.setPlayed(userId, itemId, true)
             try {
                 jellyfinApi.playStateApi.markPlayedItem(itemId)
             } catch (_: Exception) {
@@ -607,7 +613,9 @@ class JellyfinRepositoryImpl(
 
     override suspend fun markAsUnplayed(itemId: UUID) {
         withContext(Dispatchers.IO) {
-            database.setPlayed(jellyfinApi.userId!!, itemId, false)
+            val userId = jellyfinApi.userId!!
+            database.getUserDataOrCreateNew(itemId, userId)
+            database.setPlayed(userId, itemId, false)
             try {
                 jellyfinApi.playStateApi.markUnplayedItem(itemId)
             } catch (_: Exception) {

@@ -44,12 +44,6 @@ suspend fun BaseItemDto.toFindroidBook(
     if (serverDatabase != null) {
         sources.addAll(serverDatabase.getSources(id).map { it.toFindroidSource(serverDatabase) })
     }
-    // Books often arrive without mediaSources on the item payload; fetch them explicitly.
-    if (sources.isEmpty()) {
-        sources.addAll(
-            runCatching { jellyfinRepository.getMediaSources(id) }.getOrDefault(emptyList())
-        )
-    }
     val localUserData = serverDatabase?.getUserData(id, jellyfinRepository.getUserId())
     return FindroidBook(
         id = id,

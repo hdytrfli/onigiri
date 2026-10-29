@@ -56,27 +56,24 @@ constructor(
                 )
             )
             try {
-                val libraries = mutableListOf<FindroidCollection>()
-                val items = LinkedHashMap<UUID, List<FindroidItem>>()
-                // Query every library: a server can hold books in a library typed as Mixed or
-                // Books, and only the item type tells us what is actually a book.
-                for (library in repository.getLibraries()) {
-                    val books =
-                        repository.getItems(
-                            parentId = library.id,
-                            includeTypes = listOf(BaseItemKind.BOOK, BaseItemKind.AUDIO_BOOK),
-                            recursive = true,
-                            sortBy = SortBy.NAME,
-                        )
-                    if (books.isNotEmpty()) {
-                        libraries += library
-                        items[library.id] = books
-                    }
-                }
+                // One server-wide query is much faster than walking every library separately.
+                val books =
+                    repository.getItems(
+                        parentId = null,
+                        includeTypes = listOf(BaseItemKind.BOOK, BaseItemKind.AUDIO_BOOK),
+                        recursive = true,
+                        sortBy = SortBy.NAME,
+                    )
+                val libraries = if (books.isEmpty()) emptyList() else repository.getLibraries()
                 _state.emit(
                     _state.value.copy(
                         libraries = libraries,
-                        items = items,
+                        items =
+                            if (books.isEmpty()) {
+                                emptyMap()
+                            } else {
+                                mapOf((libraries.firstOrNull()?.id ?: UUID(0, 0)) to books)
+                            },
                         isLoading = false,
                     )
                 )
