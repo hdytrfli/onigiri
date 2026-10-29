@@ -219,6 +219,19 @@ fun ReaderOverlay(
                                         inactiveTickColor = Color.Transparent,
                                     ),
                                 thumb = { ReaderSliderThumb() },
+                                track = { sliderState ->
+                                    SliderDefaults.Track(
+                                        sliderState = sliderState,
+                                        colors =
+                                            SliderDefaults.colors(
+                                                activeTrackColor = Color.White,
+                                                inactiveTrackColor = Color(0x33FFFFFF),
+                                                activeTickColor = Color.Transparent,
+                                                inactiveTickColor = Color.Transparent,
+                                            ),
+                                        modifier = Modifier.height(12.dp),
+                                    )
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = state.pageCount > 1,
                             )

@@ -386,7 +386,14 @@ class ReaderActivity : AppCompatActivity() {
                         (positions.isNotEmpty() && locator.locations.position == positions.size)
                 if (!markedPlayed && atEnd) {
                     markedPlayed = true
-                    lifecycleScope.launch { runCatching { repository.markAsPlayed(id) } }
+                    lifecycleScope.launch {
+                        runCatching { repository.markAsPlayed(id) }
+                        appPreferences.sharedPreferences
+                            .edit()
+                            .remove(locatorKey(id))
+                            .remove("reader_page_count_$id")
+                            .apply()
+                    }
                 }
             }
         }
