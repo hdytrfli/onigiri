@@ -351,6 +351,10 @@ class ReaderActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val locators = runCatching { publication.positions() }.getOrNull().orEmpty()
             positions = locators
+            appPreferences.sharedPreferences
+                .edit()
+                .putInt("reader_page_count_$id", locators.size)
+                .apply()
             uiState.value = uiState.value.copy(pageCount = locators.size)
         }
 

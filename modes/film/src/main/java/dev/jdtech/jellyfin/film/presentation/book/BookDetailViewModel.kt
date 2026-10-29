@@ -8,6 +8,7 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,8 @@ data class BookDetailState(
     val error: Exception? = null,
     /** 0..1 progression stored by the in-app reader. */
     val readingProgress: Float = 0f,
+    /** Approximate pages left, when the reader has recorded a page count. */
+    val pagesLeft: Int = 0,
 )
 
 @HiltViewModel
@@ -44,11 +47,13 @@ constructor(
             _state.value =
                 result.fold(
                     onSuccess = { item ->
+                        val progress = readerProgress(bookId)
                         BookDetailState(
                             item = item as? FindroidBook,
                             isLoading = false,
                             error = if (item is FindroidBook) null else Exception("Not a book"),
-                            readingProgress = readerProgress(bookId),
+                            readingProgress = progress,
+                            pagesLeft = readerPagesLeft(bookId, progress),
                         )
                     },
                     onFailure = { BookDetailState(isLoading = false, error = it as? Exception) },
@@ -71,7 +76,17 @@ constructor(
     }
 
     private fun update(bookId: UUID, block: suspend () -> Unit) {
-        viewModelScope.launch { withContext(Dispatchers.IO) { runCatching { block() } } }
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) { runCatching { block() } }
+            load(bookId, force = true)
+        }
+    }
+
+    private fun readerPagesLeft(bookId: UUID, progress: Float): Int {
+        if (progress <= 0f) return 0
+        val total = appPreferences.sharedPreferences.getInt("reader_page_count_$bookId", 0)
+        if (total <= 0) return 0
+        return ceil((1f - progress) * total).toInt().coerceAtLeast(1)
     }
 
     private fun readerProgress(bookId: UUID): Float {

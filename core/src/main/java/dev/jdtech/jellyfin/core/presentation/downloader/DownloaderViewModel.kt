@@ -45,10 +45,15 @@ class DownloaderViewModel @Inject constructor(private val downloader: Downloader
     private fun download(item: FindroidItem, storageIndex: Int = 0) {
         viewModelScope.launch {
             _state.emit(DownloaderState(status = DownloadManager.STATUS_PENDING))
+            val source = item.sources.firstOrNull()
+            if (source == null) {
+                _state.emit(DownloaderState(status = DownloadManager.STATUS_FAILED))
+                return@launch
+            }
             val (downloadId, uiText) =
                 downloader.downloadItem(
                     item = item,
-                    sourceId = item.sources.first().id,
+                    sourceId = source.id,
                     storageIndex = storageIndex,
                 )
             if (downloadId != -1L) {

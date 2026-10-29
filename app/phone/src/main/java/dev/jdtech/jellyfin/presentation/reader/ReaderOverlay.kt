@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -99,22 +98,6 @@ fun ReaderOverlay(
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
-            state.loading ->
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Text(
-                        text = state.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 32.dp),
-                    )
-                    CircularProgressIndicator()
-                }
-
             state.error != null ->
                 Column(
                     modifier = Modifier.align(Alignment.Center).padding(32.dp),
@@ -193,51 +176,53 @@ fun ReaderOverlay(
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = displayedPage.toString(),
-                                style =
-                                    MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 14.sp,
-                                        color = Color.White,
+                        if (!state.loading) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = displayedPage.toString(),
+                                    style =
+                                        MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 14.sp,
+                                            color = Color.White,
+                                        ),
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = state.pageCount.toString(),
+                                    style =
+                                        MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 14.sp,
+                                            color = Color.White,
+                                        ),
+                                )
+                            }
+                            Slider(
+                                value = scrubValue ?: state.progress,
+                                onValueChange = { value ->
+                                    if (state.pageCount > 1) {
+                                        isScrubbing = true
+                                        scrubValue = value
+                                        onInteraction()
+                                        onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
+                                    }
+                                },
+                                onValueChangeFinished = { isScrubbing = false },
+                                colors =
+                                    SliderDefaults.colors(
+                                        thumbColor = Color.White,
+                                        activeTrackColor = Color.White,
+                                        inactiveTrackColor = Color(0x33FFFFFF),
+                                        activeTickColor = Color.Transparent,
+                                        inactiveTickColor = Color.Transparent,
                                     ),
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                text = state.pageCount.toString(),
-                                style =
-                                    MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 14.sp,
-                                        color = Color.White,
-                                    ),
+                                thumb = { ReaderSliderThumb() },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = state.pageCount > 1,
                             )
                         }
-                        Slider(
-                            value = scrubValue ?: state.progress,
-                            onValueChange = { value ->
-                                if (state.pageCount > 1) {
-                                    isScrubbing = true
-                                    scrubValue = value
-                                    onInteraction()
-                                    onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
-                                }
-                            },
-                            onValueChangeFinished = { isScrubbing = false },
-                            colors =
-                                SliderDefaults.colors(
-                                    thumbColor = Color.White,
-                                    activeTrackColor = Color.White,
-                                    inactiveTrackColor = Color(0x33FFFFFF),
-                                    activeTickColor = Color.Transparent,
-                                    inactiveTickColor = Color.Transparent,
-                                ),
-                            thumb = { ReaderSliderThumb() },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = state.pageCount > 1,
-                        )
                     }
                 }
             }

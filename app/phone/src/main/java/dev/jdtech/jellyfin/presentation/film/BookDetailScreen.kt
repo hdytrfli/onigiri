@@ -42,7 +42,6 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
-import kotlin.math.roundToInt
 
 /** A book's detail page, built from the same components as the movie detail page. */
 @Composable
@@ -84,7 +83,12 @@ fun BookDetailScreen(
             else -> {
                 val item = state.item!!
                 val progress = state.readingProgress
-                val percentLeft = ((1f - progress) * 100).roundToInt().coerceIn(0, 100)
+                val readLabel =
+                    when {
+                        item.played -> "Read"
+                        state.pagesLeft > 0 -> "Read · ${state.pagesLeft} pages left"
+                        else -> "Read"
+                    }
                 val safePadding = rememberSafePadding()
                 val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
                 val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
@@ -115,15 +119,10 @@ fun BookDetailScreen(
                             onMarkAsFavoriteClick = {
                                 viewModel.setFavorite(item.id, !item.favorite)
                             },
-                            playLabel =
-                                if (progress > 0f) {
-                                    "Continue reading · $percentLeft% left"
-                                } else {
-                                    "Read book"
-                                },
+                            playLabel = readLabel,
                             playIconRes = CoreR.drawable.ic_book_open,
                             showRestartButton = true,
-                            hasProgress = progress > 0f,
+                            hasProgress = progress > 0f && !item.played,
                             forcePlayEnabled = true,
                             modifier = Modifier.fillMaxWidth(),
                         )

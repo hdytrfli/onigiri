@@ -44,6 +44,12 @@ suspend fun BaseItemDto.toFindroidBook(
     if (serverDatabase != null) {
         sources.addAll(serverDatabase.getSources(id).map { it.toFindroidSource(serverDatabase) })
     }
+    // Books often arrive without mediaSources on the item payload; fetch them explicitly.
+    if (sources.isEmpty()) {
+        sources.addAll(
+            runCatching { jellyfinRepository.getMediaSources(id) }.getOrDefault(emptyList())
+        )
+    }
     return FindroidBook(
         id = id,
         name = name.orEmpty(),
@@ -53,7 +59,7 @@ suspend fun BaseItemDto.toFindroidBook(
         played = userData?.played == true,
         favorite = userData?.isFavorite == true,
         canPlay = playAccess != PlayAccess.NONE,
-        canDownload = canDownload == true,
+        canDownload = canDownload == true && sources.isNotEmpty(),
         runtimeTicks = 0,
         playbackPositionTicks = userData?.playbackPositionTicks ?: 0,
         images = toFindroidImages(jellyfinRepository),
