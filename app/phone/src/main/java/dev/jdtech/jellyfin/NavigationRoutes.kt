@@ -31,8 +31,6 @@ data class GenreListRoute(
     val movies: Boolean,
 ) : NavKey
 
-@Serializable data object CollectionsRoute : NavKey
-
 @Serializable data object MediaRoute : NavKey
 
 @Serializable data object DownloadsRoute : NavKey
@@ -59,7 +57,12 @@ data class CollectionRoute(val collectionId: String, val collectionName: String)
 
 @Serializable data class PersonRoute(val personId: String) : NavKey
 
-@Serializable data class BookRoute(val bookId: String, val title: String) : NavKey
+@Serializable
+data class BookRoute(
+    val bookId: String,
+    val title: String,
+    val audiobook: Boolean = false,
+) : NavKey
 
 @Serializable data class SubtitleSearchRoute(val itemId: String) : NavKey
 

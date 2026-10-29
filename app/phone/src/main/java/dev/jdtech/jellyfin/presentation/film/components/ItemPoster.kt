@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
@@ -58,6 +59,13 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
     }
 
     val isHorizontal = direction == Direction.HORIZONTAL
+    val isAudiobook = item is FindroidBook && item.isAudiobook
+    val aspectRatio =
+        when {
+            isAudiobook -> 1f
+            isHorizontal -> 1.77f
+            else -> 0.66f
+        }
     val placeholder =
         rememberBlurHashPainter(
             hash = blurHash,
@@ -80,7 +88,7 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
         contentScale = ContentScale.Crop,
         modifier =
             modifier
-                .aspectRatio(if (isHorizontal) 1.77f else 0.66f)
+                .aspectRatio(aspectRatio)
                 .background(MaterialTheme.colorScheme.surfaceContainer),
     )
 }

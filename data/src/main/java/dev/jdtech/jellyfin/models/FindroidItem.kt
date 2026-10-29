@@ -33,7 +33,9 @@ suspend fun BaseItemDto.toFindroidItem(
         BaseItemKind.SEASON -> toFindroidSeason(jellyfinRepository)
         BaseItemKind.SERIES -> toFindroidShow(jellyfinRepository)
         BaseItemKind.BOX_SET -> toFindroidBoxSet(jellyfinRepository)
-        BaseItemKind.BOOK -> if (isReadableBook()) toFindroidBook(jellyfinRepository) else null
+        BaseItemKind.BOOK ->
+            if (isReadableBook() || isAudiobookItem()) toFindroidBook(jellyfinRepository) else null
+        BaseItemKind.AUDIO_BOOK -> toFindroidBook(jellyfinRepository)
         BaseItemKind.FOLDER -> toFindroidFolder(jellyfinRepository)
         else -> null
     }

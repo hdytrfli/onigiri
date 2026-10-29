@@ -13,6 +13,7 @@ import org.jellyfin.sdk.api.client.extensions.genresApi
 import org.jellyfin.sdk.api.client.extensions.imageApi
 import org.jellyfin.sdk.api.client.extensions.itemLookupApi
 import org.jellyfin.sdk.api.client.extensions.itemsApi
+import org.jellyfin.sdk.api.client.extensions.libraryApi
 import org.jellyfin.sdk.api.client.extensions.mediaInfoApi
 import org.jellyfin.sdk.api.client.extensions.mediaSegmentsApi
 import org.jellyfin.sdk.api.client.extensions.moviesApi
@@ -72,6 +73,7 @@ class JellyfinApi(
     val genresApi = api.genresApi
     val imageApi = api.imageApi
     val itemsApi = api.itemsApi
+    val libraryApi = api.libraryApi
     val itemLookupApi = api.itemLookupApi
     val mediaInfoApi = api.mediaInfoApi
     val mediaSegmentsApi = api.mediaSegmentsApi

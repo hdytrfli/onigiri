@@ -25,6 +25,8 @@ data class FindroidBook(
     override val unplayedItemCount: Int? = null,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter>,
+    /** Audiobooks are listed with the books but the reader cannot play them yet. */
+    val isAudiobook: Boolean = false,
 ) : FindroidItem
 
 suspend fun BaseItemDto.toFindroidBook(jellyfinRepository: JellyfinRepository): FindroidBook {
@@ -42,6 +44,8 @@ suspend fun BaseItemDto.toFindroidBook(jellyfinRepository: JellyfinRepository): 
         playbackPositionTicks = userData?.playbackPositionTicks ?: 0,
         images = toFindroidImages(jellyfinRepository),
         chapters = toFindroidChapters(),
+        isAudiobook =
+            type == org.jellyfin.sdk.model.api.BaseItemKind.AUDIO_BOOK || isAudiobookItem(),
     )
 }
 
@@ -51,22 +55,26 @@ private val READABLE_BOOK_CONTAINERS = setOf("epub", "pdf", "cbz", "zip")
 /** Containers of audiobooks that a server might still report as a Book item. */
 private val AUDIOBOOK_CONTAINERS = setOf("m4b", "m4a", "mp3", "flac", "ogg", "opus", "wav", "aac")
 
+private fun BaseItemDto.bookContainers(): List<String> = buildList {
+    container?.let(::add)
+    mediaSources?.forEach { source -> source.container?.let(::add) }
+    path?.let { add(it.substringAfterLast('.', missingDelimiterValue = "")) }
+}
+    .map { it.trim().lowercase() }
+    .filter { it.isNotEmpty() }
+
+/** Whether this is an audiobook, which is listed but cannot be read by the reader. */
+fun BaseItemDto.isAudiobookItem(): Boolean =
+    mediaType == MediaType.AUDIO || bookContainers().any { it in AUDIOBOOK_CONTAINERS }
+
 /**
  * Whether this book is in a format Readium can open. Jellyfin reports the container on the item and
  * on its media sources; the file extension is the last fallback. Some servers omit all of them for
  * books, in which case the item is kept and the reader reports an unsupported file.
  */
 fun BaseItemDto.isReadableBook(): Boolean {
-    val candidates = buildList {
-        container?.let(::add)
-        mediaSources?.forEach { source -> source.container?.let(::add) }
-        path?.let { add(it.substringAfterLast('.', missingDelimiterValue = "")) }
-    }
-        .map { it.trim().lowercase() }
-        .filter { it.isNotEmpty() }
-
-    if (candidates.any { it in AUDIOBOOK_CONTAINERS }) return false
-    if (mediaType == MediaType.AUDIO) return false
+    val candidates = bookContainers()
+    if (isAudiobookItem()) return false
     if (candidates.isEmpty()) return true
     return candidates.any { it in READABLE_BOOK_CONTAINERS }
 }

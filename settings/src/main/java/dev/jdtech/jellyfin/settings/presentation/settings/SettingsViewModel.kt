@@ -432,7 +432,7 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
-                                        nameStringResource = R.string.settings_group_reading,
+                                        nameStringResource = R.string.settings_group_display,
                                         preferences =
                                             listOf(
                                                 PreferenceSelect(
@@ -440,7 +440,6 @@ constructor(
                                                         R.string.settings_reader_theme,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_theme_summary,
-                                                    iconDrawableId = R.drawable.ic_palette,
                                                     backendPreference = appPreferences.readerTheme,
                                                     options = R.array.reader_themes_options,
                                                     optionValues = R.array.reader_themes_values,
@@ -450,18 +449,22 @@ constructor(
                                                         R.string.settings_reader_brightness,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_brightness_summary,
-                                                    iconDrawableId = R.drawable.ic_sun,
                                                     backendPreference =
                                                         appPreferences.readerBrightness,
                                                     options = R.array.reader_brightness_options,
                                                     optionValues = R.array.reader_brightness_values,
                                                 ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_reading,
+                                        preferences =
+                                            listOf(
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.settings_reader_scroll,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_scroll_summary,
-                                                    iconDrawableId = R.drawable.ic_scroll_text,
                                                     backendPreference = appPreferences.readerScroll,
                                                 ),
                                                 PreferenceSelect(
@@ -469,7 +472,6 @@ constructor(
                                                         R.string.settings_reader_columns,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_columns_summary,
-                                                    iconDrawableId = R.drawable.ic_columns_2,
                                                     backendPreference =
                                                         appPreferences.readerColumnCount,
                                                     options = R.array.reader_columns_options,
@@ -480,7 +482,6 @@ constructor(
                                                         R.string.settings_reader_alignment,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_alignment_summary,
-                                                    iconDrawableId = R.drawable.ic_text_align_start,
                                                     backendPreference =
                                                         appPreferences.readerTextAlign,
                                                     options = R.array.reader_alignment_options,
@@ -492,7 +493,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_reader_normalization_summary,
-                                                    iconDrawableId = R.drawable.ic_case_sensitive,
                                                     backendPreference =
                                                         appPreferences.readerTextNormalization,
                                                     options = R.array.reader_normalization_options,
@@ -510,7 +510,6 @@ constructor(
                                                         R.string.settings_reader_font,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_font_summary,
-                                                    iconDrawableId = R.drawable.ic_type,
                                                     onClick = {
                                                         viewModelScope.launch {
                                                             eventsChannel.send(
@@ -524,7 +523,6 @@ constructor(
                                                         R.string.settings_reader_font_size,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_font_size_summary,
-                                                    iconDrawableId = R.drawable.ic_a_large_small,
                                                     backendPreference =
                                                         appPreferences.readerFontSize,
                                                     options = R.array.reader_font_size_options,
@@ -536,19 +534,23 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_reader_font_weight_summary,
-                                                    iconDrawableId = R.drawable.ic_baseline,
                                                     backendPreference =
                                                         appPreferences.readerFontWeight,
                                                     options = R.array.reader_font_weight_options,
                                                     optionValues =
                                                         R.array.reader_font_weight_values,
                                                 ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_spacing,
+                                        preferences =
+                                            listOf(
                                                 PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.settings_reader_margins,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_margins_summary,
-                                                    iconDrawableId = R.drawable.ic_frame,
                                                     backendPreference =
                                                         appPreferences.readerPageMargins,
                                                     options = R.array.reader_margins_options,
@@ -560,7 +562,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_reader_line_height_summary,
-                                                    iconDrawableId = R.drawable.ic_move_vertical,
                                                     backendPreference =
                                                         appPreferences.readerLineHeight,
                                                     options = R.array.reader_line_height_options,
@@ -573,7 +574,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_reader_paragraph_spacing_summary,
-                                                    iconDrawableId = R.drawable.ic_pilcrow,
                                                     backendPreference =
                                                         appPreferences.readerParagraphSpacing,
                                                     options =
@@ -587,7 +587,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_reader_word_spacing_summary,
-                                                    iconDrawableId = R.drawable.ic_text_wrap,
                                                     backendPreference =
                                                         appPreferences.readerWordSpacing,
                                                     options = R.array.reader_word_spacing_options,
@@ -600,8 +599,6 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string
                                                             .settings_reader_letter_spacing_summary,
-                                                    iconDrawableId =
-                                                        R.drawable.ic_stretch_horizontal,
                                                     backendPreference =
                                                         appPreferences.readerLetterSpacing,
                                                     options = R.array.reader_letter_spacing_options,

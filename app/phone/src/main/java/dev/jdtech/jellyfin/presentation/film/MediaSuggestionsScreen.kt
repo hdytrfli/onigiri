@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -29,6 +32,7 @@ import dev.jdtech.jellyfin.MoviesRoute
 import dev.jdtech.jellyfin.ShowsRoute
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
+import dev.jdtech.jellyfin.film.presentation.collection.CollectionsViewModel
 import dev.jdtech.jellyfin.film.presentation.library.LibraryAction
 import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
@@ -47,11 +51,18 @@ import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
+import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
+import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
+import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
+import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.flow.filter
 
@@ -98,11 +109,11 @@ private fun MediaPage(
         listViewModel.loadItems()
     }
 
-    // Re-tap cycles the pills, exactly like Home and Collections: list -> suggestions -> genres.
+    // Re-tap cycles the pills, exactly like Home: list -> collections -> suggestions -> genres.
     val tabReselect = LocalTabReselect.current
     LaunchedEffect(tabReselect, kind) {
         val route: Any = if (kind == MediaKind.Movies) MoviesRoute else ShowsRoute
-        tabReselect.events.filter { it == route }.collect { selectedTab = (selectedTab + 1) % 3 }
+        tabReselect.events.filter { it == route }.collect { selectedTab = (selectedTab + 1) % 4 }
     }
 
     // Back closes the search instead of leaving the page: the query is cleared on the way out so
@@ -174,6 +185,7 @@ private fun MediaPage(
                                     if (kind == MediaKind.Movies) CoreR.string.movies_label
                                     else CoreR.string.shows_label
                                 ),
+                                stringResource(CoreR.string.collections_label),
                                 stringResource(FilmR.string.suggestions),
                                 stringResource(FilmR.string.genres),
                             ),
@@ -181,6 +193,7 @@ private fun MediaPage(
                             listOf(
                                 if (kind == MediaKind.Movies) CoreR.drawable.ic_clapperboard
                                 else CoreR.drawable.ic_tv,
+                                CoreR.drawable.ic_package_2,
                                 CoreR.drawable.ic_star,
                                 CoreR.drawable.ic_layout_grid,
                             ),
@@ -219,6 +232,12 @@ private fun MediaPage(
                         showSearchField = false,
                     )
                 1 ->
+                    CollectionsTab(
+                        kind = kind,
+                        displayFields = listState.displayFields,
+                        onItemClick = onItemClick,
+                    )
+                2 ->
                     MediaSuggestionsContent(
                         state = state,
                         displayFields = listState.displayFields,
@@ -241,6 +260,74 @@ private fun MediaPage(
                     onToggle = { listViewModel.onAction(LibraryAction.ToggleDisplayField(it)) },
                     onDismiss = { showDisplayDialog = false },
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CollectionsTab(
+    kind: MediaKind,
+    displayFields: Set<ListDisplayField>,
+    onItemClick: (FindroidItem) -> Unit,
+    viewModel: CollectionsViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val safePadding = rememberSafePadding()
+
+    LaunchedEffect(kind) { viewModel.load() }
+
+    val items = if (kind == MediaKind.Movies) state.movies else state.shows
+    val title = stringResource(CoreR.string.collections_label)
+
+    if (state.error != null && items.isEmpty()) {
+        FullPageError(
+            onRefresh = { viewModel.retry() },
+            isRefreshing = state.isLoading,
+            error = state.error,
+        )
+        return
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (state.isLoading && items.isEmpty()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+        if (!state.isLoading && items.isEmpty()) {
+            EmptyState(
+                text =
+                    stringResource(
+                        if (kind == MediaKind.Movies) CoreR.string.no_movie_collections
+                        else CoreR.string.no_show_collections
+                    )
+            )
+        }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding =
+                PaddingValues(
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                    top = LocalRootPageContentInset.current,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                ),
+            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+        ) {
+            section(title = title) {
+                gridItems(items = items, key = { it.id }) { item ->
+                    ItemCard(
+                        item = item,
+                        direction = Direction.VERTICAL,
+                        onClick = { onItemClick(item) },
+                        modifier = Modifier.animateItem(),
+                        fillWidth = true,
+                        showYear = ListDisplayField.Year in displayFields,
+                        showCommunityRating = ListDisplayField.CommunityRating in displayFields,
+                        showAgeRating = ListDisplayField.AgeRating in displayFields,
+                    )
+                }
             }
         }
     }

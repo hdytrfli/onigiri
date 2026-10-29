@@ -183,7 +183,7 @@ constructor(
 
         val books =
             repository.getItems(
-                includeTypes = listOf(BaseItemKind.BOOK),
+                includeTypes = listOf(BaseItemKind.BOOK, BaseItemKind.AUDIO_BOOK),
                 recursive = true,
                 sortBy = SortBy.DATE_ADDED,
                 sortOrder = SortOrder.DESCENDING,

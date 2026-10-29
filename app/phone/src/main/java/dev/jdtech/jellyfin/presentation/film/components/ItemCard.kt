@@ -28,6 +28,7 @@ import dev.jdtech.jellyfin.core.R
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.theme.Red
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
@@ -123,7 +124,12 @@ fun ItemCard(
                 }
                 // Episodes do not carry the movie/show official rating; don't label them Unrated.
                 // Collections have no rating either - they show their item count instead.
-                if (showAgeRating && item !is FindroidEpisode && !isCollection) {
+                if (
+                    showAgeRating &&
+                        item !is FindroidEpisode &&
+                        item !is FindroidBook &&
+                        !isCollection
+                ) {
                     AgeRatingBadge(
                         rating = ageRating ?: stringResource(R.string.unrated),
                         modifier =

@@ -64,7 +64,7 @@ constructor(
                     val books =
                         repository.getItems(
                             parentId = library.id,
-                            includeTypes = listOf(BaseItemKind.BOOK),
+                            includeTypes = listOf(BaseItemKind.BOOK, BaseItemKind.AUDIO_BOOK),
                             recursive = true,
                             sortBy = SortBy.NAME,
                         )

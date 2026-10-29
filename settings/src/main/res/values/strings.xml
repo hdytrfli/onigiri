@@ -233,6 +233,8 @@
     <string name="settings_category_reader">Reader</string>
     <string name="settings_category_reader_summary">Theme, typography and spacing for books</string>
     <string name="settings_group_reading">Reading</string>
+    <string name="settings_group_display">Display</string>
+    <string name="settings_group_spacing">Spacing</string>
     <string name="settings_group_typography">Typography</string>
     <string name="settings_reader_theme">Theme</string>
     <string name="settings_reader_theme_summary">Page and text colours</string>

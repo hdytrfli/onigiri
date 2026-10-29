@@ -35,8 +35,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONObject
 import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
 import org.readium.adapter.pdfium.navigator.PdfiumEngineProvider
@@ -128,6 +126,15 @@ class ReaderActivity : AppCompatActivity() {
 
         uiState.value = uiState.value.copy(title = title, loading = true)
 
+        val isAudiobook = intent.getBooleanExtra(EXTRA_AUDIOBOOK, false)
+        if (isAudiobook) {
+            uiState.value =
+                uiState.value.copy(
+                    loading = false,
+                    error = "Audiobooks aren't supported in the reader yet.",
+                )
+        }
+
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
@@ -141,7 +148,7 @@ class ReaderActivity : AppCompatActivity() {
             },
         )
 
-        lifecycleScope.launch { openBook(id, title) }
+        lifecycleScope.launch { if (!isAudiobook) openBook(id, title) }
     }
 
     private suspend fun openBook(id: UUID, title: String) {
@@ -159,28 +166,16 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun downloadBook(id: UUID): File {
+    private suspend fun downloadBook(id: UUID): File {
         val file = File(cacheDir, "books/$id")
         if (file.exists() && file.length() > 0) return file
 
         file.parentFile?.mkdirs()
 
-        val baseUrl =
-            jellyfinApi.api.baseUrl?.trimEnd('/') ?: throw IOException("No server configured")
-        val requestBuilder =
-            Request.Builder().url("$baseUrl/Items/$id/Download").apply {
-                jellyfinApi.api.accessToken?.let { token -> header("X-Emby-Token", token) }
-            }
-
-        OkHttpClient().newCall(requestBuilder.build()).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw IOException("Download failed with HTTP ${response.code}")
-            }
-            val body = response.body ?: throw IOException("Empty response")
-            file.outputStream().use { output ->
-                body.byteStream().use { input -> input.copyTo(output) }
-            }
-        }
+        // Let the SDK make the request: it authenticates exactly like every other API call.
+        val bytes = jellyfinApi.libraryApi.getDownload(id).content
+        if (bytes.isEmpty()) throw IOException("Empty response")
+        file.writeBytes(bytes)
         return file
     }
 
@@ -320,11 +315,18 @@ class ReaderActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_BOOK_ID = "book_id"
         private const val EXTRA_BOOK_TITLE = "book_title"
+        private const val EXTRA_AUDIOBOOK = "audiobook"
         private const val FRAGMENT_TAG = "reader_navigator_fragment"
 
-        fun intent(context: Context, bookId: UUID, title: String): Intent =
+        fun intent(
+            context: Context,
+            bookId: UUID,
+            title: String,
+            audiobook: Boolean = false,
+        ): Intent =
             Intent(context, ReaderActivity::class.java)
                 .putExtra(EXTRA_BOOK_ID, bookId.toString())
                 .putExtra(EXTRA_BOOK_TITLE, title)
+                .putExtra(EXTRA_AUDIOBOOK, audiobook)
     }
 }

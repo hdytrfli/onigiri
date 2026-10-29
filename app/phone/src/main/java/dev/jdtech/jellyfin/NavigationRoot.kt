@@ -57,7 +57,6 @@ import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
 import dev.jdtech.jellyfin.presentation.film.BooksScreen
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
-import dev.jdtech.jellyfin.presentation.film.CollectionsScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
 import dev.jdtech.jellyfin.presentation.film.EditImageSearchScreen
 import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
@@ -97,7 +96,7 @@ import org.jellyfin.sdk.model.api.ImageType
 private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
 
 private val TOP_LEVEL_ROUTES =
-    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, CollectionsRoute, SETTINGS_ROOT_ROUTE)
+    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, SETTINGS_ROOT_ROUTE)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
 
 data class TabBarItem(
@@ -129,13 +128,6 @@ val booksTab =
         title = CoreR.string.books_label,
         icon = CoreR.drawable.ic_book_open,
         route = BooksRoute,
-    )
-
-val collectionsTab =
-    TabBarItem(
-        title = CoreR.string.collections_label,
-        icon = CoreR.drawable.ic_package_2,
-        route = CollectionsRoute,
     )
 
 val settingsTab =
@@ -237,8 +229,7 @@ private fun MainNavigation(
     val snackbarHostState = remember { SnackbarHostState() }
     var exitPending by remember { mutableStateOf(false) }
 
-    val tabRoutes =
-        listOf(homeTab, moviesTab, showsTab, booksTab, collectionsTab, settingsTab).map { it.route }
+    val tabRoutes = listOf(homeTab, moviesTab, showsTab, booksTab, settingsTab).map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
 
@@ -531,13 +522,6 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             )
         }
     }
-    entry<CollectionsRoute> {
-        SuiteInsetBox {
-            CollectionsScreen(
-                onItemClick = resumedAction { item -> navigateToItem(navigator, item) }
-            )
-        }
-    }
     entry<BooksRoute> {
         SuiteInsetBox {
             BooksScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
@@ -579,6 +563,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     context = context,
                     bookId = UUID.fromString(key.bookId),
                     title = key.title,
+                    audiobook = key.audiobook,
                 )
             )
             navigator.goBack()
@@ -835,7 +820,13 @@ private fun EntryProviderScope<NavKey>.mainEntries(
 private fun navigateToItem(navigator: Navigator, item: FindroidItem) {
     when (item) {
         is FindroidBook ->
-            navigator.navigate(BookRoute(bookId = item.id.toString(), title = item.name))
+            navigator.navigate(
+                BookRoute(
+                    bookId = item.id.toString(),
+                    title = item.name,
+                    audiobook = item.isAudiobook,
+                )
+            )
         is FindroidBoxSet ->
             navigator.navigate(
                 CollectionRoute(collectionId = item.id.toString(), collectionName = item.name)

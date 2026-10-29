@@ -116,7 +116,7 @@ fun RootNavigationSuite(
     selectedRoute: NavKey,
     suiteType: NavigationSuiteType,
 ) {
-    val items = listOf(homeTab, moviesTab, showsTab, booksTab, collectionsTab, settingsTab)
+    val items = listOf(homeTab, moviesTab, showsTab, booksTab, settingsTab)
     val tabReselect = LocalTabReselect.current
 
     // A plain tap navigates; tapping the item of the page already on screen asks that page to do
