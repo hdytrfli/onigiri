@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
@@ -182,39 +183,43 @@ fun ReaderOverlay(
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                         }
-                        Row(
+                        Slider(
+                            value = state.progress,
+                            onValueChange = { value ->
+                                if (state.pageCount > 1) {
+                                    onInteraction()
+                                    onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
+                                }
+                            },
+                            colors =
+                                SliderDefaults.colors(
+                                    thumbColor = Color.White,
+                                    activeTrackColor = Color.White,
+                                    inactiveTrackColor = Color(0x33FFFFFF),
+                                    activeTickColor = Color.Transparent,
+                                    inactiveTickColor = Color.Transparent,
+                                ),
+                            thumb = { ReaderSliderThumb() },
                             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                            enabled = state.pageCount > 1,
+                        )
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
                             Text(
                                 text = state.page.toString(),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White.copy(alpha = 0.8f),
-                            )
-                            Slider(
-                                value = state.progress,
-                                onValueChange = { value ->
-                                    if (state.pageCount > 1) {
-                                        onInteraction()
-                                        onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
-                                    }
-                                },
-                                colors =
-                                    SliderDefaults.colors(
-                                        thumbColor = Color.White,
-                                        activeTrackColor = Color.White,
-                                        inactiveTrackColor = Color(0x33FFFFFF),
-                                        activeTickColor = Color.Transparent,
-                                        inactiveTickColor = Color.Transparent,
+                                style =
+                                    MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 14.sp,
+                                        color = Color.White,
                                     ),
-                                thumb = { ReaderSliderThumb() },
-                                modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                                enabled = state.pageCount > 1,
                             )
+                            Spacer(modifier = Modifier.weight(1f))
                             Text(
                                 text = state.pageCount.toString(),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White.copy(alpha = 0.8f),
+                                style =
+                                    MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 14.sp,
+                                        color = Color.White,
+                                    ),
                             )
                         }
                     }

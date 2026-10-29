@@ -75,7 +75,11 @@ fun BookDetailScreen(
                                 Modifier.align(Alignment.BottomStart)
                                     .padding(start = paddingStart, end = paddingEnd)
                         ) {
-                            ItemTitle(title = item.name, logoUri = item.images.logo)
+                            ItemTitle(
+                                title = item.name,
+                                logoUri = item.images.logo,
+                                maxLines = 1,
+                            )
                         }
                     }
                     Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
@@ -103,7 +107,6 @@ fun BookDetailScreen(
                                     ?.toString()
                                     .orEmpty(),
                         )
-                        BookInfoRow(label = "Genres", value = item.genres.joinToString(", "))
                         BookInfoRow(label = "Studio", value = item.studios.firstOrNull().orEmpty())
                         if (item.people.isNotEmpty()) {
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
