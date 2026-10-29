@@ -230,4 +230,6 @@
     <string name="title_download_summary">Store media on this device</string>
     <string name="settings_category_cache_summary">Disk cache for images loaded from the server</string>
     <string name="about_summary">App version, licenses and links</string>
+    <string name="settings_category_reader">Reader</string>
+    <string name="settings_category_reader_summary">Theme, typography and spacing for books</string>
 </resources>

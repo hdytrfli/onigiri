@@ -123,6 +123,16 @@ constructor(
                 preferences =
                     listOf(
                         PreferenceCategory(
+                            nameStringResource = R.string.settings_category_reader,
+                            descriptionStringRes = R.string.settings_category_reader_summary,
+                            iconDrawableId = R.drawable.ic_book_open,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(SettingsEvent.NavigateToReaderSettings)
+                                }
+                            },
+                        ),
+                        PreferenceCategory(
                             nameStringResource = R.string.settings_category_interface,
                             descriptionStringRes = R.string.settings_category_interface_summary,
                             iconDrawableId = R.drawable.ic_layout_dashboard,
@@ -410,7 +420,7 @@ constructor(
                                             ),
                                     ),
                                 ),
-                        )
+                        ),
                     )
             ),
             PreferenceGroup(

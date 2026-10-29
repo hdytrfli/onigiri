@@ -22,6 +22,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object ShowsRoute : NavKey
 
+@Serializable data object BooksRoute : NavKey
+
 @Serializable
 data class GenreListRoute(
     val genreId: String,
@@ -90,3 +92,5 @@ data class IdentifyResultsRoute(
 @Serializable data object AboutRoute : NavKey
 
 @Serializable data object SubtitleFontRoute : NavKey
+
+@Serializable data object ReaderSettingsRoute : NavKey

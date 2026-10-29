@@ -55,6 +55,7 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
+import dev.jdtech.jellyfin.presentation.film.BooksScreen
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
 import dev.jdtech.jellyfin.presentation.film.CollectionsScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
@@ -74,6 +75,7 @@ import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
 import dev.jdtech.jellyfin.presentation.film.ShowsScreen
 import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
+import dev.jdtech.jellyfin.presentation.reader.ReaderSettingsScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
@@ -95,7 +97,7 @@ import org.jellyfin.sdk.model.api.ImageType
 private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
 
 private val TOP_LEVEL_ROUTES =
-    setOf(HomeRoute, MoviesRoute, ShowsRoute, CollectionsRoute, SETTINGS_ROOT_ROUTE)
+    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, CollectionsRoute, SETTINGS_ROOT_ROUTE)
 private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
 
 data class TabBarItem(
@@ -120,6 +122,13 @@ val showsTab =
         title = CoreR.string.shows_label,
         icon = CoreR.drawable.ic_tv,
         route = ShowsRoute,
+    )
+
+val booksTab =
+    TabBarItem(
+        title = CoreR.string.books_label,
+        icon = CoreR.drawable.ic_book_open,
+        route = BooksRoute,
     )
 
 val collectionsTab =
@@ -229,7 +238,7 @@ private fun MainNavigation(
     var exitPending by remember { mutableStateOf(false) }
 
     val tabRoutes =
-        listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab).map { it.route }
+        listOf(homeTab, moviesTab, showsTab, booksTab, collectionsTab, settingsTab).map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
 
@@ -529,6 +538,11 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             )
         }
     }
+    entry<BooksRoute> {
+        SuiteInsetBox {
+            BooksScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
+        }
+    }
     entry<MediaRoute> {
         MediaScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
@@ -792,6 +806,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
                 navigateToSubtitleFont =
                     dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
+                navigateToReaderSettings =
+                    dropUnlessResumed { navigator.navigate(ReaderSettingsRoute) },
                 navigateBack = dropUnlessResumed { navigator.goBack() },
             )
         }
@@ -810,6 +826,11 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<SubtitleFontRoute> {
         SuiteInsetBox {
             SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
+        }
+    }
+    entry<ReaderSettingsRoute> {
+        SuiteInsetBox {
+            ReaderSettingsScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
         }
     }
 }

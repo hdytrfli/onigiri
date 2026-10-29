@@ -67,6 +67,7 @@ fun NavKey.drawsNavigationSuite(tabRoutes: Collection<NavKey>): Boolean =
         this is SettingsFileEditRoute ||
         this is AboutRoute ||
         this is SubtitleFontRoute ||
+        this is ReaderSettingsRoute ||
         this in tabRoutes
 
 /** The bottom bar puts its items in one row (Play-style) instead of stacking them. */
@@ -115,7 +116,7 @@ fun RootNavigationSuite(
     selectedRoute: NavKey,
     suiteType: NavigationSuiteType,
 ) {
-    val items = listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab)
+    val items = listOf(homeTab, moviesTab, showsTab, booksTab, collectionsTab, settingsTab)
     val tabReselect = LocalTabReselect.current
 
     // A plain tap navigates; tapping the item of the page already on screen asks that page to do
