@@ -112,6 +112,17 @@ fun ReaderOverlay(
                     visible = controlsVisible,
                     enter = fadeIn(tween(300)),
                     exit = fadeOut(tween(300)),
+                ) {
+                    // The player dims the content behind its controls; the top buttons need that
+                    // contrast even though the gradient itself lives at the bottom.
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f))
+                    )
+                }
+                AnimatedVisibility(
+                    visible = controlsVisible,
+                    enter = fadeIn(tween(300)),
+                    exit = fadeOut(tween(300)),
                     modifier = Modifier.align(Alignment.TopCenter),
                 ) {
                     Row(
@@ -157,6 +168,7 @@ fun ReaderOverlay(
                         Text(
                             text = state.title,
                             style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )

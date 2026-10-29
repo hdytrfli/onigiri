@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,10 +24,11 @@ fun ActorsRow(
     actors: List<FindroidItemPerson>,
     onActorClick: (personId: UUID) -> Unit,
     contentPadding: PaddingValues,
+    @StringRes titleRes: Int = CoreR.string.cast_amp_crew,
 ) {
     Column(modifier = Modifier.padding(contentPadding)) {
         Text(
-            text = stringResource(CoreR.string.cast_amp_crew),
+            text = stringResource(titleRes),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(Modifier.height(MaterialTheme.spacings.small))

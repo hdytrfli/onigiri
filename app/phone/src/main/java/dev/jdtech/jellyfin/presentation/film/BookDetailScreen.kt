@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -78,44 +80,9 @@ fun BookDetailScreen(
                     }
                     Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
-                        if (item.isAudiobook) {
-                            Text(
-                                text = "Audiobook",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        Row(
-                            horizontalArrangement =
-                                androidx.compose.foundation.layout.Arrangement.spacedBy(
-                                    MaterialTheme.spacings.small
-                                ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            (item.productionYear ?: item.premiereDate?.year)?.let {
-                                Text(
-                                    text = it.toString(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
-                            if (item.genres.isNotEmpty()) {
-                                Text(
-                                    text = item.genres.joinToString(", "),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
-                        }
-                        if (item.studios.isNotEmpty()) {
-                            Text(
-                                text = item.studios.first(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Spacer(Modifier.height(MaterialTheme.spacings.small))
                         AppButton(onClick = { onRead(item) }) {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_bolt),
+                                painter = painterResource(CoreR.drawable.ic_book_open),
                                 contentDescription = null,
                             )
                             Text(
@@ -128,6 +95,16 @@ fun BookDetailScreen(
                         }
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         OverviewText(text = item.overview)
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        BookInfoRow(
+                            label = "Year",
+                            value =
+                                (item.productionYear ?: item.premiereDate?.year)
+                                    ?.toString()
+                                    .orEmpty(),
+                        )
+                        BookInfoRow(label = "Genres", value = item.genres.joinToString(", "))
+                        BookInfoRow(label = "Studio", value = item.studios.firstOrNull().orEmpty())
                         if (item.people.isNotEmpty()) {
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         }
@@ -141,6 +118,7 @@ fun BookDetailScreen(
                                     start = paddingStart,
                                     end = paddingEnd,
                                 ),
+                            titleRes = CoreR.string.authors,
                         )
                     }
                 }
@@ -148,5 +126,19 @@ fun BookDetailScreen(
                 ItemTopBar(hasBackButton = true, onBackClick = navigateBack)
             }
         }
+    }
+}
+
+@Composable
+private fun BookInfoRow(label: String, value: String) {
+    if (value.isBlank()) return
+    Row(verticalAlignment = Alignment.Top) {
+        Text(
+            text = label,
+            modifier = Modifier.width(96.dp),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(text = value, style = MaterialTheme.typography.bodyMedium)
     }
 }
