@@ -6,6 +6,7 @@ import android.os.Looper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.models.isDownloading
@@ -46,17 +47,20 @@ class DownloaderViewModel @Inject constructor(private val downloader: Downloader
         viewModelScope.launch {
             _state.emit(DownloaderState(status = DownloadManager.STATUS_PENDING))
             val source = item.sources.firstOrNull()
-            if (source == null) {
+            if (source == null && item !is FindroidBook) {
                 _state.emit(DownloaderState(status = DownloadManager.STATUS_FAILED))
                 return@launch
             }
             val (downloadId, uiText) =
                 downloader.downloadItem(
                     item = item,
-                    sourceId = source.id,
+                    sourceId = source?.id.orEmpty(),
                     storageIndex = storageIndex,
                 )
-            if (downloadId != -1L) {
+            if (downloadId == 0L) {
+                _state.emit(DownloaderState(status = DownloadManager.STATUS_SUCCESSFUL))
+                eventsChannel.trySend(DownloaderEvent.Successful)
+            } else if (downloadId != -1L) {
                 this@DownloaderViewModel.downloadId = downloadId
                 pollDownloadProgress(downloadId)
             } else {

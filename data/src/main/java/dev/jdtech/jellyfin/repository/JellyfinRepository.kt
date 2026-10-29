@@ -95,6 +95,9 @@ interface JellyfinRepository {
 
     suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String
 
+    /** Downloads the original file through Jellyfin's item download endpoint. */
+    suspend fun getDownload(itemId: UUID): ByteArray
+
     suspend fun getSegments(itemId: UUID): List<FindroidSegment>
 
     suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray?

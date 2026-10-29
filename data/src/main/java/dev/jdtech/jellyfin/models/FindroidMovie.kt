@@ -43,18 +43,20 @@ suspend fun BaseItemDto.toFindroidMovie(
     if (serverDatabase != null) {
         sources.addAll(serverDatabase.getSources(id).map { it.toFindroidSource(serverDatabase) })
     }
+    val localUserData = serverDatabase?.getUserData(id, jellyfinRepository.getUserId())
     return FindroidMovie(
         id = id,
         name = name.orEmpty(),
         originalTitle = originalTitle,
         overview = overview.orEmpty(),
         sources = sources,
-        played = userData?.played == true,
-        favorite = userData?.isFavorite == true,
+        played = localUserData?.played ?: (userData?.played == true),
+        favorite = localUserData?.favorite ?: (userData?.isFavorite == true),
         canPlay = playAccess != PlayAccess.NONE,
         canDownload = canDownload == true,
         runtimeTicks = runTimeTicks ?: 0,
-        playbackPositionTicks = userData?.playbackPositionTicks ?: 0,
+        playbackPositionTicks =
+            localUserData?.playbackPositionTicks ?: userData?.playbackPositionTicks ?: 0,
         premiereDate = premiereDate,
         communityRating = communityRating,
         genres = genres ?: emptyList(),

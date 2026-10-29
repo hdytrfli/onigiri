@@ -17,6 +17,7 @@ import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidSource
+import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.models.FindroidSources
 import dev.jdtech.jellyfin.models.FindroidTrickplayInfo
 import dev.jdtech.jellyfin.models.UiText
@@ -38,7 +39,9 @@ import java.io.File
 import java.util.UUID
 import kotlin.Exception
 import kotlin.math.ceil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class DownloaderImpl(
@@ -58,6 +61,9 @@ class DownloaderImpl(
         sourceId: String,
         storageIndex: Int,
     ): Pair<Long, UiText?> = coroutineScope {
+        if (item is FindroidBook) {
+            return@coroutineScope downloadBook(item, storageIndex)
+        }
         try {
             val source =
                 jellyfinRepository.getMediaSources(item.id, true).first { it.id == sourceId }
@@ -170,6 +176,61 @@ class DownloaderImpl(
             )
         }
     }
+
+    private suspend fun downloadBook(item: FindroidBook, storageIndex: Int): Pair<Long, UiText?> =
+        withContext(Dispatchers.IO) {
+            try {
+                val storageLocation =
+                    context.getExternalFilesDirs(null).getOrNull(storageIndex)
+                        ?: return@withContext Pair(
+                            -1,
+                            UiText.StringResource(CoreR.string.storage_unavailable),
+                        )
+                if (
+                    Environment.getExternalStorageState(storageLocation) !=
+                        Environment.MEDIA_MOUNTED
+                ) {
+                    return@withContext Pair(
+                        -1,
+                        UiText.StringResource(CoreR.string.storage_unavailable),
+                    )
+                }
+                val bytes = jellyfinRepository.getDownload(item.id)
+                if (bytes.isEmpty()) {
+                    return@withContext Pair(
+                        -1,
+                        UiText.StringResource(CoreR.string.unknown_error),
+                    )
+                }
+                val target = File(storageLocation, "downloads/${item.id}.book")
+                target.parentFile?.mkdirs()
+                target.writeBytes(bytes)
+                database.insertBook(
+                    item.toFindroidBookDto(appPreferences.getValue(appPreferences.currentServer))
+                )
+                database.insertSource(
+                    FindroidSource(
+                            id = "book-${item.id}",
+                            name = item.name,
+                            type = FindroidSourceType.LOCAL,
+                            path = target.path,
+                            size = bytes.size.toLong(),
+                            mediaStreams = emptyList(),
+                        )
+                        .toFindroidSourceDto(item.id, target.path)
+                )
+                database.insertUserData(item.toFindroidUserDataDto(jellyfinRepository.getUserId()))
+                startImagesDownloader(item)
+                Pair(0L, null)
+            } catch (e: Exception) {
+                Timber.e(e)
+                Pair(
+                    -1,
+                    if (e.message != null) UiText.DynamicString(e.message!!)
+                    else UiText.StringResource(CoreR.string.unknown_error),
+                )
+            }
+        }
 
     override suspend fun cancelDownload(item: FindroidItem, downloadId: Long) {
         val source =

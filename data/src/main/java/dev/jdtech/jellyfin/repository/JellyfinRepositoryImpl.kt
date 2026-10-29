@@ -421,6 +421,9 @@ class JellyfinRepositoryImpl(
             }
         }
 
+    override suspend fun getDownload(itemId: UUID): ByteArray =
+        withContext(Dispatchers.IO) { jellyfinApi.libraryApi.getDownload(itemId).content }
+
     override suspend fun getSegments(itemId: UUID): List<FindroidSegment> =
         withContext(Dispatchers.IO) {
             val databaseSegments = database.getSegments(itemId).map { it.toFindroidSegment() }

@@ -230,6 +230,8 @@ class JellyfinRepositoryOfflineImpl(
         return ""
     }
 
+    override suspend fun getDownload(itemId: UUID): ByteArray = ByteArray(0)
+
     override suspend fun getSegments(itemId: UUID): List<FindroidSegment> =
         withContext(Dispatchers.IO) { database.getSegments(itemId).map { it.toFindroidSegment() } }
 

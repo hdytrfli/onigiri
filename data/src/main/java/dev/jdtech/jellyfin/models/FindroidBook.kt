@@ -50,18 +50,20 @@ suspend fun BaseItemDto.toFindroidBook(
             runCatching { jellyfinRepository.getMediaSources(id) }.getOrDefault(emptyList())
         )
     }
+    val localUserData = serverDatabase?.getUserData(id, jellyfinRepository.getUserId())
     return FindroidBook(
         id = id,
         name = name.orEmpty(),
         originalTitle = originalTitle,
         overview = overview.orEmpty(),
         sources = sources,
-        played = userData?.played == true,
-        favorite = userData?.isFavorite == true,
+        played = localUserData?.played ?: (userData?.played == true),
+        favorite = localUserData?.favorite ?: (userData?.isFavorite == true),
         canPlay = playAccess != PlayAccess.NONE,
-        canDownload = canDownload == true && sources.isNotEmpty(),
+        canDownload = canDownload == true,
         runtimeTicks = 0,
-        playbackPositionTicks = userData?.playbackPositionTicks ?: 0,
+        playbackPositionTicks =
+            localUserData?.playbackPositionTicks ?: userData?.playbackPositionTicks ?: 0,
         images = toFindroidImages(jellyfinRepository),
         chapters = toFindroidChapters(),
         isAudiobook =

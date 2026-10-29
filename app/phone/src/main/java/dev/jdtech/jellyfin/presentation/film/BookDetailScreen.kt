@@ -86,7 +86,7 @@ fun BookDetailScreen(
                 val readLabel =
                     when {
                         item.played -> "Read"
-                        state.pagesLeft > 0 -> "Read · ${state.pagesLeft} pages left"
+                        state.pagesLeft > 0 -> "${state.pagesLeft} pages left"
                         else -> "Read"
                     }
                 val safePadding = rememberSafePadding()
