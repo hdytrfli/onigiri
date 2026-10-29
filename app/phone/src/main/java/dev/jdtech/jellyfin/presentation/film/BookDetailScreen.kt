@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,18 +11,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.book.BookDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
-import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
@@ -72,19 +78,70 @@ fun BookDetailScreen(
                     }
                     Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
-                        androidx.compose.material3.Text(
-                            text = if (item.isAudiobook) "Audiobook" else "Book",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        if (item.isAudiobook) {
+                            Text(
+                                text = "Audiobook",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        Row(
+                            horizontalArrangement =
+                                androidx.compose.foundation.layout.Arrangement.spacedBy(
+                                    MaterialTheme.spacings.small
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            (item.productionYear ?: item.premiereDate?.year)?.let {
+                                Text(
+                                    text = it.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                            if (item.genres.isNotEmpty()) {
+                                Text(
+                                    text = item.genres.joinToString(", "),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                        }
+                        if (item.studios.isNotEmpty()) {
+                            Text(
+                                text = item.studios.first(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
-                        ItemButtonsBar(
-                            item = item,
-                            onPlayClick = { onRead(item) },
-                            onMarkAsPlayedClick = {},
-                            onMarkAsFavoriteClick = {},
-                        )
+                        AppButton(onClick = { onRead(item) }) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_bolt),
+                                contentDescription = null,
+                            )
+                            Text(
+                                if (item.playbackPositionTicks > 0) {
+                                    "Continue reading"
+                                } else {
+                                    "Read book"
+                                }
+                            )
+                        }
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         OverviewText(text = item.overview)
+                        if (item.people.isNotEmpty()) {
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        }
+                    }
+                    if (item.people.isNotEmpty()) {
+                        ActorsRow(
+                            actors = item.people,
+                            onActorClick = {},
+                            contentPadding =
+                                androidx.compose.foundation.layout.PaddingValues(
+                                    start = paddingStart,
+                                    end = paddingEnd,
+                                ),
+                        )
                     }
                 }
 

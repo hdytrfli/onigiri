@@ -27,6 +27,11 @@ data class FindroidBook(
     override val chapters: List<FindroidChapter>,
     /** Audiobooks are listed with the books but the reader cannot play them yet. */
     val isAudiobook: Boolean = false,
+    val productionYear: Int? = null,
+    val premiereDate: java.time.LocalDateTime? = null,
+    val genres: List<String> = emptyList(),
+    val studios: List<String> = emptyList(),
+    val people: List<FindroidItemPerson> = emptyList(),
 ) : FindroidItem
 
 suspend fun BaseItemDto.toFindroidBook(jellyfinRepository: JellyfinRepository): FindroidBook {
@@ -46,6 +51,11 @@ suspend fun BaseItemDto.toFindroidBook(jellyfinRepository: JellyfinRepository): 
         chapters = toFindroidChapters(),
         isAudiobook =
             type == org.jellyfin.sdk.model.api.BaseItemKind.AUDIO_BOOK || isAudiobookItem(),
+        productionYear = productionYear,
+        premiereDate = premiereDate,
+        genres = genres ?: emptyList(),
+        studios = studios?.mapNotNull { it.name } ?: emptyList(),
+        people = people?.map { it.toFindroidPerson(jellyfinRepository) } ?: emptyList(),
     )
 }
 

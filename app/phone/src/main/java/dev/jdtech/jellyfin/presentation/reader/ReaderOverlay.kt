@@ -146,6 +146,11 @@ fun ReaderOverlay(
                     Column(
                         modifier =
                             Modifier.fillMaxWidth()
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(Color.Transparent, Color(0xDD000000))
+                                    )
+                                )
                                 .navigationBarsPadding()
                                 .padding(horizontal = 24.dp, vertical = 16.dp)
                     ) {
@@ -191,18 +196,6 @@ fun ReaderOverlay(
                                         inactiveTickColor = Color.Transparent,
                                     ),
                                 thumb = { ReaderSliderThumb() },
-                                track = { sliderState ->
-                                    SliderDefaults.Track(
-                                        sliderState = sliderState,
-                                        colors =
-                                            SliderDefaults.colors(
-                                                thumbColor = Color.White,
-                                                activeTrackColor = Color.White,
-                                                inactiveTrackColor = Color(0x33FFFFFF),
-                                            ),
-                                        modifier = Modifier.height(10.dp),
-                                    )
-                                },
                                 modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
                                 enabled = state.pageCount > 1,
                             )
@@ -214,17 +207,6 @@ fun ReaderOverlay(
                         }
                     }
                 }
-            }
-        }
-
-        if (!state.loading && state.error == null) {
-            // One scrim over the whole page, like the player's controls background.
-            AnimatedVisibility(
-                visible = controlsVisible,
-                enter = fadeIn(tween(300)),
-                exit = fadeOut(tween(300)),
-            ) {
-                Box(modifier = Modifier.fillMaxSize().background(ReaderScrim))
             }
         }
     }
