@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,8 @@ fun PlayButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    label: String? = null,
+    @DrawableRes iconRes: Int = CoreR.drawable.ic_play,
 ) {
     val runtimeMinutesLeft by
         remember(item.playbackPositionTicks) {
@@ -30,14 +33,15 @@ fun PlayButton(
         }
 
     AppButton(onClick = onClick, modifier = modifier, enabled = enabled) {
-        Icon(painter = painterResource(CoreR.drawable.ic_play), contentDescription = null)
+        Icon(painter = painterResource(iconRes), contentDescription = null)
         Text(
             text =
-                if (item.playbackPositionTicks > 0) {
-                    stringResource(CoreR.string.runtime_minutes_left, runtimeMinutesLeft)
-                } else {
-                    stringResource(CoreR.string.play)
-                }
+                label
+                    ?: if (item.playbackPositionTicks > 0) {
+                        stringResource(CoreR.string.runtime_minutes_left, runtimeMinutesLeft)
+                    } else {
+                        stringResource(CoreR.string.play)
+                    }
         )
     }
 }

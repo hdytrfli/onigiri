@@ -27,11 +27,11 @@ class BookDetailViewModel @Inject constructor(private val repository: JellyfinRe
 
     private var loadedId: UUID? = null
 
-    fun load(bookId: UUID) {
-        if (loadedId == bookId) return
+    fun load(bookId: UUID, force: Boolean = false) {
+        if (!force && loadedId == bookId) return
         loadedId = bookId
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
+            _state.value = _state.value.copy(isLoading = _state.value.item == null, error = null)
             val result = withContext(Dispatchers.IO) { runCatching { repository.getItem(bookId) } }
             _state.value =
                 result.fold(
@@ -44,6 +44,21 @@ class BookDetailViewModel @Inject constructor(private val repository: JellyfinRe
                     },
                     onFailure = { BookDetailState(isLoading = false, error = it as? Exception) },
                 )
+        }
+    }
+
+    fun markAsPlayed(bookId: UUID) = update(bookId) { repository.markAsPlayed(bookId) }
+
+    fun markAsUnplayed(bookId: UUID) = update(bookId) { repository.markAsUnplayed(bookId) }
+
+    fun markAsFavorite(bookId: UUID) = update(bookId) { repository.markAsFavorite(bookId) }
+
+    fun unmarkAsFavorite(bookId: UUID) = update(bookId) { repository.unmarkAsFavorite(bookId) }
+
+    private fun update(bookId: UUID, block: suspend () -> Unit) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) { runCatching { block() } }
+            load(bookId, force = true)
         }
     }
 }

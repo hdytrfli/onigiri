@@ -96,15 +96,29 @@ fun ItemHeader(
                     LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
             if (bookLandscape) {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.weight(0.6f).fillMaxHeight().background(Color.Black))
-                    AsyncImage(
-                        model = model,
-                        contentDescription = null,
-                        modifier = Modifier.weight(0.4f).fillMaxHeight(),
-                        placeholder =
-                            placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
-                        contentScale = ContentScale.Crop,
-                    )
+                    Box(modifier = Modifier.weight(0.4f).fillMaxHeight().background(Color.Black))
+                    Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
+                        AsyncImage(
+                            model = model,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            placeholder =
+                                placeholder
+                                    ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
+                            contentScale = ContentScale.Crop,
+                        )
+                        // Fade the cover into the black field instead of cutting at a hard edge.
+                        Box(
+                            modifier =
+                                Modifier.fillMaxHeight()
+                                    .fillMaxWidth(0.5f)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(Color.Black, Color.Transparent)
+                                        )
+                                    )
+                        )
+                    }
                 }
             } else {
                 AsyncImage(

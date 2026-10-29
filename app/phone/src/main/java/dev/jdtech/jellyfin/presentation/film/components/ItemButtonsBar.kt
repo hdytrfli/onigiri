@@ -1,5 +1,6 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,10 @@ fun ItemButtonsBar(
     onMarkAsFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier,
     canPlay: Boolean = true,
+    playLabel: String? = null,
+    @DrawableRes playIconRes: Int = CoreR.drawable.ic_play,
+    showRestartButton: Boolean = true,
+    forcePlayEnabled: Boolean = false,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
@@ -43,9 +48,11 @@ fun ItemButtonsBar(
                     item = item,
                     onClick = { onPlayClick(false) },
                     modifier = Modifier.weight(weight = 1f, fill = true),
-                    enabled = item.canPlay && canPlay,
+                    enabled = (item.canPlay || forcePlayEnabled) && canPlay,
+                    label = playLabel,
+                    iconRes = playIconRes,
                 )
-                if (item.playbackPositionTicks.div(600000000) > 0) {
+                if (showRestartButton && item.playbackPositionTicks.div(600000000) > 0) {
                     AppIconButton(
                         onClick = { onPlayClick(true) },
                         content = {
@@ -67,9 +74,11 @@ fun ItemButtonsBar(
                 PlayButton(
                     item = item,
                     onClick = { onPlayClick(false) },
-                    enabled = item.canPlay && canPlay,
+                    enabled = (item.canPlay || forcePlayEnabled) && canPlay,
+                    label = playLabel,
+                    iconRes = playIconRes,
                 )
-                if (item.playbackPositionTicks.div(600000000) > 0) {
+                if (showRestartButton && item.playbackPositionTicks.div(600000000) > 0) {
                     AppIconButton(
                         onClick = { onPlayClick(true) },
                         content = {

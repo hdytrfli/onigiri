@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,16 +19,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.book.BookDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
-import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
+import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
@@ -85,19 +83,34 @@ fun BookDetailScreen(
                     }
                     Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
-                        AppButton(onClick = { onRead(item) }) {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_book_open),
-                                contentDescription = null,
-                            )
-                            Text(
+                        ItemButtonsBar(
+                            item = item,
+                            onPlayClick = { onRead(item) },
+                            onMarkAsPlayedClick = {
+                                if (item.played) {
+                                    viewModel.markAsUnplayed(item.id)
+                                } else {
+                                    viewModel.markAsPlayed(item.id)
+                                }
+                            },
+                            onMarkAsFavoriteClick = {
+                                if (item.favorite) {
+                                    viewModel.unmarkAsFavorite(item.id)
+                                } else {
+                                    viewModel.markAsFavorite(item.id)
+                                }
+                            },
+                            playLabel =
                                 if (item.playbackPositionTicks > 0) {
                                     "Continue reading"
                                 } else {
                                     "Read book"
-                                }
-                            )
-                        }
+                                },
+                            playIconRes = CoreR.drawable.ic_book_open,
+                            showRestartButton = false,
+                            forcePlayEnabled = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         OverviewText(text = item.overview)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
