@@ -4,9 +4,12 @@ import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +32,7 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimLight
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidSeason
@@ -48,11 +52,13 @@ fun ItemHeader(
     var backdropUri =
         when (item) {
             is FindroidEpisode -> item.images.primary
+            is FindroidBook -> item.images.primary
             else -> item.images.backdrop
         }
     val backdropBlurHash =
         when (item) {
             is FindroidEpisode -> item.images.primaryBlurHash
+            is FindroidBook -> item.images.primaryBlurHash
             else -> item.images.backdropBlurHash
         }
 
@@ -85,16 +91,33 @@ fun ItemHeader(
         item = item,
         showLogo = showLogo,
         backdropImage = {
-            AsyncImage(
-                model = model,
-                contentDescription = null,
-                modifier =
-                    Modifier.fillMaxSize()
-                        .parallaxLayoutModifier(scrollState = scrollState, rate = 2),
-                placeholder =
-                    placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
-                contentScale = ContentScale.Crop,
-            )
+            val bookLandscape =
+                item is FindroidBook &&
+                    LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+            if (bookLandscape) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.weight(0.6f).fillMaxHeight().background(Color.Black))
+                    AsyncImage(
+                        model = model,
+                        contentDescription = null,
+                        modifier = Modifier.weight(0.4f).fillMaxHeight(),
+                        placeholder =
+                            placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = model,
+                    contentDescription = null,
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .parallaxLayoutModifier(scrollState = scrollState, rate = 2),
+                    placeholder =
+                        placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         },
         content = content,
     )

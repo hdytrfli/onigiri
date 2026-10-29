@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +22,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -60,10 +58,11 @@ data class ReaderUiState(
             }
 }
 
-private val TopScrim =
-    Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.72f), Color.Transparent))
-private val BottomScrim =
-    Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f)))
+private val ReaderScrim =
+    Brush.verticalGradient(
+        0f to Color(0x33000000),
+        1f to Color(0xDD000000),
+    )
 
 /**
  * The reader's chrome, in the player's language: a top bar with back and the two reader actions,
@@ -75,10 +74,7 @@ private val BottomScrim =
 fun ReaderOverlay(
     state: ReaderUiState,
     controlsVisible: Boolean,
-    showDetails: Boolean,
     onBack: () -> Unit,
-    onOpenDetails: () -> Unit,
-    onDismissDetails: () -> Unit,
     onOpenSettings: () -> Unit,
     onSeek: (Int) -> Unit,
     onInteraction: () -> Unit,
@@ -121,7 +117,6 @@ fun ReaderOverlay(
                     Row(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .background(TopScrim)
                                 .statusBarsPadding()
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -133,16 +128,9 @@ fun ReaderOverlay(
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        AppIconButton(onClick = onOpenDetails, variant = AppButtonVariant.Ghost) {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_info),
-                                contentDescription = "Book details",
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(4.dp))
                         AppIconButton(onClick = onOpenSettings, variant = AppButtonVariant.Ghost) {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_settings),
+                                painter = painterResource(CoreR.drawable.ic_bolt),
                                 contentDescription = "Reader settings",
                             )
                         }
@@ -158,7 +146,6 @@ fun ReaderOverlay(
                     Column(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .background(BottomScrim)
                                 .navigationBarsPadding()
                                 .padding(horizontal = 24.dp, vertical = 16.dp)
                     ) {
@@ -231,34 +218,13 @@ fun ReaderOverlay(
         }
 
         if (!state.loading && state.error == null) {
-            // Match the player: the chrome brings its own dim so the page recedes under it.
+            // One scrim over the whole page, like the player's controls background.
             AnimatedVisibility(
                 visible = controlsVisible,
                 enter = fadeIn(tween(300)),
                 exit = fadeOut(tween(300)),
             ) {
-                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)))
-            }
-        }
-
-        if (showDetails) {
-            ModalBottomSheet(
-                onDismissRequest = onDismissDetails,
-                containerColor = MaterialTheme.colorScheme.surface,
-            ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-                    Text(text = state.title, style = MaterialTheme.typography.headlineSmall)
-                    if (state.overview.isNotBlank()) {
-                        Text(
-                            text = state.overview,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 12.dp, bottom = 32.dp),
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.size(32.dp))
-                    }
-                }
+                Box(modifier = Modifier.fillMaxSize().background(ReaderScrim))
             }
         }
     }

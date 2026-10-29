@@ -30,6 +30,7 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -43,6 +44,7 @@ import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.image.ImageNavigatorFragment
+import org.readium.r2.navigator.input.DragEvent
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
@@ -76,7 +78,6 @@ class ReaderActivity : AppCompatActivity() {
 
     private val uiState = mutableStateOf(ReaderUiState())
     private val controlsVisible = mutableStateOf(true)
-    private val showDetails = mutableStateOf(false)
 
     private val handler = Handler(Looper.getMainLooper())
     private val hideControls = Runnable { controlsVisible.value = false }
@@ -86,12 +87,34 @@ class ReaderActivity : AppCompatActivity() {
                 toggleControls()
                 return false
             }
+
+            override fun onDrag(event: DragEvent): Boolean {
+                if (event.type != DragEvent.Type.End) return false
+                if (appPreferences.getValue(appPreferences.readerMode) != "scroll") return false
+                if (!appPreferences.getValue(appPreferences.readerChaptersGesture)) return false
+
+                val dx = event.offset.x
+                val dy = event.offset.y
+                if (abs(dx) < 80f || abs(dx) <= abs(dy)) return false
+
+                val current = lastLocator ?: return false
+                val order = publication?.readingOrder ?: return false
+                val currentIndex = order.indexOfLast { link ->
+                    current.href.toString().startsWith(link.href.toString().substringBefore("#"))
+                }
+                if (currentIndex < 0) return false
+                val targetIndex = if (dx > 0) currentIndex - 1 else currentIndex + 1
+                val target = order.getOrNull(targetIndex) ?: return false
+                return navigator?.go(target) ?: false
+            }
         }
 
     private var bookId: UUID? = null
     private var navigator: Navigator? = null
     private var epubNavigator: EpubNavigatorFragment? = null
     private var positions: List<Locator> = emptyList()
+    private var publication: Publication? = null
+    private var lastLocator: Locator? = null
     private var locatorJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,10 +152,7 @@ class ReaderActivity : AppCompatActivity() {
                     ReaderOverlay(
                         state = uiState.value,
                         controlsVisible = controlsVisible.value,
-                        showDetails = showDetails.value,
                         onBack = { finish() },
-                        onOpenDetails = { showDetails.value = true },
-                        onDismissDetails = { showDetails.value = false },
                         onOpenSettings = {
                             startActivity(
                                 Intent(this@ReaderActivity, ReaderSettingsActivity::class.java)
@@ -160,11 +180,7 @@ class ReaderActivity : AppCompatActivity() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (showDetails.value) {
-                        showDetails.value = false
-                    } else {
-                        finish()
-                    }
+                    finish()
                 }
             },
         )
@@ -248,6 +264,7 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showPublication(publication: Publication, id: UUID, title: String) {
+        this.publication = publication
         val initialLocator = storedLocator(id)
         val epubPreferences = appPreferences.readerSettings().toEpubPreferences()
 
@@ -334,6 +351,7 @@ class ReaderActivity : AppCompatActivity() {
         locatorJob = lifecycleScope.launch {
             navigator?.currentLocator?.collect { locator ->
                 if (locator.href.toString().isEmpty()) return@collect
+                lastLocator = locator
                 appPreferences.sharedPreferences
                     .edit()
                     .putString(locatorKey(id), locator.toJSON().toString())
