@@ -37,6 +37,7 @@ constructor(
 
     private val uuidSuggestions = UUID.fromString("31e47044-9b79-4bb0-99d0-0e477ed65420")
     private val uuidLatestBooks = UUID.fromString("6d1f6c1e-0c2b-4a5e-9f1e-3b0f3c5a7d11")
+    private val uuidLatestAudiobooks = UUID.fromString("9a8f2b24-51d6-4a3b-8b7f-2f6a4f0c8e33")
     private val uuidContinueWatching =
         UUID(4937169328197226115, -4704919157662094443) // 44845958-8326-4e83-beb4-c4f42e9eeb95
     private val uuidNextUp =
@@ -45,6 +46,7 @@ constructor(
     private val uiTextContinueWatching = UiText.StringResource(FilmR.string.continue_watching)
     private val uiTextNextUp = UiText.StringResource(FilmR.string.next_up)
     private val uiTextLatestBooks = UiText.StringResource(FilmR.string.latest_books)
+    private val uiTextLatestAudiobooks = UiText.StringResource(FilmR.string.latest_audiobooks)
 
     private var hasLoadedOnce = false
 
@@ -65,6 +67,7 @@ constructor(
                 loadResumeItems()
                 loadNextUpItems()
                 loadLatestBooks()
+                loadLatestAudiobooks()
                 loadViews()
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
@@ -86,6 +89,7 @@ constructor(
                 loadResumeItems()
                 loadNextUpItems()
                 loadLatestBooks()
+                loadLatestAudiobooks()
                 loadViews()
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
@@ -183,7 +187,7 @@ constructor(
 
         val books =
             repository.getItems(
-                includeTypes = listOf(BaseItemKind.BOOK, BaseItemKind.AUDIO_BOOK),
+                includeTypes = listOf(BaseItemKind.BOOK),
                 recursive = true,
                 sortBy = SortBy.DATE_ADDED,
                 sortOrder = SortOrder.DESCENDING,
@@ -198,6 +202,34 @@ constructor(
             }
 
         _state.emit(_state.value.copy(latestBooksSection = section))
+    }
+
+    private suspend fun loadLatestAudiobooks() {
+        Timber.i("Loading latest audiobooks")
+        if (!appPreferences.getValue(appPreferences.homeLatest)) {
+            _state.emit(_state.value.copy(latestAudiobooksSection = null))
+            return
+        }
+
+        val audiobooks =
+            repository.getItems(
+                includeTypes = listOf(BaseItemKind.AUDIO_BOOK),
+                recursive = true,
+                sortBy = SortBy.DATE_ADDED,
+                sortOrder = SortOrder.DESCENDING,
+                limit = 16,
+            )
+
+        val section =
+            if (audiobooks.isEmpty()) {
+                null
+            } else {
+                HomeItem.Section(
+                    HomeSection(uuidLatestAudiobooks, uiTextLatestAudiobooks, audiobooks)
+                )
+            }
+
+        _state.emit(_state.value.copy(latestAudiobooksSection = section))
     }
 
     private suspend fun loadViews() {

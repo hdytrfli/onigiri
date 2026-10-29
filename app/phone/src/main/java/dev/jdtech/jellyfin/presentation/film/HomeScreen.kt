@@ -57,6 +57,7 @@ import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.Section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.flow.filter
@@ -271,17 +272,6 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                         )
                     }
                 }
-                state.latestBooksSection?.let { section ->
-                    item(key = section.id) {
-                        HomeSection(
-                            section = section.homeSection,
-                            itemsPadding = itemsPadding,
-                            onAction = onAction,
-                            modifier = Modifier.animateItem(),
-                            displayFields = state.displayFields,
-                        )
-                    }
-                }
                 items(state.views, key = { it.id }) { view ->
                     HomeView(
                         view = view,
@@ -290,6 +280,32 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                         modifier = Modifier.animateItem(),
                         displayFields = state.displayFields,
                     )
+                }
+                state.latestBooksSection?.let { section ->
+                    item(key = section.id) {
+                        HomeSection(
+                            section = section.homeSection,
+                            itemsPadding = itemsPadding,
+                            onAction = onAction,
+                            modifier = Modifier.animateItem(),
+                            displayFields = state.displayFields,
+                            gridSize = GridSize.POSTER,
+                            vertical = true,
+                        )
+                    }
+                }
+                state.latestAudiobooksSection?.let { section ->
+                    item(key = section.id) {
+                        HomeSection(
+                            section = section.homeSection,
+                            itemsPadding = itemsPadding,
+                            onAction = onAction,
+                            modifier = Modifier.animateItem(),
+                            displayFields = state.displayFields,
+                            gridSize = GridSize.POSTER,
+                            vertical = true,
+                        )
+                    }
                 }
             }
         }

@@ -18,6 +18,8 @@ fun HomeSection(
     modifier: Modifier = Modifier,
     showRemainingTime: Boolean = false,
     displayFields: Set<ListDisplayField> = emptySet(),
+    gridSize: GridSize = GridSize.THUMBNAIL,
+    vertical: Boolean = false,
 ) {
     Section(
         title = section.name.asString(),
@@ -26,12 +28,12 @@ fun HomeSection(
     ) {
         GridRows(
             items = section.items,
-            columns = gridColumns(GridSize.THUMBNAIL),
+            columns = gridColumns(gridSize),
             modifier = Modifier.padding(itemsPadding),
         ) { item ->
             ItemCard(
                 item = item,
-                direction = Direction.HORIZONTAL,
+                direction = if (vertical) Direction.VERTICAL else Direction.HORIZONTAL,
                 onClick = { onAction(HomeAction.OnItemClick(item)) },
                 fillWidth = true,
                 showRemainingTime = showRemainingTime,

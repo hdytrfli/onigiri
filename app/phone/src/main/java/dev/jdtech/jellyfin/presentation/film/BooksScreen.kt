@@ -25,6 +25,7 @@ import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.books.BooksViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
@@ -43,7 +44,7 @@ import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.flow.filter
 
-/** The Books root page, one toolbar tab per Books library. */
+/** The Books root page, split into books and audiobooks. */
 @Composable
 fun BooksScreen(
     onItemClick: (FindroidItem) -> Unit,
@@ -52,40 +53,36 @@ fun BooksScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val safePadding = rememberSafePadding()
-    val libraryCount = state.libraries.size
 
-    LaunchedEffect(libraryCount) { if (selectedTab >= libraryCount) selectedTab = 0 }
-
-    // Pressing the Books item again cycles through the libraries.
+    // Pressing the Books item again cycles Books <-> Audiobooks.
     val tabReselect = LocalTabReselect.current
-    LaunchedEffect(tabReselect, libraryCount) {
+    LaunchedEffect(tabReselect) {
         tabReselect.events
             .filter { it is BooksRoute }
-            .collect { if (libraryCount > 0) selectedTab = (selectedTab + 1) % libraryCount }
+            .collect { selectedTab = (selectedTab + 1) % 2 }
     }
 
     LaunchedEffect(true) { viewModel.load() }
 
-    val selectedLibrary = state.libraries.getOrNull(selectedTab)
-    val books = selectedLibrary?.let { state.items[it.id] }.orEmpty()
-    val safeSelectedTab = selectedTab.coerceIn(0, (libraryCount - 1).coerceAtLeast(0))
+    val audiobooks = selectedTab == 1
+    val sectionTitle =
+        stringResource(if (audiobooks) CoreR.string.audiobooks_label else CoreR.string.books_label)
+    val items =
+        state.items.values
+            .flatten()
+            .filter { item -> item is FindroidBook && item.isAudiobook == audiobooks }
+            .distinctBy { it.id }
 
     RootPage(
         header = {
             PageToolbar(
                 tabs =
-                    if (state.libraries.isEmpty()) {
-                        listOf(stringResource(CoreR.string.books_label))
-                    } else {
-                        state.libraries.map { it.name }
-                    },
-                tabIcons =
-                    if (state.libraries.isEmpty()) {
-                        listOf(CoreR.drawable.ic_book_open)
-                    } else {
-                        state.libraries.map { CoreR.drawable.ic_book_open }
-                    },
-                selectedIndex = safeSelectedTab,
+                    listOf(
+                        stringResource(CoreR.string.books_label),
+                        stringResource(CoreR.string.audiobooks_label),
+                    ),
+                tabIcons = listOf(CoreR.drawable.ic_book_open, CoreR.drawable.ic_headphones),
+                selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
                 dropdownOnCompact = true,
             )
@@ -95,7 +92,7 @@ fun BooksScreen(
             OfflineNotice()
             return@RootPage
         }
-        if (state.error != null && books.isEmpty()) {
+        if (state.error != null && items.isEmpty()) {
             FullPageError(
                 onRefresh = { viewModel.retry() },
                 isRefreshing = state.isLoading,
@@ -104,14 +101,20 @@ fun BooksScreen(
             )
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
-                if (state.isLoading && books.isEmpty()) {
+                if (state.isLoading && items.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                if (!state.isLoading && state.libraries.isEmpty()) {
-                    EmptyState(text = stringResource(CoreR.string.no_book_libraries))
-                }
-                if (!state.isLoading && selectedLibrary != null && books.isEmpty()) {
-                    EmptyState(text = stringResource(CoreR.string.no_books))
+                if (!state.isLoading && items.isEmpty()) {
+                    EmptyState(
+                        text =
+                            stringResource(
+                                when {
+                                    state.libraries.isEmpty() -> CoreR.string.no_book_libraries
+                                    audiobooks -> CoreR.string.no_audiobooks
+                                    else -> CoreR.string.no_books
+                                }
+                            )
+                    )
                 }
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
@@ -126,9 +129,9 @@ fun BooksScreen(
                     horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 ) {
-                    if (selectedLibrary != null && books.isNotEmpty()) {
-                        section(title = selectedLibrary.name) {
-                            items(items = books, key = { it.id }) { item ->
+                    if (items.isNotEmpty()) {
+                        section(title = sectionTitle) {
+                            items(items = items, key = { it.id }) { item ->
                                 ItemCard(
                                     item = item,
                                     direction = Direction.VERTICAL,

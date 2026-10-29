@@ -3,6 +3,8 @@ package dev.jdtech.jellyfin
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -18,10 +20,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.databinding.ActivityReaderBinding
 import dev.jdtech.jellyfin.presentation.reader.ReaderOverlay
-import dev.jdtech.jellyfin.presentation.reader.ReaderSettings
 import dev.jdtech.jellyfin.presentation.reader.ReaderUiState
 import dev.jdtech.jellyfin.presentation.reader.readerSettings
-import dev.jdtech.jellyfin.presentation.reader.setReaderSettings
 import dev.jdtech.jellyfin.presentation.reader.toEpubPreferences
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -30,7 +30,6 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -40,15 +39,20 @@ import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
 import org.readium.adapter.pdfium.navigator.PdfiumEngineProvider
 import org.readium.adapter.pdfium.navigator.PdfiumPreferences
 import org.readium.r2.navigator.Navigator
+import org.readium.r2.navigator.VisualNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.image.ImageNavigatorFragment
+import org.readium.r2.navigator.input.InputListener
+import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.asset.AssetRetriever
 import org.readium.r2.shared.util.http.DefaultHttpClient
 import org.readium.r2.streamer.PublicationOpener
@@ -61,7 +65,7 @@ import timber.log.Timber
  * settings), PDF or CBZ/Divina (fixed layout). The controls overlay matches the player's chrome.
  */
 @AndroidEntryPoint
-@OptIn(ExperimentalReadiumApi::class)
+@OptIn(ExperimentalReadiumApi::class, InternalReadiumApi::class)
 class ReaderActivity : AppCompatActivity() {
 
     @Inject lateinit var appPreferences: AppPreferences
@@ -71,12 +75,23 @@ class ReaderActivity : AppCompatActivity() {
     private lateinit var binding: ActivityReaderBinding
 
     private val uiState = mutableStateOf(ReaderUiState())
-    private val settingsState = mutableStateOf(ReaderSettings())
-    private val showSettings = mutableStateOf(false)
+    private val controlsVisible = mutableStateOf(true)
+    private val showDetails = mutableStateOf(false)
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val hideControls = Runnable { controlsVisible.value = false }
+    private val tapListener =
+        object : InputListener {
+            override fun onTap(event: TapEvent): Boolean {
+                toggleControls()
+                return false
+            }
+        }
 
     private var bookId: UUID? = null
     private var navigator: Navigator? = null
     private var epubNavigator: EpubNavigatorFragment? = null
+    private var positions: List<Locator> = emptyList()
     private var locatorJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +110,7 @@ class ReaderActivity : AppCompatActivity() {
                 runCatching { UUID.fromString(it) }.getOrNull()
             }
         val title = intent.getStringExtra(EXTRA_BOOK_TITLE).orEmpty()
+        val overview = intent.getStringExtra(EXTRA_OVERVIEW).orEmpty()
         if (id == null) {
             finish()
             return
@@ -104,8 +120,7 @@ class ReaderActivity : AppCompatActivity() {
         binding = ActivityReaderBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        settingsState.value = appPreferences.readerSettings()
-        binding.readerDim.alpha = brightnessOverlay(settingsState.value.brightness)
+        binding.readerDim.alpha = brightnessOverlay(appPreferences.readerSettings().brightness)
 
         binding.readerOverlay.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -113,18 +128,24 @@ class ReaderActivity : AppCompatActivity() {
                 FindroidTheme {
                     ReaderOverlay(
                         state = uiState.value,
-                        settings = settingsState.value,
-                        showSettings = showSettings.value,
+                        controlsVisible = controlsVisible.value,
+                        showDetails = showDetails.value,
                         onBack = { finish() },
-                        onOpenSettings = { showSettings.value = true },
-                        onDismissSettings = { showSettings.value = false },
-                        onSettingsChange = { settings -> updateSettings(settings) },
+                        onOpenDetails = { showDetails.value = true },
+                        onDismissDetails = { showDetails.value = false },
+                        onOpenSettings = {
+                            startActivity(
+                                Intent(this@ReaderActivity, ReaderSettingsActivity::class.java)
+                            )
+                        },
+                        onSeek = { page -> seekTo(page) },
+                        onInteraction = { showControls() },
                     )
                 }
             }
         }
 
-        uiState.value = uiState.value.copy(title = title, loading = true)
+        uiState.value = uiState.value.copy(title = title, overview = overview, loading = true)
 
         val isAudiobook = intent.getBooleanExtra(EXTRA_AUDIOBOOK, false)
         if (isAudiobook) {
@@ -139,8 +160,8 @@ class ReaderActivity : AppCompatActivity() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (showSettings.value) {
-                        showSettings.value = false
+                    if (showDetails.value) {
+                        showDetails.value = false
                     } else {
                         finish()
                     }
@@ -149,6 +170,34 @@ class ReaderActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch { if (!isAudiobook) openBook(id, title) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Settings opened from the reader are visible behind this activity when we come back.
+        if (::binding.isInitialized) {
+            binding.readerDim.alpha = brightnessOverlay(appPreferences.readerSettings().brightness)
+            epubNavigator?.submitPreferences(appPreferences.readerSettings().toEpubPreferences())
+        }
+    }
+
+    private fun showControls() {
+        controlsVisible.value = true
+        handler.removeCallbacks(hideControls)
+        handler.postDelayed(hideControls, 4000L)
+    }
+
+    private fun toggleControls() {
+        if (controlsVisible.value) {
+            handler.removeCallbacks(hideControls)
+            controlsVisible.value = false
+        } else {
+            showControls()
+        }
+    }
+
+    private fun seekTo(page: Int) {
+        positions.getOrNull(page - 1)?.let { epubNavigator?.go(it) }
     }
 
     private suspend fun openBook(id: UUID, title: String) {
@@ -200,7 +249,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun showPublication(publication: Publication, id: UUID, title: String) {
         val initialLocator = storedLocator(id)
-        val epubPreferences = settingsState.value.toEpubPreferences()
+        val epubPreferences = appPreferences.readerSettings().toEpubPreferences()
 
         val fragmentClass: Class<out Fragment>
         val fragmentFactory: androidx.fragment.app.FragmentFactory
@@ -262,13 +311,24 @@ class ReaderActivity : AppCompatActivity() {
         navigator = fragment as? Navigator
         epubNavigator = fragment as? EpubNavigatorFragment
 
+        (navigator as? VisualNavigator)?.addInputListener(tapListener)
+
+        val pageCount = positions.size
         uiState.value =
             uiState.value.copy(
                 title = title,
                 loading = false,
                 error = null,
-                progress = initialLocator?.progressLabel().orEmpty(),
+                page = initialLocator?.locations?.position ?: 1,
+                pageCount = pageCount,
             )
+        showControls()
+
+        lifecycleScope.launch {
+            val locators = runCatching { publication.positions() }.getOrNull().orEmpty()
+            positions = locators
+            uiState.value = uiState.value.copy(pageCount = locators.size)
+        }
 
         locatorJob?.cancel()
         locatorJob = lifecycleScope.launch {
@@ -278,16 +338,13 @@ class ReaderActivity : AppCompatActivity() {
                     .edit()
                     .putString(locatorKey(id), locator.toJSON().toString())
                     .apply()
-                uiState.value = uiState.value.copy(progress = locator.progressLabel())
+                uiState.value =
+                    uiState.value.copy(
+                        page = locator.locations.position ?: uiState.value.page,
+                        pageCount = positions.size.takeIf { it > 0 } ?: uiState.value.pageCount,
+                    )
             }
         }
-    }
-
-    private fun updateSettings(settings: ReaderSettings) {
-        settingsState.value = settings
-        appPreferences.setReaderSettings(settings)
-        binding.readerDim.alpha = brightnessOverlay(settings.brightness)
-        epubNavigator?.submitPreferences(settings.toEpubPreferences())
     }
 
     private fun storedLocator(id: UUID): Locator? {
@@ -299,15 +356,11 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun brightnessOverlay(brightness: Float): Float = (1f - brightness).coerceIn(0f, 0.8f)
 
-    private fun Locator.progressLabel(): String {
-        val percent = locations.totalProgression?.let { "${(it * 100).roundToInt()}%" }
-        return listOfNotNull(title, percent).joinToString(" · ")
-    }
-
     private fun readableError(error: Throwable): String =
         error.message ?: "This book could not be opened"
 
     override fun onDestroy() {
+        handler.removeCallbacks(hideControls)
         locatorJob?.cancel()
         super.onDestroy()
     }
@@ -316,17 +369,20 @@ class ReaderActivity : AppCompatActivity() {
         private const val EXTRA_BOOK_ID = "book_id"
         private const val EXTRA_BOOK_TITLE = "book_title"
         private const val EXTRA_AUDIOBOOK = "audiobook"
+        private const val EXTRA_OVERVIEW = "overview"
         private const val FRAGMENT_TAG = "reader_navigator_fragment"
 
         fun intent(
             context: Context,
             bookId: UUID,
             title: String,
+            overview: String = "",
             audiobook: Boolean = false,
         ): Intent =
             Intent(context, ReaderActivity::class.java)
                 .putExtra(EXTRA_BOOK_ID, bookId.toString())
                 .putExtra(EXTRA_BOOK_TITLE, title)
+                .putExtra(EXTRA_OVERVIEW, overview)
                 .putExtra(EXTRA_AUDIOBOOK, audiobook)
     }
 }

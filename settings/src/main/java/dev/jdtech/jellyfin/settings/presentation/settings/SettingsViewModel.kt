@@ -443,39 +443,21 @@ constructor(
                                                     backendPreference = appPreferences.readerTheme,
                                                     options = R.array.reader_themes_options,
                                                     optionValues = R.array.reader_themes_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_brightness,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_brightness_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerBrightness,
-                                                    options = R.array.reader_brightness_options,
-                                                    optionValues = R.array.reader_brightness_values,
-                                                ),
+                                                )
                                             ),
                                     ),
                                     PreferenceGroup(
                                         nameStringResource = R.string.settings_group_reading,
                                         preferences =
                                             listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_scroll,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_scroll_summary,
-                                                    backendPreference = appPreferences.readerScroll,
-                                                ),
                                                 PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.settings_reader_columns,
+                                                        R.string.settings_reader_mode,
                                                     descriptionStringRes =
-                                                        R.string.settings_reader_columns_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerColumnCount,
-                                                    options = R.array.reader_columns_options,
-                                                    optionValues = R.array.reader_columns_values,
+                                                        R.string.settings_reader_mode_summary,
+                                                    backendPreference = appPreferences.readerMode,
+                                                    options = R.array.reader_modes_options,
+                                                    optionValues = R.array.reader_modes_values,
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
@@ -487,7 +469,7 @@ constructor(
                                                     options = R.array.reader_alignment_options,
                                                     optionValues = R.array.reader_alignment_values,
                                                 ),
-                                                PreferenceSelect(
+                                                PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.settings_reader_normalization,
                                                     descriptionStringRes =
@@ -495,9 +477,15 @@ constructor(
                                                             .settings_reader_normalization_summary,
                                                     backendPreference =
                                                         appPreferences.readerTextNormalization,
-                                                    options = R.array.reader_normalization_options,
-                                                    optionValues =
-                                                        R.array.reader_normalization_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_chapters_gesture,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_chapters_gesture_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerChaptersGesture,
                                                 ),
                                             ),
                                     ),

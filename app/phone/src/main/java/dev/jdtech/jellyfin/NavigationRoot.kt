@@ -55,6 +55,7 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
+import dev.jdtech.jellyfin.presentation.film.BookDetailScreen
 import dev.jdtech.jellyfin.presentation.film.BooksScreen
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
 import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
@@ -555,19 +556,23 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }
-    entry<BookRoute> { key ->
+    entry<BookDetailRoute> { key ->
         val context = LocalContext.current
-        LaunchedEffect(key) {
-            context.startActivity(
-                ReaderActivity.intent(
-                    context = context,
-                    bookId = UUID.fromString(key.bookId),
-                    title = key.title,
-                    audiobook = key.audiobook,
+        BookDetailScreen(
+            bookId = UUID.fromString(key.bookId),
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onRead = { item ->
+                context.startActivity(
+                    ReaderActivity.intent(
+                        context = context,
+                        bookId = item.id,
+                        title = item.name,
+                        overview = item.overview,
+                        audiobook = item.isAudiobook,
+                    )
                 )
-            )
-            navigator.goBack()
-        }
+            },
+        )
     }
     entry<CollectionRoute> { key ->
         CollectionScreen(
@@ -821,11 +826,7 @@ private fun navigateToItem(navigator: Navigator, item: FindroidItem) {
     when (item) {
         is FindroidBook ->
             navigator.navigate(
-                BookRoute(
-                    bookId = item.id.toString(),
-                    title = item.name,
-                    audiobook = item.isAudiobook,
-                )
+                BookDetailRoute(bookId = item.id.toString(), audiobook = item.isAudiobook)
             )
         is FindroidBoxSet ->
             navigator.navigate(

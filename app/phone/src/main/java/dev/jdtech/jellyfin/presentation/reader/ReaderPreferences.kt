@@ -13,14 +13,14 @@ data class ReaderSettings(
     val theme: String = "dark",
     val fontFamily: String = "",
     val fontSize: Float = 1f,
-    val fontWeight: Float = 0.5f,
+    val fontWeight: Float = 1f,
     val pageMargins: Float = 1f,
     val scroll: Boolean = false,
     val columnCount: Int = 1,
     val textAlign: String = "",
     val textNormalization: Boolean = true,
     val lineHeight: Float = 1.5f,
-    val paragraphSpacing: Float = 0f,
+    val paragraphSpacing: Float = 1.3f,
     val wordSpacing: Float = 0f,
     val letterSpacing: Float = 0f,
     val brightness: Float = 1f,
@@ -36,14 +36,14 @@ fun AppPreferences.readerSettings(): ReaderSettings {
         theme = getValue(readerTheme),
         fontFamily = getValue(readerFontFamily).takeIf { it != "default" }.orEmpty(),
         fontSize = float(readerFontSize, 1f),
-        fontWeight = float(readerFontWeight, 0.5f),
-        pageMargins = float(readerPageMargins, 1f),
-        scroll = getValue(readerScroll),
-        columnCount = getValue(readerColumnCount).toIntOrNull() ?: 1,
+        fontWeight = 1f,
+        pageMargins = 1f,
+        scroll = getValue(readerMode) == "scroll",
+        columnCount = if (getValue(readerMode) == "dual") 2 else 1,
         textAlign = getValue(readerTextAlign).takeIf { it != "default" }.orEmpty(),
-        textNormalization = getValue(readerTextNormalization) != "false",
+        textNormalization = getValue(readerTextNormalization),
         lineHeight = float(readerLineHeight, 1.5f),
-        paragraphSpacing = float(readerParagraphSpacing, 0f),
+        paragraphSpacing = float(readerParagraphSpacing, 1.3f),
         wordSpacing = float(readerWordSpacing, 0f),
         letterSpacing = float(readerLetterSpacing, 0f),
         brightness = float(readerBrightness, 1f),
@@ -56,10 +56,16 @@ fun AppPreferences.setReaderSettings(settings: ReaderSettings) {
     setValue(readerFontSize, settings.fontSize.toString())
     setValue(readerFontWeight, settings.fontWeight.toString())
     setValue(readerPageMargins, settings.pageMargins.toString())
-    setValue(readerScroll, settings.scroll)
-    setValue(readerColumnCount, settings.columnCount.toString())
+    setValue(
+        readerMode,
+        when {
+            settings.scroll -> "scroll"
+            settings.columnCount >= 2 -> "dual"
+            else -> "single"
+        },
+    )
     setValue(readerTextAlign, settings.textAlign.ifBlank { "default" })
-    setValue(readerTextNormalization, settings.textNormalization.toString())
+    setValue(readerTextNormalization, settings.textNormalization)
     setValue(readerLineHeight, settings.lineHeight.toString())
     setValue(readerParagraphSpacing, settings.paragraphSpacing.toString())
     setValue(readerWordSpacing, settings.wordSpacing.toString())

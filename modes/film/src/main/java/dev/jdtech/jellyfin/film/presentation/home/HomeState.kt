@@ -11,6 +11,7 @@ data class HomeState(
     val resumeSection: HomeItem.Section? = null,
     val nextUpSection: HomeItem.Section? = null,
     val latestBooksSection: HomeItem.Section? = null,
+    val latestAudiobooksSection: HomeItem.Section? = null,
     val views: List<HomeItem.ViewItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: Exception? = null,

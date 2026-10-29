@@ -65,8 +65,10 @@
     <string name="shows_label">Shows</string>
     <string name="collections_label">Collections</string>
     <string name="books_label">Books</string>
+    <string name="audiobooks_label">Audiobooks</string>
     <string name="no_book_libraries">No book libraries found</string>
     <string name="no_books">No books in this library</string>
+    <string name="no_audiobooks">No audiobooks in this library</string>
     <string name="unrated">Unrated</string>
     <string name="display_info">Display info</string>
     <string name="display_info_summary">Tap a field to show or hide it on every item</string>
