@@ -15,6 +15,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Readium's PDF adapter depends on AndroidPdfViewer, which is published on JitPack.
+        maven("https://jitpack.io") { content { includeGroup("com.github.marain87") } }
     }
 }
 

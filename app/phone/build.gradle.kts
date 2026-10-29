@@ -80,6 +80,11 @@ android {
         compose = true
     }
 
+    compileOptions {
+        // Required by the Readium toolkit.
+        isCoreLibraryDesugaringEnabled = true
+    }
+
     dependenciesInfo {
         // Disables dependency metadata when building APKs.
         includeInApk = false
@@ -129,6 +134,11 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.jellyfin.core)
+    implementation(libs.readium.shared)
+    implementation(libs.readium.streamer)
+    implementation(libs.readium.navigator)
+    implementation(libs.readium.adapter.pdfium)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     ksp(libs.kotlin.metadata.jvm)
     compileOnly(libs.libmpv)
     implementation(libs.material)

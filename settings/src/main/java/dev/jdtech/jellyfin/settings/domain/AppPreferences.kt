@@ -96,6 +96,21 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     /** Where subtitles are anchored: the whole screen, or just the video frame. */
     val playerMpvSubAnchor = Preference("pref_player_mpv_sub_anchor", "screen")
 
+    // Reader
+    val readerTheme = Preference("pref_reader_theme", "dark")
+    val readerFontFamily = Preference("pref_reader_font_family", "")
+    val readerFontSize = Preference("pref_reader_font_size", "1.0")
+    val readerFontWeight = Preference("pref_reader_font_weight", "0.5")
+    val readerPageMargins = Preference("pref_reader_page_margins", "1.0")
+    val readerScroll = Preference("pref_reader_scroll", false)
+    val readerColumnCount = Preference("pref_reader_column_count", "1")
+    val readerTextAlign = Preference("pref_reader_text_align", "")
+    val readerTextNormalization = Preference("pref_reader_text_normalization", "true")
+    val readerLineHeight = Preference("pref_reader_line_height", "1.5")
+    val readerParagraphSpacing = Preference("pref_reader_paragraph_spacing", "0.0")
+    val readerWordSpacing = Preference("pref_reader_word_spacing", "0.0")
+    val readerLetterSpacing = Preference("pref_reader_letter_spacing", "0.0")
+    val readerBrightness = Preference("pref_reader_brightness", "1.0")
     val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "3")
     val playerMpvSubBorderColor = Preference("pref_player_mpv_sub_border_color", "#FF000000")
     val playerMpvSubBorderOpacity = Preference("pref_player_mpv_sub_border_opacity", "255")

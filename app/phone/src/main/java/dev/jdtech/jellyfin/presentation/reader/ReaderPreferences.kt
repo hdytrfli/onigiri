@@ -1,0 +1,104 @@
+package dev.jdtech.jellyfin.presentation.reader
+
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.preferences.ColumnCount
+import org.readium.r2.navigator.preferences.FontFamily
+import org.readium.r2.navigator.preferences.TextAlign
+import org.readium.r2.navigator.preferences.Theme
+import org.readium.r2.shared.ExperimentalReadiumApi
+
+/** Every reader preference, in the units the reader UI edits them in. */
+data class ReaderSettings(
+    val theme: String = "dark",
+    val fontFamily: String = "",
+    val fontSize: Float = 1f,
+    val fontWeight: Float = 0.5f,
+    val pageMargins: Float = 1f,
+    val scroll: Boolean = false,
+    val columnCount: Int = 1,
+    val textAlign: String = "",
+    val textNormalization: Boolean = true,
+    val lineHeight: Float = 1.5f,
+    val paragraphSpacing: Float = 0f,
+    val wordSpacing: Float = 0f,
+    val letterSpacing: Float = 0f,
+    val brightness: Float = 1f,
+)
+
+fun AppPreferences.readerSettings(): ReaderSettings {
+    fun float(
+        preference: dev.jdtech.jellyfin.settings.domain.models.Preference<String>,
+        fallback: Float,
+    ) = getValue(preference).toFloatOrNull() ?: fallback
+
+    return ReaderSettings(
+        theme = getValue(readerTheme),
+        fontFamily = getValue(readerFontFamily),
+        fontSize = float(readerFontSize, 1f),
+        fontWeight = float(readerFontWeight, 0.5f),
+        pageMargins = float(readerPageMargins, 1f),
+        scroll = getValue(readerScroll),
+        columnCount = getValue(readerColumnCount).toIntOrNull() ?: 1,
+        textAlign = getValue(readerTextAlign),
+        textNormalization = getValue(readerTextNormalization) != "false",
+        lineHeight = float(readerLineHeight, 1.5f),
+        paragraphSpacing = float(readerParagraphSpacing, 0f),
+        wordSpacing = float(readerWordSpacing, 0f),
+        letterSpacing = float(readerLetterSpacing, 0f),
+        brightness = float(readerBrightness, 1f),
+    )
+}
+
+fun AppPreferences.setReaderSettings(settings: ReaderSettings) {
+    setValue(readerTheme, settings.theme)
+    setValue(readerFontFamily, settings.fontFamily)
+    setValue(readerFontSize, settings.fontSize.toString())
+    setValue(readerFontWeight, settings.fontWeight.toString())
+    setValue(readerPageMargins, settings.pageMargins.toString())
+    setValue(readerScroll, settings.scroll)
+    setValue(readerColumnCount, settings.columnCount.toString())
+    setValue(readerTextAlign, settings.textAlign)
+    setValue(readerTextNormalization, settings.textNormalization.toString())
+    setValue(readerLineHeight, settings.lineHeight.toString())
+    setValue(readerParagraphSpacing, settings.paragraphSpacing.toString())
+    setValue(readerWordSpacing, settings.wordSpacing.toString())
+    setValue(readerLetterSpacing, settings.letterSpacing.toString())
+    setValue(readerBrightness, settings.brightness.toString())
+}
+
+/** Maps our reader settings onto Readium's reflowable EPUB preferences. */
+@OptIn(ExperimentalReadiumApi::class)
+fun ReaderSettings.toEpubPreferences(): EpubPreferences =
+    EpubPreferences(
+        theme =
+            when (theme) {
+                "light" -> Theme.LIGHT
+                "sepia" -> Theme.SEPIA
+                else -> Theme.DARK
+            },
+        fontFamily = fontFamily.takeIf { it.isNotBlank() }?.let { FontFamily(it) },
+        fontSize = fontSize.toDouble(),
+        fontWeight = fontWeight.toDouble(),
+        pageMargins = pageMargins.toDouble(),
+        scroll = scroll,
+        columnCount =
+            when (columnCount) {
+                0 -> ColumnCount.AUTO
+                2 -> ColumnCount.TWO
+                else -> ColumnCount.ONE
+            },
+        textAlign =
+            when (textAlign) {
+                "start" -> TextAlign.START
+                "justify" -> TextAlign.JUSTIFY
+                else -> null
+            },
+        textNormalization = textNormalization,
+        lineHeight = lineHeight.toDouble(),
+        paragraphSpacing = paragraphSpacing.toDouble(),
+        wordSpacing = wordSpacing.toDouble(),
+        letterSpacing = letterSpacing.toDouble(),
+        // The reader's own typography controls only take effect over the publisher styles.
+        publisherStyles = false,
+    )

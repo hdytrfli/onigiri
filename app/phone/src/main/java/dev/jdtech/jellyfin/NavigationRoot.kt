@@ -44,6 +44,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
 import dev.jdtech.jellyfin.core.presentation.theme.ScrimMedium
 import dev.jdtech.jellyfin.models.CollectionType
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
@@ -556,6 +557,19 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }
+    entry<BookRoute> { key ->
+        val context = LocalContext.current
+        LaunchedEffect(key) {
+            context.startActivity(
+                ReaderActivity.intent(
+                    context = context,
+                    bookId = UUID.fromString(key.bookId),
+                    title = key.title,
+                )
+            )
+            navigator.goBack()
+        }
+    }
     entry<CollectionRoute> { key ->
         CollectionScreen(
             collectionId = UUID.fromString(key.collectionId),
@@ -802,6 +816,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
 
 private fun navigateToItem(navigator: Navigator, item: FindroidItem) {
     when (item) {
+        is FindroidBook ->
+            navigator.navigate(BookRoute(bookId = item.id.toString(), title = item.name))
         is FindroidBoxSet ->
             navigator.navigate(
                 CollectionRoute(collectionId = item.id.toString(), collectionName = item.name)
