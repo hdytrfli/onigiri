@@ -41,9 +41,11 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
@@ -104,6 +106,10 @@ private fun EditImageSearchLayout(
             )
         }
     ) { innerPadding ->
+        if (LocalOfflineMode.current) {
+            OfflineNotice(modifier = Modifier.padding(innerPadding))
+            return@PageScaffold
+        }
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             when {
                 state.isSearching ->
@@ -132,7 +138,6 @@ private fun EditImageSearchLayout(
                     ) {
                         items(
                             items = state.results,
-                            key = { it.hashCode() },
                             // A banner is wide, so give it two columns in landscape (one in
                             // portrait) rather than changing its aspect ratio.
                             span = { _ ->

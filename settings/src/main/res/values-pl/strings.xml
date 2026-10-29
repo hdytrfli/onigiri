@@ -31,7 +31,6 @@
     <string name="settings_socket_timeout">Limit czasu socketa</string>
     <string name="subtitles_summary">Dostosuj wygląd napisów</string>
     <string name="subtitles">Napisy</string>
-    <string name="seeking">Przesuwanie</string>
     <string name="pref_player_mpv_vo">Wyjście wideo</string>
     <string name="pref_player_mpv_ao">Wyjście audio</string>
     <string name="seek_back_increment">Krok przesuwania wstecznego</string>

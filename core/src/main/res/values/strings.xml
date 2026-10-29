@@ -13,6 +13,9 @@
     <string name="view_all">View all</string>
     <string name="error_loading_data">Error loading data</string>
     <string name="error_title">Something went wrong</string>
+    <string name="offline_mode_title">You\'re offline</string>
+    <string name="offline_mode_message">Offline mode is on. Only downloaded items are available right now.</string>
+    <string name="go_online">Go online</string>
     <string name="error_try_again">Pull down to try again.</string>
     <string name="show_stacktrace">Show stacktrace</string>
     <string name="retry">Retry</string>
@@ -150,7 +153,7 @@
     <string name="subtitle_machine_translated">Machine translated</string>
     <string name="subtitle_details">Details</string>
     <string name="subtitle_comment">Comment</string>
-    <string name="identify">Identify</string>
+    <string name="identify">Identify media</string>
     <string name="identify_search_hint">Title</string>
     <string name="identify_name">Name</string>
     <string name="identify_name_hint">Movie name</string>

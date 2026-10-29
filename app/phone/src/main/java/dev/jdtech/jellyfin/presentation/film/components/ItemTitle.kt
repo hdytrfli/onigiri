@@ -2,8 +2,8 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,9 +25,8 @@ import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 /**
  * Shows the item's title logo image when available, falling back to plain text otherwise.
  *
- * The logo uses its intrinsic (auto) width, capped to a reserved area of 70% of the screen width in
- * portrait and 35% in landscape, with a 2:1 (width:height) maximum ratio. [logoHeight] can tighten
- * the height further for inline uses.
+ * The logo takes the configured fraction of the screen width (70% in portrait, 35% in landscape by
+ * default), inside a fixed 16:9 box. [logoHeight] can tighten the height further for inline uses.
  */
 @Composable
 fun ItemTitle(
@@ -63,7 +62,9 @@ fun ItemTitle(
             contentDescription = title,
             contentScale = ContentScale.Fit,
             alignment = Alignment.CenterStart,
-            modifier = modifier.widthIn(max = maxWidth).heightIn(max = maxHeight),
+            // The configured fraction is the actual width, not just a cap: a logo smaller than the
+            // cap still grows/shrinks with the setting.
+            modifier = modifier.width(maxWidth).height(maxHeight),
         )
     } else {
         Text(

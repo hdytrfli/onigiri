@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,6 +27,8 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.HomeRoute
+import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSection
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyHomeSuggestions
@@ -50,10 +53,13 @@ import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.Section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun HomeScreen(
@@ -76,6 +82,23 @@ fun HomeScreen(
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Pressing the Home item again cycles Home -> Favorites -> Downloads.
+    val tabReselect = LocalTabReselect.current
+    LaunchedEffect(tabReselect) {
+        tabReselect.events
+            .filter { it is HomeRoute }
+            .collect { selectedTab = (selectedTab + 1) % 3 }
+    }
+
+    // The offline notice's Downloads action: open this page on the Downloads tab.
+    val openDownloads by tabReselect.openDownloads.collectAsState()
+    LaunchedEffect(openDownloads) {
+        if (openDownloads) {
+            selectedTab = 2
+            tabReselect.consumeDownloads()
+        }
+    }
 
     val onAction: (HomeAction) -> Unit = { action ->
         when (action) {
@@ -171,7 +194,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
@@ -180,6 +203,11 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
     val contentPaddingTop = LocalRootPageContentInset.current
+
+    if (LocalOfflineMode.current) {
+        OfflineNotice()
+        return
+    }
 
     if (state.error != null && state.suggestionsSection == null && state.views.isEmpty()) {
         FullPageError(

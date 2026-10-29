@@ -48,8 +48,10 @@ import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -117,6 +119,10 @@ private fun EditImagesScreenLayout(
             )
         }
     ) { innerPadding ->
+        if (LocalOfflineMode.current) {
+            OfflineNotice(modifier = Modifier.padding(innerPadding))
+            return@PageScaffold
+        }
         if (state.isLoading && state.images.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),

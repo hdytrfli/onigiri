@@ -32,9 +32,11 @@ import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
+import dev.jdtech.jellyfin.presentation.utils.LocalSetOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.utils.restart
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 import javax.inject.Inject
 
@@ -95,6 +97,13 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         CompositionLocalProvider(
                             LocalOfflineMode provides state.isOfflineMode,
+                            LocalSetOfflineMode provides
+                                { enabled ->
+                                    viewModel.setOfflineMode(enabled)
+                                    // Same behaviour as the settings switch: relaunch the task so
+                                    // the repository bindings are injected for the new mode.
+                                    restart()
+                                },
                             LocalBlurHash provides state.blurHash,
                             LocalPredictiveBack provides state.predictiveBack,
                             LocalTabletUiMode provides state.tabletUiMode,

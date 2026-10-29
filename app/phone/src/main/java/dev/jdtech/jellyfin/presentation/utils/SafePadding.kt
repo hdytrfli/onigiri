@@ -8,14 +8,11 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
 
 data class SafePadding(val start: Dp, val top: Dp, val end: Dp, val bottom: Dp)
 
@@ -37,10 +34,10 @@ fun topBarWindowInsets(): WindowInsets =
     }
 
 /**
- * The window insets a secondary page pads its Scaffold content with: the horizontal gutters plus
- * the keyboard, never the bottom - the app owns the bottom edge (the navigation suite at roots,
- * edge-to-edge content elsewhere) and reserving the safe-drawing bottom left an empty surface band
- * above the gesture area on secondary pages.
+ * The window insets a secondary page pads its Scaffold content with: only the keyboard. Side safe
+ * insets are deliberately not reserved - the page gutter is the margin, and on rail layouts the
+ * rail (through `SuiteInsetBox`) already takes the start edge - while the bottom stays app-owned
+ * (the navigation suite at roots, edge-to-edge content elsewhere).
  *
  * Pages that call `Modifier.recalculateWindowInsets()` reset the consumed insets of their subtree,
  * undoing the app-wide hidden-status-bar consumption (see MainActivity), so they must drop the top
@@ -48,34 +45,18 @@ fun topBarWindowInsets(): WindowInsets =
  * this automatically.
  */
 @Composable
-fun pageContentWindowInsets(): WindowInsets =
-    WindowInsets.safeDrawing
-        .only(WindowInsetsSides.Horizontal)
-        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
+fun pageContentWindowInsets(): WindowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom)
 
+/**
+ * The app's safe spacing: the top and bottom insets only.
+ *
+ * The display cutout is never reserved on the sides - the app runs edge to edge horizontally, with
+ * the gutter as the only margin, on every page and in every orientation. The status bar/cutout at
+ * the top is still honoured (unless the status bar is hidden), because the top bars sit there.
+ */
 @Composable
-fun rememberSafePadding(handleStartInsets: Boolean = true): SafePadding {
+fun rememberSafePadding(): SafePadding {
     val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-
-    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-
-    val safePaddingStart =
-        if (handleStartInsets) {
-            with(density) { WindowInsets.safeDrawing.getLeft(this, layoutDirection).toDp() }
-        } else {
-            // Navigation rail handles safe drawing inset in medium and expanded width
-            when {
-                windowSizeClass.isWidthAtLeastBreakpoint(
-                    WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
-                ) -> 0.dp
-                windowSizeClass.isWidthAtLeastBreakpoint(
-                    WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND
-                ) -> 0.dp
-                else ->
-                    with(density) { WindowInsets.safeDrawing.getLeft(this, layoutDirection).toDp() }
-            }
-        }
 
     val safePaddingTop =
         if (LocalHideStatusBar.current) {
@@ -83,14 +64,7 @@ fun rememberSafePadding(handleStartInsets: Boolean = true): SafePadding {
         } else {
             with(density) { WindowInsets.safeDrawing.getTop(this).toDp() }
         }
-    val safePaddingEnd =
-        with(density) { WindowInsets.safeDrawing.getRight(this, layoutDirection).toDp() }
     val safePaddingBottom = with(density) { WindowInsets.safeDrawing.getBottom(this).toDp() }
 
-    return SafePadding(
-        start = safePaddingStart,
-        top = safePaddingTop,
-        end = safePaddingEnd,
-        bottom = safePaddingBottom,
-    )
+    return SafePadding(start = 0.dp, top = safePaddingTop, end = 0.dp, bottom = safePaddingBottom)
 }

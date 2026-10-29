@@ -11,7 +11,6 @@
     <string name="gestures">제스처</string>
     <string name="player_gestures_zoom">줌 제스처</string>
     <string name="player_gestures_zoom_summary">핀치 인으로 화면 채우기</string>
-    <string name="seeking">탐색</string>
     <string name="seek_back_increment">되감기 시간</string>
     <string name="settings_category_download">다운로드</string>
     <string name="settings_category_appearance">디자인</string>

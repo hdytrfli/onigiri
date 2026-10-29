@@ -19,7 +19,6 @@
     <string name="gestures">Gester</string>
     <string name="player_gestures_zoom">Zoomgest</string>
     <string name="player_gestures_seek_summary">Svep horisontellt för att spola framåt eller bakåt</string>
-    <string name="seeking">Spolar</string>
     <string name="seek_back_increment">Spola bakåt intervall</string>
     <string name="seek_forward_increment">Spola framåt intervall</string>
     <string name="amoled_theme">AMOLED-mörkt tema</string>

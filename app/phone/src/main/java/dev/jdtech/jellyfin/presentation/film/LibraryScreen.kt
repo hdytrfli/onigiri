@@ -59,12 +59,14 @@ import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemCountBadge
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.pageContentWindowInsets
 import dev.jdtech.jellyfin.presentation.utils.plus
@@ -187,7 +189,7 @@ fun LibraryContent(
     sectionTitle: String? = null,
     showSearchField: Boolean = true,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
     // Under a root page the floating header overlays the content, so the first grid item
     // starts below it; standalone the grid keeps its own spacing.
     val rootInset = LocalRootPageContentInset.current
@@ -277,47 +279,51 @@ fun LibraryContent(
                 },
             )
         }
-        val error = state.error
-        if (error != null && items.isEmpty()) {
-            FullPageError(
-                onRefresh = { onAction(LibraryAction.RefreshItems) },
-                isRefreshing = state.isLoading,
-                error = error,
-            )
+        if (LocalOfflineMode.current) {
+            OfflineNotice()
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = contentPadding,
-                horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-            ) {
-                // The title is content, not a header: it scrolls away with the grid. The badge
-                // on its right shows the cached list's total.
-                section(
-                    title = sectionTitle,
-                    trailingContent =
-                        itemCount?.let { count ->
-                            {
-                                ItemCountBadge(
-                                    count = count,
-                                    modifier = Modifier.padding(start = 8.dp),
-                                )
-                            }
-                        },
+            val error = state.error
+            if (error != null && items.isEmpty()) {
+                FullPageError(
+                    onRefresh = { onAction(LibraryAction.RefreshItems) },
+                    isRefreshing = state.isLoading,
+                    error = error,
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding,
+                    horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                    verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 ) {
-                    items(items = items, key = { it.id }) { item ->
-                        ItemCard(
-                            item = item,
-                            direction = Direction.VERTICAL,
-                            onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                            modifier = Modifier.animateItem(),
-                            fillWidth = true,
-                            showYear = ListDisplayField.Year in state.displayFields,
-                            showCommunityRating =
-                                ListDisplayField.CommunityRating in state.displayFields,
-                            showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                        )
+                    // The title is content, not a header: it scrolls away with the grid. The badge
+                    // on its right shows the cached list's total.
+                    section(
+                        title = sectionTitle,
+                        trailingContent =
+                            itemCount?.let { count ->
+                                {
+                                    ItemCountBadge(
+                                        count = count,
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
+                                }
+                            },
+                    ) {
+                        items(items = items, key = { it.id }) { item ->
+                            ItemCard(
+                                item = item,
+                                direction = Direction.VERTICAL,
+                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                modifier = Modifier.animateItem(),
+                                fillWidth = true,
+                                showYear = ListDisplayField.Year in state.displayFields,
+                                showCommunityRating =
+                                    ListDisplayField.CommunityRating in state.displayFields,
+                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
+                            )
+                        }
                     }
                 }
             }

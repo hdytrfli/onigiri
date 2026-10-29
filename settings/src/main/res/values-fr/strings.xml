@@ -24,7 +24,6 @@
     <string name="download_roaming">Télécharger en itinérance</string>
     <string name="player_gestures_zoom">Geste de zoom</string>
     <string name="player_gestures_zoom_summary">Pincer pour remplir l\'écran avec la vidéo</string>
-    <string name="seeking">Recherche</string>
     <string name="seek_forward_increment">Incrément de la recherche vers l\'avant</string>
     <string name="seek_back_increment">Incrément de retour de recherche</string>
     <string name="settings_category_network">Réseau</string>

@@ -35,10 +35,12 @@ import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FilmSearchBar
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
@@ -92,7 +94,12 @@ private fun MediaScreenLayout(
     onAction: (MediaAction) -> Unit,
     onSearchAction: (SearchAction) -> Unit,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
+
+    if (LocalOfflineMode.current) {
+        OfflineNotice()
+        return
+    }
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingTop = safePadding.top + MaterialTheme.spacings.small

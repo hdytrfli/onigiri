@@ -1073,14 +1073,16 @@ constructor(
                                                     options = R.array.mpv_sub_pos_options,
                                                     optionValues = R.array.mpv_sub_pos,
                                                 ),
-                                                PreferenceSwitch(
+                                                PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.pref_player_mpv_sub_use_margins,
+                                                        R.string.pref_player_mpv_sub_anchor,
                                                     descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_mpv_sub_use_margins_summary,
+                                                        R.string.pref_player_mpv_sub_anchor_summary,
+                                                    optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
-                                                        appPreferences.playerMpvSubUseMargins,
+                                                        appPreferences.playerMpvSubAnchor,
+                                                    options = R.array.mpv_sub_anchor_options,
+                                                    optionValues = R.array.mpv_sub_anchor_values,
                                                 ),
                                             ),
                                     ),
@@ -1525,6 +1527,7 @@ constructor(
                 preference.nameStringResource == R.string.title_download ||
                     preference.nameStringResource == R.string.settings_category_cache ->
                     R.string.settings_group_storage
+                preference.nameStringResource == R.string.about -> R.string.settings_group_about
                 else -> null
             }
         }
@@ -1594,7 +1597,6 @@ constructor(
                         )
                 }
             }
-            else -> Unit
         }
     }
 }

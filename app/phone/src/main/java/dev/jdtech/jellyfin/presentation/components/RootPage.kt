@@ -30,7 +30,7 @@ fun RootPage(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
     // The gutter above and below the 48dp floating header keeps the status bar (unless hidden),
     // the header, and the content tight: 8dp on both sides of the bar.
     val headerTop = safePadding.top + MaterialTheme.spacings.gutter

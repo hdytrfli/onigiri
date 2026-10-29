@@ -89,6 +89,14 @@
         <item>95</item>
         <item>100</item>
     </string-array>
+    <string-array name="mpv_sub_anchor_options">
+        <item>Screen</item>
+        <item>Frame</item>
+    </string-array>
+    <string-array name="mpv_sub_anchor_values">
+        <item>screen</item>
+        <item>frame</item>
+    </string-array>
     <string-array name="mpv_sub_pos_options">
         <item>0%</item>
         <item>5%</item>

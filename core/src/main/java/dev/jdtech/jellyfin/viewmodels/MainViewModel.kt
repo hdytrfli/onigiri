@@ -10,6 +10,7 @@ import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.domain.Constants
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -49,11 +50,17 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         }
     }
 
+    /** Turns offline mode on or off, e.g. from an offline notice's "Go online" action. */
+    fun setOfflineMode(enabled: Boolean) {
+        appPreferences.setValue(appPreferences.offlineMode, enabled)
+    }
+
     /**
      * Continuously derives [MainState] from the underlying preferences and database, so the state
      * (and anything derived from it, e.g. the setup/main navigation condition) reacts to changes as
      * soon as they happen.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun check() {
         viewModelScope.launch {
             _state.emit(MainState(isLoading = true))

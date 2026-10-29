@@ -40,7 +40,6 @@
     <string name="player_gestures_seek_summary">اسحب أفقياً للتنقل للأمام أو للخلف</string>
     <string name="player_start_maximized">بدء التشغيل بأقصى حجم</string>
     <string name="player_start_maximized_summary">فتح الفيديو في وضع التكبير افتراضيًا</string>
-    <string name="seeking">التنقل</string>
     <string name="seek_back_increment">التنقل للخلف</string>
     <string name="seek_forward_increment">التنقل للأمام</string>
     <string name="trickplay">تشغيل الصور المصغرة</string>

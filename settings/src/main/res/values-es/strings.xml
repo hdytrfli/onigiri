@@ -24,7 +24,6 @@
     <string name="gestures">Gestos</string>
     <string name="player_gestures_zoom">Gesto de zoom</string>
     <string name="player_gestures_zoom_summary">Pellizca la pantalla para llenar tu pantalla con el vídeo</string>
-    <string name="seeking">Buscando</string>
     <string name="seek_back_increment">Incremento al retroceder</string>
     <string name="seek_forward_increment">Incremento al avanzar</string>
     <string name="subtitles">Subtítulos</string>

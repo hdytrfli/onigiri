@@ -39,7 +39,6 @@
     <string name="player_gestures_zoom_summary">Pellizcar para rellenar pantalla con el video</string>
     <string name="subtitles">Subtítulos</string>
     <string name="subtitles_summary">Personalizar apariencia de subtítulos</string>
-    <string name="seeking">Buscando</string>
     <string name="seek_forward_increment">Incrementar adelanto</string>
     <string name="seek_back_increment">Incrementar retroceso</string>
     <string name="extra_info_summary">Mostrar información detallada de audio, video y subtítulos</string>

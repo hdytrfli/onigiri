@@ -18,7 +18,6 @@
     <string name="player_gestures_zoom">Gestor de Zoom</string>
     <string name="gestures">Gestos</string>
     <string name="player_gestures_zoom_summary">Clique para preencher o ecrã com o vídeo</string>
-    <string name="seeking">Procura</string>
     <string name="subtitles">Legendas</string>
     <string name="seek_back_increment">Procurar incremento de volta</string>
     <string name="seek_forward_increment">Procure o incremento para a frente</string>

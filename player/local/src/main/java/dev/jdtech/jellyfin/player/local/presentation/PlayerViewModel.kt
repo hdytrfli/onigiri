@@ -173,7 +173,7 @@ constructor(
                 .build()
 
         val trackSelectionParameters =
-            TrackSelectionParameters.Builder(application)
+            TrackSelectionParameters.Builder()
                 .setPreferredAudioLanguage(
                     appPreferences.getValue(appPreferences.preferredAudioLanguage)
                 )
@@ -201,6 +201,7 @@ constructor(
                 .setSubFontSize(subOptions.getValue("sub-font-size"))
                 .setSubColor(subOptions.getValue("sub-color"))
                 .setSubPos(subOptions.getValue("sub-pos"))
+                .setSubMarginY(subOptions.getValue("sub-margin-y"))
                 .setSubUseMargins(subOptions.getValue("sub-use-margins"))
                 .setSubBorderSize(subOptions.getValue("sub-outline-size"))
                 .setSubBorderColor(subOptions.getValue("sub-outline-color"))

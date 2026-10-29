@@ -32,6 +32,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 /**
@@ -49,8 +50,15 @@ fun FullPageError(
     description: String? = stringResource(CoreR.string.error_try_again),
     error: Throwable? = null,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
     var showDetails by rememberSaveable { mutableStateOf(false) }
+
+    // Offline mode is not a failure: explain it in the same full-page layout, with its own icon and
+    // the action that leaves offline mode.
+    if (LocalOfflineMode.current) {
+        OfflineNotice(modifier = modifier)
+        return
+    }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,

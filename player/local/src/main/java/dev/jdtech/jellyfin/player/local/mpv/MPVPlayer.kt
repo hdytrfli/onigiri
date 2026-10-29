@@ -83,6 +83,7 @@ class MPVPlayer(
     private val subFontSize: String = "28",
     private val subColor: String = "#FFFFFFFF",
     private val subPos: String = "100",
+    private val subMarginY: String = "34",
     private val subUseMargins: String = "yes",
     private val subBorderSize: String = "0",
     private val subBorderColor: String = "#FF000000",
@@ -116,6 +117,7 @@ class MPVPlayer(
         subFontSize = builder.subFontSize,
         subColor = builder.subColor,
         subPos = builder.subPos,
+        subMarginY = builder.subMarginY,
         subUseMargins = builder.subUseMargins,
         subBorderSize = builder.subBorderSize,
         subBorderColor = builder.subBorderColor,
@@ -161,6 +163,9 @@ class MPVPlayer(
             private set
 
         var subPos: String = "100"
+            private set
+
+        var subMarginY: String = "34"
             private set
 
         var subUseMargins: String = "yes"
@@ -220,6 +225,8 @@ class MPVPlayer(
         fun setSubColor(subColor: String) = apply { this.subColor = subColor }
 
         fun setSubPos(subPos: String) = apply { this.subPos = subPos }
+
+        fun setSubMarginY(subMarginY: String) = apply { this.subMarginY = subMarginY }
 
         fun setSubUseMargins(subUseMargins: String) = apply { this.subUseMargins = subUseMargins }
 
@@ -302,6 +309,7 @@ class MPVPlayer(
         MPVLib.setOptionString("sub-font-size", subFontSize)
         MPVLib.setOptionString("sub-color", subColor)
         MPVLib.setOptionString("sub-pos", subPos)
+        MPVLib.setOptionString("sub-margin-y", subMarginY)
         MPVLib.setOptionString("sub-use-margins", subUseMargins)
         MPVLib.setOptionString("sub-ass-force-margins", subUseMargins)
         MPVLib.setOptionString("sub-outline-size", subBorderSize)

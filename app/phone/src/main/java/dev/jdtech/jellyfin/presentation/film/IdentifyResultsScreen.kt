@@ -47,9 +47,11 @@ import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
@@ -118,6 +120,10 @@ private fun IdentifyResultsLayout(
             )
         }
     ) { innerPadding ->
+        if (LocalOfflineMode.current) {
+            OfflineNotice(modifier = Modifier.padding(innerPadding))
+            return@PageScaffold
+        }
         PageContent(modifier = Modifier.padding(innerPadding)) {
             when {
                 state.isSearching ->
@@ -144,7 +150,7 @@ private fun IdentifyResultsLayout(
                         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {
-                        items(items = state.results, key = { it.hashCode() }) { result ->
+                        items(items = state.results) { result ->
                             IdentifyResultCard(
                                 result = result,
                                 onClick = { onApply(result) },

@@ -19,7 +19,6 @@
     <string name="player_gestures_seek_summary">החלק אופקית כדי לקפוץ קדימה או אחורה</string>
     <string name="subtitles">כתוביות</string>
     <string name="settings_category_network">רשת</string>
-    <string name="seeking">קפיצה</string>
     <string name="seek_forward_increment">גודל קפיצה קדימה (מילי שניות)</string>
     <string name="amoled_theme">ערכת נושא כהה ל-AMOLED</string>
     <string name="amoled_theme_summary">השתמש בערכת נושא עם רקע שחור אמיתי למסכי AMOLED</string>

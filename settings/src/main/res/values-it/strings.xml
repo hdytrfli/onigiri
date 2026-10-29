@@ -22,7 +22,6 @@
     <string name="mpv_player">Player MPV</string>
     <string name="download_mobile_data">Scarica usando i dati mobili</string>
     <string name="download_roaming">Scarica in roaming</string>
-    <string name="seeking">Avanti/Indietro rapido</string>
     <string name="gestures">Gesti</string>
     <string name="player_gestures_zoom">Gesto zoom</string>
     <string name="player_gestures_zoom_summary">Pizzica per riempire lo schermo con il video</string>

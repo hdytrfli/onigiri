@@ -26,8 +26,10 @@ import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 @Composable
@@ -61,7 +63,7 @@ private fun FavoritesScreenLayout(
     onRetryClick: () -> Unit,
     embedded: Boolean = false,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
@@ -73,6 +75,11 @@ private fun FavoritesScreenLayout(
         } else {
             safePadding.top + 88.dp
         }
+
+    if (LocalOfflineMode.current) {
+        OfflineNotice()
+        return
+    }
 
     if (state.error != null && state.items.isEmpty()) {
         FullPageError(

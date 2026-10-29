@@ -19,7 +19,6 @@
     <string name="player_gestures_seek">Navigačné gestá</string>
     <string name="player_gestures_zoom_summary">Odtiahnite 2 prsty od seba pre zväčšenie videa na celú obrazovku</string>
     <string name="player_gestures_seek_summary">Potiahnite prst horizontálne pre navigáciu vo videu</string>
-    <string name="seeking">Pretáčanie</string>
     <string name="seek_back_increment">Velkosť pretočenia dozadu</string>
     <string name="seek_forward_increment">Velkosť pretočenia dopredu</string>
     <string name="subtitles">Titulky</string>

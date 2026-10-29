@@ -23,7 +23,6 @@
     <string name="download_mobile_data">Letöltés mobilhálozaton</string>
     <string name="mpv_player_summary">Használd a kísérleti mpv lejátszót videók lejátszására. Az mpv több videó, hang, és felirat kódeket támogat.</string>
     <string name="subtitles">Feliratok</string>
-    <string name="seeking">Seekelés</string>
     <string name="pref_player_mpv_vo">Videó kimenet</string>
     <string name="pref_player_mpv_ao">Hang kimenet</string>
     <string name="player_gestures_zoom">Zoom gesztus</string>

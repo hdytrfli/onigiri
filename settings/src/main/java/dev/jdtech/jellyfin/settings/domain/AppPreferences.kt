@@ -92,7 +92,10 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
         Preference("pref_player_mpv_sub_font_weight", SubtitleFonts.DEFAULT_WEIGHT.toString())
     val playerMpvSubColor = Preference("pref_player_mpv_sub_color", "#FFFFFFFF")
     val playerMpvSubPosition = Preference("pref_player_mpv_sub_pos", "100")
-    val playerMpvSubUseMargins = Preference("pref_player_mpv_sub_use_margins", true)
+
+    /** Where subtitles are anchored: the whole screen, or just the video frame. */
+    val playerMpvSubAnchor = Preference("pref_player_mpv_sub_anchor", "screen")
+
     val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "3")
     val playerMpvSubBorderColor = Preference("pref_player_mpv_sub_border_color", "#FF000000")
     val playerMpvSubBorderOpacity = Preference("pref_player_mpv_sub_border_opacity", "255")

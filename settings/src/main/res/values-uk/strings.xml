@@ -17,7 +17,6 @@
     <string name="gestures">Жести</string>
     <string name="player_gestures_zoom_summary">Натисніть, щоб заповнити екран відео</string>
     <string name="player_gestures_seek_summary">Проведіть по горизонталі, щоб перейти вперед або назад</string>
-    <string name="seeking">Пошук (Перемотка)</string>
     <string name="seek_back_increment">Крок пошуку назад</string>
     <string name="amoled_theme">Темна тема AMOLED</string>
     <string name="amoled_theme_summary">Використовувати AMOLED-тему на чистому чорному фоні</string>

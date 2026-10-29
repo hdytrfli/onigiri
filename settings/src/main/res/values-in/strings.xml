@@ -38,7 +38,6 @@
     <string name="player_gestures_seek_summary">Geser secara horizontal untuk maju atau mundur</string>
     <string name="player_start_maximized">Mulai dalam mode besar</string>
     <string name="player_start_maximized_summary">Buka video dalam mode besar secara bawaan</string>
-    <string name="seeking">Mencari</string>
     <string name="seek_back_increment">Lonjakan ke belakang</string>
     <string name="seek_forward_increment">Lonjakan ke depan</string>
     <string name="about">Tentang</string>

@@ -64,7 +64,7 @@ private fun DownloadsScreenLayout(
     embedded: Boolean = false,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
 
     PageScaffold(
         scrollBehavior = scrollBehavior,

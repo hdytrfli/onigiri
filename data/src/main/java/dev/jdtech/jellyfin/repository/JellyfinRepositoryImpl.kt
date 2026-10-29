@@ -300,7 +300,6 @@ class JellyfinRepositoryImpl(
                                     RecommendationType.HAS_ACTOR_FROM_RECENTLY_PLAYED,
                                     RecommendationType.HAS_LIKED_ACTOR ->
                                         RecommendationKind.Starring
-                                    else -> RecommendationKind.Unknown
                                 },
                             baselineName = dto.baselineItemName,
                             categoryId = dto.categoryId,

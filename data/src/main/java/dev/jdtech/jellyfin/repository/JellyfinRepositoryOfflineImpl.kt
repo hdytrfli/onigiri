@@ -6,6 +6,7 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidGenre
+import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidPerson
@@ -104,7 +105,14 @@ class JellyfinRepositoryOfflineImpl(
         emptyList()
 
     override suspend fun getPerson(personId: UUID): FindroidPerson {
-        TODO("Not yet implemented")
+        // People are server metadata and are not cached locally; the person page shows the offline
+        // notice instead, so return a safe placeholder rather than throwing.
+        return FindroidPerson(
+            id = personId,
+            name = "",
+            overview = "",
+            images = FindroidImages(),
+        )
     }
 
     override suspend fun getPersonItems(
@@ -112,11 +120,12 @@ class JellyfinRepositoryOfflineImpl(
         includeTypes: List<BaseItemKind>?,
         recursive: Boolean,
     ): List<FindroidItem> {
-        TODO("Not yet implemented")
+        return emptyList()
     }
 
     override suspend fun getFavoriteItems(): List<FindroidItem> {
-        TODO("Not yet implemented")
+        // Favorites reflect server userdata and are not part of the offline cache.
+        return emptyList()
     }
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> {
@@ -214,7 +223,8 @@ class JellyfinRepositoryOfflineImpl(
         }
 
     override suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String {
-        TODO("Not yet implemented")
+        // Offline playback resolves the downloaded file directly from the local source.
+        return ""
     }
 
     override suspend fun getSegments(itemId: UUID): List<FindroidSegment> =
@@ -307,7 +317,7 @@ class JellyfinRepositoryOfflineImpl(
     }
 
     override suspend fun updateDeviceName(name: String) {
-        TODO("Not yet implemented")
+        // Nothing to report to the server while offline.
     }
 
     override suspend fun getUserConfiguration(): UserConfiguration? {

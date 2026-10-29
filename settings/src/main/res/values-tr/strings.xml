@@ -49,7 +49,6 @@
     <string name="player_gestures_seek_summary">Yatay hareketle ileri veya geri kaydırın</string>
     <string name="player_start_maximized">Maksimize bir şekilde başlatın</string>
     <string name="player_start_maximized_summary">Videoyu varsayılan olarak maksimizie modda başlatın</string>
-    <string name="seeking">İleri/geri sarmak</string>
     <string name="seek_back_increment">Geriye atlama süresi</string>
     <string name="seek_forward_increment">İleriye atlama süresi</string>
     <string name="trickplay">Trickplay</string>

@@ -30,7 +30,10 @@ object MpvSubtitleOptions {
 
     /** Raw option values for `MPVLib.setOptionString`. */
     fun buildOptions(appPreferences: AppPreferences): Map<String, String> {
-        val useMargins = yesNo(appPreferences.getValue(appPreferences.playerMpvSubUseMargins))
+        // In mpv, sub-use-margins=yes places subtitles in the black borders, i.e. across the whole
+        // screen; =no confines them to the video frame.
+        val anchoredToScreen = appPreferences.getValue(appPreferences.playerMpvSubAnchor) != "frame"
+        val subUseMargins = yesNo(anchoredToScreen)
         val borderEnabled = appPreferences.getValue(appPreferences.playerMpvSubBorderEnabled)
         val borderSize =
             if (borderEnabled) {
@@ -54,8 +57,9 @@ object MpvSubtitleOptions {
             "sub-font-size" to appPreferences.getValue(appPreferences.playerMpvSubFontSize),
             "sub-color" to appPreferences.getValue(appPreferences.playerMpvSubColor),
             "sub-pos" to appPreferences.getValue(appPreferences.playerMpvSubPosition),
-            "sub-use-margins" to useMargins,
-            "sub-ass-force-margins" to useMargins,
+            "sub-margin-y" to "0",
+            "sub-use-margins" to subUseMargins,
+            "sub-ass-force-margins" to subUseMargins,
             "sub-outline-size" to borderSize,
             "sub-outline-color" to borderColor,
             "sub-back-color" to "#00000000",

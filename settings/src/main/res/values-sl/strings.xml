@@ -18,7 +18,6 @@
     <string name="player_gestures_zoom_summary">Stisnite, da zaslon zapolnite z videoposnetkom</string>
     <string name="player_gestures_seek_summary">Povlecite vodoravno za premik naprej ali nazaj</string>
     <string name="player_gestures_seek">Gibi za iskanje</string>
-    <string name="seeking">iskanje</string>
     <string name="seek_back_increment">Iskanja nazaj</string>
     <string name="seek_forward_increment">Iskanja naprej</string>
     <string name="subtitles">Podnapisi</string>

@@ -23,6 +23,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 
 /** The item-kind dependent actions a detail page can offer in its overflow menu. */
@@ -75,6 +76,8 @@ fun DetailActionsMenu(
     val showIdentify = DetailAction.IDENTIFY in actions && identifyState.canManage
     val showEditImages = DetailAction.EDIT_IMAGES in actions && identifyState.canManage
 
+    // These actions all need the server, so offline mode hides the trigger entirely.
+    if (LocalOfflineMode.current) return
     if (!showSubtitleSearch && !showIdentify && !showEditImages) return
 
     Box(modifier = modifier) {

@@ -50,7 +50,9 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 
 /**
@@ -108,6 +110,10 @@ private fun IdentifyScreenLayout(
             )
         }
     ) { innerPadding ->
+        if (LocalOfflineMode.current) {
+            OfflineNotice(modifier = Modifier.padding(innerPadding))
+            return@PageScaffold
+        }
         PageContent(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

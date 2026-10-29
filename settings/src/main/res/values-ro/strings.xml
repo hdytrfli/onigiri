@@ -39,7 +39,6 @@
     <string name="player_gestures_seek_summary">Glisați orizontal pentru a derula înainte sau înapoi</string>
     <string name="player_start_maximized">Pornește maximizat</string>
     <string name="player_start_maximized_summary">Deschide video-ul maximizat în mod implicit</string>
-    <string name="seeking">Se derulează</string>
     <string name="seek_back_increment">Derulează înapoi cu increment (ms)</string>
     <string name="seek_forward_increment">Derulează înainte cu increment (ms)</string>
     <string name="trickplay">Trickplay</string>

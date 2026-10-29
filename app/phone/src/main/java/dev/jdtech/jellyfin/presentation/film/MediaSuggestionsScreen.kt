@@ -24,6 +24,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.LocalTabReselect
+import dev.jdtech.jellyfin.MoviesRoute
+import dev.jdtech.jellyfin.ShowsRoute
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.R as FilmR
 import dev.jdtech.jellyfin.film.presentation.library.LibraryAction
@@ -46,8 +49,11 @@ import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import kotlinx.coroutines.flow.filter
 
 /** The Movies root page: Movies (sortable list), Suggestions and Genres tabs. */
 @Composable
@@ -92,6 +98,13 @@ private fun MediaPage(
         listViewModel.loadItems()
     }
 
+    // Re-tap cycles the pills, exactly like Home and Collections: list -> suggestions -> genres.
+    val tabReselect = LocalTabReselect.current
+    LaunchedEffect(tabReselect, kind) {
+        val route: Any = if (kind == MediaKind.Movies) MoviesRoute else ShowsRoute
+        tabReselect.events.filter { it == route }.collect { selectedTab = (selectedTab + 1) % 3 }
+    }
+
     // Back closes the search instead of leaving the page: the query is cleared on the way out so
     // reopening starts fresh.
     BackHandler(enabled = listState.searchExpanded) {
@@ -102,7 +115,7 @@ private fun MediaPage(
     // Search and sort only exist on the list tab; the display-info trigger lives on every
     // tab and drives the one global listDisplayFields setting through the list ViewModel.
     val toolbarActions: @Composable RowScope.() -> Unit = {
-        if (selectedTab == 0) {
+        if (selectedTab == 0 && !LocalOfflineMode.current) {
             AppIconButton(
                 onClick = { listViewModel.onAction(LibraryAction.ToggleSearch) },
                 variant = AppButtonVariant.Secondary,
@@ -180,51 +193,55 @@ private fun MediaPage(
             }
         }
     ) {
-        when (selectedTab) {
-            0 ->
-                LibraryContent(
-                    state = listState,
-                    onAction = { action ->
-                        if (action is LibraryAction.OnItemClick) {
-                            onItemClick(action.item)
-                        }
-                        listViewModel.onAction(action)
-                    },
-                    showSortDialog = showSortDialog,
-                    showDisplayDialog = false,
-                    onShowSortDialogChange = { showSortDialog = it },
-                    onShowDisplayDialogChange = {},
-                    embedded = true,
-                    sectionTitle =
-                        stringResource(
-                            if (kind == MediaKind.Movies) CoreR.string.all_movies
-                            else CoreR.string.all_shows
-                        ),
-                    showSearchField = false,
+        if (LocalOfflineMode.current) {
+            OfflineNotice()
+        } else {
+            when (selectedTab) {
+                0 ->
+                    LibraryContent(
+                        state = listState,
+                        onAction = { action ->
+                            if (action is LibraryAction.OnItemClick) {
+                                onItemClick(action.item)
+                            }
+                            listViewModel.onAction(action)
+                        },
+                        showSortDialog = showSortDialog,
+                        showDisplayDialog = false,
+                        onShowSortDialogChange = { showSortDialog = it },
+                        onShowDisplayDialogChange = {},
+                        embedded = true,
+                        sectionTitle =
+                            stringResource(
+                                if (kind == MediaKind.Movies) CoreR.string.all_movies
+                                else CoreR.string.all_shows
+                            ),
+                        showSearchField = false,
+                    )
+                1 ->
+                    MediaSuggestionsContent(
+                        state = state,
+                        displayFields = listState.displayFields,
+                        onItemClick = onItemClick,
+                        onListClick = { selectedTab = 0 },
+                        onRetry = { viewModel.retry(kind) },
+                    )
+                else ->
+                    GenresContent(
+                        kind = kind,
+                        displayFields = listState.displayFields,
+                        onItemClick = onItemClick,
+                        onGenreClick = onGenreClick,
+                    )
+            }
+            // One dialog for every tab; the setting itself is global, never stored per page.
+            if (showDisplayDialog) {
+                DisplayInfoDialog(
+                    fields = listState.displayFields,
+                    onToggle = { listViewModel.onAction(LibraryAction.ToggleDisplayField(it)) },
+                    onDismiss = { showDisplayDialog = false },
                 )
-            1 ->
-                MediaSuggestionsContent(
-                    state = state,
-                    displayFields = listState.displayFields,
-                    onItemClick = onItemClick,
-                    onListClick = { selectedTab = 0 },
-                    onRetry = { viewModel.retry(kind) },
-                )
-            else ->
-                GenresContent(
-                    kind = kind,
-                    displayFields = listState.displayFields,
-                    onItemClick = onItemClick,
-                    onGenreClick = onGenreClick,
-                )
-        }
-        // One dialog for every tab; the setting itself is global, never stored per page.
-        if (showDisplayDialog) {
-            DisplayInfoDialog(
-                fields = listState.displayFields,
-                onToggle = { listViewModel.onAction(LibraryAction.ToggleDisplayField(it)) },
-                onDismiss = { showDisplayDialog = false },
-            )
+            }
         }
     }
 }
@@ -237,7 +254,7 @@ private fun MediaSuggestionsContent(
     onListClick: () -> Unit,
     onRetry: () -> Unit,
 ) {
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
     val contentPadding =
         PaddingValues(
             top = LocalRootPageContentInset.current,
@@ -281,7 +298,7 @@ private fun GenresContent(
     viewModel: GenresViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
 
     LaunchedEffect(kind) { viewModel.load(kind) }
 

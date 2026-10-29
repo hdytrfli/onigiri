@@ -82,6 +82,7 @@
     <string name="users">Users</string>
     <string name="title_download">Downloads</string>
     <string name="about">About</string>
+    <string name="settings_group_about">About</string>
     <string name="home">Home</string>
     <string name="home_suggestions">Display suggestions</string>
     <string name="home_continue_watching">Display continue watching</string>
@@ -164,9 +165,9 @@
     <string name="pref_player_mpv_sub_border_style">Border style</string>
     <string name="pref_player_mpv_sub_ass_override">ASS style override</string>
     <string name="pref_player_mpv_sub_pos">Position</string>
-    <string name="pref_player_mpv_sub_pos_summary">Vertical position of the subtitles, 0% at the top and 100% at the bottom</string>
-    <string name="pref_player_mpv_sub_use_margins">Use margins</string>
-    <string name="pref_player_mpv_sub_use_margins_summary">Draw subtitles in the black bars when present</string>
+    <string name="pref_player_mpv_sub_pos_summary" formatted="false">Vertical position of the subtitles, 0% at the top and 100% at the bottom</string>
+    <string name="pref_player_mpv_sub_anchor">Subtitles anchored to</string>
+    <string name="pref_player_mpv_sub_anchor_summary">Which area the subtitle position is measured against</string>
     <string name="advanced">Advanced</string>
     <string name="discard_changes_dialog_title">Discard changes?</string>
     <string name="discard_changes_dialog_text">You have unsaved changes.</string>

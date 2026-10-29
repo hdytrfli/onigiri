@@ -16,7 +16,6 @@
     <string name="privacy_policy">Zásady ochrany osobních údajů</string>
     <string name="mpv_player">mpv přehrávač</string>
     <string name="mpv_player_summary">Použít experimentální mpv přehrávač k přehrávání videí. mpv má podporu pro více video a audio kodeků a formátů titulků.</string>
-    <string name="seeking">Posouvání</string>
     <string name="settings_category_network">Síť</string>
     <string name="pref_player_mpv_hwdec">Hardwarové dekódování</string>
     <string name="pref_player_mpv_vo">Výstup videa</string>

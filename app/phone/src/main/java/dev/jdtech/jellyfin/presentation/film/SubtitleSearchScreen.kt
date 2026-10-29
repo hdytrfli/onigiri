@@ -59,7 +59,9 @@ import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.settings.R as SettingsR
 import java.util.UUID
@@ -120,6 +122,10 @@ private fun SubtitleSearchScreenLayout(
             )
         }
     ) { innerPadding ->
+        if (LocalOfflineMode.current) {
+            OfflineNotice(modifier = Modifier.padding(innerPadding))
+            return@PageScaffold
+        }
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = onRefresh,

@@ -22,7 +22,6 @@
     <string name="settings_category_player">Player</string>
     <string name="mpv_player_summary">Benutze den experimentellen MPV-Player. Dieser unterstützt mehr Codecs in Bezug auf sowohl Video, Audio als auch Untertitel.</string>
     <string name="gestures">Gesten</string>
-    <string name="seeking">Suchen</string>
     <string name="subtitles">Untertitel</string>
     <string name="subtitles_summary">Untertitel anpassen</string>
     <string name="player_gestures_zoom">Zoom-Geste</string>

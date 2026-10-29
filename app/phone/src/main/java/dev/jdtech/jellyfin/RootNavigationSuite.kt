@@ -116,12 +116,23 @@ fun RootNavigationSuite(
     suiteType: NavigationSuiteType,
 ) {
     val items = listOf(homeTab, moviesTab, showsTab, collectionsTab, settingsTab)
+    val tabReselect = LocalTabReselect.current
+
+    // A plain tap navigates; tapping the item of the page already on screen asks that page to do
+    // its secondary action (cycle its tabs, open its search).
+    fun onClick(item: TabBarItem) {
+        if (selectedRoute == item.route) {
+            tabReselect.reselect(item.route)
+        } else {
+            navigator.navigate(item.route)
+        }
+    }
 
     if (suiteType == NavigationSuiteType.NavigationRail) {
         // The rail takes no window insets of its own: the first item starts on the content's top
         // spine (status bar + gutter, like the floating header beside it), and every item below is
         // separated by a small gap. Only the top is inset - the rail surface stays full-bleed.
-        val safeTop = rememberSafePadding(handleStartInsets = false).top
+        val safeTop = rememberSafePadding().top
         NavigationRail(
             modifier = Modifier.fillMaxHeight(),
             windowInsets = WindowInsets(0, 0, 0, 0),
@@ -140,7 +151,7 @@ fun RootNavigationSuite(
                 )
                 NavigationRailItem(
                     selected = selectedRoute == item.route,
-                    onClick = { navigator.navigate(item.route) },
+                    onClick = { onClick(item) },
                     icon = { Icon(painterResource(item.icon), contentDescription = null) },
                     label = { Text(stringResource(item.title)) },
                     enabled = item.enabled,
@@ -164,7 +175,7 @@ fun RootNavigationSuite(
                 if (wideBottomBar) {
                     WideNavigationBarItem(
                         selected = selectedRoute == item.route,
-                        onClick = { navigator.navigate(item.route) },
+                        onClick = { onClick(item) },
                         iconResource = item.icon,
                         label = stringResource(item.title),
                         enabled = item.enabled,
@@ -172,7 +183,7 @@ fun RootNavigationSuite(
                 } else {
                     NavigationBarItem(
                         selected = selectedRoute == item.route,
-                        onClick = { navigator.navigate(item.route) },
+                        onClick = { onClick(item) },
                         icon = { Icon(painterResource(item.icon), contentDescription = null) },
                         label = { Text(stringResource(item.title)) },
                         enabled = item.enabled,

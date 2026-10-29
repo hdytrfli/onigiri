@@ -18,7 +18,6 @@
     <string name="gestures">Cử chỉ</string>
     <string name="player_gestures_zoom">Cử chỉ thu phóng</string>
     <string name="player_gestures_zoom_summary">Chụm hai ngón tay vào và ra để video lấp đầy màn hình</string>
-    <string name="seeking">Tua</string>
     <string name="seek_back_increment">Gia số tua lùi</string>
     <string name="seek_forward_increment">Gia số tua tới</string>
     <string name="subtitles">Phụ đề</string>

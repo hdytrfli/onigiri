@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.CollectionsRoute
+import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionsViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
@@ -31,12 +33,15 @@ import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
+import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
+import kotlinx.coroutines.flow.filter
 
 /** The Collections root page, split into the movie and show collections. */
 @Composable
@@ -46,7 +51,15 @@ fun CollectionsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(0) }
-    val safePadding = rememberSafePadding(handleStartInsets = false)
+    val safePadding = rememberSafePadding()
+
+    // Pressing the Collections item again cycles Movies <-> Shows.
+    val tabReselect = LocalTabReselect.current
+    LaunchedEffect(tabReselect) {
+        tabReselect.events
+            .filter { it is CollectionsRoute }
+            .collect { selectedTab = (selectedTab + 1) % 2 }
+    }
 
     LaunchedEffect(true) { viewModel.load() }
 
@@ -69,6 +82,10 @@ fun CollectionsScreen(
             )
         }
     ) {
+        if (LocalOfflineMode.current) {
+            OfflineNotice()
+            return@RootPage
+        }
         val items = if (selectedTab == 0) state.movies else state.shows
         // Resolved here: the grid's content lambda below is not composable.
         val collectionsTitle = stringResource(CoreR.string.collections_label)

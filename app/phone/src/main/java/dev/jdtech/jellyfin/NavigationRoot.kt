@@ -274,9 +274,16 @@ private fun MainNavigation(
     val suiteType = rememberNavigationSuiteType()
     val predictiveBack = LocalPredictiveBack.current
     val currentRoute = navigationState.currentBackStack().last()
+    val tabReselect = remember { TabReselect() }
     CompositionLocalProvider(
         LocalSuiteStartInset provides suiteType.suiteStartInset(),
         LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
+        LocalTabReselect provides tabReselect,
+        LocalOpenDownloads provides
+            {
+                tabReselect.requestDownloads()
+                navigator.navigate(HomeRoute)
+            },
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             NavDisplay(
