@@ -25,6 +25,7 @@ import dev.jdtech.jellyfin.presentation.reader.setReaderSettings
 import dev.jdtech.jellyfin.presentation.reader.toEpubPreferences
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -46,6 +47,7 @@ import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.image.ImageNavigatorFragment
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
+import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
@@ -211,11 +213,26 @@ class ReaderActivity : AppCompatActivity() {
         when {
             publication.conformsTo(Publication.Profile.EPUB) -> {
                 fragmentClass = EpubNavigatorFragment::class.java
+                val configuration = EpubNavigatorFragment.Configuration {
+                    // Serve the bundled font files and declare them, so the same families as
+                    // the subtitle font setting can be selected for the book text.
+                    servedAssets += "subtitle-fonts/.*"
+                    SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
+                        ->
+                        addFontFamilyDeclaration(FontFamily(family)) {
+                            addFontFace {
+                                addSource("subtitle-fonts/$asset")
+                                setFontWeight(100..900)
+                            }
+                        }
+                    }
+                }
                 fragmentFactory =
                     EpubNavigatorFactory(publication)
                         .createFragmentFactory(
                             initialLocator = initialLocator,
                             initialPreferences = epubPreferences,
+                            configuration = configuration,
                         )
             }
 

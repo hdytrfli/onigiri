@@ -271,6 +271,17 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                         )
                     }
                 }
+                state.latestBooksSection?.let { section ->
+                    item(key = section.id) {
+                        HomeSection(
+                            section = section.homeSection,
+                            itemsPadding = itemsPadding,
+                            onAction = onAction,
+                            modifier = Modifier.animateItem(),
+                            displayFields = state.displayFields,
+                        )
+                    }
+                }
                 items(state.views, key = { it.id }) { view ->
                     HomeView(
                         view = view,

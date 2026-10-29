@@ -174,6 +174,20 @@ object SubtitleFonts {
         return fonts.values.toList()
     }
 
+    /**
+     * The bundled families with the asset file each is unpacked from, for renderers that read
+     * straight from the APK assets (the in-app reader) instead of through fontconfig.
+     */
+    fun bundledFamilyAssets(context: Context): List<Pair<String, String>> {
+        ensureBundled(context)
+        val dir = fontsDir(context)
+        return bundled.mapNotNull { font ->
+            val file = File(dir, font.assets.first())
+            if (!file.exists()) return@mapNotNull null
+            (familyNameOf(file) ?: font.name) to font.assets.first()
+        }
+    }
+
     /** The label shown for [weight]. */
     fun weightLabel(weight: Int): String =
         weightSteps.firstOrNull { it.first == weight }?.second ?: weight.toString()

@@ -9,6 +9,8 @@ import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.HomeItem
 import dev.jdtech.jellyfin.models.HomeSection
+import dev.jdtech.jellyfin.models.SortBy
+import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -19,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.jellyfin.sdk.model.api.BaseItemKind
 import timber.log.Timber
 
 @HiltViewModel
@@ -33,6 +36,7 @@ constructor(
     val state = _state.asStateFlow()
 
     private val uuidSuggestions = UUID.fromString("31e47044-9b79-4bb0-99d0-0e477ed65420")
+    private val uuidLatestBooks = UUID.fromString("6d1f6c1e-0c2b-4a5e-9f1e-3b0f3c5a7d11")
     private val uuidContinueWatching =
         UUID(4937169328197226115, -4704919157662094443) // 44845958-8326-4e83-beb4-c4f42e9eeb95
     private val uuidNextUp =
@@ -40,6 +44,7 @@ constructor(
 
     private val uiTextContinueWatching = UiText.StringResource(FilmR.string.continue_watching)
     private val uiTextNextUp = UiText.StringResource(FilmR.string.next_up)
+    private val uiTextLatestBooks = UiText.StringResource(FilmR.string.latest_books)
 
     private var hasLoadedOnce = false
 
@@ -59,6 +64,7 @@ constructor(
                 loadDisplayFields()
                 loadResumeItems()
                 loadNextUpItems()
+                loadLatestBooks()
                 loadViews()
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
@@ -79,6 +85,7 @@ constructor(
                 loadSuggestions()
                 loadResumeItems()
                 loadNextUpItems()
+                loadLatestBooks()
                 loadViews()
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
@@ -164,6 +171,35 @@ constructor(
         _state.emit(_state.value.copy(nextUpSection = section))
     }
 
+    /**
+     * The newest books across every library, whether the server typed the library as Books or not.
+     */
+    private suspend fun loadLatestBooks() {
+        Timber.i("Loading latest books")
+        if (!appPreferences.getValue(appPreferences.homeLatest)) {
+            _state.emit(_state.value.copy(latestBooksSection = null))
+            return
+        }
+
+        val books =
+            repository.getItems(
+                includeTypes = listOf(BaseItemKind.BOOK),
+                recursive = true,
+                sortBy = SortBy.DATE_ADDED,
+                sortOrder = SortOrder.DESCENDING,
+                limit = 16,
+            )
+
+        val section =
+            if (books.isEmpty()) {
+                null
+            } else {
+                HomeItem.Section(HomeSection(uuidLatestBooks, uiTextLatestBooks, books))
+            }
+
+        _state.emit(_state.value.copy(latestBooksSection = section))
+    }
+
     private suspend fun loadViews() {
         Timber.i("Loading views")
         val items =
@@ -171,8 +207,9 @@ constructor(
                 repository
                     .getUserViews()
                     .filter { view ->
-                        CollectionType.fromString(view.collectionType?.serialName) in
-                            CollectionType.supported
+                        val type = CollectionType.fromString(view.collectionType?.serialName)
+                        // Board books in their own row, independent of the library type.
+                        type in CollectionType.supported && type != CollectionType.Books
                     }
                     .map { view -> view to repository.getLatestMedia(view.id) }
                     .filter { (_, latest) -> latest.isNotEmpty() }

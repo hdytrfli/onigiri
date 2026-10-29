@@ -346,4 +346,262 @@
         <item>landscape</item>
         <item>never</item>
     </string-array>
+    <string-array name="reader_themes_values">
+        <item>light</item>
+        <item>sepia</item>
+        <item>dark</item>
+    </string-array>
+    <string-array name="reader_themes_options">
+        <item>Light</item>
+        <item>Sepia</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="reader_columns_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="reader_columns_options">
+        <item>Single page</item>
+        <item>Dual page</item>
+    </string-array>
+    <string-array name="reader_alignment_values">
+        <item>default</item>
+        <item>start</item>
+        <item>justify</item>
+    </string-array>
+    <string-array name="reader_alignment_options">
+        <item>Publisher default</item>
+        <item>Start</item>
+        <item>Justify</item>
+    </string-array>
+    <string-array name="reader_normalization_values">
+        <item>true</item>
+        <item>false</item>
+    </string-array>
+    <string-array name="reader_normalization_options">
+        <item>On</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="reader_font_size_values">
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+        <item>1.1</item>
+        <item>1.2</item>
+        <item>1.3</item>
+        <item>1.4</item>
+        <item>1.5</item>
+        <item>1.6</item>
+        <item>1.7</item>
+        <item>1.8</item>
+        <item>1.9</item>
+        <item>2.0</item>
+    </string-array>
+    <string-array name="reader_font_size_options">
+        <item>0.8×</item>
+        <item>0.9×</item>
+        <item>1.0×</item>
+        <item>1.1×</item>
+        <item>1.2×</item>
+        <item>1.3×</item>
+        <item>1.4×</item>
+        <item>1.5×</item>
+        <item>1.6×</item>
+        <item>1.7×</item>
+        <item>1.8×</item>
+        <item>1.9×</item>
+        <item>2.0×</item>
+    </string-array>
+    <string-array name="reader_font_weight_values">
+        <item>0.0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+        <item>1.1</item>
+        <item>1.2</item>
+        <item>1.3</item>
+        <item>1.4</item>
+        <item>1.5</item>
+    </string-array>
+    <string-array name="reader_font_weight_options">
+        <item>0.0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+        <item>1.1</item>
+        <item>1.2</item>
+        <item>1.3</item>
+        <item>1.4</item>
+        <item>1.5</item>
+    </string-array>
+    <string-array name="reader_margins_values">
+        <item>0.0</item>
+        <item>0.2</item>
+        <item>0.4</item>
+        <item>0.6</item>
+        <item>0.8</item>
+        <item>1.0</item>
+        <item>1.2</item>
+        <item>1.4</item>
+        <item>1.6</item>
+        <item>1.8</item>
+        <item>2.0</item>
+    </string-array>
+    <string-array name="reader_margins_options">
+        <item>0.0×</item>
+        <item>0.2×</item>
+        <item>0.4×</item>
+        <item>0.6×</item>
+        <item>0.8×</item>
+        <item>1.0×</item>
+        <item>1.2×</item>
+        <item>1.4×</item>
+        <item>1.6×</item>
+        <item>1.8×</item>
+        <item>2.0×</item>
+    </string-array>
+    <string-array name="reader_line_height_values">
+        <item>1.0</item>
+        <item>1.1</item>
+        <item>1.2</item>
+        <item>1.3</item>
+        <item>1.4</item>
+        <item>1.5</item>
+        <item>1.6</item>
+        <item>1.7</item>
+        <item>1.8</item>
+        <item>1.9</item>
+        <item>2.0</item>
+        <item>2.1</item>
+        <item>2.2</item>
+    </string-array>
+    <string-array name="reader_line_height_options">
+        <item>1.0×</item>
+        <item>1.1×</item>
+        <item>1.2×</item>
+        <item>1.3×</item>
+        <item>1.4×</item>
+        <item>1.5×</item>
+        <item>1.6×</item>
+        <item>1.7×</item>
+        <item>1.8×</item>
+        <item>1.9×</item>
+        <item>2.0×</item>
+        <item>2.1×</item>
+        <item>2.2×</item>
+    </string-array>
+    <string-array name="reader_paragraph_spacing_values">
+        <item>0.0</item>
+        <item>0.2</item>
+        <item>0.4</item>
+        <item>0.6</item>
+        <item>0.8</item>
+        <item>1.0</item>
+        <item>1.2</item>
+        <item>1.4</item>
+        <item>1.6</item>
+        <item>1.8</item>
+        <item>2.0</item>
+    </string-array>
+    <string-array name="reader_paragraph_spacing_options">
+        <item>0.0</item>
+        <item>0.2</item>
+        <item>0.4</item>
+        <item>0.6</item>
+        <item>0.8</item>
+        <item>1.0</item>
+        <item>1.2</item>
+        <item>1.4</item>
+        <item>1.6</item>
+        <item>1.8</item>
+        <item>2.0</item>
+    </string-array>
+    <string-array name="reader_word_spacing_values">
+        <item>0.0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+    </string-array>
+    <string-array name="reader_word_spacing_options">
+        <item>0.0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+    </string-array>
+    <string-array name="reader_letter_spacing_values">
+        <item>0.0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+    </string-array>
+    <string-array name="reader_letter_spacing_options">
+        <item>0.0</item>
+        <item>0.1</item>
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+    </string-array>
+    <string-array name="reader_brightness_values">
+        <item>0.2</item>
+        <item>0.3</item>
+        <item>0.4</item>
+        <item>0.5</item>
+        <item>0.6</item>
+        <item>0.7</item>
+        <item>0.8</item>
+        <item>0.9</item>
+        <item>1.0</item>
+    </string-array>
+    <string-array name="reader_brightness_options">
+        <item>20%</item>
+        <item>30%</item>
+        <item>40%</item>
+        <item>50%</item>
+        <item>60%</item>
+        <item>70%</item>
+        <item>80%</item>
+        <item>90%</item>
+        <item>100%</item>
+    </string-array>
 </resources>

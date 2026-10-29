@@ -98,13 +98,13 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Reader
     val readerTheme = Preference("pref_reader_theme", "dark")
-    val readerFontFamily = Preference("pref_reader_font_family", "")
+    val readerFontFamily = Preference("pref_reader_font_family", "default")
     val readerFontSize = Preference("pref_reader_font_size", "1.0")
     val readerFontWeight = Preference("pref_reader_font_weight", "0.5")
     val readerPageMargins = Preference("pref_reader_page_margins", "1.0")
     val readerScroll = Preference("pref_reader_scroll", false)
     val readerColumnCount = Preference("pref_reader_column_count", "1")
-    val readerTextAlign = Preference("pref_reader_text_align", "")
+    val readerTextAlign = Preference("pref_reader_text_align", "default")
     val readerTextNormalization = Preference("pref_reader_text_normalization", "true")
     val readerLineHeight = Preference("pref_reader_line_height", "1.5")
     val readerParagraphSpacing = Preference("pref_reader_paragraph_spacing", "0.0")

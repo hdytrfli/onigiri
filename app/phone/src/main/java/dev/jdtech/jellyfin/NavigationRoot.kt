@@ -75,7 +75,7 @@ import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
 import dev.jdtech.jellyfin.presentation.film.ShowsScreen
 import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
-import dev.jdtech.jellyfin.presentation.reader.ReaderSettingsScreen
+import dev.jdtech.jellyfin.presentation.reader.ReaderFontScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
@@ -806,8 +806,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
                 navigateToSubtitleFont =
                     dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
-                navigateToReaderSettings =
-                    dropUnlessResumed { navigator.navigate(ReaderSettingsRoute) },
+                navigateToReaderFont = dropUnlessResumed { navigator.navigate(ReaderFontRoute) },
                 navigateBack = dropUnlessResumed { navigator.goBack() },
             )
         }
@@ -828,10 +827,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             SubtitleFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
         }
     }
-    entry<ReaderSettingsRoute> {
-        SuiteInsetBox {
-            ReaderSettingsScreen(navigateBack = dropUnlessResumed { navigator.goBack() })
-        }
+    entry<ReaderFontRoute> {
+        SuiteInsetBox { ReaderFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
     }
 }
 

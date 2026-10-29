@@ -34,13 +34,13 @@ fun AppPreferences.readerSettings(): ReaderSettings {
 
     return ReaderSettings(
         theme = getValue(readerTheme),
-        fontFamily = getValue(readerFontFamily),
+        fontFamily = getValue(readerFontFamily).takeIf { it != "default" }.orEmpty(),
         fontSize = float(readerFontSize, 1f),
         fontWeight = float(readerFontWeight, 0.5f),
         pageMargins = float(readerPageMargins, 1f),
         scroll = getValue(readerScroll),
         columnCount = getValue(readerColumnCount).toIntOrNull() ?: 1,
-        textAlign = getValue(readerTextAlign),
+        textAlign = getValue(readerTextAlign).takeIf { it != "default" }.orEmpty(),
         textNormalization = getValue(readerTextNormalization) != "false",
         lineHeight = float(readerLineHeight, 1.5f),
         paragraphSpacing = float(readerParagraphSpacing, 0f),
@@ -52,13 +52,13 @@ fun AppPreferences.readerSettings(): ReaderSettings {
 
 fun AppPreferences.setReaderSettings(settings: ReaderSettings) {
     setValue(readerTheme, settings.theme)
-    setValue(readerFontFamily, settings.fontFamily)
+    setValue(readerFontFamily, settings.fontFamily.ifBlank { "default" })
     setValue(readerFontSize, settings.fontSize.toString())
     setValue(readerFontWeight, settings.fontWeight.toString())
     setValue(readerPageMargins, settings.pageMargins.toString())
     setValue(readerScroll, settings.scroll)
     setValue(readerColumnCount, settings.columnCount.toString())
-    setValue(readerTextAlign, settings.textAlign)
+    setValue(readerTextAlign, settings.textAlign.ifBlank { "default" })
     setValue(readerTextNormalization, settings.textNormalization.toString())
     setValue(readerLineHeight, settings.lineHeight.toString())
     setValue(readerParagraphSpacing, settings.paragraphSpacing.toString())

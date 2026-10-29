@@ -67,7 +67,7 @@ fun NavKey.drawsNavigationSuite(tabRoutes: Collection<NavKey>): Boolean =
         this is SettingsFileEditRoute ||
         this is AboutRoute ||
         this is SubtitleFontRoute ||
-        this is ReaderSettingsRoute ||
+        this is ReaderFontRoute ||
         this in tabRoutes
 
 /** The bottom bar puts its items in one row (Play-style) instead of stacking them. */

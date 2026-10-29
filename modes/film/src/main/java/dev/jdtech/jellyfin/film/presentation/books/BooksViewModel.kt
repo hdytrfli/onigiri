@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
-import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.SortBy
@@ -57,15 +56,22 @@ constructor(
                 )
             )
             try {
-                val libraries = repository.getLibraries().filter { it.type == CollectionType.Books }
-                val items = libraries.associate { library ->
-                    library.id to
+                val libraries = mutableListOf<FindroidCollection>()
+                val items = LinkedHashMap<UUID, List<FindroidItem>>()
+                // Query every library: a server can hold books in a library typed as Mixed or
+                // Books, and only the item type tells us what is actually a book.
+                for (library in repository.getLibraries()) {
+                    val books =
                         repository.getItems(
                             parentId = library.id,
                             includeTypes = listOf(BaseItemKind.BOOK),
                             recursive = true,
                             sortBy = SortBy.NAME,
                         )
+                    if (books.isNotEmpty()) {
+                        libraries += library
+                        items[library.id] = books
+                    }
                 }
                 _state.emit(
                     _state.value.copy(

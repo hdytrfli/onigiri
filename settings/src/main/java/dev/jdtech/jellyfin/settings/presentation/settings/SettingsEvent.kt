@@ -11,7 +11,7 @@ sealed interface SettingsEvent {
 
     data object NavigateToSubtitleFont : SettingsEvent
 
-    data object NavigateToReaderSettings : SettingsEvent
+    data object NavigateToReaderFont : SettingsEvent
 
     data class NavigateToSettings(val indexes: List<Int>) : SettingsEvent
 

@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.MediaType
 import org.jellyfin.sdk.model.api.PlayAccess
 
 /**
@@ -45,11 +46,15 @@ suspend fun BaseItemDto.toFindroidBook(jellyfinRepository: JellyfinRepository): 
 }
 
 /** The publication formats the in-app reader supports. */
-private val READABLE_BOOK_CONTAINERS = setOf("epub", "pdf", "cbz")
+private val READABLE_BOOK_CONTAINERS = setOf("epub", "pdf", "cbz", "zip")
+
+/** Containers of audiobooks that a server might still report as a Book item. */
+private val AUDIOBOOK_CONTAINERS = setOf("m4b", "m4a", "mp3", "flac", "ogg", "opus", "wav", "aac")
 
 /**
  * Whether this book is in a format Readium can open. Jellyfin reports the container on the item and
- * on its media sources; the file extension is the last fallback.
+ * on its media sources; the file extension is the last fallback. Some servers omit all of them for
+ * books, in which case the item is kept and the reader reports an unsupported file.
  */
 fun BaseItemDto.isReadableBook(): Boolean {
     val candidates = buildList {
@@ -57,5 +62,11 @@ fun BaseItemDto.isReadableBook(): Boolean {
         mediaSources?.forEach { source -> source.container?.let(::add) }
         path?.let { add(it.substringAfterLast('.', missingDelimiterValue = "")) }
     }
-    return candidates.any { it.lowercase() in READABLE_BOOK_CONTAINERS }
+        .map { it.trim().lowercase() }
+        .filter { it.isNotEmpty() }
+
+    if (candidates.any { it in AUDIOBOOK_CONTAINERS }) return false
+    if (mediaType == MediaType.AUDIO) return false
+    if (candidates.isEmpty()) return true
+    return candidates.any { it in READABLE_BOOK_CONTAINERS }
 }

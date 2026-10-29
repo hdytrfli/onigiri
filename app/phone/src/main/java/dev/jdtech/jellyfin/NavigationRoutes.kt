@@ -93,4 +93,4 @@ data class IdentifyResultsRoute(
 
 @Serializable data object SubtitleFontRoute : NavKey
 
-@Serializable data object ReaderSettingsRoute : NavKey
+@Serializable data object ReaderFontRoute : NavKey
