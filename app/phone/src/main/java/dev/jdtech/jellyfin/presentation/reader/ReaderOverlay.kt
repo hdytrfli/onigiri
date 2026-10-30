@@ -80,6 +80,7 @@ fun ReaderOverlay(
     state: ReaderUiState,
     controlsVisible: Boolean,
     onBack: () -> Unit,
+    onOpenContents: () -> Unit,
     onOpenSettings: () -> Unit,
     onSeek: (Int) -> Unit,
     onInteraction: () -> Unit,
@@ -138,6 +139,12 @@ fun ReaderOverlay(
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
+                        AppIconButton(onClick = onOpenContents, variant = AppButtonVariant.Ghost) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_list),
+                                contentDescription = "Contents",
+                            )
+                        }
                         AppIconButton(onClick = onOpenSettings, variant = AppButtonVariant.Ghost) {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_bolt),

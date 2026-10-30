@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
@@ -19,10 +20,13 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.databinding.ActivityReaderBinding
+import dev.jdtech.jellyfin.presentation.reader.ReaderChapter
 import dev.jdtech.jellyfin.presentation.reader.ReaderOverlay
+import dev.jdtech.jellyfin.presentation.reader.ReaderTocScreen
 import dev.jdtech.jellyfin.presentation.reader.ReaderUiState
 import dev.jdtech.jellyfin.presentation.reader.readerSettings
 import dev.jdtech.jellyfin.presentation.reader.toEpubPreferences
+import dev.jdtech.jellyfin.presentation.reader.toReaderChapters
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -52,6 +56,7 @@ import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.preferences.FontFamily
+import org.readium.r2.shared.DelicateReadiumApi
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Locator
@@ -69,7 +74,11 @@ import timber.log.Timber
  * settings), PDF or CBZ/Divina (fixed layout). The controls overlay matches the player's chrome.
  */
 @AndroidEntryPoint
-@OptIn(ExperimentalReadiumApi::class, InternalReadiumApi::class)
+@OptIn(
+    ExperimentalReadiumApi::class,
+    InternalReadiumApi::class,
+    DelicateReadiumApi::class,
+)
 class ReaderActivity : AppCompatActivity() {
 
     @Inject lateinit var appPreferences: AppPreferences
@@ -82,6 +91,8 @@ class ReaderActivity : AppCompatActivity() {
 
     private val uiState = mutableStateOf(ReaderUiState())
     private val controlsVisible = mutableStateOf(true)
+    private val showContents = mutableStateOf(false)
+    private val chapters = mutableStateOf<List<ReaderChapter>>(emptyList())
 
     private val handler = Handler(Looper.getMainLooper())
     private val hideControls = Runnable { controlsVisible.value = false }
@@ -152,18 +163,35 @@ class ReaderActivity : AppCompatActivity() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 FindroidTheme {
-                    ReaderOverlay(
-                        state = uiState.value,
-                        controlsVisible = controlsVisible.value,
-                        onBack = { finish() },
-                        onOpenSettings = {
-                            startActivity(
-                                Intent(this@ReaderActivity, ReaderSettingsActivity::class.java)
-                            )
-                        },
-                        onSeek = { page -> seekTo(page) },
-                        onInteraction = { showControls() },
-                    )
+                    BackHandler(enabled = showContents.value) { showContents.value = false }
+
+                    if (showContents.value) {
+                        ReaderTocScreen(
+                            chapters = chapters.value,
+                            onBack = { showContents.value = false },
+                            onChapterClick = { chapter ->
+                                showContents.value = false
+                                navigator?.go(chapter.link)
+                            },
+                        )
+                    } else {
+                        ReaderOverlay(
+                            state = uiState.value,
+                            controlsVisible = controlsVisible.value,
+                            onBack = { finish() },
+                            onOpenContents = { showContents.value = true },
+                            onOpenSettings = {
+                                startActivity(
+                                    Intent(
+                                        this@ReaderActivity,
+                                        ReaderSettingsActivity::class.java,
+                                    )
+                                )
+                            },
+                            onSeek = { page -> seekTo(page) },
+                            onInteraction = { showControls() },
+                        )
+                    }
                 }
             }
         }
@@ -270,6 +298,7 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun showPublication(publication: Publication, id: UUID, title: String) {
         this.publication = publication
+        chapters.value = publication.tableOfContents.toReaderChapters()
         val initialLocator = if (startFromBeginning) null else storedLocator(id)
         val settings = appPreferences.readerSettings()
         val epubPreferences = settings.toEpubPreferences()
@@ -284,6 +313,8 @@ class ReaderActivity : AppCompatActivity() {
                     // Serve the bundled font files and declare them, so the same families as
                     // the subtitle font setting can be selected for the book text.
                     servedAssets += "subtitle-fonts/.*"
+                    // Scroll mode should never change chapters on a horizontal swipe.
+                    disablePageTurnsWhileScrolling = true
                     readiumCssRsProperties =
                         RsProperties(maxLineLength = Length.Rem(settings.maxLineLengthRem))
                     SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
