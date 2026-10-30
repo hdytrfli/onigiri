@@ -11,16 +11,16 @@ data class FindroidItemPersonImage(val uri: Uri?, val blurHash: String?)
 
 fun BaseItemPerson.toFindroidImage(repository: JellyfinRepository): FindroidItemPersonImage {
     val baseUrl = Uri.parse(repository.getBaseUrl())
+    val builder =
+        baseUrl
+            .buildUpon()
+            .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
+            .appendQueryParameter("maxWidth", "400")
+    // Some item payloads (notably books/authors) omit the image tag even though the
+    // person has a picture. The image endpoint still serves it without the tag.
+    primaryImageTag?.let { builder.appendQueryParameter("tag", it) }
     return FindroidItemPersonImage(
-        uri =
-            primaryImageTag?.let { tag ->
-                baseUrl
-                    .buildUpon()
-                    .appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
-                    .appendQueryParameter("tag", tag)
-                    .appendQueryParameter("maxWidth", "400")
-                    .build()
-            },
+        uri = builder.build(),
         blurHash = imageBlurHashes?.get(ImageType.PRIMARY)?.get(primaryImageTag),
     )
 }
