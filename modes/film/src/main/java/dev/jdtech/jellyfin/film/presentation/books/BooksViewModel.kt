@@ -40,6 +40,7 @@ constructor(
     val state = _state.asStateFlow()
 
     private var loaded = false
+    private var openedItemId: UUID? = null
 
     fun load(force: Boolean = false) {
         if (!force && loaded) return
@@ -80,6 +81,30 @@ constructor(
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e, isLoading = false))
             }
+        }
+    }
+
+    /** Cached like the movie/show list: load once, refresh only the opened item on return. */
+    fun loadIfNeeded() {
+        if (_state.value.items.isEmpty() && !_state.value.isLoading) load()
+    }
+
+    fun onItemOpened(itemId: UUID) {
+        openedItemId = itemId
+    }
+
+    fun refreshOpenedItem() {
+        val itemId = openedItemId ?: return
+        openedItemId = null
+        viewModelScope.launch(Dispatchers.IO) {
+            val item = repository.getItem(itemId) ?: return@launch
+            _state.value =
+                _state.value.copy(
+                    items =
+                        _state.value.items.mapValues { (_, items) ->
+                            items.map { cached -> if (cached.id == item.id) item else cached }
+                        }
+                )
         }
     }
 

@@ -74,7 +74,8 @@ fun BooksScreen(
     }
 
     LifecycleResumeEffect(Unit) {
-        viewModel.load(force = true)
+        viewModel.loadIfNeeded()
+        viewModel.refreshOpenedItem()
         onPauseOrDispose {}
     }
 
@@ -175,7 +176,10 @@ fun BooksScreen(
                                 ItemCard(
                                     item = item,
                                     direction = Direction.VERTICAL,
-                                    onClick = { onItemClick(item) },
+                                    onClick = {
+                                        viewModel.onItemOpened(item.id)
+                                        onItemClick(item)
+                                    },
                                     modifier = Modifier.animateItem(),
                                     fillWidth = true,
                                     showYear = ListDisplayField.Year in state.displayFields,

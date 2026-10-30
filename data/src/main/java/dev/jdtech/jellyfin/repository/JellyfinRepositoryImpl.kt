@@ -129,10 +129,20 @@ class JellyfinRepositoryImpl(
 
     override suspend fun getItem(itemId: UUID): FindroidItem? =
         withContext(Dispatchers.IO) {
-            jellyfinApi.userLibraryApi
-                .getItem(itemId = itemId, userId = jellyfinApi.userId!!)
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    ids = listOf(itemId),
+                    fields =
+                        listOf(
+                            ItemFields.PEOPLE,
+                            ItemFields.PRIMARY_IMAGE_ASPECT_RATIO,
+                        ),
+                )
                 .content
-                .toFindroidItem(this@JellyfinRepositoryImpl, database)
+                .items
+                .firstOrNull()
+                ?.toFindroidItem(this@JellyfinRepositoryImpl, database)
         }
 
     override suspend fun getItems(
