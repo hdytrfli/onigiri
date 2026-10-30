@@ -6,15 +6,17 @@
     android:background="@android:color/black"
     android:keepScreenOn="true">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/reader_navigator"
+    <dev.jdtech.jellyfin.presentation.reader.PullToChapterLayout
+        android:id="@+id/reader_pull"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/reader_continuous"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/reader_navigator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </dev.jdtech.jellyfin.presentation.reader.PullToChapterLayout>
 
     <View
         android:id="@+id/reader_dim"

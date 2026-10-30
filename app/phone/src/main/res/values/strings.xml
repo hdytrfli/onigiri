@@ -72,6 +72,10 @@
     <string name="author_title">Author</string>
     <string name="reader_contents_title">Contents</string>
     <string name="reader_contents_empty">This book has no table of contents.</string>
+    <string name="reader_pull_next_chapter">Next chapter</string>
+    <string name="reader_pull_previous_chapter">Previous chapter</string>
+    <string name="reader_pull_next_release">Release for next chapter</string>
+    <string name="reader_pull_previous_release">Release for previous chapter</string>
     <string name="reader_font_title">Reader font</string>
     <string name="reader_font_note">Applies to books you read in the app. Styled books may keep some of their own typography.</string>
 </resources>

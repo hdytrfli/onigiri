@@ -2,33 +2,29 @@ package dev.jdtech.jellyfin
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.databinding.ActivityReaderBinding
-import dev.jdtech.jellyfin.presentation.reader.ContinuousProgress
-import dev.jdtech.jellyfin.presentation.reader.ContinuousReader
-import dev.jdtech.jellyfin.presentation.reader.ContinuousReaderController
 import dev.jdtech.jellyfin.presentation.reader.ReaderChapter
 import dev.jdtech.jellyfin.presentation.reader.ReaderOverlay
 import dev.jdtech.jellyfin.presentation.reader.ReaderSettings
@@ -46,7 +42,6 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -106,8 +101,6 @@ class ReaderActivity : AppCompatActivity() {
     private val controlsVisible = mutableStateOf(true)
     private val showContents = mutableStateOf(false)
     private val chapters = mutableStateOf<List<ReaderChapter>>(emptyList())
-    private val continuousController = mutableStateOf<ContinuousReaderController?>(null)
-    private val readerSettings = mutableStateOf(ReaderSettings())
 
     private val handler = Handler(Looper.getMainLooper())
     private val hideControls = Runnable { controlsVisible.value = false }
@@ -144,10 +137,7 @@ class ReaderActivity : AppCompatActivity() {
     private var maxWidthHref: String? = null
     private var startFromBeginning = false
     private var markedPlayed = false
-    private var currentTitle = ""
-    private var currentId: UUID? = null
-    private var lastSavedPage = 0
-    private var lastSavedAt = 0L
+    private var readerIsScroll = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,23 +166,15 @@ class ReaderActivity : AppCompatActivity() {
         binding = ActivityReaderBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        readerSettings.value = appPreferences.readerSettings()
-        binding.readerDim.alpha = brightnessOverlay(readerSettings.value.brightness)
-
-        binding.readerContinuous.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            isVisible = false
-            setContent {
-                FindroidTheme {
-                    continuousController.value?.let { controller ->
-                        ContinuousReader(
-                            controller = controller,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
-                }
-            }
+        binding.readerPull.apply {
+            pullEnabled = false
+            canPullNext = { canPullNextChapter() }
+            canPullPrevious = { canPullPreviousChapter() }
+            onPullNext = { goToNextChapter() }
+            onPullPrevious = { goToPreviousChapter() }
         }
+
+        binding.readerDim.alpha = brightnessOverlay(appPreferences.readerSettings().brightness)
 
         binding.readerOverlay.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -200,41 +182,34 @@ class ReaderActivity : AppCompatActivity() {
                 FindroidTheme {
                     BackHandler(enabled = showContents.value) { showContents.value = false }
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        if (showContents.value) {
-                            CompositionLocalProvider(LocalHideStatusBar provides true) {
-                                ReaderTocScreen(
-                                    chapters = chapters.value,
-                                    onBack = { showContents.value = false },
-                                    onChapterClick = { chapter ->
-                                        showContents.value = false
-                                        val continuous = continuousController.value
-                                        if (continuous != null) {
-                                            continuous.goTo(chapter.link)
-                                        } else {
-                                            navigator?.go(chapter.link)
-                                        }
-                                    },
-                                )
-                            }
-                        } else {
-                            ReaderOverlay(
-                                state = uiState.value,
-                                controlsVisible = controlsVisible.value,
-                                onBack = { finish() },
-                                onOpenContents = { showContents.value = true },
-                                onOpenSettings = {
-                                    startActivity(
-                                        Intent(
-                                            this@ReaderActivity,
-                                            ReaderSettingsActivity::class.java,
-                                        )
-                                    )
+                    if (showContents.value) {
+                        CompositionLocalProvider(LocalHideStatusBar provides true) {
+                            ReaderTocScreen(
+                                chapters = chapters.value,
+                                onBack = { showContents.value = false },
+                                onChapterClick = { chapter ->
+                                    showContents.value = false
+                                    navigator?.go(chapter.link)
                                 },
-                                onSeek = { page -> seekTo(page) },
-                                onInteraction = { showControls() },
                             )
                         }
+                    } else {
+                        ReaderOverlay(
+                            state = uiState.value,
+                            controlsVisible = controlsVisible.value,
+                            onBack = { finish() },
+                            onOpenContents = { showContents.value = true },
+                            onOpenSettings = {
+                                startActivity(
+                                    Intent(
+                                        this@ReaderActivity,
+                                        ReaderSettingsActivity::class.java,
+                                    )
+                                )
+                            },
+                            onSeek = { page -> seekTo(page) },
+                            onInteraction = { showControls() },
+                        )
                     }
                 }
             }
@@ -268,44 +243,13 @@ class ReaderActivity : AppCompatActivity() {
         // Settings opened from the reader are visible behind this activity when we come back.
         if (::binding.isInitialized) {
             val settings = appPreferences.readerSettings()
-            readerSettings.value = settings
             binding.readerDim.alpha = brightnessOverlay(settings.brightness)
-
-            val continuous = continuousController.value
-            val continuousExpected =
-                publication?.let { supportsContinuousScroll(it, settings) } == true
-            if (continuous != null && !continuousExpected) {
-                reopenCurrentPublication()
-                return
-            }
-
-            if (continuous != null) {
-                continuous.updateSettings(settings)
-            } else {
-                epubNavigator?.submitPreferences(settings.toEpubPreferences())
-                lifecycleScope.launch { applyMaxWidth(settings.maxLineLengthRem, force = true) }
-                if (continuousExpected) {
-                    reopenCurrentPublication()
-                }
-            }
+            epubNavigator?.submitPreferences(settings.toEpubPreferences())
+            readerIsScroll = settings.scroll
+            binding.readerPull.pullEnabled = isPullEligible(settings)
+            lifecycleScope.launch { applyMaxWidth(settings.maxLineLengthRem, force = true) }
         }
     }
-
-    private fun reopenCurrentPublication() {
-        val id = currentId ?: return
-        val publication = publication ?: return
-        if (uiState.value.loading) return
-        showPublication(publication, id, currentTitle)
-    }
-
-    private fun supportsContinuousScroll(
-        publication: Publication,
-        settings: ReaderSettings,
-    ): Boolean =
-        publication.conformsTo(Publication.Profile.EPUB) &&
-            settings.scroll &&
-            (publication.metadata.layout == null ||
-                publication.metadata.layout == Layout.REFLOWABLE)
 
     private fun showControls() {
         controlsVisible.value = true
@@ -323,14 +267,106 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun seekTo(page: Int) {
-        positions.getOrNull(page - 1)?.let { locator ->
-            val continuous = continuousController.value
-            if (continuous != null) {
-                continuous.seekTo(locator)
-            } else {
-                epubNavigator?.go(locator)
+        positions.getOrNull(page - 1)?.let { epubNavigator?.go(it) }
+    }
+
+    private fun isPullEligible(settings: ReaderSettings): Boolean {
+        val layout = publication?.metadata?.layout
+        return settings.scroll &&
+            epubNavigator != null &&
+            publication?.conformsTo(Publication.Profile.EPUB) == true &&
+            layout != Layout.FIXED
+    }
+
+    private fun canPullNextChapter(): Boolean {
+        if (!readerIsScroll) return false
+        val webView = activeReaderWebView() ?: return false
+        if (webView.canScrollVertically(1)) return false
+        val order = publication?.readingOrder ?: return false
+        val index = currentResourceIndex()
+        return index in 0 until order.lastIndex
+    }
+
+    private fun canPullPreviousChapter(): Boolean {
+        if (!readerIsScroll) return false
+        val webView = activeReaderWebView() ?: return false
+        if (webView.canScrollVertically(-1)) return false
+        return currentResourceIndex() > 0
+    }
+
+    private fun goToNextChapter() {
+        val publication = publication ?: return
+        val index = currentResourceIndex()
+        if (index < 0 || index >= publication.readingOrder.lastIndex) return
+        val next = publication.readingOrder[index + 1]
+        val target =
+            positions.firstOrNull { sameResource(it.href.toString(), next.href.toString()) }
+                ?: publication.locatorFromLink(next)
+        if (target != null) {
+            navigator?.go(target)
+        } else {
+            navigator?.go(next)
+        }
+    }
+
+    private fun goToPreviousChapter() {
+        val publication = publication ?: return
+        val index = currentResourceIndex()
+        if (index <= 0) return
+        val previous = publication.readingOrder[index - 1]
+        val target =
+            positions.asReversed().firstOrNull {
+                sameResource(it.href.toString(), previous.href.toString())
+            } ?: publication.locatorFromLink(previous)
+        if (target != null) {
+            navigator?.go(target)
+        } else {
+            navigator?.go(previous)
+        }
+    }
+
+    private fun currentResourceIndex(): Int {
+        val locator = lastLocator ?: return -1
+        val order = publication?.readingOrder ?: return -1
+        val currentHref = locator.href.toString()
+        return order.indexOfFirst { sameResource(it.href.toString(), currentHref) }
+    }
+
+    private fun sameResource(left: String, right: String): Boolean {
+        val leftHref = normalizeHref(left)
+        val rightHref = normalizeHref(right)
+        return leftHref == rightHref ||
+            leftHref.endsWith("/$rightHref") ||
+            rightHref.endsWith("/$leftHref")
+    }
+
+    private fun normalizeHref(href: String): String = href.substringBefore('#').substringBefore('?')
+
+    private fun activeReaderWebView(): WebView? {
+        val root = visualNavigator?.publicationView ?: return null
+        val views = mutableListOf<WebView>()
+        collectWebViews(root, views)
+        return views
+            .filter { it.isShown }
+            .maxByOrNull { visibleArea(it) }
+            ?.takeIf { visibleArea(it) > 0 }
+    }
+
+    private fun collectWebViews(view: View, out: MutableList<WebView>) {
+        if (view is WebView) {
+            out.add(view)
+            return
+        }
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                collectWebViews(view.getChildAt(index), out)
             }
         }
+    }
+
+    private fun visibleArea(view: View): Int {
+        val rect = Rect()
+        return if (view.getGlobalVisibleRect(rect)) rect.width() * rect.height() else 0
     }
 
     private suspend fun openBook(id: UUID, title: String) {
@@ -382,81 +418,10 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun showPublication(publication: Publication, id: UUID, title: String) {
         this.publication = publication
-        currentId = id
-        currentTitle = title
         chapters.value = publication.tableOfContents.toReaderChapters()
-
-        val initialLocator =
-            if (startFromBeginning) {
-                null
-            } else {
-                lastLocator ?: storedLocator(id)
-            }
-        startFromBeginning = false
-        val settings = readerSettings.value
+        val initialLocator = if (startFromBeginning) null else storedLocator(id)
+        val settings = appPreferences.readerSettings()
         val epubPreferences = settings.toEpubPreferences()
-
-        // Switching between paged and continuous scroll reuses the same activity. Tear down the
-        // renderer that was active before creating the new one.
-        locatorJob?.cancel()
-        locatorJob = null
-        continuousController.value?.release()
-        continuousController.value = null
-        supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)?.let { previous ->
-            supportFragmentManager.beginTransaction().remove(previous).commitNow()
-        }
-        navigator = null
-        visualNavigator = null
-        overflowableNavigator = null
-        epubNavigator = null
-        positions = emptyList()
-        lastLocator = initialLocator
-        lastSavedPage = 0
-        lastSavedAt = 0L
-        maxWidthHref = null
-        binding.readerContinuous.isVisible = false
-
-        if (supportsContinuousScroll(publication, settings)) {
-            val controller =
-                ContinuousReaderController(
-                    context = this,
-                    publication = publication,
-                    chapters = publication.readingOrder,
-                    initialSettings = settings,
-                    initialLocator = initialLocator,
-                )
-            controller.onTap = { toggleControls() }
-            controller.onProgress = { progress -> onContinuousProgress(progress) }
-            controller.onError = { error ->
-                uiState.value = uiState.value.copy(loading = false, error = readableError(error))
-            }
-            continuousController.value = controller
-            binding.readerContinuous.isVisible = true
-
-            uiState.value =
-                uiState.value.copy(
-                    title = title,
-                    loading = false,
-                    error = null,
-                    page = initialLocator?.locations?.position ?: 1,
-                    pageCount = positions.size,
-                )
-            showControls()
-
-            lifecycleScope.launch {
-                val locators = runCatching { publication.positions() }.getOrNull().orEmpty()
-                positions = locators
-                appPreferences.sharedPreferences
-                    .edit()
-                    .putInt("reader_page_count_$id", locators.size)
-                    .apply()
-                uiState.value = uiState.value.copy(pageCount = locators.size)
-                continuousController.value?.lastProgress?.let { progress ->
-                    onContinuousProgress(progress, force = true)
-                }
-            }
-            return
-        }
 
         val fragmentClass: Class<out Fragment>
         val fragmentFactory: androidx.fragment.app.FragmentFactory
@@ -524,16 +489,20 @@ class ReaderActivity : AppCompatActivity() {
         overflowableNavigator = fragment as? OverflowableNavigator
         epubNavigator = fragment as? EpubNavigatorFragment
 
+        readerIsScroll = settings.scroll
+        binding.readerPull.pullEnabled = isPullEligible(settings)
+
         visualNavigator?.addInputListener(tapListener)
         appliedMaxWidth = settings.maxLineLengthRem
 
+        val pageCount = positions.size
         uiState.value =
             uiState.value.copy(
                 title = title,
                 loading = false,
                 error = null,
                 page = initialLocator?.locations?.position ?: 1,
-                pageCount = positions.size,
+                pageCount = pageCount,
             )
         showControls()
 
@@ -547,6 +516,7 @@ class ReaderActivity : AppCompatActivity() {
             uiState.value = uiState.value.copy(pageCount = locators.size)
         }
 
+        locatorJob?.cancel()
         locatorJob = lifecycleScope.launch {
             navigator?.currentLocator?.collect { locator ->
                 val href = locator.href.toString()
@@ -571,7 +541,6 @@ class ReaderActivity : AppCompatActivity() {
                         (positions.isNotEmpty() && locator.locations.position == positions.size)
                 if (!markedPlayed && atEnd) {
                     markedPlayed = true
-                    lastLocator = null
                     lifecycleScope.launch {
                         runCatching { repository.markAsPlayed(id) }
                         appPreferences.sharedPreferences
@@ -583,71 +552,6 @@ class ReaderActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun onContinuousProgress(progress: ContinuousProgress, force: Boolean = false) {
-        val id = currentId ?: return
-        val pageCount = positions.size
-        val page =
-            if (pageCount > 1) {
-                (progress.totalProgression * (pageCount - 1)).roundToInt() + 1
-            } else {
-                1
-            }
-        val position = page.coerceIn(1, pageCount.coerceAtLeast(1))
-        uiState.value =
-            uiState.value.copy(
-                page = position,
-                pageCount = pageCount.takeIf { it > 0 } ?: uiState.value.pageCount,
-            )
-
-        val atEnd = progress.totalProgression >= 0.999
-        if (atEnd) {
-            lastLocator = null
-            if (!markedPlayed) {
-                markedPlayed = true
-                lifecycleScope.launch { runCatching { repository.markAsPlayed(id) } }
-            }
-            appPreferences.sharedPreferences
-                .edit()
-                .remove(locatorKey(id))
-                .remove("reader_page_count_$id")
-                .apply()
-            return
-        }
-
-        val locator = continuousLocator(progress, position, pageCount)
-        if (locator != null) {
-            lastLocator = locator
-        }
-
-        val now = SystemClock.elapsedRealtime()
-        if (locator != null && (force || position != lastSavedPage || now - lastSavedAt > 750L)) {
-            appPreferences.sharedPreferences
-                .edit()
-                .putString(locatorKey(id), locator.toJSON().toString())
-                .apply()
-            lastSavedPage = position
-            lastSavedAt = now
-        }
-    }
-
-    private fun continuousLocator(
-        progress: ContinuousProgress,
-        page: Int,
-        pageCount: Int,
-    ): Locator? {
-        val publication = publication ?: return null
-        val link = publication.readingOrder.getOrNull(progress.chapterIndex) ?: return null
-        val base = publication.locatorFromLink(link) ?: return null
-        return base.copy(
-            locations =
-                base.locations.copy(
-                    progression = progress.chapterProgression,
-                    position = page.takeIf { pageCount > 0 },
-                    totalProgression = progress.totalProgression,
-                )
-        )
     }
 
     /**
@@ -683,18 +587,9 @@ class ReaderActivity : AppCompatActivity() {
     private fun readableError(error: Throwable): String =
         error.message ?: "This book could not be opened"
 
-    override fun onPause() {
-        continuousController.value?.lastProgress?.let { progress ->
-            onContinuousProgress(progress, force = true)
-        }
-        super.onPause()
-    }
-
     override fun onDestroy() {
         handler.removeCallbacks(hideControls)
         locatorJob?.cancel()
-        continuousController.value?.release()
-        continuousController.value = null
         super.onDestroy()
     }
 
