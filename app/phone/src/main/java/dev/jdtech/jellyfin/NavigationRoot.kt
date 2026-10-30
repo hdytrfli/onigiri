@@ -525,14 +525,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     }
     entry<BooksRoute> {
         SuiteInsetBox {
-            BooksScreen(
-                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-                onSearchClick =
-                    dropUnlessResumed {
-                        searchExpanded.value = true
-                        navigator.navigate(MediaRoute)
-                    },
-            )
+            BooksScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
         }
     }
     entry<MediaRoute> {

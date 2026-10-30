@@ -31,8 +31,8 @@ import dev.jdtech.jellyfin.film.presentation.search.SearchState
 import dev.jdtech.jellyfin.film.presentation.search.SearchViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
+import dev.jdtech.jellyfin.presentation.components.MediaSearchBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.FilmSearchBar
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
@@ -136,7 +136,7 @@ private fun MediaScreenLayout(
         }
 
         if (searchExpanded) {
-            FilmSearchBar(
+            MediaSearchBar(
                 state = searchState,
                 expanded = searchExpanded,
                 onExpand = onSearchExpand,

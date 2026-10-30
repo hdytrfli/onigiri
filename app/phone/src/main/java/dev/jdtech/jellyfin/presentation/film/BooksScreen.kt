@@ -1,9 +1,11 @@
 package dev.jdtech.jellyfin.presentation.film
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -28,10 +30,13 @@ import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.books.BooksViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
+import dev.jdtech.jellyfin.film.presentation.search.SearchAction
+import dev.jdtech.jellyfin.film.presentation.search.SearchViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.MediaSearchBar
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.Direction
@@ -52,12 +57,16 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun BooksScreen(
     onItemClick: (FindroidItem) -> Unit,
-    onSearchClick: () -> Unit = {},
     viewModel: BooksViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val searchState by searchViewModel.state.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(0) }
+    var searchExpanded by rememberSaveable { mutableStateOf(false) }
     val safePadding = rememberSafePadding()
+
+    BackHandler(enabled = searchExpanded) { searchExpanded = false }
 
     // Pressing the Books item again cycles Books <-> Audiobooks.
     val tabReselect = LocalTabReselect.current
@@ -95,7 +104,7 @@ fun BooksScreen(
                 dropdownOnCompact = true,
                 actions = {
                     AppIconButton(
-                        onClick = onSearchClick,
+                        onClick = { searchExpanded = true },
                         content = {
                             Icon(
                                 painter = painterResource(CoreR.drawable.ic_search),
@@ -166,6 +175,24 @@ fun BooksScreen(
                             }
                         }
                     }
+                }
+
+                if (searchExpanded) {
+                    MediaSearchBar(
+                        state = searchState,
+                        expanded = searchExpanded,
+                        onExpand = { searchExpanded = it },
+                        onAction = { action ->
+                            when (action) {
+                                is SearchAction.OnItemClick -> onItemClick(action.item)
+                                else -> Unit
+                            }
+                            searchViewModel.onAction(action)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        paddingStart = safePadding.start + MaterialTheme.spacings.gutter,
+                        paddingEnd = safePadding.end + MaterialTheme.spacings.gutter,
+                    )
                 }
             }
         }
