@@ -502,6 +502,10 @@ constructor(
                                                         R.string.settings_reader_tap_turn,
                                                     descriptionStringRes =
                                                         R.string.settings_reader_tap_turn_summary,
+                                                    enabled =
+                                                        appPreferences.getValue(
+                                                            appPreferences.readerMode
+                                                        ) != "scroll",
                                                     backendPreference =
                                                         appPreferences.readerTapTurn,
                                                 ),

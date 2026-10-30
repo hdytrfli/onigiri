@@ -88,7 +88,8 @@ class ReaderActivity : AppCompatActivity() {
     private val tapListener =
         object : InputListener {
             override fun onTap(event: TapEvent): Boolean {
-                if (appPreferences.getValue(appPreferences.readerTapTurn)) {
+                val scrollMode = appPreferences.getValue(appPreferences.readerMode) == "scroll"
+                if (!scrollMode && appPreferences.getValue(appPreferences.readerTapTurn)) {
                     val width = binding.readerNavigator.width
                     if (width > 0) {
                         when {
