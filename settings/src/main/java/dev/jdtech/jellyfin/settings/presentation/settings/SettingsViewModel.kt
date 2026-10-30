@@ -1816,6 +1816,34 @@ constructor(
                             action.preference.value,
                         )
                 }
+
+                if (
+                    action.preference is PreferenceSelect &&
+                        action.preference.backendPreference.backendName ==
+                            appPreferences.readerMode.backendName
+                ) {
+                    val scrollMode = action.preference.value == "scroll"
+                    _state.value =
+                        _state.value.copy(
+                            preferenceGroups =
+                                _state.value.preferenceGroups.map { group ->
+                                    group.copy(
+                                        preferences =
+                                            group.preferences.map { preference ->
+                                                if (
+                                                    preference is PreferenceSwitch &&
+                                                        preference.backendPreference.backendName ==
+                                                            appPreferences.readerTapTurn.backendName
+                                                ) {
+                                                    preference.copy(enabled = !scrollMode)
+                                                } else {
+                                                    preference
+                                                }
+                                            }
+                                    )
+                                }
+                        )
+                }
             }
         }
     }
