@@ -9,6 +9,8 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -23,20 +25,24 @@ class PersonViewModel @Inject internal constructor(private val repository: Jelly
     fun loadPerson(personId: UUID) {
         viewModelScope.launch {
             try {
-                val person = repository.getPerson(personId)
-
-                val items =
-                    repository.getPersonItems(
-                        personIds = listOf(personId),
-                        includeTypes =
-                            listOf(
-                                BaseItemKind.MOVIE,
-                                BaseItemKind.SERIES,
-                                BaseItemKind.BOOK,
-                                BaseItemKind.AUDIO_BOOK,
-                            ),
-                        recursive = true,
-                    )
+                val (person, items) =
+                    coroutineScope {
+                        val personDeferred = async { repository.getPerson(personId) }
+                        val itemsDeferred = async {
+                            repository.getPersonItems(
+                                personIds = listOf(personId),
+                                includeTypes =
+                                    listOf(
+                                        BaseItemKind.MOVIE,
+                                        BaseItemKind.SERIES,
+                                        BaseItemKind.BOOK,
+                                        BaseItemKind.AUDIO_BOOK,
+                                    ),
+                                recursive = true,
+                            )
+                        }
+                        personDeferred.await() to itemsDeferred.await()
+                    }
 
                 val movies = items.filterIsInstance<FindroidMovie>()
                 val shows = items.filterIsInstance<FindroidShow>()

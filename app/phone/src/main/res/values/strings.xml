@@ -69,6 +69,7 @@
     <string name="player_stats_codec_direct">%1$s (direct)</string>
     <string name="player_stats_fps_value">%1$s fps</string>
     <string name="reader_settings">Reader</string>
+    <string name="author_title">Author</string>
     <string name="reader_contents_title">Contents</string>
     <string name="reader_contents_empty">This book has no table of contents.</string>
     <string name="reader_font_title">Reader font</string>

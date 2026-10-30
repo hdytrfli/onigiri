@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -28,6 +30,7 @@ import dev.jdtech.jellyfin.film.presentation.books.BooksViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
@@ -49,6 +52,7 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun BooksScreen(
     onItemClick: (FindroidItem) -> Unit,
+    onSearchClick: () -> Unit = {},
     viewModel: BooksViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -89,6 +93,17 @@ fun BooksScreen(
                 selectedIndex = selectedTab,
                 onSelect = { selectedTab = it },
                 dropdownOnCompact = true,
+                actions = {
+                    AppIconButton(
+                        onClick = onSearchClick,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_search),
+                                contentDescription = stringResource(CoreR.string.search),
+                            )
+                        },
+                    )
+                },
             )
         }
     ) {

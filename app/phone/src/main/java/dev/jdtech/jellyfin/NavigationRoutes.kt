@@ -55,7 +55,7 @@ data class CollectionRoute(val collectionId: String, val collectionName: String)
 
 @Serializable data class SeasonRoute(val seasonId: String) : NavKey
 
-@Serializable data class PersonRoute(val personId: String) : NavKey
+@Serializable data class PersonRoute(val personId: String, val isAuthor: Boolean = false) : NavKey
 
 @Serializable
 data class BookDetailRoute(val bookId: String, val audiobook: Boolean = false) : NavKey

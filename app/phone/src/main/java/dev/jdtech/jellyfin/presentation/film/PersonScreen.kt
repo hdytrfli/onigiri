@@ -29,7 +29,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,10 +45,10 @@ import dev.jdtech.jellyfin.film.presentation.person.PersonState
 import dev.jdtech.jellyfin.film.presentation.person.PersonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidPerson
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
-import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -63,6 +62,7 @@ import java.util.UUID
 @Composable
 fun PersonScreen(
     personId: UUID,
+    isAuthor: Boolean = false,
     navigateBack: () -> Unit,
     navigateHome: () -> Unit,
     navigateToItem: (item: FindroidItem) -> Unit,
@@ -74,6 +74,7 @@ fun PersonScreen(
 
     PersonScreenLayout(
         state = state,
+        isAuthor = isAuthor,
         onAction = { action ->
             when (action) {
                 is PersonAction.NavigateBack -> navigateBack()
@@ -85,13 +86,17 @@ fun PersonScreen(
 }
 
 @Composable
-private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> Unit) {
+private fun PersonScreenLayout(
+    state: PersonState,
+    isAuthor: Boolean = false,
+    onAction: (PersonAction) -> Unit,
+) {
     val safePadding = rememberSafePadding()
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     // Home-style spine: status bar, 8dp, the floating action bar, 8dp, then content - the same
-    // header gap RootPage uses, since ItemTopBar floats at the top just like a header.
+    // header gap RootPage uses, since PageTopBar floats at the top just like a header.
     val paddingTop =
         safePadding.top + MaterialTheme.spacings.gutter + 48.dp + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
@@ -235,20 +240,16 @@ private fun PersonScreenLayout(state: PersonState, onAction: (PersonAction) -> U
             } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
         }
 
-        ItemTopBar(
-            hasBackButton = true,
-            onBackClick = { onAction(PersonAction.NavigateBack) },
-            content = {
-                state.person?.let { person ->
-                    Text(
-                        text = person.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(start = MaterialTheme.spacings.small),
-                    )
-                }
-            },
+        PageTopBar(
+            title =
+                stringResource(
+                    if (isAuthor) {
+                        dev.jdtech.jellyfin.R.string.author_title
+                    } else {
+                        CoreR.string.cast_amp_crew
+                    }
+                ),
+            onBack = { onAction(PersonAction.NavigateBack) },
         )
     }
 }

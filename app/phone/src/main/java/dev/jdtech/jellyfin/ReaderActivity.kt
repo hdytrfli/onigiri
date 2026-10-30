@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.WindowCompat
@@ -28,6 +29,7 @@ import dev.jdtech.jellyfin.presentation.reader.readerSettings
 import dev.jdtech.jellyfin.presentation.reader.toEpubPreferences
 import dev.jdtech.jellyfin.presentation.reader.toReaderChapters
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
+import dev.jdtech.jellyfin.presentation.utils.LocalHideStatusBar
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.settings.domain.SubtitleFonts
@@ -166,14 +168,16 @@ class ReaderActivity : AppCompatActivity() {
                     BackHandler(enabled = showContents.value) { showContents.value = false }
 
                     if (showContents.value) {
-                        ReaderTocScreen(
-                            chapters = chapters.value,
-                            onBack = { showContents.value = false },
-                            onChapterClick = { chapter ->
-                                showContents.value = false
-                                navigator?.go(chapter.link)
-                            },
-                        )
+                        CompositionLocalProvider(LocalHideStatusBar provides true) {
+                            ReaderTocScreen(
+                                chapters = chapters.value,
+                                onBack = { showContents.value = false },
+                                onChapterClick = { chapter ->
+                                    showContents.value = false
+                                    navigator?.go(chapter.link)
+                                },
+                            )
+                        }
                     } else {
                         ReaderOverlay(
                             state = uiState.value,

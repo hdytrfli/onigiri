@@ -46,7 +46,7 @@ constructor(
     // Remembered so dependent selects can re-evaluate visibility after they update their flags.
     private var lastIndexes: List<Int> = emptyList()
 
-    private val topLevelPreferences =
+    private fun topLevelPreferences(): List<PreferenceGroup> =
         listOf(
             PreferenceGroup(
                 preferences =
@@ -468,6 +468,7 @@ constructor(
                                                     backendPreference = appPreferences.readerMode,
                                                     options = R.array.reader_modes_options,
                                                     optionValues = R.array.reader_modes_values,
+                                                    onUpdate = { loadPreferences(lastIndexes) },
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
@@ -1547,7 +1548,7 @@ constructor(
 
             val isRootLevel = indexes.isEmpty()
 
-            var preferences = topLevelPreferences
+            var preferences = topLevelPreferences()
 
             // Resolve the page's parent: indexes accumulate one entry per pushed settings
             // subpage, and every non-empty list names a visible category.
@@ -1814,34 +1815,6 @@ constructor(
                         appPreferences.setValue(
                             action.preference.backendPreference,
                             action.preference.value,
-                        )
-                }
-
-                if (
-                    action.preference is PreferenceSelect &&
-                        action.preference.backendPreference.backendName ==
-                            appPreferences.readerMode.backendName
-                ) {
-                    val scrollMode = action.preference.value == "scroll"
-                    _state.value =
-                        _state.value.copy(
-                            preferenceGroups =
-                                _state.value.preferenceGroups.map { group ->
-                                    group.copy(
-                                        preferences =
-                                            group.preferences.map { preference ->
-                                                if (
-                                                    preference is PreferenceSwitch &&
-                                                        preference.backendPreference.backendName ==
-                                                            appPreferences.readerTapTurn.backendName
-                                                ) {
-                                                    preference.copy(enabled = !scrollMode)
-                                                } else {
-                                                    preference
-                                                }
-                                            }
-                                    )
-                                }
                         )
                 }
             }

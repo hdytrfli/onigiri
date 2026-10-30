@@ -4,12 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
+import dev.jdtech.jellyfin.models.FindroidItemPersonImage
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.ceil
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -44,20 +48,22 @@ constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = _state.value.item == null, error = null)
             val result = withContext(Dispatchers.IO) { runCatching { repository.getItem(bookId) } }
+            val book = (result.getOrNull() as? FindroidBook)?.let { enrichAuthors(it) }
             _state.value =
-                result.fold(
-                    onSuccess = { item ->
-                        val progress = readerProgress(bookId)
-                        BookDetailState(
-                            item = item as? FindroidBook,
-                            isLoading = false,
-                            error = if (item is FindroidBook) null else Exception("Not a book"),
-                            readingProgress = progress,
-                            pagesLeft = readerPagesLeft(bookId, progress),
-                        )
-                    },
-                    onFailure = { BookDetailState(isLoading = false, error = it as? Exception) },
-                )
+                if (book != null) {
+                    val progress = readerProgress(bookId)
+                    BookDetailState(
+                        item = book,
+                        isLoading = false,
+                        readingProgress = progress,
+                        pagesLeft = readerPagesLeft(bookId, progress),
+                    )
+                } else {
+                    BookDetailState(
+                        isLoading = false,
+                        error = result.exceptionOrNull() as? Exception ?: Exception("Not a book"),
+                    )
+                }
         }
     }
 
@@ -95,6 +101,39 @@ constructor(
         val total = appPreferences.sharedPreferences.getInt("reader_page_count_$bookId", 0)
         if (total <= 0) return 0
         return ceil((1f - progress) * total).toInt().coerceAtLeast(1)
+    }
+
+    /**
+     * Fetches missing author portraits from their person records instead of relying on item stubs.
+     */
+    private suspend fun enrichAuthors(book: FindroidBook): FindroidBook {
+        if (book.people.isEmpty()) return book
+        val people = coroutineScope {
+            book.people
+                .map { person ->
+                    async {
+                        if (person.image.uri != null) {
+                            person
+                        } else {
+                            val detail = runCatching { repository.getPerson(person.id) }.getOrNull()
+                            val image = detail?.images
+                            if (image?.primary != null) {
+                                person.copy(
+                                    image =
+                                        FindroidItemPersonImage(
+                                            uri = image.primary,
+                                            blurHash = image.primaryBlurHash,
+                                        )
+                                )
+                            } else {
+                                person
+                            }
+                        }
+                    }
+                }
+                .awaitAll()
+        }
+        return book.copy(people = people)
     }
 
     private fun readerProgress(bookId: UUID): Float {

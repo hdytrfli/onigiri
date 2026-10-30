@@ -525,7 +525,14 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     }
     entry<BooksRoute> {
         SuiteInsetBox {
-            BooksScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
+            BooksScreen(
+                onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+                onSearchClick =
+                    dropUnlessResumed {
+                        searchExpanded.value = true
+                        navigator.navigate(MediaRoute)
+                    },
+            )
         }
     }
     entry<MediaRoute> {
@@ -574,7 +581,9 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 )
             },
             navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
-            onAuthorClick = { personId -> navigator.navigate(PersonRoute(personId.toString())) },
+            onAuthorClick = { personId ->
+                navigator.navigate(PersonRoute(personId.toString(), isAuthor = true))
+            },
         )
     }
     entry<CollectionRoute> { key ->
@@ -769,6 +778,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<PersonRoute> { key ->
         PersonScreen(
             personId = UUID.fromString(key.personId),
+            isAuthor = key.isAuthor,
             navigateBack = dropUnlessResumed { navigator.goBack() },
             navigateHome = dropUnlessResumed { navigator.navigateHome() },
             navigateToItem =
