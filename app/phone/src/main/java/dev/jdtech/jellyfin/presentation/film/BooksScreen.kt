@@ -1,11 +1,11 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -30,13 +30,11 @@ import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.books.BooksViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
-import dev.jdtech.jellyfin.film.presentation.search.SearchAction
-import dev.jdtech.jellyfin.film.presentation.search.SearchViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
-import dev.jdtech.jellyfin.presentation.components.MediaSearchBar
+import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.Direction
@@ -58,12 +56,11 @@ import kotlinx.coroutines.flow.filter
 fun BooksScreen(
     onItemClick: (FindroidItem) -> Unit,
     viewModel: BooksViewModel = hiltViewModel(),
-    searchViewModel: SearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val searchState by searchViewModel.state.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     val safePadding = rememberSafePadding()
 
     BackHandler(enabled = searchExpanded) { searchExpanded = false }
@@ -89,31 +86,46 @@ fun BooksScreen(
             .flatten()
             .filter { item -> item is FindroidBook && item.isAudiobook == audiobooks }
             .distinctBy { it.id }
+            .filter { item -> searchQuery.isBlank() || item.name.contains(searchQuery, true) }
 
     RootPage(
         header = {
-            PageToolbar(
-                tabs =
-                    listOf(
-                        stringResource(CoreR.string.books_label),
-                        stringResource(CoreR.string.audiobooks_label),
-                    ),
-                tabIcons = listOf(CoreR.drawable.ic_book_open, CoreR.drawable.ic_headphones),
-                selectedIndex = selectedTab,
-                onSelect = { selectedTab = it },
-                dropdownOnCompact = true,
-                actions = {
-                    AppIconButton(
-                        onClick = { searchExpanded = true },
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_search),
-                                contentDescription = stringResource(CoreR.string.search),
+            AnimatedContent(targetState = searchExpanded, label = "books-search") { expanded ->
+                if (expanded) {
+                    PageSearchField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        onClose = {
+                            searchExpanded = false
+                            searchQuery = ""
+                        },
+                    )
+                } else {
+                    PageToolbar(
+                        tabs =
+                            listOf(
+                                stringResource(CoreR.string.books_label),
+                                stringResource(CoreR.string.audiobooks_label),
+                            ),
+                        tabIcons =
+                            listOf(CoreR.drawable.ic_book_open, CoreR.drawable.ic_headphones),
+                        selectedIndex = selectedTab,
+                        onSelect = { selectedTab = it },
+                        dropdownOnCompact = true,
+                        actions = {
+                            AppIconButton(
+                                onClick = { searchExpanded = true },
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_search),
+                                        contentDescription = stringResource(CoreR.string.search),
+                                    )
+                                },
                             )
                         },
                     )
-                },
-            )
+                }
+            }
         }
     ) {
         if (LocalOfflineMode.current) {
@@ -175,24 +187,6 @@ fun BooksScreen(
                             }
                         }
                     }
-                }
-
-                if (searchExpanded) {
-                    MediaSearchBar(
-                        state = searchState,
-                        expanded = searchExpanded,
-                        onExpand = { searchExpanded = it },
-                        onAction = { action ->
-                            when (action) {
-                                is SearchAction.OnItemClick -> onItemClick(action.item)
-                                else -> Unit
-                            }
-                            searchViewModel.onAction(action)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        paddingStart = safePadding.start + MaterialTheme.spacings.gutter,
-                        paddingEnd = safePadding.end + MaterialTheme.spacings.gutter,
-                    )
                 }
             }
         }
