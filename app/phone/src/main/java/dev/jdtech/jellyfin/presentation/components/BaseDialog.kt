@@ -46,12 +46,14 @@ fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
     description: String? = null,
+    showContentDivider: Boolean = true,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
 ) {
     BaseDialogImpl(
         title = title,
         onDismiss = onDismiss,
         description = description,
+        showContentDivider = showContentDivider,
         actions = null,
         content = content,
     )
@@ -62,6 +64,7 @@ fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
     description: String? = null,
+    showContentDivider: Boolean = true,
     negativeButton: @Composable () -> Unit,
     positiveButton: @Composable () -> Unit,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
@@ -70,6 +73,7 @@ fun BaseDialog(
         title = title,
         onDismiss = onDismiss,
         description = description,
+        showContentDivider = showContentDivider,
         actions = {
             negativeButton()
             positiveButton()
@@ -83,6 +87,7 @@ private fun BaseDialogImpl(
     title: String,
     onDismiss: () -> Unit,
     description: String?,
+    showContentDivider: Boolean,
     actions: (@Composable RowScope.() -> Unit)?,
     content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
 ) {
@@ -113,7 +118,9 @@ private fun BaseDialogImpl(
                             )
                         }
                     }
-                    HorizontalDivider()
+                    if (showContentDivider) {
+                        HorizontalDivider()
+                    }
                     content(PaddingValues(MaterialTheme.spacings.medium))
                 }
             }

@@ -305,8 +305,18 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
             .apply()
     }
 
-    fun clearAllProfilePins() {
-        val keys = sharedPreferences.all.keys.filter { it.startsWith("pref_profile_pin_") }
+    fun setProfileAdmin(serverId: String, userId: UUID, isAdmin: Boolean) {
+        sharedPreferences.edit().putBoolean(profileAdminKey(serverId, userId), isAdmin).apply()
+    }
+
+    fun isProfileAdmin(serverId: String, userId: UUID): Boolean =
+        sharedPreferences.getBoolean(profileAdminKey(serverId, userId), false)
+
+    fun clearAllProfileMetadata() {
+        val keys =
+            sharedPreferences.all.keys.filter {
+                it.startsWith("pref_profile_pin_") || it.startsWith("pref_profile_admin_")
+            }
         if (keys.isEmpty()) return
         sharedPreferences.edit().apply { keys.forEach(::remove) }.apply()
     }
@@ -326,6 +336,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     private fun profilePinHashKey(serverId: String, userId: UUID) =
         "pref_profile_pin_hash_${serverId}_$userId"
+
+    private fun profileAdminKey(serverId: String, userId: UUID) =
+        "pref_profile_admin_${serverId}_$userId"
 
     private fun hashPin(salt: ByteArray, pin: String): String =
         MessageDigest.getInstance("SHA-256").digest(salt + pin.toByteArray(Charsets.UTF_8)).toHex()

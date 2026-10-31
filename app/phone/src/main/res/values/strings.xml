@@ -43,6 +43,7 @@
     <string name="profile_add_title">Add profile</string>
     <string name="profile_add_description">Sign in with another Jellyfin user on this server. The new profile becomes active after signing in.</string>
     <string name="profile_current">Current</string>
+    <string name="profile_admin">Admin</string>
     <string name="profile_locked">Locked</string>
     <string name="profile_pin_title">Enter profile PIN</string>
     <string name="profile_pin_description">Unlock %1$s to switch to this profile.</string>

@@ -36,7 +36,7 @@ constructor(
             // restarted process starts the onboarding flow.
             appPreferences.setValue(appPreferences.onboardingSessionCleared, true)
             appPreferences.clearReaderState()
-            appPreferences.clearAllProfilePins()
+            appPreferences.clearAllProfileMetadata()
             jellyfinApi.api.update(accessToken = null)
             jellyfinApi.userId = null
             eventsChannel.send(ServerResetEvent.Reset)

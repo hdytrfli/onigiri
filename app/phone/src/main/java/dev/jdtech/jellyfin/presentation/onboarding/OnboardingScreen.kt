@@ -40,8 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,8 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -326,8 +322,6 @@ fun OnboardingScaffold(
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val contentMaxHeight = maxHeight * 0.76f
-        var contentTopPx by remember { mutableFloatStateOf(0f) }
-        var contentHeightPx by remember { mutableFloatStateOf(0f) }
 
         Image(
             painter = painterResource(CoreR.drawable.onboarding_background),
@@ -336,32 +330,8 @@ fun OnboardingScaffold(
             modifier = Modifier.fillMaxSize(),
         )
         Canvas(modifier = Modifier.fillMaxSize()) {
-            // Black is anchored to the measured content, so a short form keeps the image visible
-            // while a tall form (or an open keyboard) grows the dark area instead of scaling the
-            // background. The tail of a vertical gradient repeats its last colour, so everything
-            // from the content top down stays fully black.
-            val contentTop = contentTopPx.takeIf { it > 0f } ?: size.height * 0.6f
-            val contentHeight = contentHeightPx.takeIf { it > 0f } ?: size.height * 0.3f
-            val gradientStart = (contentTop - contentHeight * 0.6f).coerceAtLeast(0f)
             drawRect(
-                brush =
-                    Brush.verticalGradient(
-                        colorStops =
-                            arrayOf(
-                                0f to Color.Transparent,
-                                0.12f to Color.Black.copy(alpha = 0.03f),
-                                0.24f to Color.Black.copy(alpha = 0.12f),
-                                0.36f to Color.Black.copy(alpha = 0.26f),
-                                0.48f to Color.Black.copy(alpha = 0.46f),
-                                0.60f to Color.Black.copy(alpha = 0.68f),
-                                0.72f to Color.Black.copy(alpha = 0.86f),
-                                0.84f to Color.Black.copy(alpha = 0.96f),
-                                0.92f to Color.Black.copy(alpha = 0.995f),
-                                1f to Color.Black,
-                            ),
-                        startY = gradientStart,
-                        endY = contentTop,
-                    )
+                brush = Brush.verticalGradient(colors = listOf(Color(0x33000000), Color.Black))
             )
         }
 
@@ -395,17 +365,11 @@ fun OnboardingScaffold(
                 Spacer(modifier = Modifier.weight(1f))
                 Column(
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .widthIn(max = 420.dp)
+                        Modifier.widthIn(max = 420.dp)
+                            .fillMaxWidth()
                             .align(Alignment.CenterHorizontally)
                             .heightIn(max = contentMaxHeight)
-                            .verticalScroll(rememberScrollState())
-                            .onGloballyPositioned { coordinates ->
-                                val top = coordinates.positionInRoot().y
-                                val height = coordinates.size.height.toFloat()
-                                if (top != contentTopPx) contentTopPx = top
-                                if (height != contentHeightPx) contentHeightPx = height
-                            },
+                            .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                     content = content,
                 )

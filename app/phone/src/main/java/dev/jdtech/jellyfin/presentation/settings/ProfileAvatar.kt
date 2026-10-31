@@ -1,23 +1,37 @@
 package dev.jdtech.jellyfin.presentation.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
+import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 
 @Composable
@@ -28,37 +42,69 @@ fun ProfileAvatar(
     size: Dp,
 ) {
     val context = LocalContext.current
-    val placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainerHigh)
-    val request = avatarUrl?.let { url ->
-        ImageRequest.Builder(context)
-            .data(url)
-            .apply {
-                accessToken?.let { token ->
-                    httpHeaders(NetworkHeaders.Builder().set("X-Emby-Token", token).build())
-                }
+    var failed by remember(avatarUrl) { mutableStateOf(false) }
+    val request =
+        remember(avatarUrl, accessToken) {
+            avatarUrl?.let { url ->
+                ImageRequest.Builder(context)
+                    .data(url)
+                    .apply {
+                        accessToken?.let { token ->
+                            httpHeaders(NetworkHeaders.Builder().set("X-Emby-Token", token).build())
+                        }
+                    }
+                    .build()
             }
-            .build()
-    }
+        }
 
     Box(
-        modifier = modifier.size(size).clip(CircleShape),
+        modifier =
+            modifier
+                .size(size)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
-        if (request != null) {
+        Icon(
+            painter = painterResource(CoreR.drawable.ic_user),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp),
+        )
+        if (request != null && !failed) {
             AsyncImage(
                 model = request,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                placeholder = placeholder,
-                error = painterResource(CoreR.drawable.ic_user),
-                modifier = Modifier.size(size).clip(CircleShape),
+                onError = { failed = true },
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
             )
-        } else {
+        }
+    }
+}
+
+@Composable
+fun ProfileAdminBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_user),
+                painter = painterResource(CoreR.drawable.ic_shield),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(size * 0.58f),
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(12.dp),
+            )
+            Text(
+                text = stringResource(R.string.profile_admin),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
             )
         }
     }

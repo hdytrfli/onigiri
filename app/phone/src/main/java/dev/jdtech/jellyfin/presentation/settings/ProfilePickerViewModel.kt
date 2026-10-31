@@ -22,6 +22,7 @@ data class ProfileItem(
     val name: String,
     val isLocked: Boolean,
     val isCurrent: Boolean,
+    val isAdmin: Boolean,
     val accessToken: String?,
 )
 
@@ -76,6 +77,7 @@ constructor(
                                 name = user.name,
                                 isLocked = appPreferences.hasProfilePin(server.id, user.id),
                                 isCurrent = user.id == server.currentUserId,
+                                isAdmin = appPreferences.isProfileAdmin(server.id, user.id),
                                 accessToken = user.accessToken,
                             )
                         },

@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +20,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +45,6 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
-import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.onboarding.PinCodeField
@@ -80,18 +78,20 @@ fun ProfilePickerScreen(
             )
         }
     ) { innerPadding ->
-        PageContent(modifier = Modifier.padding(innerPadding)) {
-            ProfilePickerContent(
-                state = state,
-                onProfileClick = viewModel::onProfileClick,
-                onAddProfile = onAddProfile,
-                onDismissPin = viewModel::dismissPin,
-                onSubmitPin = viewModel::submitPin,
-                onForgotPin = viewModel::showForgotPin,
-                onDismissForgot = viewModel::dismissForgotPin,
-                onSubmitPassword = viewModel::submitPassword,
-            )
-        }
+        ProfilePickerContent(
+            state = state,
+            onProfileClick = viewModel::onProfileClick,
+            onAddProfile = onAddProfile,
+            onDismissPin = viewModel::dismissPin,
+            onSubmitPin = viewModel::submitPin,
+            onForgotPin = viewModel::showForgotPin,
+            onDismissForgot = viewModel::dismissForgotPin,
+            onSubmitPassword = viewModel::submitPassword,
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = MaterialTheme.spacings.gutter),
+        )
     }
 }
 
@@ -106,16 +106,17 @@ private fun ProfilePickerContent(
     onForgotPin: (ProfileItem) -> Unit,
     onDismissForgot: () -> Unit,
     onSubmitPassword: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val columns = gridColumns(GridSize.PROFILE)
     val gap = LocalGridGap.current
 
     if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(modifier = modifier, contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(modifier = modifier) {
             val cellWidth = (maxWidth - gap * (columns - 1).toFloat()) / columns.toFloat()
 
             Column(
@@ -253,97 +254,97 @@ private fun ProfileCard(
     width: androidx.compose.ui.unit.Dp,
     onClick: () -> Unit,
 ) {
-    Surface(
-        modifier = Modifier.width(width).clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        border =
-            if (profile.isCurrent) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-            } else {
-                null
-            },
+    Column(
+        modifier =
+            Modifier.width(width)
+                .clickable(onClick = onClick)
+                .padding(vertical = MaterialTheme.spacings.small),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
     ) {
-        Column(
-            modifier = Modifier.padding(MaterialTheme.spacings.medium),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-        ) {
-            Box {
-                ProfileAvatar(
-                    avatarUrl =
-                        baseUrl?.let { "$it/Users/${profile.id}/Images/Primary?maxWidth=200" },
-                    accessToken = profile.accessToken,
-                    size = 64.dp,
-                )
-                if (profile.isLocked) {
-                    Box(
-                        modifier =
-                            Modifier.align(Alignment.BottomEnd)
-                                .size(22.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceContainerHigh,
-                                    CircleShape,
-                                )
-                                .padding(4.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_lock),
-                            contentDescription = stringResource(R.string.profile_locked),
-                            modifier = Modifier.size(14.dp),
-                        )
-                    }
+        Box {
+            ProfileAvatar(
+                avatarUrl = baseUrl?.let { "$it/Users/${profile.id}/Images/Primary?maxWidth=200" },
+                accessToken = profile.accessToken,
+                size = 72.dp,
+            )
+            if (profile.isLocked) {
+                Box(
+                    modifier =
+                        Modifier.align(Alignment.BottomEnd)
+                            .size(24.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                CircleShape,
+                            )
+                            .padding(5.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_lock),
+                        contentDescription = stringResource(R.string.profile_locked),
+                        modifier = Modifier.size(14.dp),
+                    )
                 }
             }
-            Text(
-                text = profile.name,
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
             if (profile.isCurrent) {
-                Text(
-                    text = stringResource(R.string.profile_current),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                Box(
+                    modifier =
+                        Modifier.align(Alignment.TopStart)
+                            .size(24.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                            .padding(5.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_check),
+                        contentDescription = stringResource(R.string.profile_current),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                }
             }
+        }
+        Text(
+            text = profile.name,
+            style = MaterialTheme.typography.titleSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (profile.isAdmin) {
+            ProfileAdminBadge()
         }
     }
 }
 
 @Composable
 private fun AddProfileCard(width: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier.width(width).clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    Column(
+        modifier =
+            Modifier.width(width)
+                .clickable(onClick = onClick)
+                .padding(vertical = MaterialTheme.spacings.small),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
     ) {
-        Column(
-            modifier = Modifier.padding(MaterialTheme.spacings.medium).fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        Box(
+            modifier =
+                Modifier.size(72.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center,
         ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.size(64.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_plus),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-            }
-            Text(
-                text = stringResource(R.string.profile_add),
-                style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center,
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_plus),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(32.dp),
             )
         }
+        Text(
+            text = stringResource(R.string.profile_add),
+            style = MaterialTheme.typography.titleSmall,
+            textAlign = TextAlign.Center,
+        )
     }
 }

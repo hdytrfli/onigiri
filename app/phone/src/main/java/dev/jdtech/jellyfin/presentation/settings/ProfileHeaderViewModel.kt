@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.api.JellyfinApi
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ data class ProfileHeaderState(
     val serverName: String? = null,
     val avatarUrl: String? = null,
     val accessToken: String? = null,
+    val isAdmin: Boolean = false,
 )
 
 @HiltViewModel
@@ -23,6 +25,7 @@ class ProfileHeaderViewModel
 constructor(
     private val repository: SetupRepository,
     private val jellyfinApi: JellyfinApi,
+    private val appPreferences: AppPreferences,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileHeaderState())
     val state = _state.asStateFlow()
@@ -47,6 +50,10 @@ constructor(
                             null
                         },
                     accessToken = user?.accessToken,
+                    isAdmin =
+                        user != null &&
+                            server != null &&
+                            appPreferences.isProfileAdmin(server.id, user.id),
                 )
             )
         }

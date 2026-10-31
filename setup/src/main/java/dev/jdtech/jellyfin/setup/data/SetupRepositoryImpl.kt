@@ -241,6 +241,11 @@ class SetupRepositoryImpl(
 
         database.insertUser(user)
         database.updateServerCurrentUser(authenticationResult.serverId!!, user.id)
+        appPreferences.setProfileAdmin(
+            serverId = authenticationResult.serverId!!,
+            userId = user.id,
+            isAdmin = authenticationResult.user?.policy?.isAdministrator == true,
+        )
 
         jellyfinApi.apply {
             api.update(accessToken = authenticationResult.accessToken)
