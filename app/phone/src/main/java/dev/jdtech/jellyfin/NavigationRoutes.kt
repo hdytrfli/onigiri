@@ -4,6 +4,8 @@ import androidx.navigation3.runtime.NavKey
 import dev.jdtech.jellyfin.models.CollectionType
 import kotlinx.serialization.Serializable
 
+@Serializable data object OnboardingRoute : NavKey
+
 @Serializable data object WelcomeRoute : NavKey
 
 @Serializable data object ServersRoute : NavKey

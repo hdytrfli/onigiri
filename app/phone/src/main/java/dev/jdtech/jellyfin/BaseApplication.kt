@@ -32,6 +32,8 @@ import timber.log.Timber
 class BaseApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
     @Inject lateinit var appPreferences: AppPreferences
 
+    @Inject lateinit var onboardingSessionMigration: OnboardingSessionMigration
+
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
     override val workManagerConfiguration: Configuration
@@ -43,6 +45,8 @@ class BaseApplication : Application(), Configuration.Provider, SingletonImageLoa
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+
+        onboardingSessionMigration.run()
 
         val workManager = WorkManager.getInstance(applicationContext)
 

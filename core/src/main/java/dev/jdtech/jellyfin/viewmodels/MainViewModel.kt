@@ -90,6 +90,14 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     }
                 }
 
+            val setupFlagsWithOnboarding =
+                combine(
+                    setupFlags,
+                    appPreferences.observe(appPreferences.onboardingComplete),
+                ) { flags, onboardingComplete ->
+                    flags.copy(onboardingComplete = onboardingComplete)
+                }
+
             val interfacePrefs =
                 combine(
                         appPreferences.observe(appPreferences.backdropPortraitRatio),
@@ -171,7 +179,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                 }
 
             combine(
-                    setupFlags,
+                    setupFlagsWithOnboarding,
                     appPreferences.observe(appPreferences.offlineMode),
                     interfacePrefs,
                     titlePrefs,
@@ -182,6 +190,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         hasServers = flags.hasServers,
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
+                        onboardingComplete = flags.onboardingComplete,
                         isOfflineMode = offlineMode,
                         backdropPortraitRatio =
                             interfacePrefs.portraitRatio.toFloatOrNull() ?: 1.5f,
@@ -212,6 +221,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val hasServers: Boolean,
         val hasCurrentServer: Boolean,
         val hasCurrentUser: Boolean,
+        val onboardingComplete: Boolean = false,
     )
 
     private data class TitlePrefs(
@@ -253,6 +263,7 @@ data class MainState(
     val hasServers: Boolean = false,
     val hasCurrentServer: Boolean = false,
     val hasCurrentUser: Boolean = false,
+    val onboardingComplete: Boolean = false,
     val isOfflineMode: Boolean = false,
     val backdropPortraitRatio: Float = 1.5f,
     val backdropLandscapeRatio: Float = 2.3333333f,

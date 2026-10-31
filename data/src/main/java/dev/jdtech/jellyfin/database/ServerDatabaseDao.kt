@@ -75,6 +75,10 @@ interface ServerDatabaseDao {
 
     @Query("DELETE FROM servers WHERE id = :id") suspend fun deleteServer(id: String)
 
+    @Query("DELETE FROM users") suspend fun deleteAllUsers()
+
+    @Query("DELETE FROM servers") suspend fun deleteAllServers()
+
     @Query("DELETE FROM users WHERE id = :id") suspend fun deleteUser(id: UUID)
 
     @Query("DELETE FROM serverAddresses WHERE id = :id") suspend fun deleteServerAddress(id: UUID)

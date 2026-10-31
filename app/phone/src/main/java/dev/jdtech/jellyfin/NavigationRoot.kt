@@ -75,6 +75,7 @@ import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
 import dev.jdtech.jellyfin.presentation.film.ShowsScreen
 import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
+import dev.jdtech.jellyfin.presentation.onboarding.OnboardingScreen
 import dev.jdtech.jellyfin.presentation.reader.ReaderFontScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
@@ -143,16 +144,12 @@ fun NavigationRoot(
     hasServers: Boolean,
     hasCurrentServer: Boolean,
     hasCurrentUser: Boolean,
+    onboardingComplete: Boolean,
     confirmExit: Boolean = false,
 ) {
-    val setupComplete = hasServers && hasCurrentServer && hasCurrentUser
+    val setupComplete = onboardingComplete && hasServers && hasCurrentServer && hasCurrentUser
 
-    val setupStartRoute: NavKey =
-        when {
-            hasServers && hasCurrentServer -> UsersRoute
-            hasServers -> ServersRoute
-            else -> WelcomeRoute
-        }
+    val setupStartRoute: NavKey = OnboardingRoute
 
     // Navigation state for both modes is hoisted so that it survives switching between them.
     val setupBackStack = rememberNavBackStack(setupStartRoute)
@@ -401,6 +398,9 @@ private fun EntryProviderScope<NavKey>.setupEntries(
     showBack: Boolean,
     onSetupComplete: () -> Unit,
 ) {
+    entry<OnboardingRoute> {
+        OnboardingScreen(onComplete = dropUnlessResumed { onSetupComplete() })
+    }
     entry<WelcomeRoute> {
         WelcomeScreen(onContinueClick = dropUnlessResumed { navigate(ServersRoute) })
     }

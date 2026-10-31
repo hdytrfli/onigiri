@@ -134,6 +134,7 @@ class MainActivity : AppCompatActivity() {
                                 hasServers = state.hasServers,
                                 hasCurrentServer = state.hasCurrentServer,
                                 hasCurrentUser = state.hasCurrentUser,
+                                onboardingComplete = state.onboardingComplete,
                                 confirmExit = state.confirmExit,
                             )
                         }

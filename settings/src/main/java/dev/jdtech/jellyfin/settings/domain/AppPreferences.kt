@@ -2,7 +2,10 @@ package dev.jdtech.jellyfin.settings.domain
 
 import android.content.SharedPreferences
 import dev.jdtech.jellyfin.settings.domain.models.Preference
+import java.security.MessageDigest
+import java.security.SecureRandom
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +25,12 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Server
     val currentServer = Preference<String?>("pref_current_server", null)
+
+    /** Whether the new onboarding flow has been completed at least once. */
+    val onboardingComplete = Preference("pref_onboarding_complete", false)
+
+    /** Whether the one-time pre-onboarding session purge has already run. */
+    val onboardingSessionCleared = Preference("pref_onboarding_session_cleared", false)
 
     // Language
     val preferredAudioLanguage = Preference<String?>("pref_audio_language", defaultLanguage)
@@ -262,4 +271,49 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
         }
         editor.apply()
     }
+
+    // Profile PINs are local to this device and deliberately independent from the Jellyfin
+    // password. A per-profile random salt keeps identical PINs from sharing a hash.
+
+    fun hasProfilePin(serverId: String, userId: UUID): Boolean =
+        sharedPreferences.getString(profilePinHashKey(serverId, userId), null) != null
+
+    fun setProfilePin(serverId: String, userId: UUID, pin: String) {
+        val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
+        val saltHex = salt.toHex()
+        sharedPreferences
+            .edit()
+            .putString(profilePinSaltKey(serverId, userId), saltHex)
+            .putString(profilePinHashKey(serverId, userId), hashPin(salt, pin))
+            .apply()
+    }
+
+    fun verifyProfilePin(serverId: String, userId: UUID, pin: String): Boolean {
+        val salt = sharedPreferences.getString(profilePinSaltKey(serverId, userId), null)
+        val stored = sharedPreferences.getString(profilePinHashKey(serverId, userId), null)
+        if (salt == null || stored == null) return false
+        return stored == hashPin(salt.hexToBytes(), pin)
+    }
+
+    fun clearProfilePin(serverId: String, userId: UUID) {
+        sharedPreferences
+            .edit()
+            .remove(profilePinSaltKey(serverId, userId))
+            .remove(profilePinHashKey(serverId, userId))
+            .apply()
+    }
+
+    private fun profilePinSaltKey(serverId: String, userId: UUID) =
+        "pref_profile_pin_salt_${serverId}_$userId"
+
+    private fun profilePinHashKey(serverId: String, userId: UUID) =
+        "pref_profile_pin_hash_${serverId}_$userId"
+
+    private fun hashPin(salt: ByteArray, pin: String): String =
+        MessageDigest.getInstance("SHA-256").digest(salt + pin.toByteArray(Charsets.UTF_8)).toHex()
+
+    private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
+
+    private fun String.hexToBytes(): ByteArray =
+        chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 }
