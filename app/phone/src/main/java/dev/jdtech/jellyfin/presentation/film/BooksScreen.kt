@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +43,7 @@ import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
+import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
 import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
@@ -61,6 +63,8 @@ fun BooksScreen(
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    var showSortDialog by remember { mutableStateOf(false) }
+    var showDisplayDialog by remember { mutableStateOf(false) }
     val safePadding = rememberSafePadding()
 
     BackHandler(enabled = searchExpanded) {
@@ -126,6 +130,25 @@ fun BooksScreen(
                                     )
                                 },
                             )
+                            AppIconButton(
+                                onClick = { showDisplayDialog = true },
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_tv_minimal),
+                                        contentDescription =
+                                            stringResource(CoreR.string.display_info),
+                                    )
+                                },
+                            )
+                            AppIconButton(
+                                onClick = { showSortDialog = true },
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_arrow_down_up),
+                                        contentDescription = stringResource(CoreR.string.sort_by),
+                                    )
+                                },
+                            )
                         },
                     )
                 }
@@ -186,10 +209,6 @@ fun BooksScreen(
                                     modifier = Modifier.animateItem(),
                                     fillWidth = true,
                                     showYear = ListDisplayField.Year in state.displayFields,
-                                    showCommunityRating =
-                                        ListDisplayField.CommunityRating in state.displayFields,
-                                    showAgeRating =
-                                        ListDisplayField.AgeRating in state.displayFields,
                                 )
                             }
                         }
@@ -197,5 +216,23 @@ fun BooksScreen(
                 }
             }
         }
+    }
+
+    if (showSortDialog) {
+        SortByDialog(
+            currentSortBy = state.sortBy,
+            currentSortOrder = state.sortOrder,
+            onUpdate = viewModel::changeSorting,
+            onDismissRequest = { showSortDialog = false },
+        )
+    }
+
+    if (showDisplayDialog) {
+        DisplayInfoDialog(
+            fields = state.displayFields,
+            onToggle = viewModel::toggleDisplayField,
+            onDismiss = { showDisplayDialog = false },
+            availableFields = setOf(ListDisplayField.Year),
+        )
     }
 }

@@ -138,6 +138,7 @@ class JellyfinRepositoryImpl(
                             ItemFields.OVERVIEW,
                             ItemFields.PEOPLE,
                             ItemFields.PRIMARY_IMAGE_ASPECT_RATIO,
+                            ItemFields.STUDIOS,
                         ),
                 )
                 .content

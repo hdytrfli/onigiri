@@ -404,6 +404,7 @@ fun DisplayInfoDialog(
     fields: Set<ListDisplayField>,
     onToggle: (ListDisplayField) -> Unit,
     onDismiss: () -> Unit,
+    availableFields: Set<ListDisplayField> = ListDisplayField.entries.toSet(),
 ) {
     BaseDialog(
         title = stringResource(CoreR.string.display_info),
@@ -411,24 +412,30 @@ fun DisplayInfoDialog(
         onDismiss = onDismiss,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            AppOptionRow(
-                text = stringResource(CoreR.string.display_year),
-                onClick = { onToggle(ListDisplayField.Year) },
-                selected = ListDisplayField.Year in fields,
-                role = Role.Checkbox,
-            )
-            AppOptionRow(
-                text = stringResource(CoreR.string.display_rating),
-                onClick = { onToggle(ListDisplayField.CommunityRating) },
-                selected = ListDisplayField.CommunityRating in fields,
-                role = Role.Checkbox,
-            )
-            AppOptionRow(
-                text = stringResource(CoreR.string.display_age_rating),
-                onClick = { onToggle(ListDisplayField.AgeRating) },
-                selected = ListDisplayField.AgeRating in fields,
-                role = Role.Checkbox,
-            )
+            if (ListDisplayField.Year in availableFields) {
+                AppOptionRow(
+                    text = stringResource(CoreR.string.display_year),
+                    onClick = { onToggle(ListDisplayField.Year) },
+                    selected = ListDisplayField.Year in fields,
+                    role = Role.Checkbox,
+                )
+            }
+            if (ListDisplayField.CommunityRating in availableFields) {
+                AppOptionRow(
+                    text = stringResource(CoreR.string.display_rating),
+                    onClick = { onToggle(ListDisplayField.CommunityRating) },
+                    selected = ListDisplayField.CommunityRating in fields,
+                    role = Role.Checkbox,
+                )
+            }
+            if (ListDisplayField.AgeRating in availableFields) {
+                AppOptionRow(
+                    text = stringResource(CoreR.string.display_age_rating),
+                    onClick = { onToggle(ListDisplayField.AgeRating) },
+                    selected = ListDisplayField.AgeRating in fields,
+                    role = Role.Checkbox,
+                )
+            }
         }
     }
 }

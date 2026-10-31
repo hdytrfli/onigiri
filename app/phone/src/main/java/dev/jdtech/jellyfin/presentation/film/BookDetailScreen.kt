@@ -44,6 +44,7 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import java.util.UUID
+import org.jellyfin.sdk.model.api.PersonKind
 
 /** A book's detail page, built from the same components as the movie detail page. */
 @Composable
@@ -139,8 +140,12 @@ fun BookDetailScreen(
                                     .orEmpty(),
                         )
                         BookInfoRow(
-                            label = stringResource(R.string.book_info_genres),
-                            value = item.genres.joinToString(", "),
+                            label = stringResource(R.string.book_info_author),
+                            value =
+                                item.people
+                                    .filter { it.type == PersonKind.AUTHOR }
+                                    .ifEmpty { item.people }
+                                    .joinToString(", ") { it.name },
                         )
                         BookInfoRow(
                             label = stringResource(R.string.book_info_publisher),

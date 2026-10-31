@@ -72,7 +72,7 @@
     <string name="profile_password_description">Enter the Jellyfin password for %1$s to reset this profile PIN.</string>
     <string name="profile_password_field_description">Needed to reset this profile PIN.</string>
     <string name="book_info_year">Year</string>
-    <string name="book_info_genres">Genres</string>
+    <string name="book_info_author">Author</string>
     <string name="book_info_publisher">Publisher</string>
     <string name="profile_password_wrong">That password was not accepted.</string>
     <string name="profile_password_unlock">Unlock</string>

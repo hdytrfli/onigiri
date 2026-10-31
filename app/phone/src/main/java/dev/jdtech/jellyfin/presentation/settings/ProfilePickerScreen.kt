@@ -524,7 +524,7 @@ private fun ProfileCard(
                     ) {
                         if (onChangePin != null) {
                             MenuActionItem(
-                                icon = CoreR.drawable.ic_lock,
+                                icon = CoreR.drawable.ic_asterisk,
                                 label =
                                     stringResource(
                                         if (profile.isLocked) {

@@ -55,6 +55,7 @@ fun ItemCard(
         when (item) {
             is FindroidMovie -> item.productionYear ?: item.premiereDate?.year
             is FindroidShow -> item.productionYear
+            is FindroidBook -> item.productionYear ?: item.premiereDate?.year
             else -> null
         }
     val communityRating =

@@ -7,6 +7,7 @@ import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.SortBy
+import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
@@ -21,6 +22,8 @@ data class BooksState(
     val libraries: List<FindroidCollection> = emptyList(),
     val items: Map<UUID, List<FindroidItem>> = emptyMap(),
     val displayFields: Set<ListDisplayField> = emptySet(),
+    val sortBy: SortBy = SortBy.NAME,
+    val sortOrder: SortOrder = SortOrder.ASCENDING,
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )
@@ -46,6 +49,8 @@ constructor(
         if (!force && loaded) return
         loaded = true
         viewModelScope.launch(Dispatchers.IO) {
+            val sortBy = SortBy.fromString(appPreferences.getValue(appPreferences.sortBy))
+            val sortOrder = SortOrder.fromString(appPreferences.getValue(appPreferences.sortOrder))
             _state.emit(
                 _state.value.copy(
                     isLoading = true,
@@ -54,6 +59,8 @@ constructor(
                         ListDisplayField.fromKeys(
                             appPreferences.getValue(appPreferences.listDisplayFields)
                         ),
+                    sortBy = sortBy,
+                    sortOrder = sortOrder,
                 )
             )
             try {
@@ -63,7 +70,8 @@ constructor(
                         parentId = null,
                         includeTypes = listOf(BaseItemKind.BOOK, BaseItemKind.AUDIO_BOOK),
                         recursive = true,
-                        sortBy = SortBy.NAME,
+                        sortBy = sortBy,
+                        sortOrder = sortOrder,
                     )
                 val libraries = if (books.isEmpty()) emptyList() else repository.getLibraries()
                 _state.emit(
@@ -106,6 +114,25 @@ constructor(
                         }
                 )
         }
+    }
+
+    fun changeSorting(sortBy: SortBy, sortOrder: SortOrder) {
+        appPreferences.setValue(appPreferences.sortBy, sortBy.toString())
+        appPreferences.setValue(appPreferences.sortOrder, sortOrder.toString())
+        _state.value = _state.value.copy(sortBy = sortBy, sortOrder = sortOrder)
+        load(force = true)
+    }
+
+    fun toggleDisplayField(field: ListDisplayField) {
+        val fields = _state.value.displayFields.toMutableSet()
+        if (!fields.add(field)) {
+            fields.remove(field)
+        }
+        appPreferences.setValue(
+            appPreferences.listDisplayFields,
+            fields.map { it.key }.toSet(),
+        )
+        _state.value = _state.value.copy(displayFields = fields)
     }
 
     fun retry() {
