@@ -73,7 +73,7 @@ constructor(
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var triggerDistance = 0f
     private var maxPull = 0f
-    private val triggerFraction = 0.30f
+    private val triggerFraction = 0.20f
     private val circleRadius = 24f * density
     private val ringWidth = 3f * density
 
@@ -212,8 +212,8 @@ constructor(
         val centerX = width / 2f
         val centerY =
             when (direction) {
-                Direction.NEXT -> height - pullDistance + circleRadius
-                Direction.PREVIOUS -> pullDistance - circleRadius
+                Direction.NEXT -> height - pullDistance / 2f
+                Direction.PREVIOUS -> pullDistance / 2f
             }
         val ringRadius = circleRadius - ringWidth / 2f
         ringRect.set(
