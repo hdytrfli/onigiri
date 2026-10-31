@@ -182,7 +182,7 @@ fun QuickConnectContent(
         }
         AppButton(
             onClick = onCancel,
-            variant = AppButtonVariant.Ghost,
+            variant = AppButtonVariant.Secondary,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(text = stringResource(R.string.onboarding_back))

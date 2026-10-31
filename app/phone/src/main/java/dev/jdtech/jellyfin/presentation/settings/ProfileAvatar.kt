@@ -50,12 +50,12 @@ fun ProfileAvatar(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 placeholder = placeholder,
-                error = painterResource(CoreR.drawable.user_placeholder),
+                error = painterResource(CoreR.drawable.ic_user),
                 modifier = Modifier.size(size).clip(CircleShape),
             )
         } else {
             Icon(
-                painter = painterResource(CoreR.drawable.user_placeholder),
+                painter = painterResource(CoreR.drawable.ic_user),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(size * 0.58f),
