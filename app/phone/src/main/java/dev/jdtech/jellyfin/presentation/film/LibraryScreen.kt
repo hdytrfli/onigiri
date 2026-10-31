@@ -415,21 +415,18 @@ fun DisplayInfoDialog(
                 text = stringResource(CoreR.string.display_year),
                 onClick = { onToggle(ListDisplayField.Year) },
                 selected = ListDisplayField.Year in fields,
-                iconDrawableId = CoreR.drawable.ic_calendar,
                 role = Role.Checkbox,
             )
             AppOptionRow(
                 text = stringResource(CoreR.string.display_rating),
                 onClick = { onToggle(ListDisplayField.CommunityRating) },
                 selected = ListDisplayField.CommunityRating in fields,
-                iconDrawableId = CoreR.drawable.ic_star,
                 role = Role.Checkbox,
             )
             AppOptionRow(
                 text = stringResource(CoreR.string.display_age_rating),
                 onClick = { onToggle(ListDisplayField.AgeRating) },
                 selected = ListDisplayField.AgeRating in fields,
-                iconDrawableId = CoreR.drawable.ic_shield,
                 role = Role.Checkbox,
             )
         }

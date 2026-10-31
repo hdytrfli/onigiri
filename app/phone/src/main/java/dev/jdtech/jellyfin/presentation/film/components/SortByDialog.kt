@@ -66,7 +66,6 @@ fun SortByDialog(
                         onUpdate(selectedOption, selectedOrder)
                     },
                     selected = isSelected,
-                    iconDrawableId = CoreR.drawable.ic_diamond,
                     role = Role.RadioButton,
                     trailingContent = {
                         if (isSelected) {

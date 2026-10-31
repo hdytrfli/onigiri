@@ -52,6 +52,9 @@
     <string name="profile_remove_title">Remove profile?</string>
     <string name="profile_remove_description">Remove %1$s from this device? The Jellyfin user itself is not deleted.</string>
     <string name="profile_remove_action">Remove</string>
+    <string name="profile_add_lock">Add profile lock</string>
+    <string name="profile_change_lock">Change profile lock</string>
+    <string name="profile_save_pin">Save PIN</string>
     <string name="profile_pin_title">Enter profile PIN</string>
     <string name="profile_pin_description">Unlock %1$s to switch to this profile.</string>
     <string name="profile_pin_wrong">That PIN is not correct.</string>

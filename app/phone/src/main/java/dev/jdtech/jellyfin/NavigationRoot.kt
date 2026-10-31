@@ -821,13 +821,11 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         }
     }
     entry<ProfilePickerRoute> { key ->
-        SuiteInsetBox {
-            ProfilePickerScreen(
-                onBack = if (key.canGoBack) dropUnlessResumed { navigator.goBack() } else null,
-                onAddProfile = dropUnlessResumed { navigator.navigate(AddProfileRoute) },
-                canGoBack = key.canGoBack,
-            )
-        }
+        ProfilePickerScreen(
+            onBack = if (key.canGoBack) dropUnlessResumed { navigator.goBack() } else null,
+            onAddProfile = dropUnlessResumed { navigator.navigate(AddProfileRoute) },
+            canGoBack = key.canGoBack,
+        )
     }
     entry<AddProfileRoute> { AddProfileScreen(onBack = dropUnlessResumed { navigator.goBack() }) }
     entry<SettingsFileEditRoute> { key ->

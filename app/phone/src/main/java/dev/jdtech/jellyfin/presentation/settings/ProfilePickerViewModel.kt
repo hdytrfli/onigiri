@@ -36,6 +36,8 @@ data class ProfilePickerState(
     val forgotPrompt: ProfileItem? = null,
     val forgotError: UiText? = null,
     val removePrompt: ProfileItem? = null,
+    val pinEditorPrompt: ProfileItem? = null,
+    val pinEditorError: UiText? = null,
     val isBusy: Boolean = false,
 )
 
@@ -155,6 +157,33 @@ constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun showPinEditor(profile: ProfileItem) {
+        if (profile.isCurrent.not()) return
+        _state.update { it.copy(pinEditorPrompt = profile, pinEditorError = null) }
+    }
+
+    fun dismissPinEditor() {
+        _state.update { it.copy(pinEditorPrompt = null, pinEditorError = null) }
+    }
+
+    fun saveProfilePin(pin: String) {
+        val profile = _state.value.pinEditorPrompt ?: return
+        val serverId = _state.value.serverId ?: return
+        if (pin.length != 4) {
+            _state.update {
+                it.copy(pinEditorError = UiText.StringResource(R.string.onboarding_pin_incomplete))
+            }
+            return
+        }
+        if (_state.value.isBusy) return
+        viewModelScope.launch {
+            _state.update { it.copy(isBusy = true, pinEditorError = null) }
+            appPreferences.setProfilePin(serverId, profile.id, pin)
+            _state.update { it.copy(isBusy = false, pinEditorPrompt = null) }
+            load()
         }
     }
 

@@ -42,7 +42,7 @@ fun SettingsProfileHeader(
         ProfileAvatar(
             avatarUrl = state.avatarUrl,
             accessToken = state.accessToken,
-            size = 72.dp,
+            size = 96.dp,
         )
         Column(modifier = Modifier.weight(1f)) {
             Row(
@@ -71,7 +71,7 @@ fun SettingsProfileHeader(
         AppIconButton(
             onClick = onLogoutProfile,
             size = AppButtonSize.Decorator,
-            variant = AppButtonVariant.Secondary,
+            variant = AppButtonVariant.Ghost,
         ) {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_logout),
@@ -81,7 +81,7 @@ fun SettingsProfileHeader(
         AppIconButton(
             onClick = onChangeProfile,
             size = AppButtonSize.Decorator,
-            variant = AppButtonVariant.Secondary,
+            variant = AppButtonVariant.Ghost,
         ) {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_user),
