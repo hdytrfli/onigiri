@@ -16,6 +16,7 @@ data class ReaderSettings(
     val fontWeight: Float = 1f,
     val pageMargins: Float = 1f,
     val scroll: Boolean = false,
+    val pullDistance: Float = 0.2f,
     val columnCount: Int = 1,
     val textAlign: String = "",
     val textNormalization: Boolean = true,
@@ -51,6 +52,7 @@ fun AppPreferences.readerSettings(): ReaderSettings {
         fontWeight = float(readerFontWeight, 1f),
         pageMargins = float(readerPageMargins, 1f),
         scroll = getValue(readerMode) == "scroll",
+        pullDistance = float(readerPullDistance, 0.2f).coerceIn(0f, 1f),
         columnCount = if (getValue(readerMode) == "dual") 2 else 1,
         textAlign = getValue(readerTextAlign).takeIf { it != "default" }.orEmpty(),
         textNormalization = getValue(readerTextNormalization),
@@ -70,6 +72,7 @@ fun AppPreferences.setReaderSettings(settings: ReaderSettings) {
     setValue(readerFontSize, settings.fontSize.toString())
     setValue(readerFontWeight, settings.fontWeight.toString())
     setValue(readerPageMargins, settings.pageMargins.toString())
+    setValue(readerPullDistance, settings.pullDistance.toString())
     setValue(
         readerMode,
         when {

@@ -69,11 +69,25 @@ constructor(
             invalidate()
         }
 
+    /** How far the chapter has to be pulled before it changes, as a fraction of the height. */
+    var pullDistanceFraction: Float = 0.20f
+        set(value) {
+            field = value.coerceIn(0f, 1f)
+            updatePullDistances()
+            if (field <= 0f) {
+                resetAnimator?.cancel()
+                resetAnimator = null
+                pullDistance = 0f
+                pulling = false
+                applyContentTranslation()
+                invalidate()
+            }
+        }
+
     private val density = resources.displayMetrics.density
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var triggerDistance = 0f
     private var maxPull = 0f
-    private val triggerFraction = 0.20f
     private val circleRadius = 24f * density
     private val ringWidth = 3f * density
 
@@ -113,7 +127,11 @@ constructor(
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
-        triggerDistance = height * triggerFraction
+        updatePullDistances()
+    }
+
+    private fun updatePullDistances() {
+        triggerDistance = height * pullDistanceFraction
         maxPull = triggerDistance * 1.15f
     }
 
@@ -124,7 +142,7 @@ constructor(
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        if (!pullEnabled) return false
+        if (!pullEnabled || triggerDistance <= 0f) return false
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -208,7 +226,12 @@ constructor(
 
         if (!pullEnabled || pullDistance <= 0f) return
 
-        val progress = (pullDistance / triggerDistance).coerceIn(0f, 1f)
+        val progress =
+            if (triggerDistance > 0f) {
+                (pullDistance / triggerDistance).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
         val centerX = width / 2f
         val centerY =
             when (direction) {

@@ -242,6 +242,8 @@
     <string name="settings_reader_brightness_summary">Dim the page while reading</string>
     <string name="settings_reader_mode">Reading mode</string>
     <string name="settings_reader_mode_summary">Scroll continuously, or turn one or two pages</string>
+    <string name="settings_reader_pull_distance">Chapter pull distance</string>
+    <string name="settings_reader_pull_distance_summary">How far to pull past a chapter edge in scroll mode; 0% turns it off</string>
     <string name="settings_reader_scroll">Scroll</string>
     <string name="settings_reader_scroll_summary">Scroll continuously instead of turning pages</string>
     <string name="settings_reader_columns">Pages</string>

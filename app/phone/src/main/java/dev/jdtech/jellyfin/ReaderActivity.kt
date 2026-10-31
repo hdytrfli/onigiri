@@ -254,6 +254,7 @@ class ReaderActivity : AppCompatActivity() {
             if (readerIsScroll) scrollPaddingHref = null
             binding.readerPull.pullEnabled = isPullEligible(settings)
             updateScrollModePadding()
+            maxWidthHref = null
             lifecycleScope.launch { applyMaxWidth(settings.maxLineLengthRem, force = true) }
         }
     }
@@ -280,6 +281,7 @@ class ReaderActivity : AppCompatActivity() {
     private fun isPullEligible(settings: ReaderSettings): Boolean {
         val layout = publication?.metadata?.layout
         return settings.scroll &&
+            settings.pullDistance > 0f &&
             epubNavigator != null &&
             publication?.conformsTo(Publication.Profile.EPUB) == true &&
             layout != Layout.FIXED
@@ -293,6 +295,7 @@ class ReaderActivity : AppCompatActivity() {
                 else -> Theme.DARK
             }
         val ringColor = theme.contentColor
+        binding.readerPull.pullDistanceFraction = settings.pullDistance
         binding.readerPull.ringColor = ringColor
         binding.readerPull.trackColor = (ringColor and 0x00FFFFFF) or (0x33 shl 24)
         binding.readerPull.setBackgroundColor(theme.backgroundColor)
@@ -476,6 +479,7 @@ class ReaderActivity : AppCompatActivity() {
         val settings = appPreferences.readerSettings()
         val epubPreferences = settings.toEpubPreferences()
         applyPullAppearance(settings)
+        maxWidthHref = null
 
         val fragmentClass: Class<out Fragment>
         val fragmentFactory: androidx.fragment.app.FragmentFactory
@@ -508,6 +512,7 @@ class ReaderActivity : AppCompatActivity() {
                     object : EpubNavigatorFragment.PaginationListener {
                         override fun onPageLoaded() {
                             updateScrollModePadding()
+                            applyMaxWidthForPage()
                         }
 
                         override fun onPageChanged(
@@ -516,6 +521,7 @@ class ReaderActivity : AppCompatActivity() {
                             locator: Locator,
                         ) {
                             updateScrollModePadding(locator)
+                            applyMaxWidthForPage(locator)
                         }
                     }
                 fragmentFactory =
@@ -605,11 +611,6 @@ class ReaderActivity : AppCompatActivity() {
                         page = locator.locations.position ?: uiState.value.page,
                         pageCount = positions.size.takeIf { it > 0 } ?: uiState.value.pageCount,
                     )
-                if (href != maxWidthHref) {
-                    maxWidthHref = href
-                    val maxWidth = appPreferences.readerSettings().maxLineLengthRem
-                    lifecycleScope.launch { applyMaxWidth(maxWidth, force = true) }
-                }
                 val atEnd =
                     (locator.locations.totalProgression ?: 0.0) >= 0.999 ||
                         (positions.isNotEmpty() && locator.locations.position == positions.size)
@@ -632,6 +633,17 @@ class ReaderActivity : AppCompatActivity() {
      * Applies the page-width cap to the resource currently on screen. Readium's CSS property is
      * injected at creation, but changing the setting while the reader is open needs a live update.
      */
+    private fun applyMaxWidthForPage(locator: Locator? = null) {
+        val href =
+            locator?.href?.toString()
+                ?: epubNavigator?.currentLocator?.value?.href?.toString()
+                ?: return
+        if (href == maxWidthHref) return
+        maxWidthHref = href
+        val maxWidth = appPreferences.readerSettings().maxLineLengthRem
+        lifecycleScope.launch { applyMaxWidth(maxWidth, force = true) }
+    }
+
     private suspend fun applyMaxWidth(rem: Double, force: Boolean) {
         if (!force && rem == appliedMaxWidth) return
         appliedMaxWidth = rem

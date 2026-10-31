@@ -470,6 +470,22 @@ constructor(
                                                     optionValues = R.array.reader_modes_values,
                                                     onUpdate = { loadPreferences(lastIndexes) },
                                                 ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_pull_distance,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_pull_distance_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerPullDistance,
+                                                    options = R.array.reader_pull_distance_options,
+                                                    optionValues =
+                                                        R.array.reader_pull_distance_values,
+                                                    enabled =
+                                                        appPreferences.getValue(
+                                                            appPreferences.readerMode
+                                                        ) == "scroll",
+                                                ),
                                                 PreferenceSelect(
                                                     nameStringResource =
                                                         R.string.settings_reader_alignment,
