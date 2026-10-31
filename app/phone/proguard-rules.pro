@@ -23,10 +23,8 @@
 # Keep class names of all classes for easy debugging (and fix navigation route checking)
 -keepnames class dev.jdtech.jellyfin.** { *; }
 
-# The continuous reader injects a JavaScript bridge into Readium's HTML resource.
--keepclassmembers class dev.jdtech.jellyfin.presentation.reader.ChapterNavBridge {
-    @android.webkit.JavascriptInterface <methods>;
-}
+# Inflated from activity_reader.xml.
+-keep class dev.jdtech.jellyfin.presentation.reader.PullToChapterLayout { *; }
 
 # mpv-android's MPVLib talks to libplayer.so through JNI by member name, and unlike the previous
 # dev.jdtech.mpv:libmpv it ships no consumer ProGuard rules of its own. Same rule the reference

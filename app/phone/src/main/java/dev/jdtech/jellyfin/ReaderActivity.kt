@@ -2,10 +2,14 @@ package dev.jdtech.jellyfin
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
@@ -21,11 +25,9 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.databinding.ActivityReaderBinding
-import dev.jdtech.jellyfin.presentation.reader.CHAPTER_NAV_REMOVE_SCRIPT
-import dev.jdtech.jellyfin.presentation.reader.CHAPTER_NAV_SCRIPT
-import dev.jdtech.jellyfin.presentation.reader.ChapterNavBridge
 import dev.jdtech.jellyfin.presentation.reader.ReaderChapter
 import dev.jdtech.jellyfin.presentation.reader.ReaderOverlay
+import dev.jdtech.jellyfin.presentation.reader.ReaderSettings
 import dev.jdtech.jellyfin.presentation.reader.ReaderTocScreen
 import dev.jdtech.jellyfin.presentation.reader.ReaderUiState
 import dev.jdtech.jellyfin.presentation.reader.readerSettings
@@ -65,7 +67,6 @@ import org.readium.r2.shared.DelicateReadiumApi
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.publication.Layout
-import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.positions
@@ -132,9 +133,6 @@ class ReaderActivity : AppCompatActivity() {
     private var publication: Publication? = null
     private var lastLocator: Locator? = null
     private var locatorJob: Job? = null
-    private var chapterNavJob: Job? = null
-    private var chapterNavHref: String? = null
-    private var chapterNavPendingHref: String? = null
     private var appliedMaxWidth: Double? = null
     private var maxWidthHref: String? = null
     private var startFromBeginning = false
@@ -167,6 +165,14 @@ class ReaderActivity : AppCompatActivity() {
 
         binding = ActivityReaderBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.readerPull.apply {
+            pullEnabled = false
+            canPullNext = { canPullNextChapter() }
+            canPullPrevious = { canPullPreviousChapter() }
+            onPullNext = { goToNextChapter() }
+            onPullPrevious = { goToPreviousChapter() }
+        }
 
         binding.readerDim.alpha = brightnessOverlay(appPreferences.readerSettings().brightness)
 
@@ -238,13 +244,9 @@ class ReaderActivity : AppCompatActivity() {
         if (::binding.isInitialized) {
             val settings = appPreferences.readerSettings()
             binding.readerDim.alpha = brightnessOverlay(settings.brightness)
-            readerIsScroll = settings.scroll
-            if (readerIsScroll) {
-                chapterNavHref = null
-                chapterNavPendingHref = null
-            }
             epubNavigator?.submitPreferences(settings.toEpubPreferences())
-            updateChapterNav()
+            readerIsScroll = settings.scroll
+            binding.readerPull.pullEnabled = isPullEligible(settings)
             lifecycleScope.launch { applyMaxWidth(settings.maxLineLengthRem, force = true) }
         }
     }
@@ -268,69 +270,33 @@ class ReaderActivity : AppCompatActivity() {
         positions.getOrNull(page - 1)?.let { epubNavigator?.go(it) }
     }
 
-    private fun chapterNavBridge(link: Link): Any? {
-        val order = publication?.readingOrder ?: return null
-        val index = order.indexOfFirst { sameResource(it.href.toString(), link.href.toString()) }
-        if (index < 0) return null
-        return ChapterNavBridge(
-            canPrevious = index > 0,
-            canNext = index < order.lastIndex,
-            onPrevious = { runOnUiThread { goToPreviousChapter(index) } },
-            onNext = { runOnUiThread { goToNextChapter(index) } },
-        )
+    private fun isPullEligible(settings: ReaderSettings): Boolean {
+        val layout = publication?.metadata?.layout
+        return settings.scroll &&
+            epubNavigator != null &&
+            publication?.conformsTo(Publication.Profile.EPUB) == true &&
+            layout != Layout.FIXED
     }
 
-    private fun injectChapterNav(href: String) {
-        if (!readerIsScroll || isFinishing || isDestroyed) return
-        if (publication?.metadata?.layout == Layout.FIXED) return
-        val navigator = currentEpubNavigator() ?: return
-        chapterNavPendingHref = href
-        chapterNavJob?.cancel()
-        chapterNavJob = lifecycleScope.launch {
-            val result = runCatching {
-                navigator.evaluateJavascript(CHAPTER_NAV_SCRIPT)
-            }.getOrNull()
-            if (chapterNavPendingHref != href) return@launch
-            chapterNavPendingHref = null
-            chapterNavHref = if (result?.contains("findroid-ok") == true) href else null
-        }
+    private fun canPullNextChapter(): Boolean {
+        if (!readerIsScroll) return false
+        val webView = activeReaderWebView() ?: return false
+        if (webView.canScrollVertically(1)) return false
+        val order = publication?.readingOrder ?: return false
+        val index = currentResourceIndex()
+        return index in 0 until order.lastIndex
     }
 
-    private fun clearChapterNav() {
-        val navigator = currentEpubNavigator() ?: return
-        chapterNavPendingHref = null
-        chapterNavJob?.cancel()
-        chapterNavJob = lifecycleScope.launch {
-            runCatching { navigator.evaluateJavascript(CHAPTER_NAV_REMOVE_SCRIPT) }
-            if (chapterNavPendingHref != null) return@launch
-            chapterNavHref = null
-        }
+    private fun canPullPreviousChapter(): Boolean {
+        if (!readerIsScroll) return false
+        val webView = activeReaderWebView() ?: return false
+        if (webView.canScrollVertically(-1)) return false
+        return currentResourceIndex() > 0
     }
 
-    private fun updateChapterNav(locator: Locator? = null) {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            runOnUiThread { updateChapterNav(locator) }
-            return
-        }
-        if (!readerIsScroll) {
-            clearChapterNav()
-            return
-        }
-        if (publication?.metadata?.layout == Layout.FIXED) return
-        val href =
-            locator?.href?.toString()
-                ?: currentEpubNavigator()?.currentLocator?.value?.href?.toString()
-                ?: return
-        if (href == chapterNavHref || href == chapterNavPendingHref) return
-        injectChapterNav(href)
-    }
-
-    private fun currentEpubNavigator(): EpubNavigatorFragment? =
-        epubNavigator
-            ?: (supportFragmentManager.findFragmentByTag(FRAGMENT_TAG) as? EpubNavigatorFragment)
-
-    private fun goToNextChapter(index: Int) {
+    private fun goToNextChapter() {
         val publication = publication ?: return
+        val index = currentResourceIndex()
         if (index < 0 || index >= publication.readingOrder.lastIndex) return
         val next = publication.readingOrder[index + 1]
         val target =
@@ -343,8 +309,9 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
-    private fun goToPreviousChapter(index: Int) {
+    private fun goToPreviousChapter() {
         val publication = publication ?: return
+        val index = currentResourceIndex()
         if (index <= 0) return
         val previous = publication.readingOrder[index - 1]
         val target =
@@ -358,6 +325,13 @@ class ReaderActivity : AppCompatActivity() {
         }
     }
 
+    private fun currentResourceIndex(): Int {
+        val locator = lastLocator ?: return -1
+        val order = publication?.readingOrder ?: return -1
+        val currentHref = locator.href.toString()
+        return order.indexOfFirst { sameResource(it.href.toString(), currentHref) }
+    }
+
     private fun sameResource(left: String, right: String): Boolean {
         val leftHref = normalizeHref(left)
         val rightHref = normalizeHref(right)
@@ -367,6 +341,33 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun normalizeHref(href: String): String = href.substringBefore('#').substringBefore('?')
+
+    private fun activeReaderWebView(): WebView? {
+        val root = visualNavigator?.publicationView ?: return null
+        val views = mutableListOf<WebView>()
+        collectWebViews(root, views)
+        return views
+            .filter { it.isShown }
+            .maxByOrNull { visibleArea(it) }
+            ?.takeIf { visibleArea(it) > 0 }
+    }
+
+    private fun collectWebViews(view: View, out: MutableList<WebView>) {
+        if (view is WebView) {
+            out.add(view)
+            return
+        }
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                collectWebViews(view.getChildAt(index), out)
+            }
+        }
+    }
+
+    private fun visibleArea(view: View): Int {
+        val rect = Rect()
+        return if (view.getGlobalVisibleRect(rect)) rect.width() * rect.height() else 0
+    }
 
     private suspend fun openBook(id: UUID, title: String) {
         try {
@@ -421,9 +422,6 @@ class ReaderActivity : AppCompatActivity() {
         val initialLocator = if (startFromBeginning) null else storedLocator(id)
         val settings = appPreferences.readerSettings()
         val epubPreferences = settings.toEpubPreferences()
-        readerIsScroll = settings.scroll
-        chapterNavHref = null
-        chapterNavPendingHref = null
 
         val fragmentClass: Class<out Fragment>
         val fragmentFactory: androidx.fragment.app.FragmentFactory
@@ -437,9 +435,6 @@ class ReaderActivity : AppCompatActivity() {
                     servedAssets += "subtitle-fonts/.*"
                     // Scroll mode should never change chapters on a horizontal swipe.
                     disablePageTurnsWhileScrolling = true
-                    registerJavascriptInterface("FindroidChapterNav") { link ->
-                        chapterNavBridge(link)
-                    }
                     readiumCssRsProperties =
                         RsProperties(maxLineLength = Length.Rem(settings.maxLineLengthRem))
                     SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
@@ -452,22 +447,11 @@ class ReaderActivity : AppCompatActivity() {
                         }
                     }
                 }
-                val paginationListener =
-                    object : EpubNavigatorFragment.PaginationListener {
-                        override fun onPageChanged(
-                            pageIndex: Int,
-                            totalPages: Int,
-                            locator: Locator,
-                        ) {
-                            updateChapterNav(locator)
-                        }
-                    }
                 fragmentFactory =
                     EpubNavigatorFactory(publication)
                         .createFragmentFactory(
                             initialLocator = initialLocator,
                             initialPreferences = epubPreferences,
-                            paginationListener = paginationListener,
                             configuration = configuration,
                         )
             }
@@ -505,7 +489,8 @@ class ReaderActivity : AppCompatActivity() {
         overflowableNavigator = fragment as? OverflowableNavigator
         epubNavigator = fragment as? EpubNavigatorFragment
 
-        updateChapterNav()
+        readerIsScroll = settings.scroll
+        binding.readerPull.pullEnabled = isPullEligible(settings)
 
         visualNavigator?.addInputListener(tapListener)
         appliedMaxWidth = settings.maxLineLengthRem
@@ -537,7 +522,6 @@ class ReaderActivity : AppCompatActivity() {
                 val href = locator.href.toString()
                 if (href.isEmpty()) return@collect
                 lastLocator = locator
-                updateChapterNav(locator)
                 appPreferences.sharedPreferences
                     .edit()
                     .putString(locatorKey(id), locator.toJSON().toString())
