@@ -9,6 +9,7 @@ import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ProfileHeaderState(
@@ -17,7 +18,7 @@ data class ProfileHeaderState(
     val avatarUrl: String? = null,
     val accessToken: String? = null,
     val isAdmin: Boolean = false,
-    val isLocked: Boolean = false,
+    val loggedOut: Boolean = false,
 )
 
 @HiltViewModel
@@ -55,21 +56,16 @@ constructor(
                         user != null &&
                             server != null &&
                             appPreferences.isProfileAdmin(server.id, user.id),
-                    isLocked =
-                        user != null &&
-                            server != null &&
-                            appPreferences.hasProfilePin(server.id, user.id),
                 )
             )
         }
     }
 
-    fun savePin(pin: String) {
+    fun logout() {
         viewModelScope.launch {
-            val server = repository.getCurrentServer() ?: return@launch
-            val user = repository.getCurrentUser() ?: return@launch
-            appPreferences.setProfilePin(server.id, user.id, pin)
-            refresh()
+            repository.logout()
+            appPreferences.setValue(appPreferences.profileLoggedOut, true)
+            _state.update { it.copy(loggedOut = true) }
         }
     }
 }

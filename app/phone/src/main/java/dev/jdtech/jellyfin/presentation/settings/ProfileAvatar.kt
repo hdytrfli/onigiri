@@ -84,11 +84,17 @@ fun ProfileAvatar(
 }
 
 @Composable
-fun ProfileAdminBadge(modifier: Modifier = Modifier) {
+fun ProfileRoleBadge(isAdmin: Boolean, modifier: Modifier = Modifier) {
+    val color =
+        if (isAdmin) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
     Surface(
         modifier = modifier,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+        color = color.copy(alpha = 0.14f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -96,15 +102,19 @@ fun ProfileAdminBadge(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(CoreR.drawable.ic_shield),
+                painter =
+                    painterResource(
+                        if (isAdmin) CoreR.drawable.ic_shield else CoreR.drawable.ic_user
+                    ),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = color,
                 modifier = Modifier.size(12.dp),
             )
             Text(
-                text = stringResource(R.string.profile_admin),
+                text =
+                    stringResource(if (isAdmin) R.string.profile_admin else R.string.profile_guest),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = color,
             )
         }
     }

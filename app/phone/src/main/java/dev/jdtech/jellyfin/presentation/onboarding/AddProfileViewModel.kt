@@ -32,7 +32,6 @@ data class AddProfileState(
     val isSavingPin: Boolean = false,
     val loginError: UiText? = null,
     val pinError: UiText? = null,
-    val quickConnectEnabled: Boolean = false,
     val quickConnectVisible: Boolean = false,
     val quickConnectCode: String? = null,
     val quickConnectError: UiText? = null,
@@ -56,10 +55,6 @@ constructor(
     val events = eventsChannel.receiveAsFlow()
 
     private var quickConnectJob: Job? = null
-
-    init {
-        loadQuickConnectEnabled()
-    }
 
     fun updateUsername(value: String) {
         _state.update { it.copy(username = value, loginError = null) }
@@ -114,6 +109,15 @@ constructor(
         }
         quickConnectJob = viewModelScope.launch {
             try {
+                if (!repository.getIsQuickConnectEnabled()) {
+                    _state.update {
+                        it.copy(
+                            quickConnectError =
+                                UiText.StringResource(R.string.onboarding_quick_connect_unavailable)
+                        )
+                    }
+                    return@launch
+                }
                 var quickConnectState = repository.initiateQuickConnect()
                 _state.update { it.copy(quickConnectCode = quickConnectState.code) }
                 while (!quickConnectState.authenticated) {
@@ -204,16 +208,10 @@ constructor(
     }
 
     private fun complete() {
+        appPreferences.setValue(appPreferences.profileLoggedOut, false)
         appPreferences.clearReaderState()
         _state.update { it.copy(isSavingPin = false) }
         viewModelScope.launch { eventsChannel.send(AddProfileEvent.Completed) }
-    }
-
-    private fun loadQuickConnectEnabled() {
-        viewModelScope.launch {
-            runCatching { repository.getIsQuickConnectEnabled() }
-                .onSuccess { enabled -> _state.update { it.copy(quickConnectEnabled = enabled) } }
-        }
     }
 
     private fun Throwable.toUiText(): UiText =

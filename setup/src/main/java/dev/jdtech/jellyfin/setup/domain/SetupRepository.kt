@@ -43,5 +43,8 @@ interface SetupRepository {
 
     suspend fun setCurrentUser(userId: UUID)
 
+    /** Clears the active user without deleting the saved profile. */
+    suspend fun logout()
+
     suspend fun setCurrentAddress(addressId: UUID)
 }

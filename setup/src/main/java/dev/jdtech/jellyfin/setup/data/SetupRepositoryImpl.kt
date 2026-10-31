@@ -291,6 +291,16 @@ class SetupRepositoryImpl(
         }
     }
 
+    override suspend fun logout() {
+        val server = getCurrentServer() ?: return
+        server.currentUserId = null
+        database.updateServer(server)
+        jellyfinApi.apply {
+            api.update(accessToken = null)
+            userId = null
+        }
+    }
+
     override suspend fun setCurrentAddress(addressId: UUID) {
         val server = getCurrentServer() ?: return
         val address = database.getAddress(id = addressId)

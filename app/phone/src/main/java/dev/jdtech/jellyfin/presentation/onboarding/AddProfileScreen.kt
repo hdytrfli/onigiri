@@ -72,7 +72,6 @@ fun AddProfileScreen(
                         password = state.password,
                         isLoggingIn = state.isLoggingIn,
                         loginError = state.loginError,
-                        quickConnectEnabled = state.quickConnectEnabled,
                         onUsernameChange = viewModel::updateUsername,
                         onPasswordChange = viewModel::updatePassword,
                         onLogin = viewModel::login,

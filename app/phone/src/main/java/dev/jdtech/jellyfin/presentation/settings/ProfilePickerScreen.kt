@@ -57,6 +57,7 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
+import dev.jdtech.jellyfin.settings.R as SettingsR
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,12 +67,19 @@ fun ProfilePickerScreen(
     onAddProfile: () -> Unit,
     canGoBack: Boolean,
     viewModel: ProfilePickerViewModel = hiltViewModel(),
+    resetViewModel: ServerResetViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showChangeServerDialog by remember { mutableStateOf(false) }
 
     ObserveAsEvents(viewModel.events) { event ->
         if (event is ProfilePickerEvent.Switched) {
+            context.clearProfileCachesAndRestart()
+        }
+    }
+    ObserveAsEvents(resetViewModel.events) { event ->
+        if (event is ServerResetEvent.Reset) {
             context.clearProfileCachesAndRestart()
         }
     }
@@ -91,6 +99,18 @@ fun ProfilePickerScreen(
             ItemTopBar(
                 hasBackButton = canGoBack && onBack != null,
                 onBackClick = { onBack?.invoke() },
+                trailingContent = {
+                    AppIconButton(
+                        onClick = { showChangeServerDialog = true },
+                        variant = AppButtonVariant.Secondary,
+                    ) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_server),
+                            contentDescription =
+                                stringResource(SettingsR.string.settings_change_server),
+                        )
+                    }
+                },
             )
             ProfilePickerContent(
                 state = state,
@@ -107,6 +127,7 @@ fun ProfilePickerScreen(
                 onDismissRemove = viewModel::dismissRemoveProfile,
                 onConfirmRemove = viewModel::confirmRemoveProfile,
                 onChangePin = viewModel::showPinEditor,
+                onUnlockProfile = viewModel::unlockProfile,
                 onDismissPinEditor = viewModel::dismissPinEditor,
                 onSavePin = viewModel::saveProfilePin,
                 modifier =
@@ -116,6 +137,33 @@ fun ProfilePickerScreen(
                         .padding(horizontal = MaterialTheme.spacings.gutter),
             )
         }
+    }
+
+    if (showChangeServerDialog) {
+        BaseDialog(
+            title = stringResource(SettingsR.string.settings_change_server),
+            description = stringResource(R.string.settings_change_server_confirm),
+            onDismiss = { showChangeServerDialog = false },
+            negativeButton = {
+                AppButton(
+                    onClick = { showChangeServerDialog = false },
+                    variant = AppButtonVariant.Secondary,
+                ) {
+                    Text(text = stringResource(R.string.profile_cancel))
+                }
+            },
+            positiveButton = {
+                AppButton(
+                    onClick = {
+                        showChangeServerDialog = false
+                        resetViewModel.reset()
+                    },
+                    variant = AppButtonVariant.Destructive,
+                ) {
+                    Text(text = stringResource(R.string.settings_change_server_action))
+                }
+            },
+        )
     }
 }
 
@@ -139,6 +187,7 @@ private fun ProfilePickerContent(
     onDismissRemove: () -> Unit,
     onConfirmRemove: () -> Unit,
     onChangePin: (ProfileItem) -> Unit,
+    onUnlockProfile: (ProfileItem) -> Unit,
     onDismissPinEditor: () -> Unit,
     onSavePin: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -156,6 +205,7 @@ private fun ProfilePickerContent(
             val maxColumns = (maxWidth / 96.dp).toInt().coerceAtLeast(1)
             val columns = configuredColumns.coerceIn(1, maxColumns)
             val cellWidth = (maxWidth - gap * (columns - 1).toFloat()) / columns.toFloat()
+            val hasCurrentUser = state.profiles.any { it.isCurrent }
             val cells =
                 buildList<ProfileCell> {
                     state.profiles.forEach { add(ProfileCell.Profile(it)) }
@@ -182,18 +232,36 @@ private fun ProfilePickerContent(
                                         width = cellWidth,
                                         onClick = { onProfileClick(cell.item) },
                                         onRemove =
-                                            if (cell.item.isCurrent || !state.viewerIsAdmin) {
-                                                null
-                                            } else {
+                                            if (
+                                                hasCurrentUser &&
+                                                    (state.viewerIsAdmin || cell.item.isCurrent)
+                                            ) {
                                                 { onRemoveProfile(cell.item) }
+                                            } else {
+                                                null
                                             },
                                         onChangePin =
-                                            if (cell.item.isCurrent) {
+                                            if (
+                                                hasCurrentUser &&
+                                                    (state.viewerIsAdmin || cell.item.isCurrent)
+                                            ) {
                                                 { onChangePin(cell.item) }
                                             } else {
                                                 null
                                             },
-                                        showActions = state.viewerIsAdmin || cell.item.isCurrent,
+                                        onUnlock =
+                                            if (
+                                                hasCurrentUser &&
+                                                    cell.item.isLocked &&
+                                                    (state.viewerIsAdmin || cell.item.isCurrent)
+                                            ) {
+                                                { onUnlockProfile(cell.item) }
+                                            } else {
+                                                null
+                                            },
+                                        showActions =
+                                            hasCurrentUser &&
+                                                (state.viewerIsAdmin || cell.item.isCurrent),
                                     )
 
                                 ProfileCell.Add ->
@@ -364,6 +432,7 @@ private fun ProfileCard(
     onClick: () -> Unit,
     onRemove: (() -> Unit)?,
     onChangePin: (() -> Unit)?,
+    onUnlock: (() -> Unit)?,
     showActions: Boolean,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -418,13 +487,12 @@ private fun ProfileCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (profile.isAdmin) {
-                    ProfileAdminBadge(
-                        modifier = Modifier.padding(top = MaterialTheme.spacings.extraSmall)
-                    )
-                }
+                ProfileRoleBadge(
+                    isAdmin = profile.isAdmin,
+                    modifier = Modifier.padding(top = MaterialTheme.spacings.extraSmall),
+                )
             }
-            if (showActions && (onChangePin != null || onRemove != null)) {
+            if (showActions && (onChangePin != null || onUnlock != null || onRemove != null)) {
                 Box {
                     AppIconButton(
                         onClick = { menuExpanded = true },
@@ -455,6 +523,16 @@ private fun ProfileCard(
                                 onClick = {
                                     menuExpanded = false
                                     onChangePin()
+                                },
+                            )
+                        }
+                        if (onUnlock != null) {
+                            MenuActionItem(
+                                icon = CoreR.drawable.ic_lock_open,
+                                label = stringResource(R.string.profile_unlock),
+                                onClick = {
+                                    menuExpanded = false
+                                    onUnlock()
                                 },
                             )
                         }

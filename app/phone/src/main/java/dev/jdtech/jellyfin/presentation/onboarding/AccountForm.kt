@@ -41,7 +41,6 @@ fun AccountForm(
     password: String,
     isLoggingIn: Boolean,
     loginError: UiText?,
-    quickConnectEnabled: Boolean,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLogin: () -> Unit,
@@ -121,21 +120,19 @@ fun AccountForm(
                 isLoading = isLoggingIn,
                 modifier = Modifier.fillMaxWidth(),
             )
-            if (quickConnectEnabled) {
-                AppButton(
-                    onClick = onQuickConnect,
-                    enabled = !isLoggingIn,
-                    variant = AppButtonVariant.Secondary,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(text = stringResource(R.string.onboarding_quick_connect_action))
-                }
-                Text(
-                    text = stringResource(R.string.onboarding_quick_connect_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = OnScrimSecondary,
-                )
+            AppButton(
+                onClick = onQuickConnect,
+                enabled = !isLoggingIn,
+                variant = AppButtonVariant.Secondary,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(text = stringResource(R.string.onboarding_quick_connect_action))
             }
+            Text(
+                text = stringResource(R.string.onboarding_quick_connect_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = OnScrimSecondary,
+            )
         }
     }
 }

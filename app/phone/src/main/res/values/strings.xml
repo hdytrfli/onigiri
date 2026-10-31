@@ -33,6 +33,7 @@
     <string name="onboarding_login_required">Enter your username and password to continue.</string>
     <string name="onboarding_login_error">That username or password was not accepted.</string>
     <string name="onboarding_quick_connect_error">Quick Connect could not be started. Please try again.</string>
+    <string name="onboarding_quick_connect_unavailable">Quick Connect is not enabled on this server.</string>
     <string name="onboarding_pin_incomplete">Enter all 4 digits to lock this profile.</string>
     <string name="onboarding_pin_save_error">The PIN could not be saved. Please try again.</string>
     <string name="onboarding_unknown_error">Something went wrong. Please try again.</string>
@@ -44,11 +45,13 @@
     <string name="profile_add_description">Sign in with another Jellyfin user on this server. The new profile becomes active after signing in.</string>
     <string name="profile_current">Current</string>
     <string name="profile_admin">Admin</string>
+    <string name="profile_guest">Guest</string>
     <string name="profile_logout">Log out</string>
     <string name="profile_switch">Switch profile</string>
     <string name="profile_locked">Locked</string>
     <string name="profile_options">Profile options</string>
     <string name="profile_remove">Remove profile</string>
+    <string name="profile_unlock">Unlock profile</string>
     <string name="profile_remove_title">Remove profile?</string>
     <string name="profile_remove_description">Remove %1$s from this device? The Jellyfin user itself is not deleted.</string>
     <string name="profile_remove_action">Remove</string>

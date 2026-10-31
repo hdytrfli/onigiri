@@ -32,6 +32,7 @@ constructor(
             database.deleteAllServers()
             appPreferences.setValue(appPreferences.currentServer, null)
             appPreferences.setValue(appPreferences.onboardingComplete, false)
+            appPreferences.setValue(appPreferences.profileLoggedOut, false)
             // The data has already been cleared here; do not run the upgrade purge again when the
             // restarted process starts the onboarding flow.
             appPreferences.setValue(appPreferences.onboardingSessionCleared, true)

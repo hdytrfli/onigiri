@@ -208,7 +208,6 @@ private fun AccountPage(
             password = state.password,
             isLoggingIn = state.isLoggingIn,
             loginError = state.loginError,
-            quickConnectEnabled = state.quickConnectEnabled,
             onUsernameChange = onUsernameChange,
             onPasswordChange = onPasswordChange,
             onLogin = onLogin,

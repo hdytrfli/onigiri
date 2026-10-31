@@ -164,7 +164,6 @@ constructor(
     }
 
     fun showPinEditor(profile: ProfileItem) {
-        if (profile.isCurrent.not()) return
         _state.update { it.copy(pinEditorPrompt = profile, pinEditorError = null) }
     }
 
@@ -190,8 +189,13 @@ constructor(
         }
     }
 
+    fun unlockProfile(profile: ProfileItem) {
+        val serverId = _state.value.serverId ?: return
+        appPreferences.clearProfilePin(serverId, profile.id)
+        viewModelScope.launch { load() }
+    }
+
     fun showRemoveProfile(profile: ProfileItem) {
-        if (profile.isCurrent) return
         _state.update { it.copy(removePrompt = profile) }
     }
 
@@ -202,11 +206,15 @@ constructor(
     fun confirmRemoveProfile() {
         val profile = _state.value.removePrompt ?: return
         val serverId = _state.value.serverId ?: return
-        if (profile.isCurrent || _state.value.isBusy) return
+        if (_state.value.isBusy) return
         viewModelScope.launch {
             _state.update { it.copy(isBusy = true) }
             repository.deleteUser(profile.id)
             appPreferences.clearProfileMetadata(serverId, profile.id)
+            if (profile.isCurrent) {
+                repository.logout()
+                appPreferences.setValue(appPreferences.profileLoggedOut, true)
+            }
             _state.update { it.copy(isBusy = false, removePrompt = null) }
             load()
         }
@@ -217,6 +225,7 @@ constructor(
         viewModelScope.launch {
             _state.update { it.copy(isBusy = true) }
             repository.setCurrentUser(profile.id)
+            appPreferences.setValue(appPreferences.profileLoggedOut, false)
             appPreferences.clearReaderState()
             _state.update { it.copy(isBusy = false) }
             eventsChannel.send(ProfilePickerEvent.Switched)

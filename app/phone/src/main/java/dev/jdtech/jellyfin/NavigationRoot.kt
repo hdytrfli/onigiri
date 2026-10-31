@@ -148,9 +148,13 @@ fun NavigationRoot(
     hasCurrentServer: Boolean,
     hasCurrentUser: Boolean,
     onboardingComplete: Boolean,
+    profileLoggedOut: Boolean,
     confirmExit: Boolean = false,
 ) {
     val setupComplete = onboardingComplete && hasServers && hasCurrentServer && hasCurrentUser
+    val loggedOutProfileSelection =
+        onboardingComplete && hasCurrentServer && !hasCurrentUser && profileLoggedOut
+    val mainMode = setupComplete || loggedOutProfileSelection
 
     val setupStartRoute: NavKey = OnboardingRoute
 
@@ -158,7 +162,8 @@ fun NavigationRoot(
     val setupBackStack = rememberNavBackStack(setupStartRoute)
     val navigationState =
         rememberNavigationState(
-            startRoute = HomeRoute,
+            startRoute =
+                if (loggedOutProfileSelection) ProfilePickerRoute(canGoBack = false) else HomeRoute,
             topLevelRoutes = TOP_LEVEL_ROUTES,
         )
     val navigator = remember(navigationState) { Navigator(navigationState) }
@@ -180,20 +185,20 @@ fun NavigationRoot(
     // stacks are reconciled during composition (rather than in a LaunchedEffect, which only runs
     // after the first frame has been composed) so the first frame of the new mode already shows
     // the right screen.
-    val appliedSetupMode = remember { AppliedSetupMode(setupComplete) }
-    if (appliedSetupMode.setupComplete != setupComplete) {
-        if (setupComplete) {
+    val appliedSetupMode = remember { AppliedSetupMode(mainMode) }
+    if (appliedSetupMode.setupComplete != mainMode) {
+        if (mainMode) {
             // Setup completed: discard the setup flow and land on Home.
-            navigator.navigateHome()
+            if (!loggedOutProfileSelection) navigator.navigateHome()
         } else {
             // Setup became incomplete: restart the setup flow at the appropriate screen.
             setupBackStack.clear()
             setupBackStack.add(setupStartRoute)
         }
-        appliedSetupMode.setupComplete = setupComplete
+        appliedSetupMode.setupComplete = mainMode
     }
 
-    if (setupComplete) {
+    if (mainMode) {
         MainNavigation(
             navigationState = navigationState,
             navigator = navigator,
@@ -809,12 +814,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigateBack = dropUnlessResumed { navigator.goBack() },
                 profileHeader = {
                     SettingsProfileHeader(
-                        onLogoutProfile =
-                            dropUnlessResumed {
-                                navigator.navigate(ProfilePickerRoute(canGoBack = false))
-                            },
                         onChangeProfile =
-                            dropUnlessResumed { navigator.navigate(ProfilePickerRoute()) },
+                            dropUnlessResumed { navigator.navigate(ProfilePickerRoute()) }
                     )
                 },
             )

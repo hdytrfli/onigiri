@@ -37,7 +37,6 @@ data class OnboardingState(
     val isConnecting: Boolean = false,
     val isLoggingIn: Boolean = false,
     val isSavingPin: Boolean = false,
-    val quickConnectEnabled: Boolean = false,
     val quickConnectVisible: Boolean = false,
     val quickConnectCode: String? = null,
     val serverError: UiText? = null,
@@ -96,7 +95,6 @@ constructor(
                         serverError = null,
                     )
                 }
-                loadQuickConnectEnabled()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: ExceptionUiText) {
@@ -173,6 +171,15 @@ constructor(
         }
         quickConnectJob = viewModelScope.launch {
             try {
+                if (!repository.getIsQuickConnectEnabled()) {
+                    _state.update {
+                        it.copy(
+                            quickConnectError =
+                                UiText.StringResource(R.string.onboarding_quick_connect_unavailable)
+                        )
+                    }
+                    return@launch
+                }
                 var quickConnectState = repository.initiateQuickConnect()
                 _state.update { it.copy(quickConnectCode = quickConnectState.code) }
 
@@ -279,15 +286,9 @@ constructor(
         }
     }
 
-    private fun loadQuickConnectEnabled() {
-        viewModelScope.launch {
-            runCatching { repository.getIsQuickConnectEnabled() }
-                .onSuccess { enabled -> _state.update { it.copy(quickConnectEnabled = enabled) } }
-        }
-    }
-
     private fun completeOnboarding() {
         appPreferences.setValue(appPreferences.onboardingComplete, true)
+        appPreferences.setValue(appPreferences.profileLoggedOut, false)
         viewModelScope.launch { eventsChannel.send(OnboardingEvent.Completed) }
     }
 

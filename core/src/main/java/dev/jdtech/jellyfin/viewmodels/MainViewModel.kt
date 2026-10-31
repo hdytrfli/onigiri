@@ -94,8 +94,12 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                 combine(
                     setupFlags,
                     appPreferences.observe(appPreferences.onboardingComplete),
-                ) { flags, onboardingComplete ->
-                    flags.copy(onboardingComplete = onboardingComplete)
+                    appPreferences.observe(appPreferences.profileLoggedOut),
+                ) { flags, onboardingComplete, profileLoggedOut ->
+                    flags.copy(
+                        onboardingComplete = onboardingComplete,
+                        profileLoggedOut = profileLoggedOut,
+                    )
                 }
 
             val interfacePrefs =
@@ -205,6 +209,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         hasCurrentServer = flags.hasCurrentServer,
                         hasCurrentUser = flags.hasCurrentUser,
                         onboardingComplete = flags.onboardingComplete,
+                        profileLoggedOut = flags.profileLoggedOut,
                         isOfflineMode = offlineMode,
                         backdropPortraitRatio =
                             interfacePrefs.portraitRatio.toFloatOrNull() ?: 1.5f,
@@ -238,6 +243,7 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val hasCurrentServer: Boolean,
         val hasCurrentUser: Boolean,
         val onboardingComplete: Boolean = false,
+        val profileLoggedOut: Boolean = false,
     )
 
     private data class TitlePrefs(
@@ -282,6 +288,7 @@ data class MainState(
     val hasCurrentServer: Boolean = false,
     val hasCurrentUser: Boolean = false,
     val onboardingComplete: Boolean = false,
+    val profileLoggedOut: Boolean = false,
     val isOfflineMode: Boolean = false,
     val backdropPortraitRatio: Float = 1.5f,
     val backdropLandscapeRatio: Float = 2.3333333f,

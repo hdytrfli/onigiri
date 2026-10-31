@@ -29,6 +29,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     /** Whether the new onboarding flow has been completed at least once. */
     val onboardingComplete = Preference("pref_onboarding_complete", false)
 
+    /** The app has been intentionally logged out and must reopen on profile selection. */
+    val profileLoggedOut = Preference("pref_profile_logged_out", false)
+
     /** Whether the one-time pre-onboarding session purge has already run. */
     val onboardingSessionCleared = Preference("pref_onboarding_session_cleared", false)
 
