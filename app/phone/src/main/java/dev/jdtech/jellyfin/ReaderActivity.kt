@@ -63,6 +63,7 @@ import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.navigator.pdf.PdfNavigatorFactory
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.preferences.FontFamily
+import org.readium.r2.navigator.preferences.Theme
 import org.readium.r2.shared.DelicateReadiumApi
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
@@ -175,6 +176,7 @@ class ReaderActivity : AppCompatActivity() {
         }
 
         binding.readerDim.alpha = brightnessOverlay(appPreferences.readerSettings().brightness)
+        applyPullAppearance(appPreferences.readerSettings())
 
         binding.readerOverlay.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -244,6 +246,7 @@ class ReaderActivity : AppCompatActivity() {
         if (::binding.isInitialized) {
             val settings = appPreferences.readerSettings()
             binding.readerDim.alpha = brightnessOverlay(settings.brightness)
+            applyPullAppearance(settings)
             epubNavigator?.submitPreferences(settings.toEpubPreferences())
             readerIsScroll = settings.scroll
             binding.readerPull.pullEnabled = isPullEligible(settings)
@@ -276,6 +279,20 @@ class ReaderActivity : AppCompatActivity() {
             epubNavigator != null &&
             publication?.conformsTo(Publication.Profile.EPUB) == true &&
             layout != Layout.FIXED
+    }
+
+    private fun applyPullAppearance(settings: ReaderSettings) {
+        val theme =
+            when (settings.theme) {
+                "light" -> Theme.LIGHT
+                "sepia" -> Theme.SEPIA
+                else -> Theme.DARK
+            }
+        val ringColor = theme.contentColor
+        val trackColor = (ringColor and 0x00FFFFFF) or (0x4D shl 24)
+        binding.readerPull.ringColor = ringColor
+        binding.readerPull.trackColor = trackColor
+        binding.readerPull.setBackgroundColor(theme.backgroundColor)
     }
 
     private fun canPullNextChapter(): Boolean {
@@ -422,6 +439,7 @@ class ReaderActivity : AppCompatActivity() {
         val initialLocator = if (startFromBeginning) null else storedLocator(id)
         val settings = appPreferences.readerSettings()
         val epubPreferences = settings.toEpubPreferences()
+        applyPullAppearance(settings)
 
         val fragmentClass: Class<out Fragment>
         val fragmentFactory: androidx.fragment.app.FragmentFactory

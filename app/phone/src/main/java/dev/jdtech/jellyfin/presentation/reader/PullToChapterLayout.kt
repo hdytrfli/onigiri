@@ -33,6 +33,17 @@ constructor(
     }
 
     var pullEnabled: Boolean = false
+        set(value) {
+            field = value
+            if (!value) {
+                resetAnimator?.cancel()
+                resetAnimator = null
+                pullDistance = 0f
+                pulling = false
+                applyContentTranslation()
+                invalidate()
+            }
+        }
 
     var canPullNext: (() -> Boolean)? = null
 
@@ -42,24 +53,39 @@ constructor(
 
     var onPullPrevious: (() -> Unit)? = null
 
+    var ringColor: Int = 0xFFFFFFFF.toInt()
+        set(value) {
+            field = value
+            ringPaint.color = value
+            invalidate()
+        }
+
+    var trackColor: Int = 0x55FFFFFF
+        set(value) {
+            field = value
+            trackPaint.color = value
+            invalidate()
+        }
+
     private val density = resources.displayMetrics.density
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val triggerDistance = 112f * density
     private val maxPull = triggerDistance * 1.35f
+    private val contentTranslationFactor = 0.65f
     private val circleRadius = 24f * density
     private val ringWidth = 3f * density
 
-    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xD9000000.toInt() }
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xAA000000.toInt() }
     private val trackPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x55FFFFFF
+            color = trackColor
             style = Paint.Style.STROKE
             strokeWidth = ringWidth
             strokeCap = Paint.Cap.ROUND
         }
     private val ringPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFFFFFFF.toInt()
+            color = ringColor
             style = Paint.Style.STROKE
             strokeWidth = ringWidth
             strokeCap = Paint.Cap.ROUND
@@ -102,6 +128,7 @@ constructor(
                 downY = event.y
                 pullDistance = 0f
                 pulling = false
+                applyContentTranslation()
                 return false
             }
 
@@ -122,6 +149,7 @@ constructor(
                 direction = if (dy < 0) Direction.NEXT else Direction.PREVIOUS
                 pulling = true
                 pullDistance = abs(dy).coerceIn(0f, maxPull)
+                applyContentTranslation()
                 invalidate()
                 return true
             }
@@ -141,6 +169,7 @@ constructor(
                         event.y - downY
                     }
                 pullDistance = raw.coerceIn(0f, maxPull)
+                applyContentTranslation()
                 invalidate()
                 return true
             }
@@ -176,16 +205,11 @@ constructor(
         val progress = (pullDistance / triggerDistance).coerceIn(0f, 1f)
         val alpha = (0.35f + 0.65f * progress).coerceIn(0f, 1f)
         val centerX = width / 2f
-        val baseY =
-            when (direction) {
-                Direction.NEXT -> height - 96f * density
-                Direction.PREVIOUS -> 96f * density
-            }
-        val slide = (1f - progress) * 12f * density
+        val exposed = pullDistance * contentTranslationFactor
         val centerY =
             when (direction) {
-                Direction.NEXT -> baseY + slide
-                Direction.PREVIOUS -> baseY - slide
+                Direction.NEXT -> height - exposed / 2f
+                Direction.PREVIOUS -> exposed / 2f
             }
         val scale = 0.86f + 0.14f * progress
 
@@ -193,10 +217,10 @@ constructor(
         canvas.scale(scale, scale, centerX, centerY)
 
         fillPaint.alpha = (alpha * 255).toInt()
-        trackPaint.alpha = (alpha * 85).toInt()
+        trackPaint.alpha = (alpha * 255).toInt()
         ringPaint.alpha = (alpha * 255).toInt()
 
-        val fillRadius = circleRadius - ringWidth
+        val fillRadius = circleRadius - ringWidth * 1.5f
         canvas.drawCircle(centerX, centerY, fillRadius, fillPaint)
 
         val ringRadius = circleRadius - ringWidth / 2f
@@ -229,6 +253,7 @@ constructor(
     private fun animateReset() {
         resetAnimator?.cancel()
         if (pullDistance <= 0f) {
+            applyContentTranslation()
             invalidate()
             return
         }
@@ -237,15 +262,27 @@ constructor(
                 duration = 160L
                 addUpdateListener { animator ->
                     pullDistance = animator.animatedValue as Float
+                    applyContentTranslation()
                     invalidate()
                 }
                 start()
             }
     }
 
+    private fun applyContentTranslation() {
+        val content = getChildAt(0) ?: return
+        content.translationY =
+            when {
+                !pullEnabled || pullDistance <= 0f -> 0f
+                direction == Direction.NEXT -> -pullDistance * contentTranslationFactor
+                else -> pullDistance * contentTranslationFactor
+            }
+    }
+
     override fun onDetachedFromWindow() {
         resetAnimator?.cancel()
         resetAnimator = null
+        getChildAt(0)?.translationY = 0f
         super.onDetachedFromWindow()
     }
 }
