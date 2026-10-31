@@ -334,7 +334,14 @@ private fun ProfilePickerContent(
                     Text(text = stringResource(R.string.profile_remove_action))
                 }
             },
-        )
+        ) { contentPadding ->
+            Text(
+                text = stringResource(R.string.profile_remove_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(contentPadding),
+            )
+        }
     }
 
     state.pinEditorPrompt?.let { profile ->

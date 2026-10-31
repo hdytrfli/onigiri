@@ -20,8 +20,8 @@
     <string name="onboarding_quick_connect_hint">Approve this device from another Jellyfin app or the server dashboard.</string>
     <string name="onboarding_quick_connect_title">Quick Connect</string>
     <string name="onboarding_quick_connect_description">Enter this code in Quick Connect on your Jellyfin server. This screen will continue automatically once the device is approved.</string>
-    <string name="onboarding_quick_connect_starting">Starting Quick Connect…</string>
-    <string name="onboarding_quick_connect_waiting">Waiting for approval…</string>
+    <string name="onboarding_quick_connect_starting">Starting Quick Connect</string>
+    <string name="onboarding_quick_connect_waiting">Waiting for approval</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_pin_title">Lock this profile</string>
     <string name="onboarding_pin_description">Set a 4-digit PIN so this profile stays private on this device. You can skip this and keep the profile open.</string>
@@ -53,7 +53,8 @@
     <string name="profile_remove">Remove profile</string>
     <string name="profile_unlock">Unlock profile</string>
     <string name="profile_remove_title">Remove profile?</string>
-    <string name="profile_remove_description">Remove %1$s from this device? The Jellyfin user itself is not deleted.</string>
+    <string name="profile_remove_description">Remove %1$s from this device?</string>
+    <string name="profile_remove_body">This removes the saved profile and its local PIN from this device. The Jellyfin user itself is not deleted.</string>
     <string name="profile_remove_action">Remove</string>
     <string name="profile_add_lock">Lock profile</string>
     <string name="profile_change_lock">Change PIN</string>

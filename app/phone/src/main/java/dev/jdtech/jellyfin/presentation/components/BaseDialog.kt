@@ -21,13 +21,18 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindowProvider
 import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -78,6 +83,7 @@ fun BaseDialog(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun BaseDialogImpl(
     title: String,
@@ -86,7 +92,15 @@ private fun BaseDialogImpl(
     actions: (@Composable RowScope.() -> Unit)?,
     content: (@Composable ColumnScope.(contentPadding: PaddingValues) -> Unit)?,
 ) {
+    val scrim = LocalDialogScrim.current
+    DisposableEffect(scrim) {
+        scrim.show()
+        onDispose { scrim.hide() }
+    }
+
     Dialog(onDismissRequest = onDismiss) {
+        val view = LocalView.current
+        SideEffect { (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0.3f) }
         Column(modifier = Modifier.widthIn(max = Dimens.dialogMaxWidth).fillMaxWidth()) {
             Card(
                 modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogCompactMaxHeight),

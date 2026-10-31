@@ -116,7 +116,7 @@ fun SettingsScreen(
     if (showResetServerDialog) {
         BaseDialog(
             title = stringResource(SettingsR.string.settings_change_server),
-            description = stringResource(R.string.settings_change_server_confirm),
+            description = stringResource(SettingsR.string.settings_change_server_summary),
             onDismiss = { showResetServerDialog = false },
             negativeButton = {
                 AppButton(
@@ -137,7 +137,14 @@ fun SettingsScreen(
                     Text(text = stringResource(R.string.settings_change_server_action))
                 }
             },
-        )
+        ) { contentPadding ->
+            Text(
+                text = stringResource(R.string.settings_change_server_confirm),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(contentPadding),
+            )
+        }
     }
 }
 

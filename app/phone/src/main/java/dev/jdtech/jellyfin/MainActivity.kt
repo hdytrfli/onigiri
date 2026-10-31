@@ -14,12 +14,17 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import dev.jdtech.jellyfin.presentation.components.DialogScrimState
+import dev.jdtech.jellyfin.presentation.components.LocalDialogScrim
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.LocalContentSpacingScale
 import dev.jdtech.jellyfin.presentation.utils.BackdropRatios
@@ -62,6 +67,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
+            val dialogScrim = remember { DialogScrimState() }
 
             // Optionally hide the system status bar in the main (non-player) UI. Skipped while the
             // state is still loading so we don't show the bar again right after onCreate hid it.
@@ -87,15 +93,17 @@ class MainActivity : AppCompatActivity() {
                     // so no screen or the nav rail reserves that space.
                     Box(
                         modifier =
-                            if (state.hideStatusBar) {
-                                Modifier.consumeWindowInsets(
-                                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                                )
-                            } else {
-                                Modifier
-                            }
+                            (if (state.hideStatusBar) {
+                                    Modifier.consumeWindowInsets(
+                                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                                    )
+                                } else {
+                                    Modifier
+                                })
+                                .then(if (dialogScrim.isActive) Modifier.blur(6.dp) else Modifier)
                     ) {
                         CompositionLocalProvider(
+                            LocalDialogScrim provides dialogScrim,
                             LocalOfflineMode provides state.isOfflineMode,
                             LocalSetOfflineMode provides
                                 { enabled ->

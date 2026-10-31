@@ -32,6 +32,7 @@ import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.utils.restart
 
 @Composable
@@ -78,37 +79,39 @@ fun SettingsProfileHeader(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Box {
-            AppIconButton(
-                onClick = { menuExpanded = true },
-                variant = AppButtonVariant.Secondary,
-            ) {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_ellipsis),
-                    contentDescription = stringResource(R.string.profile_options),
-                )
-            }
-            AppDropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false },
-                alignEnd = true,
-            ) {
-                MenuActionItem(
-                    icon = CoreR.drawable.ic_user,
-                    label = stringResource(R.string.profile_switch),
-                    onClick = {
-                        menuExpanded = false
-                        onChangeProfile()
-                    },
-                )
-                MenuActionItem(
-                    icon = CoreR.drawable.ic_logout,
-                    label = stringResource(R.string.profile_logout),
-                    onClick = {
-                        menuExpanded = false
-                        viewModel.logout()
-                    },
-                )
+        if (!LocalOfflineMode.current) {
+            Box {
+                AppIconButton(
+                    onClick = { menuExpanded = true },
+                    variant = AppButtonVariant.Secondary,
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_ellipsis),
+                        contentDescription = stringResource(R.string.profile_options),
+                    )
+                }
+                AppDropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                    alignEnd = true,
+                ) {
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_user,
+                        label = stringResource(R.string.profile_switch),
+                        onClick = {
+                            menuExpanded = false
+                            onChangeProfile()
+                        },
+                    )
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_logout,
+                        label = stringResource(R.string.profile_logout),
+                        onClick = {
+                            menuExpanded = false
+                            viewModel.logout()
+                        },
+                    )
+                }
             }
         }
     }
