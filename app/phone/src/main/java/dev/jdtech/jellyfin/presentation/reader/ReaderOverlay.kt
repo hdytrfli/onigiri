@@ -43,6 +43,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import kotlin.math.roundToInt
 
 /** What the reader activity is showing while the publication opens. */
@@ -174,12 +175,9 @@ fun ReaderOverlay(
                             overflow = TextOverflow.Ellipsis,
                         )
                         if (state.overview.isNotBlank()) {
-                            Text(
+                            OverviewText(
                                 text = state.overview,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.72f),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
+                                maxCollapsedLines = 2,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                         }

@@ -16,14 +16,19 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 
 @Composable
-fun OverviewText(text: String, maxCollapsedLines: Int = Int.MAX_VALUE) {
+fun OverviewText(
+    text: String,
+    modifier: Modifier = Modifier,
+    maxCollapsedLines: Int = Int.MAX_VALUE,
+) {
     var isExpandable by remember { mutableStateOf(false) }
     var isOverviewExpanded by remember { mutableStateOf(false) }
 
     Text(
         text = text,
         modifier =
-            Modifier.then(
+            modifier
+                .then(
                     if (isExpandable)
                         Modifier.clickable { isOverviewExpanded = !isOverviewExpanded }
                     else Modifier

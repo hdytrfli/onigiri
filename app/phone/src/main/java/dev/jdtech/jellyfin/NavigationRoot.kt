@@ -160,11 +160,14 @@ fun NavigationRoot(
 
     // Navigation state for both modes is hoisted so that it survives switching between them.
     val setupBackStack = rememberNavBackStack(setupStartRoute)
+    val mainStartRoute: NavKey =
+        if (loggedOutProfileSelection) ProfilePickerRoute(canGoBack = false) else HomeRoute
+    val mainTopLevelRoutes: Set<NavKey> =
+        if (loggedOutProfileSelection) TOP_LEVEL_ROUTES + mainStartRoute else TOP_LEVEL_ROUTES
     val navigationState =
         rememberNavigationState(
-            startRoute =
-                if (loggedOutProfileSelection) ProfilePickerRoute(canGoBack = false) else HomeRoute,
-            topLevelRoutes = TOP_LEVEL_ROUTES,
+            startRoute = mainStartRoute,
+            topLevelRoutes = mainTopLevelRoutes,
         )
     val navigator = remember(navigationState) { Navigator(navigationState) }
 

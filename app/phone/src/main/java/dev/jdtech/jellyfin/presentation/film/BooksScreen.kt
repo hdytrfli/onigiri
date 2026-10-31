@@ -63,7 +63,10 @@ fun BooksScreen(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val safePadding = rememberSafePadding()
 
-    BackHandler(enabled = searchExpanded) { searchExpanded = false }
+    BackHandler(enabled = searchExpanded) {
+        searchExpanded = false
+        searchQuery = ""
+    }
 
     // Pressing the Books item again cycles Books <-> Audiobooks.
     val tabReselect = LocalTabReselect.current

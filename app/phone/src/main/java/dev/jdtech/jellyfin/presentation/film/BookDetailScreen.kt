@@ -127,7 +127,7 @@ fun BookDetailScreen(
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                        OverviewText(text = item.overview)
+                        OverviewText(text = item.overview, maxCollapsedLines = 4)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         BookInfoRow(
                             label = "Year",
