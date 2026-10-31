@@ -310,7 +310,7 @@ class ReaderActivity : AppCompatActivity() {
         scrollPaddingHref = href
         scrollPaddingJob?.cancel()
         scrollPaddingJob = lifecycleScope.launch {
-            runCatching { navigator.evaluateJavascript(SCROLL_BOTTOM_PADDING_SCRIPT) }
+            runCatching { navigator.evaluateJavascript(SCROLL_CHAPTER_PADDING_SCRIPT) }
         }
     }
 
@@ -319,7 +319,7 @@ class ReaderActivity : AppCompatActivity() {
         scrollPaddingHref = null
         scrollPaddingJob?.cancel()
         scrollPaddingJob = lifecycleScope.launch {
-            runCatching { navigator.evaluateJavascript(SCROLL_BOTTOM_PADDING_REMOVE_SCRIPT) }
+            runCatching { navigator.evaluateJavascript(SCROLL_CHAPTER_PADDING_REMOVE_SCRIPT) }
         }
     }
 
@@ -489,6 +489,9 @@ class ReaderActivity : AppCompatActivity() {
                     servedAssets += "subtitle-fonts/.*"
                     // Scroll mode should never change chapters on a horizontal swipe.
                     disablePageTurnsWhileScrolling = true
+                    // The reader is edge-to-edge with hidden system bars; do not reserve the
+                    // status bar area inside the publication.
+                    shouldApplyInsetsPadding = false
                     readiumCssRsProperties =
                         RsProperties(maxLineLength = Length.Rem(settings.maxLineLengthRem))
                     SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
@@ -672,11 +675,17 @@ class ReaderActivity : AppCompatActivity() {
         private const val EXTRA_START_FROM_BEGINNING = "start_from_beginning"
         private const val FRAGMENT_TAG = "reader_navigator_fragment"
 
-        private const val SCROLL_BOTTOM_PADDING_SCRIPT =
-            "if (document.body) { document.body.style.setProperty('padding-bottom', '24px', 'important'); }"
+        private const val SCROLL_CHAPTER_PADDING_SCRIPT =
+            "if (document.body) { " +
+                "document.body.style.setProperty('padding-top', '24px', 'important'); " +
+                "document.body.style.setProperty('padding-bottom', '24px', 'important'); " +
+                "}"
 
-        private const val SCROLL_BOTTOM_PADDING_REMOVE_SCRIPT =
-            "if (document.body) { document.body.style.removeProperty('padding-bottom'); }"
+        private const val SCROLL_CHAPTER_PADDING_REMOVE_SCRIPT =
+            "if (document.body) { " +
+                "document.body.style.removeProperty('padding-top'); " +
+                "document.body.style.removeProperty('padding-bottom'); " +
+                "}"
 
         fun intent(
             context: Context,
