@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.BooksRoute
 import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.film.presentation.books.BOOK_SORT_OPTIONS
 import dev.jdtech.jellyfin.film.presentation.books.BooksViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidBook
@@ -224,6 +225,7 @@ fun BooksScreen(
             currentSortOrder = state.sortOrder,
             onUpdate = viewModel::changeSorting,
             onDismissRequest = { showSortDialog = false },
+            availableSortOptions = BOOK_SORT_OPTIONS,
         )
     }
 

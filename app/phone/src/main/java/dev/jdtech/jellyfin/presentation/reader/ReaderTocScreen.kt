@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,11 +17,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.R
+import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -66,6 +69,7 @@ fun ReaderTocScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding + innerPadding,
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (chapters.isEmpty()) {
                 item {
@@ -78,7 +82,7 @@ fun ReaderTocScreen(
             } else {
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.widthIn(max = Dimens.contentMaxWidth),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer

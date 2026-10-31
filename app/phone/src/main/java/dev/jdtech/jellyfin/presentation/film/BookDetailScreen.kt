@@ -2,25 +2,21 @@ package dev.jdtech.jellyfin.presentation.film
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +31,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
+import dev.jdtech.jellyfin.presentation.film.components.InfoRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -132,24 +129,21 @@ fun BookDetailScreen(
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         OverviewText(text = item.overview, maxCollapsedLines = 4)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                        BookInfoRow(
-                            label = stringResource(R.string.book_info_year),
-                            value =
-                                (item.productionYear ?: item.premiereDate?.year)
-                                    ?.toString()
-                                    .orEmpty(),
-                        )
-                        BookInfoRow(
-                            label = stringResource(R.string.book_info_author),
-                            value =
-                                item.people
-                                    .filter { it.type == PersonKind.AUTHOR }
-                                    .ifEmpty { item.people }
-                                    .joinToString(", ") { it.name },
-                        )
-                        BookInfoRow(
-                            label = stringResource(R.string.book_info_publisher),
-                            value = item.studios.joinToString(", "),
+                        InfoRows(
+                            rows =
+                                listOf(
+                                    stringResource(R.string.book_info_year) to
+                                        (item.productionYear ?: item.premiereDate?.year)
+                                            ?.toString()
+                                            .orEmpty(),
+                                    stringResource(R.string.book_info_author) to
+                                        item.people
+                                            .filter { it.type == PersonKind.AUTHOR }
+                                            .ifEmpty { item.people }
+                                            .joinToString(", ") { it.name },
+                                    stringResource(R.string.book_info_publisher) to
+                                        item.studios.joinToString(", "),
+                                )
                         )
                         if (item.people.isNotEmpty()) {
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
@@ -200,19 +194,5 @@ fun BookDetailScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun BookInfoRow(label: String, value: String) {
-    if (value.isBlank()) return
-    Row(verticalAlignment = Alignment.Top) {
-        Text(
-            text = label,
-            modifier = Modifier.width(96.dp),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
     }
 }

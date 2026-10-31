@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.BaseItemKind
 
+val BOOK_SORT_OPTIONS = listOf(SortBy.NAME, SortBy.RELEASE_DATE)
+
 data class BooksState(
     val libraries: List<FindroidCollection> = emptyList(),
     val items: Map<UUID, List<FindroidItem>> = emptyMap(),
@@ -49,8 +51,13 @@ constructor(
         if (!force && loaded) return
         loaded = true
         viewModelScope.launch(Dispatchers.IO) {
-            val sortBy = SortBy.fromString(appPreferences.getValue(appPreferences.sortBy))
-            val sortOrder = SortOrder.fromString(appPreferences.getValue(appPreferences.sortOrder))
+            val storedSortBy = SortBy.fromString(appPreferences.getValue(appPreferences.bookSortBy))
+            val sortBy = storedSortBy.takeIf { it in BOOK_SORT_OPTIONS } ?: SortBy.NAME
+            val sortOrder =
+                SortOrder.fromString(appPreferences.getValue(appPreferences.bookSortOrder))
+            if (sortBy != storedSortBy) {
+                appPreferences.setValue(appPreferences.bookSortBy, sortBy.toString())
+            }
             _state.emit(
                 _state.value.copy(
                     isLoading = true,
@@ -117,8 +124,9 @@ constructor(
     }
 
     fun changeSorting(sortBy: SortBy, sortOrder: SortOrder) {
-        appPreferences.setValue(appPreferences.sortBy, sortBy.toString())
-        appPreferences.setValue(appPreferences.sortOrder, sortOrder.toString())
+        if (sortBy !in BOOK_SORT_OPTIONS) return
+        appPreferences.setValue(appPreferences.bookSortBy, sortBy.toString())
+        appPreferences.setValue(appPreferences.bookSortOrder, sortOrder.toString())
         _state.value = _state.value.copy(sortBy = sortBy, sortOrder = sortOrder)
         load(force = true)
     }

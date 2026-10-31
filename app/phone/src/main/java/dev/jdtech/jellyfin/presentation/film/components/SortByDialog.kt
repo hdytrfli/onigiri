@@ -32,10 +32,14 @@ fun SortByDialog(
     currentSortOrder: SortOrder,
     onUpdate: (sortBy: SortBy, sortOrder: SortOrder) -> Unit,
     onDismissRequest: () -> Unit,
+    availableSortOptions: List<SortBy> = SortBy.entries,
 ) {
     val optionValues = SortBy.entries
     val optionNames = stringArrayResource(CoreR.array.sort_by_options)
-    val options = optionValues.zip(optionNames)
+    val options = availableSortOptions.mapNotNull { sortBy ->
+        val index = optionValues.indexOf(sortBy)
+        if (index in optionNames.indices) sortBy to optionNames[index] else null
+    }
 
     var selectedOption by remember { mutableStateOf(currentSortBy) }
     var selectedOrder by remember { mutableStateOf(currentSortOrder) }

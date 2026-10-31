@@ -204,6 +204,8 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // Sorting
     val sortBy = Preference("pref_sort_by", "SortName")
     val sortOrder = Preference("pref_sort_order", "Ascending")
+    val bookSortBy = Preference("pref_book_sort_by", "SortName")
+    val bookSortOrder = Preference("pref_book_sort_order", "Ascending")
 
     // Offline mode
     val offlineMode = Preference("pref_offline_mode", false)

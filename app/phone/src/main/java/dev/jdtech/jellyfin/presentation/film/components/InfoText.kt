@@ -21,18 +21,31 @@ fun InfoText(
     director: FindroidItemPerson?,
     writers: List<FindroidItemPerson>,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
-        if (genres.isNotEmpty()) {
-            InfoRow(label = stringResource(CoreR.string.genres), value = genres.joinToString(", "))
-        }
-        director?.let { person ->
-            InfoRow(label = stringResource(CoreR.string.director), value = person.name)
-        }
-        if (writers.isNotEmpty()) {
-            InfoRow(
-                label = stringResource(CoreR.string.writers),
-                value = writers.joinToString(", ") { it.name },
+    val genresLabel = stringResource(CoreR.string.genres)
+    val directorLabel = stringResource(CoreR.string.director)
+    val writersLabel = stringResource(CoreR.string.writers)
+    InfoRows(
+        rows =
+            listOfNotNull(
+                if (genres.isNotEmpty()) genresLabel to genres.joinToString(", ") else null,
+                director?.let { directorLabel to it.name },
+                if (writers.isNotEmpty()) {
+                    writersLabel to writers.joinToString(", ") { it.name }
+                } else {
+                    null
+                },
             )
+    )
+}
+
+/** Generic label/value metadata rows, shared by every detail page. */
+@Composable
+fun InfoRows(rows: List<Pair<String, String>>) {
+    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
+        rows.forEach { (label, value) ->
+            if (value.isNotBlank()) {
+                InfoRow(label = label, value = value)
+            }
         }
     }
 }
