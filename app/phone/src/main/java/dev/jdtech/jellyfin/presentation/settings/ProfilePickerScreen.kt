@@ -524,7 +524,7 @@ private fun ProfileCard(
                     ) {
                         if (onChangePin != null) {
                             MenuActionItem(
-                                icon = CoreR.drawable.ic_asterisk,
+                                icon = CoreR.drawable.ic_lock,
                                 label =
                                     stringResource(
                                         if (profile.isLocked) {
@@ -580,32 +580,16 @@ private fun ProfilePinField(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_asterisk),
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                tint =
-                    if (isError) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color =
-                    if (isError) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color =
+                if (isError) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+        )
         PinCodeField(
             value = value,
             onValueChange = onValueChange,

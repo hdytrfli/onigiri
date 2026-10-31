@@ -140,11 +140,7 @@ constructor(
         viewModelScope.launch {
             _state.update { it.copy(isBusy = true, forgotError = null) }
             try {
-                val server = repository.getCurrentServer()
                 repository.login(profile.name, password)
-                if (server != null) {
-                    appPreferences.clearProfilePin(server.id, profile.id)
-                }
                 _state.update { it.copy(forgotPrompt = null, isBusy = false) }
                 switchTo(profile)
             } catch (e: Exception) {

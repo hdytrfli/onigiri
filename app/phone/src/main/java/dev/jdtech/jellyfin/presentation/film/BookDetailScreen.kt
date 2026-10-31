@@ -19,10 +19,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderAction
 import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderEvent
@@ -130,13 +132,20 @@ fun BookDetailScreen(
                         OverviewText(text = item.overview, maxCollapsedLines = 4)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         BookInfoRow(
-                            label = "Year",
+                            label = stringResource(R.string.book_info_year),
                             value =
                                 (item.productionYear ?: item.premiereDate?.year)
                                     ?.toString()
                                     .orEmpty(),
                         )
-                        BookInfoRow(label = "Studio", value = item.studios.firstOrNull().orEmpty())
+                        BookInfoRow(
+                            label = stringResource(R.string.book_info_genres),
+                            value = item.genres.joinToString(", "),
+                        )
+                        BookInfoRow(
+                            label = stringResource(R.string.book_info_publisher),
+                            value = item.studios.joinToString(", "),
+                        )
                         if (item.people.isNotEmpty()) {
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
                         }
@@ -179,6 +188,7 @@ fun BookDetailScreen(
                                     )
                                 },
                                 onNavigateToDownloads = navigateToDownloads,
+                                downloadAvailable = true,
                             )
                         }
                     },

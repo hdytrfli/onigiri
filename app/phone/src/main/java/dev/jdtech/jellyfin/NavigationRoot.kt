@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -175,9 +176,18 @@ fun NavigationRoot(
     // hoisted as well, otherwise the retained state would be discarded when switching modes.
     val saveableStateHolderDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
     val viewModelStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
+    // Every scene needs its own opaque base. Without it, a predictive-back preview can show the
+    // previous page through screens that use a transparent root.
+    val pageBackground = MaterialTheme.colorScheme.background
+    val pageBackgroundDecorator =
+        remember(pageBackground) {
+            NavEntryDecorator<NavKey> { entry ->
+                Box(Modifier.fillMaxSize().background(pageBackground)) { entry.Content() }
+            }
+        }
     val entryDecorators =
-        remember(saveableStateHolderDecorator, viewModelStoreDecorator) {
-            listOf(saveableStateHolderDecorator, viewModelStoreDecorator)
+        remember(saveableStateHolderDecorator, viewModelStoreDecorator, pageBackgroundDecorator) {
+            listOf(saveableStateHolderDecorator, viewModelStoreDecorator, pageBackgroundDecorator)
         }
 
     // Exposed as a state object (rather than a plain value) so the entry content closures, which

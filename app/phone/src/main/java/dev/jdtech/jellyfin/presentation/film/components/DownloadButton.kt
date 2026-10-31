@@ -39,6 +39,7 @@ fun DownloadButton(
     onCancelDownloadClick: () -> Unit,
     onDeleteDownloadClick: () -> Unit,
     onNavigateToDownloads: () -> Unit,
+    downloadAvailable: Boolean = item.canDownload,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -90,7 +91,7 @@ fun DownloadButton(
                 },
             )
         }
-        item.canDownload -> {
+        downloadAvailable -> {
             AppIconButton(
                 onClick = {
                     storageLocations = context.getExternalFilesDirs(null)
