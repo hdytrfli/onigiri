@@ -17,6 +17,7 @@ data class ProfileHeaderState(
     val avatarUrl: String? = null,
     val accessToken: String? = null,
     val isAdmin: Boolean = false,
+    val isLocked: Boolean = false,
 )
 
 @HiltViewModel
@@ -54,8 +55,21 @@ constructor(
                         user != null &&
                             server != null &&
                             appPreferences.isProfileAdmin(server.id, user.id),
+                    isLocked =
+                        user != null &&
+                            server != null &&
+                            appPreferences.hasProfilePin(server.id, user.id),
                 )
             )
+        }
+    }
+
+    fun savePin(pin: String) {
+        viewModelScope.launch {
+            val server = repository.getCurrentServer() ?: return@launch
+            val user = repository.getCurrentUser() ?: return@launch
+            appPreferences.setProfilePin(server.id, user.id, pin)
+            refresh()
         }
     }
 }

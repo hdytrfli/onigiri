@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,10 +25,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
+import dev.jdtech.jellyfin.presentation.onboarding.PinCodeField
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @Composable
@@ -39,6 +43,7 @@ fun SettingsProfileHeader(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var menuExpanded by remember { mutableStateOf(false) }
+    var showPinEditor by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier.fillMaxWidth().padding(vertical = MaterialTheme.spacings.small),
@@ -87,7 +92,25 @@ fun SettingsProfileHeader(
             AppDropdownMenu(
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false },
+                alignEnd = true,
             ) {
+                if (state.userName != null) {
+                    MenuActionItem(
+                        icon = CoreR.drawable.ic_lock,
+                        label =
+                            stringResource(
+                                if (state.isLocked) {
+                                    R.string.profile_change_lock
+                                } else {
+                                    R.string.profile_add_lock
+                                }
+                            ),
+                        onClick = {
+                            menuExpanded = false
+                            showPinEditor = true
+                        },
+                    )
+                }
                 MenuActionItem(
                     icon = CoreR.drawable.ic_user,
                     label = stringResource(R.string.profile_switch),
@@ -103,6 +126,46 @@ fun SettingsProfileHeader(
                         menuExpanded = false
                         onLogoutProfile()
                     },
+                )
+            }
+        }
+    }
+
+    if (showPinEditor) {
+        var pin by rememberSaveable { mutableStateOf("") }
+        BaseDialog(
+            title =
+                stringResource(
+                    if (state.isLocked) R.string.profile_change_lock else R.string.profile_add_lock
+                ),
+            description =
+                stringResource(R.string.profile_pin_description, state.userName.orEmpty()),
+            onDismiss = { showPinEditor = false },
+            negativeButton = {
+                AppButton(
+                    onClick = { showPinEditor = false },
+                    variant = AppButtonVariant.Secondary,
+                ) {
+                    Text(text = stringResource(R.string.profile_cancel))
+                }
+            },
+            positiveButton = {
+                AppButton(
+                    onClick = {
+                        viewModel.savePin(pin)
+                        showPinEditor = false
+                    },
+                    enabled = pin.length == 4,
+                ) {
+                    Text(text = stringResource(R.string.profile_save_pin))
+                }
+            },
+        ) { contentPadding ->
+            Column(modifier = Modifier.padding(contentPadding)) {
+                PinCodeField(
+                    value = pin,
+                    onValueChange = { pin = it.filter(Char::isDigit).take(4) },
+                    length = 4,
                 )
             }
         }

@@ -45,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
@@ -171,7 +170,8 @@ private fun ProfilePickerContent(
                 cells.chunked(columns).forEach { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(gap),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
                     ) {
                         row.forEach { cell ->
                             when (cell) {
@@ -182,7 +182,7 @@ private fun ProfilePickerContent(
                                         width = cellWidth,
                                         onClick = { onProfileClick(cell.item) },
                                         onRemove =
-                                            if (cell.item.isCurrent) {
+                                            if (cell.item.isCurrent || !state.viewerIsAdmin) {
                                                 null
                                             } else {
                                                 { onRemoveProfile(cell.item) }
@@ -193,7 +193,7 @@ private fun ProfilePickerContent(
                                             } else {
                                                 null
                                             },
-                                        showActions = state.viewerIsAdmin,
+                                        showActions = state.viewerIsAdmin || cell.item.isCurrent,
                                     )
 
                                 ProfileCell.Add ->
@@ -266,7 +266,7 @@ private fun ProfilePickerContent(
                     Text(text = stringResource(R.string.profile_remove_action))
                 }
             },
-        ) {}
+        )
     }
 
     state.pinEditorPrompt?.let { profile ->
@@ -428,7 +428,6 @@ private fun ProfileCard(
                 Box {
                     AppIconButton(
                         onClick = { menuExpanded = true },
-                        size = AppButtonSize.Decorator,
                         variant = AppButtonVariant.Ghost,
                     ) {
                         Icon(
@@ -440,6 +439,7 @@ private fun ProfileCard(
                     AppDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
+                        alignEnd = true,
                     ) {
                         if (onChangePin != null) {
                             MenuActionItem(

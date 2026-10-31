@@ -52,8 +52,8 @@
     <string name="profile_remove_title">Remove profile?</string>
     <string name="profile_remove_description">Remove %1$s from this device? The Jellyfin user itself is not deleted.</string>
     <string name="profile_remove_action">Remove</string>
-    <string name="profile_add_lock">Add profile lock</string>
-    <string name="profile_change_lock">Change profile lock</string>
+    <string name="profile_add_lock">Lock profile</string>
+    <string name="profile_change_lock">Change PIN</string>
     <string name="profile_save_pin">Save PIN</string>
     <string name="profile_pin_title">Enter profile PIN</string>
     <string name="profile_pin_description">Unlock %1$s to switch to this profile.</string>
@@ -71,7 +71,7 @@
     <string name="profile_empty">No saved profiles on this server yet.</string>
     <string name="settings_change_server_confirm">This signs out every profile and opens onboarding for a new server. Downloaded media stays on this device.</string>
     <string name="settings_change_server_action">Change server</string>
-    <string name="onboarding_photo_credit">Onboarding photo: Clay Banks on Unsplash</string>
+    <string name="onboarding_photo_credit">Onboarding photo: Iridial on Unsplash</string>
     <string name="player_controls_options">Playback options</string>
     <string name="player_controls_lock_gestures">Lock volume, brightness and zoom gestures</string>
     <string name="player_controls_episodes">Episodes</string>

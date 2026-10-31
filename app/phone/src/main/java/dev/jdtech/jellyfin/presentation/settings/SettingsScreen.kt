@@ -117,7 +117,6 @@ fun SettingsScreen(
         BaseDialog(
             title = stringResource(SettingsR.string.settings_change_server),
             description = stringResource(R.string.settings_change_server_confirm),
-            showContentDivider = false,
             onDismiss = { showResetServerDialog = false },
             negativeButton = {
                 AppButton(
@@ -138,7 +137,7 @@ fun SettingsScreen(
                     Text(text = stringResource(R.string.settings_change_server_action))
                 }
             },
-        ) {}
+        )
     }
 }
 

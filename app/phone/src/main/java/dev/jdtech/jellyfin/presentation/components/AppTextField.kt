@@ -99,7 +99,12 @@ fun AppTextField(
                             )
                             .padding(
                                 horizontal = MaterialTheme.spacings.medium,
-                                vertical = 12.dp,
+                                vertical =
+                                    if (leadingContent != null || trailingContent != null) {
+                                        14.dp
+                                    } else {
+                                        12.dp
+                                    },
                             ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

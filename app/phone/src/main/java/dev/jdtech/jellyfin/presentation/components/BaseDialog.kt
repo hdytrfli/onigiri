@@ -46,14 +46,12 @@ fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
     description: String? = null,
-    showContentDivider: Boolean = true,
-    content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
+    content: (@Composable ColumnScope.(contentPadding: PaddingValues) -> Unit)? = null,
 ) {
     BaseDialogImpl(
         title = title,
         onDismiss = onDismiss,
         description = description,
-        showContentDivider = showContentDivider,
         actions = null,
         content = content,
     )
@@ -64,16 +62,14 @@ fun BaseDialog(
     title: String,
     onDismiss: () -> Unit,
     description: String? = null,
-    showContentDivider: Boolean = true,
     negativeButton: @Composable () -> Unit,
     positiveButton: @Composable () -> Unit,
-    content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
+    content: (@Composable ColumnScope.(contentPadding: PaddingValues) -> Unit)? = null,
 ) {
     BaseDialogImpl(
         title = title,
         onDismiss = onDismiss,
         description = description,
-        showContentDivider = showContentDivider,
         actions = {
             negativeButton()
             positiveButton()
@@ -87,9 +83,8 @@ private fun BaseDialogImpl(
     title: String,
     onDismiss: () -> Unit,
     description: String?,
-    showContentDivider: Boolean,
     actions: (@Composable RowScope.() -> Unit)?,
-    content: @Composable ColumnScope.(contentPadding: PaddingValues) -> Unit,
+    content: (@Composable ColumnScope.(contentPadding: PaddingValues) -> Unit)?,
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.widthIn(max = Dimens.dialogMaxWidth).fillMaxWidth()) {
@@ -118,10 +113,10 @@ private fun BaseDialogImpl(
                             )
                         }
                     }
-                    if (showContentDivider) {
+                    if (content != null) {
                         HorizontalDivider()
+                        content(PaddingValues(MaterialTheme.spacings.medium))
                     }
-                    content(PaddingValues(MaterialTheme.spacings.medium))
                 }
             }
 
