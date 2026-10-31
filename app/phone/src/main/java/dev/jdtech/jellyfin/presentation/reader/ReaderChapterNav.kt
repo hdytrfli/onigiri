@@ -35,11 +35,11 @@ internal const val CHAPTER_NAV_SCRIPT =
     """
     (function() {
       var bridge = window.FindroidChapterNav;
-      if (!bridge) return;
+      if (!bridge) return 'findroid-missing';
       if (document.getElementById('findroid-chapter-nav-prev') ||
           document.getElementById('findroid-chapter-nav-next')) {
         if (window.__findroidChapterNavUpdate) window.__findroidChapterNavUpdate();
-        return;
+        return 'findroid-ok';
       }
 
       var style = document.getElementById('findroid-chapter-nav-style');
@@ -92,16 +92,33 @@ internal const val CHAPTER_NAV_SCRIPT =
         nav.className = 'findroid-chapter-nav';
         nav.id = 'findroid-chapter-nav-' + kind;
         nav.setAttribute('aria-hidden', 'true');
+        nav.setAttribute(
+          'style',
+          'display:flex!important;align-items:center!important;justify-content:center!important;' +
+          'width:100%!important;height:96px!important;min-height:96px!important;' +
+          'margin:0!important;padding:0!important;box-sizing:border-box!important;line-height:0!important;'
+        );
         nav.innerHTML =
-          '<div class="findroid-chapter-nav-circle">' +
-            '<svg class="findroid-chapter-nav-ring" viewBox="0 0 48 48">' +
-              '<circle class="findroid-chapter-nav-fill" cx="24" cy="24" r="21"></circle>' +
-              '<circle class="findroid-chapter-nav-track" cx="24" cy="24" r="21"></circle>' +
+          '<div class="findroid-chapter-nav-circle" style="position:relative!important;' +
+            'width:48px!important;height:48px!important;opacity:0.35;">' +
+            '<svg class="findroid-chapter-nav-ring" viewBox="0 0 48 48" width="48" height="48" ' +
+              'style="position:absolute!important;inset:0!important;width:48px!important;' +
+              'height:48px!important;overflow:visible!important;">' +
+              '<circle class="findroid-chapter-nav-fill" cx="24" cy="24" r="21" ' +
+                'fill="rgba(0,0,0,.85)" stroke="none"></circle>' +
+              '<circle class="findroid-chapter-nav-track" cx="24" cy="24" r="21" ' +
+                'fill="none" stroke="rgba(255,255,255,.22)" stroke-width="3"></circle>' +
               '<circle class="findroid-chapter-nav-progress" cx="24" cy="24" r="21" ' +
+                'fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" ' +
+                'stroke-dasharray="131.95" stroke-dashoffset="131.95" ' +
                 'transform="rotate(-90 24 24)"></circle>' +
             '</svg>' +
-            '<svg class="findroid-chapter-nav-icon" viewBox="0 0 24 24">' +
-              '<path d="' + iconPath + '"></path>' +
+            '<svg class="findroid-chapter-nav-icon" viewBox="0 0 24 24" width="24" height="24" ' +
+              'style="position:absolute!important;left:12px!important;top:12px!important;' +
+              'width:24px!important;height:24px!important;fill:none!important;stroke:#fff!important;' +
+              'stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;">' +
+              '<path d="' + iconPath + '" fill="none" stroke="#fff" stroke-width="2" ' +
+                'stroke-linecap="round" stroke-linejoin="round"></path>' +
             '</svg>' +
           '</div>';
         return nav;
@@ -196,6 +213,8 @@ internal const val CHAPTER_NAV_SCRIPT =
           try { bridge.goNext(); } catch (error) {}
         }
       }, { passive: true });
+
+      return 'findroid-ok';
     })();
     """
 

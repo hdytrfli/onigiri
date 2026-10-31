@@ -287,14 +287,12 @@ class ReaderActivity : AppCompatActivity() {
         chapterNavPendingHref = href
         chapterNavJob?.cancel()
         chapterNavJob = lifecycleScope.launch {
-            val result = runCatching { navigator.evaluateJavascript(CHAPTER_NAV_SCRIPT) }
+            val result = runCatching {
+                navigator.evaluateJavascript(CHAPTER_NAV_SCRIPT)
+            }.getOrNull()
             if (chapterNavPendingHref != href) return@launch
             chapterNavPendingHref = null
-            if (result.isSuccess) {
-                chapterNavHref = href
-            } else {
-                chapterNavHref = null
-            }
+            chapterNavHref = if (result?.contains("findroid-ok") == true) href else null
         }
     }
 
@@ -456,10 +454,6 @@ class ReaderActivity : AppCompatActivity() {
                 }
                 val paginationListener =
                     object : EpubNavigatorFragment.PaginationListener {
-                        override fun onPageLoaded() {
-                            updateChapterNav()
-                        }
-
                         override fun onPageChanged(
                             pageIndex: Int,
                             totalPages: Int,
@@ -543,6 +537,7 @@ class ReaderActivity : AppCompatActivity() {
                 val href = locator.href.toString()
                 if (href.isEmpty()) return@collect
                 lastLocator = locator
+                updateChapterNav(locator)
                 appPreferences.sharedPreferences
                     .edit()
                     .putString(locatorKey(id), locator.toJSON().toString())
