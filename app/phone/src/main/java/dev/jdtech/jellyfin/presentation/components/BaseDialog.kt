@@ -21,7 +21,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -92,15 +91,9 @@ private fun BaseDialogImpl(
     actions: (@Composable RowScope.() -> Unit)?,
     content: (@Composable ColumnScope.(contentPadding: PaddingValues) -> Unit)?,
 ) {
-    val scrim = LocalDialogScrim.current
-    DisposableEffect(scrim) {
-        scrim.show()
-        onDispose { scrim.hide() }
-    }
-
     Dialog(onDismissRequest = onDismiss) {
         val view = LocalView.current
-        SideEffect { (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0.3f) }
+        SideEffect { (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0.5f) }
         Column(modifier = Modifier.widthIn(max = Dimens.dialogMaxWidth).fillMaxWidth()) {
             Card(
                 modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogCompactMaxHeight),

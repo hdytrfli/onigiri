@@ -61,11 +61,16 @@
     <string name="profile_save_pin">Save PIN</string>
     <string name="profile_pin_title">Enter profile PIN</string>
     <string name="profile_pin_description">Unlock %1$s to switch to this profile.</string>
+    <string name="profile_pin_field_label">Profile PIN</string>
+    <string name="profile_pin_unlock_field_description">Enter the 4-digit PIN for this profile.</string>
+    <string name="profile_pin_change_field_description">Enter a new 4-digit PIN for this profile.</string>
+    <string name="profile_pin_add_field_description">Choose a 4-digit PIN for this profile.</string>
     <string name="profile_pin_wrong">That PIN is not correct.</string>
     <string name="profile_pin_unlock">Unlock</string>
     <string name="profile_forgot_pin">Forgot PIN?</string>
     <string name="profile_password_title">Unlock with password</string>
     <string name="profile_password_description">Enter the Jellyfin password for %1$s to reset this profile PIN.</string>
+    <string name="profile_password_field_description">Needed to reset this profile PIN.</string>
     <string name="profile_password_wrong">That password was not accepted.</string>
     <string name="profile_password_unlock">Unlock</string>
     <string name="profile_password_sign_in">Sign in</string>

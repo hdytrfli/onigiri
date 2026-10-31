@@ -37,6 +37,7 @@
    <string name="addresses">Addresses</string>
    <string name="add_address">Add address</string>
    <string name="add_server_address">Add server address</string>
+   <string name="add_server_address_description">Enter the full URL, including http:// or https://.</string>
    <string name="remove_server_address">Remove server address</string>
    <string name="remove_server_address_dialog_text">Are you sure you want to remove the server address %1$s</string>
 </resources>

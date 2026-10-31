@@ -142,7 +142,7 @@ fun ProfilePickerScreen(
     if (showChangeServerDialog) {
         BaseDialog(
             title = stringResource(SettingsR.string.settings_change_server),
-            description = stringResource(R.string.settings_change_server_confirm),
+            description = stringResource(SettingsR.string.settings_change_server_summary),
             onDismiss = { showChangeServerDialog = false },
             negativeButton = {
                 AppButton(
@@ -163,7 +163,14 @@ fun ProfilePickerScreen(
                     Text(text = stringResource(R.string.settings_change_server_action))
                 }
             },
-        )
+        ) { contentPadding ->
+            Text(
+                text = stringResource(R.string.settings_change_server_confirm),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(contentPadding),
+            )
+        }
     }
 }
 
@@ -294,24 +301,15 @@ private fun ProfilePickerContent(
                 }
             },
         ) { contentPadding ->
-            Column(
+            ProfilePinField(
+                value = pin,
+                onValueChange = { pin = it },
+                label = stringResource(R.string.profile_pin_field_label),
+                description = stringResource(R.string.profile_pin_unlock_field_description),
+                isError = state.pinError != null,
+                error = state.pinError?.asString(),
                 modifier = Modifier.padding(contentPadding),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            ) {
-                PinCodeField(
-                    value = pin,
-                    onValueChange = { pin = it },
-                    length = 4,
-                    isError = state.pinError != null,
-                )
-                state.pinError?.let {
-                    Text(
-                        text = it.asString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -371,24 +369,22 @@ private fun ProfilePickerContent(
                 }
             },
         ) { contentPadding ->
-            Column(
+            ProfilePinField(
+                value = pin,
+                onValueChange = { pin = it },
+                label = stringResource(R.string.profile_pin_field_label),
+                description =
+                    stringResource(
+                        if (profile.isLocked) {
+                            R.string.profile_pin_change_field_description
+                        } else {
+                            R.string.profile_pin_add_field_description
+                        }
+                    ),
+                isError = state.pinEditorError != null,
+                error = state.pinEditorError?.asString(),
                 modifier = Modifier.padding(contentPadding),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            ) {
-                PinCodeField(
-                    value = pin,
-                    onValueChange = { pin = it },
-                    length = 4,
-                    isError = state.pinEditorError != null,
-                )
-                state.pinEditorError?.let {
-                    Text(
-                        text = it.asString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -420,10 +416,20 @@ private fun ProfilePickerContent(
                     value = password,
                     onValueChange = { password = it },
                     label = stringResource(R.string.onboarding_password),
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_lock),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
                     visualTransformation = PasswordVisualTransformation(),
                     enabled = !state.isBusy,
                     isError = state.forgotError != null,
-                    supportingText = state.forgotError?.asString(),
+                    supportingText =
+                        state.forgotError?.asString()
+                            ?: stringResource(R.string.profile_password_field_description),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -518,7 +524,7 @@ private fun ProfileCard(
                     ) {
                         if (onChangePin != null) {
                             MenuActionItem(
-                                icon = CoreR.drawable.ic_lock,
+                                icon = CoreR.drawable.ic_asterisk,
                                 label =
                                     stringResource(
                                         if (profile.isLocked) {
@@ -557,6 +563,65 @@ private fun ProfileCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProfilePinField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    description: String,
+    isError: Boolean,
+    error: String?,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
+        ) {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_asterisk),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint =
+                    if (isError) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color =
+                    if (isError) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            )
+        }
+        PinCodeField(
+            value = value,
+            onValueChange = onValueChange,
+            length = 4,
+            isError = isError,
+        )
+        Text(
+            text = error ?: description,
+            style = MaterialTheme.typography.bodySmall,
+            color =
+                if (isError) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+        )
     }
 }
 
