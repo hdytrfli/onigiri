@@ -57,10 +57,12 @@ constructor(
         set(value) {
             field = value
             ringPaint.color = value
+            nextIcon?.setTint(value)
+            previousIcon?.setTint(value)
             invalidate()
         }
 
-    var trackColor: Int = 0x55FFFFFF
+    var trackColor: Int = 0x33FFFFFF
         set(value) {
             field = value
             trackPaint.color = value
@@ -69,19 +71,17 @@ constructor(
 
     private val density = resources.displayMetrics.density
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-    private val triggerDistance = 112f * density
-    private val maxPull = triggerDistance * 1.35f
-    private val contentTranslationFactor = 0.65f
+    private var triggerDistance = 0f
+    private var maxPull = 0f
+    private val triggerFraction = 0.30f
     private val circleRadius = 24f * density
     private val ringWidth = 3f * density
 
-    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xAA000000.toInt() }
     private val trackPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = trackColor
             style = Paint.Style.STROKE
             strokeWidth = ringWidth
-            strokeCap = Paint.Cap.ROUND
         }
     private val ringPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -93,11 +93,11 @@ constructor(
     private val ringRect = RectF()
     private val nextIcon: Drawable? =
         ContextCompat.getDrawable(context, CoreR.drawable.ic_chevron_down)?.mutate()?.apply {
-            setTint(0xFFFFFFFF.toInt())
+            setTint(ringColor)
         }
     private val previousIcon: Drawable? =
         ContextCompat.getDrawable(context, CoreR.drawable.ic_chevron_up)?.mutate()?.apply {
-            setTint(0xFFFFFFFF.toInt())
+            setTint(ringColor)
         }
 
     private var downX = 0f
@@ -109,6 +109,12 @@ constructor(
 
     init {
         setWillNotDraw(false)
+    }
+
+    override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight)
+        triggerDistance = height * triggerFraction
+        maxPull = triggerDistance * 1.15f
     }
 
     override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
@@ -203,26 +209,12 @@ constructor(
         if (!pullEnabled || pullDistance <= 0f) return
 
         val progress = (pullDistance / triggerDistance).coerceIn(0f, 1f)
-        val alpha = (0.35f + 0.65f * progress).coerceIn(0f, 1f)
         val centerX = width / 2f
-        val exposed = pullDistance * contentTranslationFactor
         val centerY =
             when (direction) {
-                Direction.NEXT -> height - exposed / 2f
-                Direction.PREVIOUS -> exposed / 2f
+                Direction.NEXT -> height - pullDistance + circleRadius
+                Direction.PREVIOUS -> pullDistance - circleRadius
             }
-        val scale = 0.86f + 0.14f * progress
-
-        canvas.save()
-        canvas.scale(scale, scale, centerX, centerY)
-
-        fillPaint.alpha = (alpha * 255).toInt()
-        trackPaint.alpha = (alpha * 255).toInt()
-        ringPaint.alpha = (alpha * 255).toInt()
-
-        val fillRadius = circleRadius - ringWidth * 1.5f
-        canvas.drawCircle(centerX, centerY, fillRadius, fillPaint)
-
         val ringRadius = circleRadius - ringWidth / 2f
         ringRect.set(
             centerX - ringRadius,
@@ -230,6 +222,7 @@ constructor(
             centerX + ringRadius,
             centerY + ringRadius,
         )
+
         canvas.drawArc(ringRect, -90f, 360f, false, trackPaint)
         canvas.drawArc(ringRect, -90f, 360f * progress, false, ringPaint)
 
@@ -243,11 +236,8 @@ constructor(
                 centerX.toInt() + half,
                 centerY.toInt() + half,
             )
-            icon.alpha = (alpha * 255).toInt()
             icon.draw(canvas)
         }
-
-        canvas.restore()
     }
 
     private fun animateReset() {
@@ -274,8 +264,8 @@ constructor(
         content.translationY =
             when {
                 !pullEnabled || pullDistance <= 0f -> 0f
-                direction == Direction.NEXT -> -pullDistance * contentTranslationFactor
-                else -> pullDistance * contentTranslationFactor
+                direction == Direction.NEXT -> -pullDistance
+                else -> pullDistance
             }
     }
 

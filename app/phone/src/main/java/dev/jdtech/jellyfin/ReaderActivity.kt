@@ -289,9 +289,8 @@ class ReaderActivity : AppCompatActivity() {
                 else -> Theme.DARK
             }
         val ringColor = theme.contentColor
-        val trackColor = (ringColor and 0x00FFFFFF) or (0x4D shl 24)
         binding.readerPull.ringColor = ringColor
-        binding.readerPull.trackColor = trackColor
+        binding.readerPull.trackColor = (ringColor and 0x00FFFFFF) or (0x33 shl 24)
         binding.readerPull.setBackgroundColor(theme.backgroundColor)
     }
 
