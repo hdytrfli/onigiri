@@ -134,6 +134,8 @@ class ReaderActivity : AppCompatActivity() {
     private var publication: Publication? = null
     private var lastLocator: Locator? = null
     private var locatorJob: Job? = null
+    private var scrollPaddingHref: String? = null
+    private var scrollPaddingJob: Job? = null
     private var appliedMaxWidth: Double? = null
     private var maxWidthHref: String? = null
     private var startFromBeginning = false
@@ -249,7 +251,9 @@ class ReaderActivity : AppCompatActivity() {
             applyPullAppearance(settings)
             epubNavigator?.submitPreferences(settings.toEpubPreferences())
             readerIsScroll = settings.scroll
+            if (readerIsScroll) scrollPaddingHref = null
             binding.readerPull.pullEnabled = isPullEligible(settings)
+            updateScrollModePadding()
             lifecycleScope.launch { applyMaxWidth(settings.maxLineLengthRem, force = true) }
         }
     }
@@ -292,9 +296,39 @@ class ReaderActivity : AppCompatActivity() {
         binding.readerPull.ringColor = ringColor
         binding.readerPull.trackColor = (ringColor and 0x00FFFFFF) or (0x33 shl 24)
         binding.readerPull.setBackgroundColor(theme.backgroundColor)
-        val bottomPadding =
-            if (settings.scroll) (24f * resources.displayMetrics.density).toInt() else 0
-        binding.readerPull.setPadding(0, 0, 0, bottomPadding)
+    }
+
+    private fun applyScrollModePadding(locator: Locator? = null) {
+        if (!readerIsScroll) {
+            removeScrollModePadding()
+            return
+        }
+        val navigator = epubNavigator ?: return
+        val href =
+            locator?.href?.toString() ?: navigator.currentLocator.value?.href?.toString() ?: return
+        if (href == scrollPaddingHref) return
+        scrollPaddingHref = href
+        scrollPaddingJob?.cancel()
+        scrollPaddingJob = lifecycleScope.launch {
+            runCatching { navigator.evaluateJavascript(SCROLL_BOTTOM_PADDING_SCRIPT) }
+        }
+    }
+
+    private fun removeScrollModePadding() {
+        val navigator = epubNavigator ?: return
+        scrollPaddingHref = null
+        scrollPaddingJob?.cancel()
+        scrollPaddingJob = lifecycleScope.launch {
+            runCatching { navigator.evaluateJavascript(SCROLL_BOTTOM_PADDING_REMOVE_SCRIPT) }
+        }
+    }
+
+    private fun updateScrollModePadding(locator: Locator? = null) {
+        if (readerIsScroll) {
+            applyScrollModePadding(locator)
+        } else {
+            removeScrollModePadding()
+        }
     }
 
     private fun canPullNextChapter(): Boolean {
@@ -467,11 +501,26 @@ class ReaderActivity : AppCompatActivity() {
                         }
                     }
                 }
+                val paginationListener =
+                    object : EpubNavigatorFragment.PaginationListener {
+                        override fun onPageLoaded() {
+                            updateScrollModePadding()
+                        }
+
+                        override fun onPageChanged(
+                            pageIndex: Int,
+                            totalPages: Int,
+                            locator: Locator,
+                        ) {
+                            updateScrollModePadding(locator)
+                        }
+                    }
                 fragmentFactory =
                     EpubNavigatorFactory(publication)
                         .createFragmentFactory(
                             initialLocator = initialLocator,
                             initialPreferences = epubPreferences,
+                            paginationListener = paginationListener,
                             configuration = configuration,
                         )
             }
@@ -511,6 +560,8 @@ class ReaderActivity : AppCompatActivity() {
 
         readerIsScroll = settings.scroll
         binding.readerPull.pullEnabled = isPullEligible(settings)
+        scrollPaddingHref = null
+        updateScrollModePadding()
 
         visualNavigator?.addInputListener(tapListener)
         appliedMaxWidth = settings.maxLineLengthRem
@@ -620,6 +671,12 @@ class ReaderActivity : AppCompatActivity() {
         private const val EXTRA_OVERVIEW = "overview"
         private const val EXTRA_START_FROM_BEGINNING = "start_from_beginning"
         private const val FRAGMENT_TAG = "reader_navigator_fragment"
+
+        private const val SCROLL_BOTTOM_PADDING_SCRIPT =
+            "if (document.body) { document.body.style.setProperty('padding-bottom', '24px', 'important'); }"
+
+        private const val SCROLL_BOTTOM_PADDING_REMOVE_SCRIPT =
+            "if (document.body) { document.body.style.removeProperty('padding-bottom'); }"
 
         fun intent(
             context: Context,

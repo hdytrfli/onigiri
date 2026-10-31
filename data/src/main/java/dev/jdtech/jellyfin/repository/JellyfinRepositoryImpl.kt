@@ -135,6 +135,7 @@ class JellyfinRepositoryImpl(
                     ids = listOf(itemId),
                     fields =
                         listOf(
+                            ItemFields.OVERVIEW,
                             ItemFields.PEOPLE,
                             ItemFields.PRIMARY_IMAGE_ASPECT_RATIO,
                         ),
