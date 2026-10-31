@@ -10,16 +10,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
@@ -49,13 +57,22 @@ fun SettingsScreen(
     navigateToSubtitleFont: () -> Unit,
     navigateToReaderFont: () -> Unit,
     navigateBack: () -> Unit,
+    profileHeader: (@Composable () -> Unit)? = null,
     viewModel: SettingsViewModel = hiltViewModel(),
+    resetViewModel: ServerResetViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    var showResetServerDialog by remember { mutableStateOf(false) }
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadPreferences(indexes) }
+
+    ObserveAsEvents(resetViewModel.events) { event ->
+        if (event is ServerResetEvent.Reset) {
+            context.clearProfileCachesAndRestart()
+        }
+    }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -64,6 +81,7 @@ fun SettingsScreen(
                 navigateToSettingsFileEdit(event.filePath)
             is SettingsEvent.NavigateToUsers -> navigateToUsers()
             is SettingsEvent.NavigateToServers -> navigateToServers()
+            is SettingsEvent.ResetServer -> showResetServerDialog = true
             is SettingsEvent.NavigateToAbout -> navigateToAbout()
             is SettingsEvent.NavigateToSubtitleFont -> navigateToSubtitleFont()
             is SettingsEvent.NavigateToReaderFont -> navigateToReaderFont()
@@ -88,11 +106,39 @@ fun SettingsScreen(
         // name of the category that was pushed.
         pageTitle = stringResource(indexes.lastOrNull() ?: CoreR.string.title_settings),
         onBack = if (indexes.isEmpty()) null else navigateBack,
+        profileHeader = profileHeader?.takeIf { indexes.isEmpty() },
         onAction = { action ->
             viewModel.onAction(action)
             viewModel.loadPreferences(indexes)
         },
     )
+
+    if (showResetServerDialog) {
+        BaseDialog(
+            title = stringResource(SettingsR.string.settings_change_server),
+            description = stringResource(R.string.settings_change_server_confirm),
+            onDismiss = { showResetServerDialog = false },
+            negativeButton = {
+                AppButton(
+                    onClick = { showResetServerDialog = false },
+                    variant = AppButtonVariant.Secondary,
+                ) {
+                    Text(text = stringResource(R.string.profile_cancel))
+                }
+            },
+            positiveButton = {
+                AppButton(
+                    onClick = {
+                        showResetServerDialog = false
+                        resetViewModel.reset()
+                    },
+                    variant = AppButtonVariant.Destructive,
+                ) {
+                    Text(text = stringResource(R.string.settings_change_server_action))
+                }
+            },
+        ) {}
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,6 +147,7 @@ private fun SettingsScreenLayout(
     state: SettingsState,
     pageTitle: String,
     onBack: (() -> Unit)?,
+    profileHeader: (@Composable () -> Unit)? = null,
     onAction: (SettingsAction) -> Unit,
 ) {
     // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox. The
@@ -113,6 +160,7 @@ private fun SettingsScreenLayout(
                 contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {
+                profileHeader?.let { header -> item(key = "profile") { header() } }
                 items(state.preferenceGroups) { group ->
                     SettingsGroupCard(
                         group = group,

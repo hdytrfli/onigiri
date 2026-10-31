@@ -75,10 +75,13 @@ import dev.jdtech.jellyfin.presentation.film.SeasonScreen
 import dev.jdtech.jellyfin.presentation.film.ShowScreen
 import dev.jdtech.jellyfin.presentation.film.ShowsScreen
 import dev.jdtech.jellyfin.presentation.film.SubtitleSearchScreen
+import dev.jdtech.jellyfin.presentation.onboarding.AddProfileScreen
 import dev.jdtech.jellyfin.presentation.onboarding.OnboardingScreen
 import dev.jdtech.jellyfin.presentation.reader.ReaderFontScreen
 import dev.jdtech.jellyfin.presentation.settings.AboutScreen
+import dev.jdtech.jellyfin.presentation.settings.ProfilePickerScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
+import dev.jdtech.jellyfin.presentation.settings.SettingsProfileHeader
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
 import dev.jdtech.jellyfin.presentation.settings.SubtitleFontScreen
 import dev.jdtech.jellyfin.presentation.setup.addresses.ServerAddressesScreen
@@ -804,9 +807,24 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },
                 navigateToReaderFont = dropUnlessResumed { navigator.navigate(ReaderFontRoute) },
                 navigateBack = dropUnlessResumed { navigator.goBack() },
+                profileHeader = {
+                    SettingsProfileHeader(
+                        onChangeProfile =
+                            dropUnlessResumed { navigator.navigate(ProfilePickerRoute) }
+                    )
+                },
             )
         }
     }
+    entry<ProfilePickerRoute> {
+        SuiteInsetBox {
+            ProfilePickerScreen(
+                onBack = dropUnlessResumed { navigator.goBack() },
+                onAddProfile = dropUnlessResumed { navigator.navigate(AddProfileRoute) },
+            )
+        }
+    }
+    entry<AddProfileRoute> { AddProfileScreen(onBack = dropUnlessResumed { navigator.goBack() }) }
     entry<SettingsFileEditRoute> { key ->
         SuiteInsetBox {
             SettingsFileEditScreen(

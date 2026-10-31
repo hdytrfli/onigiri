@@ -283,6 +283,32 @@ constructor(
                                                             ),
                                                         ),
                                                 ),
+                                                PreferenceSliders(
+                                                    nameStringResource = R.string.grid_profiles,
+                                                    descriptionStringRes =
+                                                        R.string.grid_profiles_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.grid_profile_portrait,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridProfileColumnsPortrait,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.grid_profile_landscape,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridProfileColumnsLandscape,
+                                                            ),
+                                                        ),
+                                                ),
                                                 PreferenceSelect(
                                                     nameStringResource = R.string.grid_spacing,
                                                     descriptionStringRes =
@@ -1321,36 +1347,6 @@ constructor(
             PreferenceGroup(
                 preferences =
                     listOf(
-                        PreferenceCategory(
-                            nameStringResource = R.string.users,
-                            descriptionStringRes = R.string.users_summary,
-                            iconDrawableId = R.drawable.ic_user,
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(SettingsEvent.NavigateToUsers)
-                                }
-                            },
-                        )
-                    )
-            ),
-            PreferenceGroup(
-                preferences =
-                    listOf(
-                        PreferenceCategory(
-                            nameStringResource = R.string.settings_category_servers,
-                            descriptionStringRes = R.string.settings_category_servers_summary,
-                            iconDrawableId = R.drawable.ic_server,
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(SettingsEvent.NavigateToServers)
-                                }
-                            },
-                        )
-                    )
-            ),
-            PreferenceGroup(
-                preferences =
-                    listOf(
                         PreferenceSwitch(
                             nameStringResource = R.string.offline_mode,
                             descriptionStringRes = R.string.offline_mode_summary,
@@ -1509,6 +1505,23 @@ constructor(
                                             ),
                                     )
                                 ),
+                        )
+                    )
+            ),
+            PreferenceGroup(
+                preferences =
+                    listOf(
+                        PreferenceAction(
+                            nameStringResource = R.string.settings_change_server,
+                            descriptionStringRes = R.string.settings_change_server_summary,
+                            iconDrawableId = R.drawable.ic_server,
+                            backendPreference = appPreferences.currentServer,
+                            formatValue = { "" },
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(SettingsEvent.ResetServer)
+                                }
+                            },
                         )
                     )
             ),

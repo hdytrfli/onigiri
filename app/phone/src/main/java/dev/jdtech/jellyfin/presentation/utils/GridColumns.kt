@@ -11,6 +11,7 @@ enum class GridSize {
     POSTER,
     THUMBNAIL,
     SUGGESTIONS,
+    PROFILE,
 }
 
 /** Base gap between grid cells, scaled by the "Layout grid" gap preference. */
@@ -34,12 +35,16 @@ data class GridColumns(
     /** How many suggestions the home carousel shows at once, per orientation. */
     val suggestionPortrait: Int = 1,
     val suggestionLandscape: Int = 3,
+    /** How many profile cards fit in one row of the profile picker. */
+    val profilePortrait: Int = 4,
+    val profileLandscape: Int = 6,
 ) {
     fun columns(size: GridSize, isLandscape: Boolean): Int =
         when (size) {
             GridSize.POSTER -> if (isLandscape) posterLandscape else posterPortrait
             GridSize.THUMBNAIL -> if (isLandscape) thumbnailLandscape else thumbnailPortrait
             GridSize.SUGGESTIONS -> if (isLandscape) suggestionLandscape else suggestionPortrait
+            GridSize.PROFILE -> if (isLandscape) profileLandscape else profilePortrait
         }
 }
 

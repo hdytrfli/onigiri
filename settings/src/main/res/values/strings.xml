@@ -28,6 +28,10 @@
     <string name="grid_suggestions_summary">Suggestions visible in the home screen carousel</string>
     <string name="grid_suggestion_portrait">Suggestions portrait</string>
     <string name="grid_suggestion_landscape">Suggestions landscape</string>
+    <string name="grid_profiles">Profiles</string>
+    <string name="grid_profiles_summary">Profile card size in the profile picker</string>
+    <string name="grid_profile_portrait">Profiles portrait</string>
+    <string name="grid_profile_landscape">Profiles landscape</string>
     <string name="grid_thumbnail_portrait">Thumbnail portrait</string>
     <string name="grid_thumbnail_landscape">Thumbnail landscape</string>
     <string name="grid_spacing">Grid spacing</string>
@@ -236,6 +240,8 @@
     <string name="settings_group_display">Display</string>
     <string name="settings_group_spacing">Spacing</string>
     <string name="settings_group_typography">Typography</string>
+    <string name="settings_change_server">Change server</string>
+    <string name="settings_change_server_summary">Sign out and set up a different Jellyfin server</string>
     <string name="settings_reader_theme">Theme</string>
     <string name="settings_reader_theme_summary">Page and text colours</string>
     <string name="settings_reader_brightness">Brightness</string>

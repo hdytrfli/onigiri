@@ -164,19 +164,33 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     portrait to landscape
                 }
 
-            val gridAndSuggestionPrefs =
-                gridPrefs.combine(suggestionPrefs) { grid, (suggestionPortrait, suggestionLandscape)
-                    ->
-                    GridPrefs(
-                        grid.posterPortrait,
-                        grid.posterLandscape,
-                        grid.thumbnailPortrait,
-                        grid.thumbnailLandscape,
-                        suggestionPortrait,
-                        suggestionLandscape,
-                        grid.spacing,
-                    )
+            val profileGridPrefs =
+                combine(
+                    appPreferences.observe(appPreferences.gridProfileColumnsPortrait),
+                    appPreferences.observe(appPreferences.gridProfileColumnsLandscape),
+                ) { portrait, landscape ->
+                    portrait to landscape
                 }
+
+            val gridAndSuggestionPrefs =
+                gridPrefs
+                    .combine(suggestionPrefs) { grid, (suggestionPortrait, suggestionLandscape) ->
+                        GridPrefs(
+                            grid.posterPortrait,
+                            grid.posterLandscape,
+                            grid.thumbnailPortrait,
+                            grid.thumbnailLandscape,
+                            suggestionPortrait,
+                            suggestionLandscape,
+                            grid.spacing,
+                        )
+                    }
+                    .combine(profileGridPrefs) { grid, (profilePortrait, profileLandscape) ->
+                        grid.copy(
+                            profilePortrait = profilePortrait,
+                            profileLandscape = profileLandscape,
+                        )
+                    }
 
             combine(
                     setupFlagsWithOnboarding,
@@ -210,6 +224,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         gridThumbnailLandscape = gridPrefs.thumbnailLandscape.toIntOrNull() ?: 4,
                         gridSuggestionPortrait = gridPrefs.suggestionPortrait.toIntOrNull() ?: 1,
                         gridSuggestionLandscape = gridPrefs.suggestionLandscape.toIntOrNull() ?: 3,
+                        gridProfilePortrait = gridPrefs.profilePortrait.toIntOrNull() ?: 4,
+                        gridProfileLandscape = gridPrefs.profileLandscape.toIntOrNull() ?: 6,
                         gridGapScale = gridPrefs.spacing.toFloatOrNull() ?: 1f,
                     )
                 }
@@ -255,6 +271,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val suggestionPortrait: String,
         val suggestionLandscape: String,
         val spacing: String,
+        val profilePortrait: String = "4",
+        val profileLandscape: String = "6",
     )
 }
 
@@ -281,5 +299,7 @@ data class MainState(
     val gridThumbnailLandscape: Int = 4,
     val gridSuggestionPortrait: Int = 1,
     val gridSuggestionLandscape: Int = 3,
+    val gridProfilePortrait: Int = 4,
+    val gridProfileLandscape: Int = 6,
     val gridGapScale: Float = 1f,
 )

@@ -16,13 +16,15 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -31,7 +33,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +51,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -84,7 +81,11 @@ fun OnboardingScreen(
         viewModel.handleBack()
     }
 
-    OnboardingScaffold(stepIndex = state.step.ordinal) {
+    val showBack = state.step != OnboardingStep.OVERVIEW || state.quickConnectVisible
+    OnboardingScaffold(
+        stepIndex = state.step.ordinal,
+        onBack = if (showBack) ({ viewModel.handleBack() }) else null,
+    ) {
         AnimatedContent(
             targetState = if (state.quickConnectVisible) "quick-connect" else state.step.name,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -203,100 +204,22 @@ private fun AccountPage(
     onLogin: () -> Unit,
     onQuickConnect: () -> Unit,
 ) {
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
-
     Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
         OnboardingHeader(
             title = stringResource(R.string.onboarding_account_title),
             description = stringResource(R.string.onboarding_account_description),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            AppTextField(
-                value = state.username,
-                onValueChange = onUsernameChange,
-                label = stringResource(R.string.onboarding_username),
-                hint = stringResource(R.string.onboarding_username_hint),
-                leadingContent = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_user),
-                        contentDescription = null,
-                    )
-                },
-                enabled = !state.isLoggingIn,
-                keyboardOptions =
-                    KeyboardOptions(
-                        autoCorrectEnabled = false,
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next,
-                    ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            AppTextField(
-                value = state.password,
-                onValueChange = onPasswordChange,
-                label = stringResource(R.string.onboarding_password),
-                hint = stringResource(R.string.onboarding_password_hint),
-                leadingContent = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_lock),
-                        contentDescription = null,
-                    )
-                },
-                trailingContent = {
-                    AppIconButton(
-                        onClick = { passwordVisible = !passwordVisible },
-                        size = AppButtonSize.Decorator,
-                        variant = AppButtonVariant.Ghost,
-                    ) {
-                        Icon(
-                            painter =
-                                painterResource(
-                                    if (passwordVisible) CoreR.drawable.ic_eye_off
-                                    else CoreR.drawable.ic_eye
-                                ),
-                            contentDescription = null,
-                        )
-                    }
-                },
-                enabled = !state.isLoggingIn,
-                isError = state.loginError != null,
-                supportingText = state.loginError?.asString(),
-                visualTransformation =
-                    if (passwordVisible) VisualTransformation.None
-                    else PasswordVisualTransformation(),
-                keyboardOptions =
-                    KeyboardOptions(
-                        autoCorrectEnabled = false,
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Go,
-                    ),
-                keyboardActions = KeyboardActions(onGo = { onLogin() }),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            LoadingButton(
-                text = stringResource(R.string.onboarding_sign_in),
-                onClick = onLogin,
-                isLoading = state.isLoggingIn,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (state.quickConnectEnabled) {
-                AppButton(
-                    onClick = onQuickConnect,
-                    enabled = !state.isLoggingIn,
-                    variant = AppButtonVariant.Secondary,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(text = stringResource(R.string.onboarding_quick_connect_action))
-                }
-                Text(
-                    text = stringResource(R.string.onboarding_quick_connect_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = OnScrimSecondary,
-                )
-            }
-        }
+        AccountForm(
+            username = state.username,
+            password = state.password,
+            isLoggingIn = state.isLoggingIn,
+            loginError = state.loginError,
+            quickConnectEnabled = state.quickConnectEnabled,
+            onUsernameChange = onUsernameChange,
+            onPasswordChange = onPasswordChange,
+            onLogin = onLogin,
+            onQuickConnect = onQuickConnect,
+        )
     }
 }
 
@@ -310,46 +233,11 @@ private fun QuickConnectPage(
             title = stringResource(R.string.onboarding_quick_connect_title),
             description = stringResource(R.string.onboarding_quick_connect_description),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            if (state.quickConnectCode == null) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                )
-            } else {
-                PinCodeField(
-                    value = state.quickConnectCode,
-                    onValueChange = {},
-                    length = 6,
-                    masked = false,
-                    readOnly = true,
-                )
-            }
-            state.quickConnectError?.let {
-                Text(
-                    text = it.asString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-            Text(
-                text =
-                    if (state.quickConnectCode == null) {
-                        stringResource(R.string.onboarding_quick_connect_starting)
-                    } else {
-                        stringResource(R.string.onboarding_quick_connect_waiting)
-                    },
-                style = MaterialTheme.typography.bodySmall,
-                color = OnScrimSecondary,
-            )
-        }
-        AppButton(
-            onClick = onCancel,
-            variant = AppButtonVariant.Ghost,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(text = stringResource(R.string.onboarding_back))
-        }
+        QuickConnectContent(
+            code = state.quickConnectCode,
+            error = state.quickConnectError,
+            onCancel = onCancel,
+        )
     }
 }
 
@@ -410,27 +298,29 @@ private fun PinPage(
 }
 
 @Composable
-private fun OnboardingHeader(title: String, description: String) {
+fun OnboardingHeader(title: String, description: String) {
     Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
             color = Color.White,
         )
         Text(
             text = description,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = OnScrimSecondary,
         )
     }
 }
 
 @Composable
-private fun OnboardingScaffold(
-    stepIndex: Int,
+fun OnboardingScaffold(
+    stepIndex: Int?,
+    onBack: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().imePadding()) {
         val contentMaxHeight = maxHeight * 0.76f
 
         Image(
@@ -446,7 +336,16 @@ private fun OnboardingScaffold(
                         colorStops =
                             arrayOf(
                                 0f to Color.Transparent,
-                                0.42f to Color.Black.copy(alpha = 0.15f),
+                                0.06f to Color.Black.copy(alpha = 0.03f),
+                                0.12f to Color.Black.copy(alpha = 0.10f),
+                                0.18f to Color.Black.copy(alpha = 0.22f),
+                                0.24f to Color.Black.copy(alpha = 0.35f),
+                                0.30f to Color.Black.copy(alpha = 0.50f),
+                                0.36f to Color.Black.copy(alpha = 0.65f),
+                                0.42f to Color.Black.copy(alpha = 0.78f),
+                                0.48f to Color.Black.copy(alpha = 0.90f),
+                                0.54f to Color.Black.copy(alpha = 0.97f),
+                                0.60f to Color.Black,
                                 1f to Color.Black,
                             )
                     )
@@ -457,14 +356,28 @@ private fun OnboardingScaffold(
             Column(
                 modifier =
                     Modifier.fillMaxSize()
-                        .windowInsetsPadding(WindowInsets.safeDrawing)
-                        .imePadding()
+                        .windowInsetsPadding(
+                            WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        )
                         .padding(horizontal = MaterialTheme.spacings.default)
             ) {
-                OnboardingDots(
-                    stepIndex = stepIndex,
-                    modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.spacings.small),
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.spacings.small)
+                ) {
+                    if (onBack != null) {
+                        AppIconButton(
+                            onClick = onBack,
+                            size = AppButtonSize.Decorator,
+                            variant = AppButtonVariant.Ghost,
+                            modifier = Modifier.align(Alignment.CenterStart),
+                        ) {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                contentDescription = stringResource(R.string.onboarding_back),
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Column(
                     modifier =
@@ -472,11 +385,21 @@ private fun OnboardingScaffold(
                             .widthIn(max = 420.dp)
                             .align(Alignment.CenterHorizontally)
                             .heightIn(max = contentMaxHeight)
-                            .verticalScroll(rememberScrollState())
-                            .padding(bottom = MaterialTheme.spacings.medium),
+                            .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                     content = content,
                 )
+                if (stepIndex != null) {
+                    OnboardingDots(
+                        stepIndex = stepIndex,
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(
+                                    top = MaterialTheme.spacings.medium,
+                                    bottom = MaterialTheme.spacings.small,
+                                ),
+                    )
+                }
             }
         }
     }

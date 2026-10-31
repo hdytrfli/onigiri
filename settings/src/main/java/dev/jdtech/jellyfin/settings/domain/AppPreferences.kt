@@ -72,6 +72,8 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     // How many suggestions the home screen carousel shows at once, per orientation.
     val gridSuggestionColumnsPortrait = Preference("pref_grid_suggestion_columns_portrait", "1")
     val gridSuggestionColumnsLandscape = Preference("pref_grid_suggestion_columns_landscape", "3")
+    val gridProfileColumnsPortrait = Preference("pref_grid_profile_columns_portrait", "4")
+    val gridProfileColumnsLandscape = Preference("pref_grid_profile_columns_landscape", "6")
     val gridSpacing = Preference("pref_grid_spacing", "1")
 
     // Player
@@ -301,6 +303,22 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
             .remove(profilePinSaltKey(serverId, userId))
             .remove(profilePinHashKey(serverId, userId))
             .apply()
+    }
+
+    fun clearAllProfilePins() {
+        val keys = sharedPreferences.all.keys.filter { it.startsWith("pref_profile_pin_") }
+        if (keys.isEmpty()) return
+        sharedPreferences.edit().apply { keys.forEach(::remove) }.apply()
+    }
+
+    /** Reading position and page counts are user-scoped caches, not server data. */
+    fun clearReaderState() {
+        val keys =
+            sharedPreferences.all.keys.filter {
+                it.startsWith("reader_locator_") || it.startsWith("reader_page_count_")
+            }
+        if (keys.isEmpty()) return
+        sharedPreferences.edit().apply { keys.forEach(::remove) }.apply()
     }
 
     private fun profilePinSaltKey(serverId: String, userId: UUID) =

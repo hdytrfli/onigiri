@@ -88,6 +88,10 @@ data class IdentifyResultsRoute(
 
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey
 
+@Serializable data object ProfilePickerRoute : NavKey
+
+@Serializable data object AddProfileRoute : NavKey
+
 @Serializable data class SettingsFileEditRoute(val filePath: String) : NavKey
 
 @Serializable data object AboutRoute : NavKey

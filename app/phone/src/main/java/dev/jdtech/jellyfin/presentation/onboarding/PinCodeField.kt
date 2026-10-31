@@ -1,7 +1,6 @@
 package dev.jdtech.jellyfin.presentation.onboarding
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -47,11 +46,11 @@ fun PinCodeField(
 ) {
     val focusRequester = remember { FocusRequester() }
     val gap = 8.dp
-    val borderColor =
+    val cellColor =
         if (isError) {
-            MaterialTheme.colorScheme.error
+            MaterialTheme.colorScheme.errorContainer
         } else {
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+            MaterialTheme.colorScheme.surfaceContainerHigh
         }
 
     LaunchedEffect(readOnly) { if (!readOnly) focusRequester.requestFocus() }
@@ -72,15 +71,19 @@ fun PinCodeField(
                         Modifier.width(cellWidth)
                             .height(56.dp)
                             .clip(MaterialTheme.shapes.small)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .border(1.dp, borderColor, MaterialTheme.shapes.small),
+                            .background(cellColor),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (character != null) {
                         Text(
                             text = if (masked) "•" else character.toString(),
                             style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color =
+                                if (isError) {
+                                    MaterialTheme.colorScheme.onErrorContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                             textAlign = TextAlign.Center,
                         )
                     }

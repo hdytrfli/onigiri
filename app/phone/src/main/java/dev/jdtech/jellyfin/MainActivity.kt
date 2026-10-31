@@ -127,6 +127,8 @@ class MainActivity : AppCompatActivity() {
                                     thumbnailLandscape = state.gridThumbnailLandscape,
                                     suggestionPortrait = state.gridSuggestionPortrait,
                                     suggestionLandscape = state.gridSuggestionLandscape,
+                                    profilePortrait = state.gridProfilePortrait,
+                                    profileLandscape = state.gridProfileLandscape,
                                 ),
                             LocalGridGap provides GridGapBase * state.gridGapScale,
                         ) {

@@ -104,6 +104,12 @@ fun AboutScreen(navigateBack: () -> Unit) {
                                 text = stringResource(CoreR.string.app_description),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
+                            Spacer(Modifier.height(MaterialTheme.spacings.small))
+                            Text(
+                                text = stringResource(R.string.onboarding_photo_credit),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
                             HorizontalDivider()
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
