@@ -809,18 +809,23 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 navigateBack = dropUnlessResumed { navigator.goBack() },
                 profileHeader = {
                     SettingsProfileHeader(
+                        onLogoutProfile =
+                            dropUnlessResumed {
+                                navigator.navigate(ProfilePickerRoute(canGoBack = false))
+                            },
                         onChangeProfile =
-                            dropUnlessResumed { navigator.navigate(ProfilePickerRoute) }
+                            dropUnlessResumed { navigator.navigate(ProfilePickerRoute()) },
                     )
                 },
             )
         }
     }
-    entry<ProfilePickerRoute> {
+    entry<ProfilePickerRoute> { key ->
         SuiteInsetBox {
             ProfilePickerScreen(
-                onBack = dropUnlessResumed { navigator.goBack() },
+                onBack = if (key.canGoBack) dropUnlessResumed { navigator.goBack() } else null,
                 onAddProfile = dropUnlessResumed { navigator.navigate(AddProfileRoute) },
+                canGoBack = key.canGoBack,
             )
         }
     }

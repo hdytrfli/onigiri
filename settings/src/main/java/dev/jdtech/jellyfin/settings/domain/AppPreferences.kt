@@ -312,6 +312,15 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     fun isProfileAdmin(serverId: String, userId: UUID): Boolean =
         sharedPreferences.getBoolean(profileAdminKey(serverId, userId), false)
 
+    fun clearProfileMetadata(serverId: String, userId: UUID) {
+        sharedPreferences
+            .edit()
+            .remove(profilePinSaltKey(serverId, userId))
+            .remove(profilePinHashKey(serverId, userId))
+            .remove(profileAdminKey(serverId, userId))
+            .apply()
+    }
+
     fun clearAllProfileMetadata() {
         val keys =
             sharedPreferences.all.keys.filter {

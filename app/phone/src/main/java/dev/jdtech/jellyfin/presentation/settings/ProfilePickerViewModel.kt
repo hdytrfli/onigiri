@@ -35,6 +35,7 @@ data class ProfilePickerState(
     val pinError: UiText? = null,
     val forgotPrompt: ProfileItem? = null,
     val forgotError: UiText? = null,
+    val removePrompt: ProfileItem? = null,
     val isBusy: Boolean = false,
 )
 
@@ -90,7 +91,7 @@ constructor(
     }
 
     fun onProfileClick(profile: ProfileItem) {
-        if (profile.isCurrent || _state.value.isBusy) return
+        if (_state.value.isBusy) return
         if (profile.isLocked) {
             _state.update { it.copy(pinPrompt = profile, pinError = null) }
         } else {
@@ -154,6 +155,28 @@ constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun showRemoveProfile(profile: ProfileItem) {
+        if (profile.isCurrent) return
+        _state.update { it.copy(removePrompt = profile) }
+    }
+
+    fun dismissRemoveProfile() {
+        _state.update { it.copy(removePrompt = null) }
+    }
+
+    fun confirmRemoveProfile() {
+        val profile = _state.value.removePrompt ?: return
+        val serverId = _state.value.serverId ?: return
+        if (profile.isCurrent || _state.value.isBusy) return
+        viewModelScope.launch {
+            _state.update { it.copy(isBusy = true) }
+            repository.deleteUser(profile.id)
+            appPreferences.clearProfileMetadata(serverId, profile.id)
+            _state.update { it.copy(isBusy = false, removePrompt = null) }
+            load()
         }
     }
 

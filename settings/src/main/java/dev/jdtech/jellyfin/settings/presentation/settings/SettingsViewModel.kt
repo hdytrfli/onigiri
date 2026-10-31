@@ -1357,7 +1357,19 @@ constructor(
                                 }
                             },
                             backendPreference = appPreferences.offlineMode,
-                        )
+                        ),
+                        PreferenceAction(
+                            nameStringResource = R.string.settings_change_server,
+                            descriptionStringRes = R.string.settings_change_server_summary,
+                            iconDrawableId = R.drawable.ic_server,
+                            backendPreference = appPreferences.currentServer,
+                            formatValue = { "" },
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(SettingsEvent.ResetServer)
+                                }
+                            },
+                        ),
                     )
             ),
             PreferenceGroup(
@@ -1505,23 +1517,6 @@ constructor(
                                             ),
                                     )
                                 ),
-                        )
-                    )
-            ),
-            PreferenceGroup(
-                preferences =
-                    listOf(
-                        PreferenceAction(
-                            nameStringResource = R.string.settings_change_server,
-                            descriptionStringRes = R.string.settings_change_server_summary,
-                            iconDrawableId = R.drawable.ic_server,
-                            backendPreference = appPreferences.currentServer,
-                            formatValue = { "" },
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(SettingsEvent.ResetServer)
-                                }
-                            },
                         )
                     )
             ),

@@ -88,7 +88,7 @@ data class IdentifyResultsRoute(
 
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey
 
-@Serializable data object ProfilePickerRoute : NavKey
+@Serializable data class ProfilePickerRoute(val canGoBack: Boolean = true) : NavKey
 
 @Serializable data object AddProfileRoute : NavKey
 

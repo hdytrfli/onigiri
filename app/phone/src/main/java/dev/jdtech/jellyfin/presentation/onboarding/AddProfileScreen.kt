@@ -29,36 +29,56 @@ fun AddProfileScreen(
         }
     }
 
-    BackHandler { if (!viewModel.handleBack()) onBack() }
+    val back = { if (!viewModel.handleBack()) onBack() }
+    BackHandler(onBack = back)
 
-    OnboardingScaffold(stepIndex = null, onBack = onBack) {
+    OnboardingScaffold(stepIndex = null, onBack = back) {
         Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
-            if (state.quickConnectVisible) {
-                OnboardingHeader(
-                    title = stringResource(R.string.onboarding_quick_connect_title),
-                    description = stringResource(R.string.onboarding_quick_connect_description),
-                )
-                QuickConnectContent(
-                    code = state.quickConnectCode,
-                    error = state.quickConnectError,
-                    onCancel = viewModel::cancelQuickConnect,
-                )
-            } else {
-                OnboardingHeader(
-                    title = stringResource(R.string.profile_add_title),
-                    description = stringResource(R.string.profile_add_description),
-                )
-                AccountForm(
-                    username = state.username,
-                    password = state.password,
-                    isLoggingIn = state.isLoggingIn,
-                    loginError = state.loginError,
-                    quickConnectEnabled = state.quickConnectEnabled,
-                    onUsernameChange = viewModel::updateUsername,
-                    onPasswordChange = viewModel::updatePassword,
-                    onLogin = viewModel::login,
-                    onQuickConnect = viewModel::startQuickConnect,
-                )
+            when {
+                state.quickConnectVisible -> {
+                    OnboardingHeader(
+                        title = stringResource(R.string.onboarding_quick_connect_title),
+                        description = stringResource(R.string.onboarding_quick_connect_description),
+                    )
+                    QuickConnectContent(
+                        code = state.quickConnectCode,
+                        error = state.quickConnectError,
+                        onCancel = viewModel::cancelQuickConnect,
+                    )
+                }
+
+                state.step == AddProfileStep.PIN -> {
+                    OnboardingHeader(
+                        title = stringResource(R.string.onboarding_pin_title),
+                        description = stringResource(R.string.onboarding_pin_description),
+                    )
+                    ProfilePinContent(
+                        pin = state.pin,
+                        isSavingPin = state.isSavingPin,
+                        pinError = state.pinError,
+                        onPinChange = viewModel::updatePin,
+                        onLock = viewModel::lockProfile,
+                        onSkip = viewModel::skipPin,
+                    )
+                }
+
+                else -> {
+                    OnboardingHeader(
+                        title = stringResource(R.string.profile_add_title),
+                        description = stringResource(R.string.profile_add_description),
+                    )
+                    AccountForm(
+                        username = state.username,
+                        password = state.password,
+                        isLoggingIn = state.isLoggingIn,
+                        loginError = state.loginError,
+                        quickConnectEnabled = state.quickConnectEnabled,
+                        onUsernameChange = viewModel::updateUsername,
+                        onPasswordChange = viewModel::updatePassword,
+                        onLogin = viewModel::login,
+                        onQuickConnect = viewModel::startQuickConnect,
+                    )
+                }
             }
         }
     }

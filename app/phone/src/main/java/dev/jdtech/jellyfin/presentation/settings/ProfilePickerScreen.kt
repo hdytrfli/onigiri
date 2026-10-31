@@ -1,22 +1,24 @@
 package dev.jdtech.jellyfin.presentation.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +44,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
@@ -57,8 +61,9 @@ import dev.jdtech.jellyfin.utils.ObserveAsEvents
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfilePickerScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onAddProfile: () -> Unit,
+    canGoBack: Boolean,
     viewModel: ProfilePickerViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -70,6 +75,8 @@ fun ProfilePickerScreen(
         }
     }
 
+    BackHandler(enabled = !canGoBack) {}
+
     PageScaffold(
         topBar = {
             PageTopBar(
@@ -80,13 +87,18 @@ fun ProfilePickerScreen(
     ) { innerPadding ->
         ProfilePickerContent(
             state = state,
-            onProfileClick = viewModel::onProfileClick,
+            onProfileClick = { profile ->
+                if (profile.isCurrent && canGoBack) Unit else viewModel.onProfileClick(profile)
+            },
             onAddProfile = onAddProfile,
             onDismissPin = viewModel::dismissPin,
             onSubmitPin = viewModel::submitPin,
             onForgotPin = viewModel::showForgotPin,
             onDismissForgot = viewModel::dismissForgotPin,
             onSubmitPassword = viewModel::submitPassword,
+            onRemoveProfile = viewModel::showRemoveProfile,
+            onDismissRemove = viewModel::dismissRemoveProfile,
+            onConfirmRemove = viewModel::confirmRemoveProfile,
             modifier =
                 Modifier.fillMaxSize()
                     .padding(innerPadding)
@@ -95,7 +107,6 @@ fun ProfilePickerScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProfilePickerContent(
     state: ProfilePickerState,
@@ -106,6 +117,9 @@ private fun ProfilePickerContent(
     onForgotPin: (ProfileItem) -> Unit,
     onDismissForgot: () -> Unit,
     onSubmitPassword: (String) -> Unit,
+    onRemoveProfile: (ProfileItem) -> Unit,
+    onDismissRemove: () -> Unit,
+    onConfirmRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val columns = gridColumns(GridSize.PROFILE)
@@ -116,50 +130,45 @@ private fun ProfilePickerContent(
             CircularProgressIndicator()
         }
     } else {
-        BoxWithConstraints(modifier = modifier) {
-            val cellWidth = (maxWidth - gap * (columns - 1).toFloat()) / columns.toFloat()
-
-            Column(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(vertical = MaterialTheme.spacings.large),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(columns),
+            modifier = modifier,
+            contentPadding = PaddingValues(vertical = MaterialTheme.spacings.large),
+            horizontalArrangement = Arrangement.spacedBy(gap),
+            verticalArrangement = Arrangement.spacedBy(gap),
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = stringResource(R.string.profile_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.spacings.large),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = MaterialTheme.spacings.large)
+                            .padding(bottom = MaterialTheme.spacings.small),
                 )
-                if (state.profiles.isEmpty()) {
+            }
+            if (state.profiles.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         text = stringResource(R.string.profile_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = MaterialTheme.spacings.large),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.spacings.large),
-                    horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(gap),
-                    maxItemsInEachRow = columns,
-                ) {
-                    state.profiles.forEach { profile ->
-                        ProfileCard(
-                            profile = profile,
-                            baseUrl = state.baseUrl,
-                            width = cellWidth,
-                            onClick = { onProfileClick(profile) },
-                        )
-                    }
-                    AddProfileCard(width = cellWidth, onClick = onAddProfile)
-                }
             }
+            items(state.profiles, key = { it.id }) { profile ->
+                ProfileCard(
+                    profile = profile,
+                    baseUrl = state.baseUrl,
+                    onClick = { onProfileClick(profile) },
+                    onRemove = if (profile.isCurrent) null else ({ onRemoveProfile(profile) }),
+                )
+            }
+            item { AddProfileCard(onClick = onAddProfile) }
         }
     }
 
@@ -170,8 +179,11 @@ private fun ProfilePickerContent(
             description = stringResource(R.string.profile_pin_description, profile.name),
             onDismiss = onDismissPin,
             negativeButton = {
-                AppButton(onClick = onDismissPin, variant = AppButtonVariant.Secondary) {
-                    Text(text = stringResource(R.string.profile_cancel))
+                AppButton(
+                    onClick = { onForgotPin(profile) },
+                    variant = AppButtonVariant.Secondary,
+                ) {
+                    Text(text = stringResource(R.string.profile_forgot_pin))
                 }
             },
             positiveButton = {
@@ -197,15 +209,30 @@ private fun ProfilePickerContent(
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
-                AppButton(
-                    onClick = { onForgotPin(profile) },
-                    variant = AppButtonVariant.Ghost,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(text = stringResource(R.string.profile_forgot_pin))
-                }
             }
         }
+    }
+
+    state.removePrompt?.let { profile ->
+        BaseDialog(
+            title = stringResource(R.string.profile_remove_title),
+            description = stringResource(R.string.profile_remove_description, profile.name),
+            onDismiss = onDismissRemove,
+            negativeButton = {
+                AppButton(onClick = onDismissRemove, variant = AppButtonVariant.Secondary) {
+                    Text(text = stringResource(R.string.profile_cancel))
+                }
+            },
+            positiveButton = {
+                AppButton(
+                    onClick = onConfirmRemove,
+                    variant = AppButtonVariant.Destructive,
+                    enabled = !state.isBusy,
+                ) {
+                    Text(text = stringResource(R.string.profile_remove_action))
+                }
+            },
+        ) {}
     }
 
     state.forgotPrompt?.let { profile ->
@@ -224,7 +251,7 @@ private fun ProfilePickerContent(
                     onClick = { onSubmitPassword(password) },
                     enabled = !state.isBusy,
                 ) {
-                    Text(text = stringResource(R.string.profile_password_unlock))
+                    Text(text = stringResource(R.string.profile_password_sign_in))
                 }
             },
         ) { contentPadding ->
@@ -251,79 +278,93 @@ private fun ProfilePickerContent(
 private fun ProfileCard(
     profile: ProfileItem,
     baseUrl: String?,
-    width: androidx.compose.ui.unit.Dp,
     onClick: () -> Unit,
+    onRemove: (() -> Unit)?,
 ) {
-    Column(
-        modifier =
-            Modifier.width(width)
-                .clickable(onClick = onClick)
-                .padding(vertical = MaterialTheme.spacings.small),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-    ) {
-        Box {
-            ProfileAvatar(
-                avatarUrl = baseUrl?.let { "$it/Users/${profile.id}/Images/Primary?maxWidth=200" },
-                accessToken = profile.accessToken,
-                size = 72.dp,
-            )
-            if (profile.isLocked) {
-                Box(
-                    modifier =
-                        Modifier.align(Alignment.BottomEnd)
-                            .size(24.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceContainerHigh,
-                                CircleShape,
-                            )
-                            .padding(5.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_lock),
-                        contentDescription = stringResource(R.string.profile_locked),
-                        modifier = Modifier.size(14.dp),
-                    )
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = MaterialTheme.spacings.small),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+        ) {
+            Box {
+                ProfileAvatar(
+                    avatarUrl =
+                        baseUrl?.let { "$it/Users/${profile.id}/Images/Primary?maxWidth=200" },
+                    accessToken = profile.accessToken,
+                    size = 72.dp,
+                    modifier = Modifier.clickable(onClick = onClick),
+                )
+                if (profile.isLocked) {
+                    Box(
+                        modifier =
+                            Modifier.align(Alignment.BottomEnd)
+                                .size(24.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    CircleShape,
+                                )
+                                .padding(5.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_lock),
+                            contentDescription = stringResource(R.string.profile_locked),
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
                 }
             }
-            if (profile.isCurrent) {
-                Box(
-                    modifier =
-                        Modifier.align(Alignment.TopStart)
-                            .size(24.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
-                            .padding(5.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_check),
-                        contentDescription = stringResource(R.string.profile_current),
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
+            Text(
+                text = profile.name,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (profile.isAdmin) {
+                ProfileAdminBadge()
             }
         }
-        Text(
-            text = profile.name,
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (profile.isAdmin) {
-            ProfileAdminBadge()
+        if (onRemove != null) {
+            var menuExpanded by remember { mutableStateOf(false) }
+            Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                AppIconButton(
+                    onClick = { menuExpanded = true },
+                    size = AppButtonSize.Decorator,
+                    variant = AppButtonVariant.Ghost,
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_ellipsis),
+                        contentDescription = stringResource(R.string.profile_options),
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(R.string.profile_remove)) },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_trash),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            onRemove()
+                        },
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun AddProfileCard(width: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
+private fun AddProfileCard(onClick: () -> Unit) {
     Column(
-        modifier =
-            Modifier.width(width)
-                .clickable(onClick = onClick)
-                .padding(vertical = MaterialTheme.spacings.small),
+        modifier = Modifier.fillMaxWidth().padding(vertical = MaterialTheme.spacings.small),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
     ) {
@@ -331,7 +372,8 @@ private fun AddProfileCard(width: androidx.compose.ui.unit.Dp, onClick: () -> Un
             modifier =
                 Modifier.size(72.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

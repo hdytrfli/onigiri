@@ -18,11 +18,20 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+enum class AddProfileStep {
+    ACCOUNT,
+    PIN,
+}
+
 data class AddProfileState(
+    val step: AddProfileStep = AddProfileStep.ACCOUNT,
     val username: String = "",
     val password: String = "",
+    val pin: String = "",
     val isLoggingIn: Boolean = false,
+    val isSavingPin: Boolean = false,
     val loginError: UiText? = null,
+    val pinError: UiText? = null,
     val quickConnectEnabled: Boolean = false,
     val quickConnectVisible: Boolean = false,
     val quickConnectCode: String? = null,
@@ -75,8 +84,7 @@ constructor(
             try {
                 repository.login(current.username.trim(), current.password)
                 appPreferences.clearReaderState()
-                _state.update { it.copy(isLoggingIn = false) }
-                eventsChannel.send(AddProfileEvent.Completed)
+                _state.update { it.copy(step = AddProfileStep.PIN, isLoggingIn = false) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -116,12 +124,12 @@ constructor(
                 appPreferences.clearReaderState()
                 _state.update {
                     it.copy(
+                        step = AddProfileStep.PIN,
                         quickConnectVisible = false,
                         quickConnectCode = null,
                         quickConnectError = null,
                     )
                 }
-                eventsChannel.send(AddProfileEvent.Completed)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
@@ -148,12 +156,57 @@ constructor(
         }
     }
 
+    fun updatePin(value: String) {
+        _state.update { it.copy(pin = value.filter(Char::isDigit).take(4), pinError = null) }
+    }
+
+    fun lockProfile() {
+        val current = _state.value
+        if (current.pin.length != 4) {
+            _state.update {
+                it.copy(pinError = UiText.StringResource(R.string.onboarding_pin_incomplete))
+            }
+            return
+        }
+        if (current.isSavingPin) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isSavingPin = true, pinError = null) }
+            val server = repository.getCurrentServer()
+            val user = repository.getCurrentUser()
+            if (server == null || user == null) {
+                _state.update {
+                    it.copy(
+                        isSavingPin = false,
+                        pinError = UiText.StringResource(R.string.onboarding_pin_save_error),
+                    )
+                }
+                return@launch
+            }
+            appPreferences.setProfilePin(server.id, user.id, current.pin)
+            complete()
+        }
+    }
+
+    fun skipPin() {
+        complete()
+    }
+
     fun handleBack(): Boolean {
         if (_state.value.quickConnectVisible) {
             cancelQuickConnect()
             return true
         }
+        // Login has already switched the active user; don't let the user step back into the
+        // account form and leave it in a half-configured state.
+        if (_state.value.step == AddProfileStep.PIN) return true
         return false
+    }
+
+    private fun complete() {
+        appPreferences.clearReaderState()
+        _state.update { it.copy(isSavingPin = false) }
+        viewModelScope.launch { eventsChannel.send(AddProfileEvent.Completed) }
     }
 
     private fun loadQuickConnectEnabled() {

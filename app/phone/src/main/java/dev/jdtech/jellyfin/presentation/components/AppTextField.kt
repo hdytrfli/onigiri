@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
@@ -89,7 +91,12 @@ fun AppTextField(
                     modifier =
                         Modifier.fillMaxWidth()
                             .clip(shape)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                            .border(
+                                1.dp,
+                                if (isError) MaterialTheme.colorScheme.error else Color.Transparent,
+                                shape,
+                            )
                             .padding(
                                 horizontal = MaterialTheme.spacings.medium,
                                 vertical = 12.dp,

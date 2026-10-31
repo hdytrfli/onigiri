@@ -253,47 +253,14 @@ private fun PinPage(
             title = stringResource(R.string.onboarding_pin_title),
             description = stringResource(R.string.onboarding_pin_description),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            Text(
-                text = stringResource(R.string.onboarding_pin_label),
-                style = MaterialTheme.typography.labelLarge,
-                color = OnScrimSecondary,
-            )
-            PinCodeField(
-                value = state.pin,
-                onValueChange = onPinChange,
-                length = 4,
-                isError = state.pinError != null,
-            )
-            state.pinError?.let {
-                Text(
-                    text = it.asString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            LoadingButton(
-                text = stringResource(R.string.onboarding_pin_lock),
-                onClick = onLock,
-                isLoading = state.isSavingPin,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            AppButton(
-                onClick = onSkip,
-                enabled = !state.isSavingPin,
-                variant = AppButtonVariant.Secondary,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(text = stringResource(R.string.onboarding_pin_skip))
-            }
-            Text(
-                text = stringResource(R.string.onboarding_pin_info),
-                style = MaterialTheme.typography.bodySmall,
-                color = OnScrimSecondary,
-            )
-        }
+        ProfilePinContent(
+            pin = state.pin,
+            isSavingPin = state.isSavingPin,
+            pinError = state.pinError,
+            onPinChange = onPinChange,
+            onLock = onLock,
+            onSkip = onSkip,
+        )
     }
 }
 
