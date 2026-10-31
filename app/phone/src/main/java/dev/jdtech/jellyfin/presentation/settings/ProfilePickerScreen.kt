@@ -1,30 +1,24 @@
 package dev.jdtech.jellyfin.presentation.settings
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +37,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,9 +47,12 @@ import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
+import dev.jdtech.jellyfin.presentation.components.MenuActionItem
+import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.onboarding.PinCodeField
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
@@ -92,36 +88,11 @@ fun ProfilePickerScreen(
         )
         Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
 
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.systemBars)
-                    .padding(horizontal = MaterialTheme.spacings.gutter)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.spacings.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (canGoBack && onBack != null) {
-                    AppIconButton(
-                        onClick = onBack,
-                        size = AppButtonSize.Decorator,
-                        variant = AppButtonVariant.Ghost,
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_arrow_left),
-                            contentDescription = stringResource(R.string.onboarding_back),
-                        )
-                    }
-                }
-                Text(
-                    text = stringResource(R.string.profile_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(start = MaterialTheme.spacings.small),
-                )
-            }
+        Column(modifier = Modifier.fillMaxSize()) {
+            ItemTopBar(
+                hasBackButton = canGoBack && onBack != null,
+                onBackClick = { onBack?.invoke() },
+            )
             ProfilePickerContent(
                 state = state,
                 onProfileClick = { profile ->
@@ -139,7 +110,11 @@ fun ProfilePickerScreen(
                 onChangePin = viewModel::showPinEditor,
                 onDismissPinEditor = viewModel::dismissPinEditor,
                 onSavePin = viewModel::saveProfilePin,
-                modifier = Modifier.weight(1f).fillMaxWidth(),
+                modifier =
+                    Modifier.weight(1f)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = MaterialTheme.spacings.gutter),
             )
         }
     }
@@ -218,6 +193,7 @@ private fun ProfilePickerContent(
                                             } else {
                                                 null
                                             },
+                                        showActions = state.viewerIsAdmin,
                                     )
 
                                 ProfileCell.Add ->
@@ -380,7 +356,6 @@ private fun ProfilePickerContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ProfileCard(
     profile: ProfileItem,
@@ -389,6 +364,7 @@ private fun ProfileCard(
     onClick: () -> Unit,
     onRemove: (() -> Unit)?,
     onChangePin: (() -> Unit)?,
+    showActions: Boolean,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -404,11 +380,10 @@ private fun ProfileCard(
                 accessToken = profile.accessToken,
                 size = 96.dp,
                 modifier =
-                    Modifier.combinedClickable(
+                    Modifier.clickable(
                         interactionSource = interactionSource,
                         indication = null,
                         onClick = onClick,
-                        onLongClick = { menuExpanded = true },
                     ),
             )
             if (profile.isLocked) {
@@ -430,61 +405,72 @@ private fun ProfileCard(
                     )
                 }
             }
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false },
-            ) {
-                if (onChangePin != null) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text =
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = profile.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (profile.isAdmin) {
+                    ProfileAdminBadge(
+                        modifier = Modifier.padding(top = MaterialTheme.spacings.extraSmall)
+                    )
+                }
+            }
+            if (showActions && (onChangePin != null || onRemove != null)) {
+                Box {
+                    AppIconButton(
+                        onClick = { menuExpanded = true },
+                        size = AppButtonSize.Decorator,
+                        variant = AppButtonVariant.Ghost,
+                    ) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_ellipsis),
+                            contentDescription = stringResource(R.string.profile_options),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    AppDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                    ) {
+                        if (onChangePin != null) {
+                            MenuActionItem(
+                                icon = CoreR.drawable.ic_lock,
+                                label =
                                     stringResource(
                                         if (profile.isLocked) {
                                             R.string.profile_change_lock
                                         } else {
                                             R.string.profile_add_lock
                                         }
-                                    )
+                                    ),
+                                onClick = {
+                                    menuExpanded = false
+                                    onChangePin()
+                                },
                             )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_lock),
-                                contentDescription = null,
+                        }
+                        if (onRemove != null) {
+                            MenuActionItem(
+                                icon = CoreR.drawable.ic_trash,
+                                label = stringResource(R.string.profile_remove),
+                                onClick = {
+                                    menuExpanded = false
+                                    onRemove()
+                                },
                             )
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onChangePin()
-                        },
-                    )
-                }
-                if (onRemove != null) {
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.profile_remove)) },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_trash),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onRemove()
-                        },
-                    )
+                        }
+                    }
                 }
             }
-        }
-        Text(
-            text = profile.name,
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (profile.isAdmin) {
-            ProfileAdminBadge()
         }
     }
 }

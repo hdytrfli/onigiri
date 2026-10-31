@@ -30,6 +30,7 @@ data class ProfilePickerState(
     val profiles: List<ProfileItem> = emptyList(),
     val serverId: String? = null,
     val baseUrl: String? = null,
+    val viewerIsAdmin: Boolean = false,
     val isLoading: Boolean = true,
     val pinPrompt: ProfileItem? = null,
     val pinError: UiText? = null,
@@ -71,21 +72,23 @@ constructor(
                 return@launch
             }
             val users = repository.getUsers(server.id)
+            val profiles = users.map { user ->
+                ProfileItem(
+                    id = user.id,
+                    name = user.name,
+                    isLocked = appPreferences.hasProfilePin(server.id, user.id),
+                    isCurrent = user.id == server.currentUserId,
+                    isAdmin = appPreferences.isProfileAdmin(server.id, user.id),
+                    accessToken = user.accessToken,
+                )
+            }
             _state.update {
                 it.copy(
-                    profiles =
-                        users.map { user ->
-                            ProfileItem(
-                                id = user.id,
-                                name = user.name,
-                                isLocked = appPreferences.hasProfilePin(server.id, user.id),
-                                isCurrent = user.id == server.currentUserId,
-                                isAdmin = appPreferences.isProfileAdmin(server.id, user.id),
-                                accessToken = user.accessToken,
-                            )
-                        },
+                    profiles = profiles,
                     serverId = server.id,
                     baseUrl = jellyfinApi.api.baseUrl?.trimEnd('/'),
+                    viewerIsAdmin =
+                        profiles.firstOrNull { profile -> profile.isCurrent }?.isAdmin == true,
                     isLoading = false,
                 )
             }

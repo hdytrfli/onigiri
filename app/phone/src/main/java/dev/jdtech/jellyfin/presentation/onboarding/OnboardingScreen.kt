@@ -15,19 +15,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -58,10 +54,8 @@ import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.theme.OnScrimSecondary
 import dev.jdtech.jellyfin.presentation.components.AppButton
-import dev.jdtech.jellyfin.presentation.components.AppButtonSize
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppTextField
+import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
 import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.utils.ObserveAsEvents
@@ -303,53 +297,41 @@ fun OnboardingScaffold(
         }
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
-            Column(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .windowInsetsPadding(
-                            WindowInsets.systemBars.union(WindowInsets.displayCutout)
-                        )
-                        .imePadding()
-                        .padding(horizontal = MaterialTheme.spacings.default)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.spacings.small)
-                ) {
-                    if (onBack != null) {
-                        AppIconButton(
-                            onClick = onBack,
-                            size = AppButtonSize.Decorator,
-                            variant = AppButtonVariant.Ghost,
-                            modifier = Modifier.align(Alignment.CenterStart),
-                        ) {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = stringResource(R.string.onboarding_back),
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
+            Column(modifier = Modifier.fillMaxSize()) {
+                ItemTopBar(
+                    hasBackButton = onBack != null,
+                    onBackClick = { onBack?.invoke() },
+                )
                 Column(
                     modifier =
-                        Modifier.widthIn(max = 420.dp)
+                        Modifier.weight(1f)
                             .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                            .heightIn(max = contentMaxHeight)
-                            .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                    content = content,
-                )
-                if (stepIndex != null) {
-                    OnboardingDots(
-                        stepIndex = stepIndex,
+                            .imePadding()
+                            .navigationBarsPadding()
+                            .padding(horizontal = MaterialTheme.spacings.default)
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Column(
                         modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(
-                                    top = MaterialTheme.spacings.medium,
-                                    bottom = MaterialTheme.spacings.small,
-                                ),
+                            Modifier.widthIn(max = 420.dp)
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .heightIn(max = contentMaxHeight)
+                                .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                        content = content,
                     )
+                    if (stepIndex != null) {
+                        OnboardingDots(
+                            stepIndex = stepIndex,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(
+                                        top = MaterialTheme.spacings.medium,
+                                        bottom = MaterialTheme.spacings.small,
+                                    ),
+                        )
+                    }
                 }
             }
         }

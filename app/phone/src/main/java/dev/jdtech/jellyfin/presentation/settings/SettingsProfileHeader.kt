@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -20,9 +24,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
+import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @Composable
@@ -33,6 +38,7 @@ fun SettingsProfileHeader(
     viewModel: ProfileHeaderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier.fillMaxWidth().padding(vertical = MaterialTheme.spacings.small),
@@ -68,25 +74,37 @@ fun SettingsProfileHeader(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        AppIconButton(
-            onClick = onLogoutProfile,
-            size = AppButtonSize.Decorator,
-            variant = AppButtonVariant.Ghost,
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_logout),
-                contentDescription = stringResource(R.string.profile_logout),
-            )
-        }
-        AppIconButton(
-            onClick = onChangeProfile,
-            size = AppButtonSize.Decorator,
-            variant = AppButtonVariant.Ghost,
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_user),
-                contentDescription = stringResource(R.string.profile_switch),
-            )
+        Box {
+            AppIconButton(
+                onClick = { menuExpanded = true },
+                variant = AppButtonVariant.Secondary,
+            ) {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_ellipsis),
+                    contentDescription = stringResource(R.string.profile_options),
+                )
+            }
+            AppDropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+            ) {
+                MenuActionItem(
+                    icon = CoreR.drawable.ic_user,
+                    label = stringResource(R.string.profile_switch),
+                    onClick = {
+                        menuExpanded = false
+                        onChangeProfile()
+                    },
+                )
+                MenuActionItem(
+                    icon = CoreR.drawable.ic_logout,
+                    label = stringResource(R.string.profile_logout),
+                    onClick = {
+                        menuExpanded = false
+                        onLogoutProfile()
+                    },
+                )
+            }
         }
     }
 }
