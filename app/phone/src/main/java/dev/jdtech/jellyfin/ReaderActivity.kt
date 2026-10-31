@@ -292,6 +292,9 @@ class ReaderActivity : AppCompatActivity() {
         binding.readerPull.ringColor = ringColor
         binding.readerPull.trackColor = (ringColor and 0x00FFFFFF) or (0x33 shl 24)
         binding.readerPull.setBackgroundColor(theme.backgroundColor)
+        val bottomPadding =
+            if (settings.scroll) (24f * resources.displayMetrics.density).toInt() else 0
+        binding.readerPull.setPadding(0, 0, 0, bottomPadding)
     }
 
     private fun canPullNextChapter(): Boolean {

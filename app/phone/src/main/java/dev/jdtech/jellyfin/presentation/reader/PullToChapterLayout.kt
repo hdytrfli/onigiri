@@ -203,17 +203,18 @@ constructor(
         return true
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
 
         if (!pullEnabled || pullDistance <= 0f) return
 
         val progress = (pullDistance / triggerDistance).coerceIn(0f, 1f)
         val centerX = width / 2f
+        val bottomInset = paddingBottom.toFloat()
         val centerY =
             when (direction) {
-                Direction.NEXT -> height - triggerDistance / 2f
-                Direction.PREVIOUS -> triggerDistance / 2f
+                Direction.NEXT -> height - (bottomInset + pullDistance) / 2f
+                Direction.PREVIOUS -> pullDistance / 2f
             }
         val ringRadius = circleRadius - ringWidth / 2f
         ringRect.set(
