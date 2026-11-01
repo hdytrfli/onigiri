@@ -49,6 +49,7 @@ constructor(
     private val uiTextLatestAudiobooks = UiText.StringResource(FilmR.string.latest_audiobooks)
 
     private var hasLoadedOnce = false
+    private var lastOfflineMode: Boolean? = null
 
     /**
      * Loads everything on first entry. On later entries (coming back from a detail page) it
@@ -56,7 +57,8 @@ constructor(
      * scroll position. Use [loadData] for a full refresh.
      */
     fun refresh() {
-        if (!hasLoadedOnce) {
+        val offlineMode = appPreferences.getValue(appPreferences.offlineMode)
+        if (!hasLoadedOnce || lastOfflineMode != offlineMode) {
             hasLoadedOnce = true
             loadData()
             return
@@ -77,6 +79,7 @@ constructor(
 
     fun loadData() {
         Timber.i("Loading data")
+        lastOfflineMode = appPreferences.getValue(appPreferences.offlineMode)
         viewModelScope.launch(Dispatchers.Default) {
             _state.emit(_state.value.copy(isLoading = true, error = null))
             try {

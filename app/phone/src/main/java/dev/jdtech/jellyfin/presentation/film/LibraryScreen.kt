@@ -52,6 +52,7 @@ import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
@@ -87,9 +88,9 @@ fun LibraryScreen(
 
     LaunchedEffect(true) {
         viewModel.setup(parentId = libraryId, libraryType = libraryType, genreIds = genreIds)
-        // The ViewModel owns the list cache, so a revisit renders it instead of reloading.
         viewModel.loadItemsIfNeeded()
     }
+    OfflineModeReload { viewModel.loadItems(force = true) }
 
     LibraryScreenLayout(
         libraryName = libraryName,

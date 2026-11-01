@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -76,6 +78,14 @@ constructor(
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
     val failures = _failures.asSharedFlow()
+
+    init {
+        // Offline mode changes the repository that answers a query, so every cached result must be
+        // revalidated instead of silently serving the other mode's data.
+        scope.launch {
+            appPreferences.observe(appPreferences.offlineMode).drop(1).collect { invalidateAll() }
+        }
+    }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> observe(key: SwrKey, serializer: KSerializer<T>): StateFlow<SwrEntry<T>> {
@@ -191,6 +201,14 @@ constructor(
             entries.keys
                 .filter { it.value.startsWith(prefix) }
                 .forEach { flow(it).value = flow(it).value.copy(isStale = true) }
+        }
+    }
+
+    /** Marks every entry stale; the next read revalidates through the current repository mode. */
+    fun invalidateAll() {
+        scope.launch {
+            database.invalidateAllQueryCache()
+            entries.values.forEach { it.value = it.value.copy(isStale = true) }
         }
     }
 

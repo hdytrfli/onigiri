@@ -23,6 +23,7 @@ import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.components.RootPage
@@ -50,6 +51,7 @@ fun GenreScreen(
         )
         viewModel.loadItems()
     }
+    OfflineModeReload { viewModel.loadItems(force = true) }
 
     BackHandler(enabled = state.searchExpanded) {
         viewModel.onAction(LibraryAction.SetSearchQuery(""))

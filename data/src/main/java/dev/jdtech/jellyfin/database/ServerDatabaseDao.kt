@@ -90,6 +90,8 @@ interface ServerDatabaseDao {
     @Query("UPDATE query_cache SET updatedAt = 0 WHERE cacheKey LIKE :prefix || '%'")
     suspend fun invalidateQueryCachePrefix(prefix: String)
 
+    @Query("UPDATE query_cache SET updatedAt = 0") suspend fun invalidateAllQueryCache()
+
     @Query("DELETE FROM query_cache") suspend fun clearQueryCache()
 
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertMovie(movie: FindroidMovieDto)

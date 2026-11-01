@@ -45,11 +45,13 @@ constructor(
     val state = _state.asStateFlow()
 
     private var loaded = false
+    private var lastOfflineMode: Boolean? = null
     private var openedItemId: UUID? = null
 
     fun load(force: Boolean = false) {
         if (!force && loaded) return
         loaded = true
+        lastOfflineMode = appPreferences.getValue(appPreferences.offlineMode)
         viewModelScope.launch(Dispatchers.IO) {
             val storedSortBy = SortBy.fromString(appPreferences.getValue(appPreferences.bookSortBy))
             val sortBy = storedSortBy.takeIf { it in BOOK_SORT_OPTIONS } ?: SortBy.NAME
@@ -99,9 +101,14 @@ constructor(
         }
     }
 
-    /** Cached like the movie/show list: load once, refresh only the opened item on return. */
+    /** Cached like the movie/show list: reload only when the mode changed or there is no data. */
     fun loadIfNeeded() {
-        if (_state.value.items.isEmpty() && !_state.value.isLoading) load()
+        val offlineMode = appPreferences.getValue(appPreferences.offlineMode)
+        if (lastOfflineMode != offlineMode) {
+            load(force = true)
+        } else if (_state.value.items.isEmpty() && !_state.value.isLoading) {
+            load()
+        }
     }
 
     fun onItemOpened(itemId: UUID) {

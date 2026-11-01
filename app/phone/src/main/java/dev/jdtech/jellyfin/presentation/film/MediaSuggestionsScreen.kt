@@ -48,6 +48,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
@@ -106,6 +107,11 @@ private fun MediaPage(
         viewModel.load(kind)
         listViewModel.setup(parentId = null, libraryType = libraryType)
         listViewModel.loadItems()
+    }
+
+    OfflineModeReload {
+        listViewModel.loadItems(force = true)
+        viewModel.retry(kind)
     }
 
     // Re-tap cycles the pills, exactly like Home: list -> collections -> suggestions -> genres.
@@ -273,6 +279,7 @@ private fun CollectionsTab(
     val safePadding = rememberSafePadding()
 
     LaunchedEffect(kind) { viewModel.load() }
+    OfflineModeReload { viewModel.retry() }
 
     val items = if (kind == MediaKind.Movies) state.movies else state.shows
     val title = stringResource(CoreR.string.collections_label)
@@ -394,6 +401,7 @@ private fun GenresContent(
     // Load once; the cached sections stay put until the user pulls to refresh or the cache is
     // invalidated by a new ViewModel.
     LaunchedEffect(kind) { viewModel.load(kind) }
+    OfflineModeReload { viewModel.retry(kind) }
 
     AppPullToRefreshBox(
         isRefreshing = state.isLoading,

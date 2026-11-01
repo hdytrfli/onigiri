@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin.repository
 import android.content.Context
 import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
+import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidGenre
@@ -98,7 +99,50 @@ class JellyfinRepositoryOfflineImpl(
         searchTerm: String?,
         genreIds: List<UUID>?,
     ): List<FindroidItem> {
-        return emptyList()
+        val types = includeTypes?.toSet()
+        val items =
+            downloadedItems().filter { item ->
+                if (types == null) {
+                    true
+                } else {
+                    when (item) {
+                        is FindroidMovie -> BaseItemKind.MOVIE in types
+                        is FindroidShow -> BaseItemKind.SERIES in types
+                        is FindroidEpisode -> BaseItemKind.EPISODE in types
+                        is FindroidBook ->
+                            if (item.isAudiobook) {
+                                BaseItemKind.AUDIO_BOOK in types
+                            } else {
+                                BaseItemKind.BOOK in types
+                            }
+                        else -> false
+                    }
+                }
+            }
+        val searched =
+            if (searchTerm.isNullOrBlank()) {
+                items
+            } else {
+                items.filter { it.name.contains(searchTerm, ignoreCase = true) }
+            }
+        val sorted =
+            when (sortBy) {
+                SortBy.RELEASE_DATE ->
+                    searched.sortedWith(
+                        compareBy(nullsLast()) { item ->
+                            when (item) {
+                                is FindroidMovie -> item.premiereDate
+                                is FindroidEpisode -> item.premiereDate
+                                is FindroidBook -> item.premiereDate
+                                else -> null
+                            }
+                        }
+                    )
+                else -> searched.sortedBy { it.name.lowercase() }
+            }
+        val ordered = if (sortOrder == SortOrder.DESCENDING) sorted.reversed() else sorted
+        val from = startIndex ?: 0
+        return ordered.drop(from).let { if (limit != null) it.take(limit) else it }
     }
 
     override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
@@ -126,10 +170,8 @@ class JellyfinRepositoryOfflineImpl(
         return emptyList()
     }
 
-    override suspend fun getFavoriteItems(): List<FindroidItem> {
-        // Favorites reflect server userdata and are not part of the offline cache.
-        return emptyList()
-    }
+    override suspend fun getFavoriteItems(): List<FindroidItem> =
+        downloadedItems().filter { it.favorite }
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> {
         return withContext(Dispatchers.IO) {
@@ -388,25 +430,37 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun downloadRemoteImage(itemId: UUID, type: ImageType, imageUrl: String) = Unit
 
-    override suspend fun getDownloads(): List<FindroidItem> =
+    override suspend fun getDownloads(): List<FindroidItem> = downloadedItems()
+
+    /** Every locally available item, regardless of its server-side type. */
+    private suspend fun downloadedItems(): List<FindroidItem> =
         withContext(Dispatchers.IO) {
-            val items = mutableListOf<FindroidItem>()
-            items.addAll(
-                database
-                    .getMoviesByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
-                    .map { it.toFindroidMovie(database, jellyfinApi.userId!!) }
-            )
-            items.addAll(
-                database
-                    .getBooksByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
-                    .map { it.toFindroidBook(database, jellyfinApi.userId!!) }
-            )
-            items.addAll(
-                database
-                    .getShowsByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
-                    .map { it.toFindroidShow(database, jellyfinApi.userId!!) }
-            )
-            items
+            val serverId =
+                appPreferences.getValue(appPreferences.currentServer)
+                    ?: return@withContext emptyList()
+            val userId = jellyfinApi.userId ?: return@withContext emptyList()
+            buildList {
+                addAll(
+                    database.getMoviesByServerId(serverId).map {
+                        it.toFindroidMovie(database, userId)
+                    }
+                )
+                addAll(
+                    database.getBooksByServerId(serverId).map {
+                        it.toFindroidBook(database, userId)
+                    }
+                )
+                addAll(
+                    database.getShowsByServerId(serverId).map {
+                        it.toFindroidShow(database, userId)
+                    }
+                )
+                addAll(
+                    database.getEpisodesByServerId(serverId).map {
+                        it.toFindroidEpisode(database, userId)
+                    }
+                )
+            }
         }
 
     override fun getUserId(): UUID {

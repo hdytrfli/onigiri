@@ -912,11 +912,13 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun showOptionsSheet(overlay: View, panel: View, scrim: View) {
+        // Position the panel off-screen before its first visible frame. Doing this in a post()
+        // briefly draws it at translationX = 0 (the "already open" flash) before the animation.
+        panel.animate().cancel()
+        val sheetWidth = if (panel.layoutParams.width > 0) panel.layoutParams.width else panel.width
+        panel.translationX = sheetWidth.toFloat()
         overlay.visibility = View.VISIBLE
-        panel.post {
-            panel.translationX = panel.width.toFloat()
-            panel.animate().translationX(0f).setDuration(200L).start()
-        }
+        panel.animate().translationX(0f).setDuration(200L).start()
         hidePlayerControls()
     }
 

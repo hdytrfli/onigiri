@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -103,8 +105,8 @@ private fun AppSnackbarContent(
     val icon = tone.icon()
 
     Surface(
-        modifier = modifier.widthIn(max = 560.dp).fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
+        modifier = modifier.widthIn(max = 560.dp).fillMaxWidth().heightIn(min = 52.dp),
+        shape = CircleShape,
         color = colors.container,
         contentColor = colors.content,
         shadowElevation = 6.dp,

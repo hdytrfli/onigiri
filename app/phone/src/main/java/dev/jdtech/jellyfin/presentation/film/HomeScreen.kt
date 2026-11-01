@@ -47,6 +47,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
@@ -79,6 +80,7 @@ fun HomeScreen(
     val downloadsState by downloadsViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.refresh() }
+    OfflineModeReload { viewModel.loadData() }
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
