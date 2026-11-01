@@ -19,8 +19,14 @@ class SearchViewModel @Inject constructor(private val repository: JellyfinReposi
     val state = _state.asStateFlow()
 
     var currentJob: Job? = null
+    private var lastQuery: String = ""
+
+    fun refresh() {
+        if (lastQuery.isNotBlank()) search(lastQuery)
+    }
 
     private fun search(query: String) {
+        lastQuery = query
         currentJob?.cancel()
         currentJob = viewModelScope.launch {
             try {

@@ -360,13 +360,28 @@ private fun MediaSuggestionsContent(
         onRefresh = onRetry,
         modifier = Modifier.fillMaxSize(),
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (state.sections.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding,
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                ) {
+        if (state.error != null && state.sections.isEmpty()) {
+            FullPageError(
+                onRefresh = onRetry,
+                isRefreshing = state.isLoading,
+                error = state.error,
+            )
+        } else {
+            // Keep a scrollable container even when there are no rows, otherwise the pull gesture
+            // has nothing to attach to and the empty state cannot be refreshed by dragging.
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+            ) {
+                if (state.sections.isEmpty()) {
+                    item {
+                        EmptyState(
+                            text = stringResource(FilmR.string.suggestions_empty),
+                            modifier = Modifier.fillParentMaxSize(),
+                        )
+                    }
+                } else {
                     items(items = state.sections, key = { it.id }) { section ->
                         MediaSectionRow(
                             section = section,
@@ -376,12 +391,6 @@ private fun MediaSuggestionsContent(
                         )
                     }
                 }
-            } else if (state.error != null) {
-                FullPageError(
-                    onRefresh = onRetry,
-                    isRefreshing = state.isLoading,
-                    error = state.error,
-                )
             }
         }
     }

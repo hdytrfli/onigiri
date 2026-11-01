@@ -45,17 +45,16 @@ import dev.jdtech.jellyfin.film.presentation.person.PersonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidPerson
 import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
-import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import java.util.UUID
@@ -72,6 +71,7 @@ fun PersonScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadPerson(personId) }
+    OfflineModeReload { viewModel.loadPerson(personId) }
 
     PersonScreenLayout(
         state = state,
@@ -108,148 +108,136 @@ private fun PersonScreenLayout(
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (LocalOfflineMode.current) {
-            OfflineNotice()
-        } else {
-            state.person?.let { person ->
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Spacer(Modifier.height(paddingTop))
-                    when {
-                        windowSizeClass.isWidthAtLeastBreakpoint(
-                            WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND
-                        ) -> {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(itemsPadding),
-                                horizontalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.default),
-                            ) {
-                                PersonImage(person)
-                                Column(
-                                    verticalArrangement =
-                                        Arrangement.spacedBy(MaterialTheme.spacings.medium)
-                                ) {
-                                    Text(
-                                        text = person.name,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                    )
-                                    if (person.overview.isNotBlank()) {
-                                        OverviewText(text = person.overview, maxCollapsedLines = 12)
-                                    }
-                                }
-                            }
-                        }
-                        else -> {
+        state.person?.let { person ->
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Spacer(Modifier.height(paddingTop))
+                when {
+                    windowSizeClass.isWidthAtLeastBreakpoint(
+                        WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND
+                    ) -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(itemsPadding),
+                            horizontalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacings.default),
+                        ) {
+                            PersonImage(person)
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(itemsPadding),
                                 verticalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                                    Arrangement.spacedBy(MaterialTheme.spacings.medium)
                             ) {
-                                PersonImage(person)
                                 Text(
                                     text = person.name,
                                     style = MaterialTheme.typography.headlineMedium,
                                 )
                                 if (person.overview.isNotBlank()) {
-                                    OverviewText(text = person.overview, maxCollapsedLines = 4)
+                                    OverviewText(text = person.overview, maxCollapsedLines = 12)
                                 }
                             }
                         }
                     }
-
-                    Spacer(Modifier.height(MaterialTheme.spacings.default))
-
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default)
-                    ) {
-                        if (state.starredInMovies.isNotEmpty()) {
-                            Column {
-                                Text(
-                                    text = stringResource(CoreR.string.movies_label),
-                                    modifier = Modifier.padding(itemsPadding),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                Spacer(
-                                    modifier = Modifier.height(MaterialTheme.spacings.extraSmall)
-                                )
-                                GridRows(
-                                    items = state.starredInMovies,
-                                    columns = gridColumns(GridSize.POSTER),
-                                    modifier = Modifier.padding(itemsPadding),
-                                ) { item ->
-                                    ItemCard(
-                                        item = item,
-                                        direction = Direction.VERTICAL,
-                                        onClick = { onAction(PersonAction.NavigateToItem(item)) },
-                                        fillWidth = true,
-                                    )
-                                }
+                    else -> {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(itemsPadding),
+                            verticalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            PersonImage(person)
+                            Text(
+                                text = person.name,
+                                style = MaterialTheme.typography.headlineMedium,
+                            )
+                            if (person.overview.isNotBlank()) {
+                                OverviewText(text = person.overview, maxCollapsedLines = 4)
                             }
                         }
+                    }
+                }
 
-                        if (state.starredInShows.isNotEmpty()) {
-                            Column {
-                                Text(
-                                    text = stringResource(CoreR.string.shows_label),
-                                    modifier = Modifier.padding(itemsPadding),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                Spacer(
-                                    modifier = Modifier.height(MaterialTheme.spacings.extraSmall)
-                                )
-                                GridRows(
-                                    items = state.starredInShows,
-                                    columns = gridColumns(GridSize.POSTER),
-                                    modifier = Modifier.padding(itemsPadding),
-                                ) { item ->
-                                    ItemCard(
-                                        item = item,
-                                        direction = Direction.VERTICAL,
-                                        onClick = { onAction(PersonAction.NavigateToItem(item)) },
-                                        fillWidth = true,
-                                    )
-                                }
-                            }
-                        }
+                Spacer(Modifier.height(MaterialTheme.spacings.default))
 
-                        if (state.starredInBooks.isNotEmpty()) {
-                            Column {
-                                Text(
-                                    text = stringResource(CoreR.string.books_label),
-                                    modifier = Modifier.padding(itemsPadding),
-                                    style = MaterialTheme.typography.titleMedium,
+                Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default)) {
+                    if (state.starredInMovies.isNotEmpty()) {
+                        Column {
+                            Text(
+                                text = stringResource(CoreR.string.movies_label),
+                                modifier = Modifier.padding(itemsPadding),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+                            GridRows(
+                                items = state.starredInMovies,
+                                columns = gridColumns(GridSize.POSTER),
+                                modifier = Modifier.padding(itemsPadding),
+                            ) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(PersonAction.NavigateToItem(item)) },
+                                    fillWidth = true,
                                 )
-                                Spacer(
-                                    modifier = Modifier.height(MaterialTheme.spacings.extraSmall)
-                                )
-                                GridRows(
-                                    items = state.starredInBooks,
-                                    columns = gridColumns(GridSize.POSTER),
-                                    modifier = Modifier.padding(itemsPadding),
-                                ) { item ->
-                                    ItemCard(
-                                        item = item,
-                                        direction = Direction.VERTICAL,
-                                        onClick = { onAction(PersonAction.NavigateToItem(item)) },
-                                        fillWidth = true,
-                                    )
-                                }
                             }
                         }
                     }
 
-                    Spacer(Modifier.height(paddingBottom))
+                    if (state.starredInShows.isNotEmpty()) {
+                        Column {
+                            Text(
+                                text = stringResource(CoreR.string.shows_label),
+                                modifier = Modifier.padding(itemsPadding),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+                            GridRows(
+                                items = state.starredInShows,
+                                columns = gridColumns(GridSize.POSTER),
+                                modifier = Modifier.padding(itemsPadding),
+                            ) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(PersonAction.NavigateToItem(item)) },
+                                    fillWidth = true,
+                                )
+                            }
+                        }
+                    }
+
+                    if (state.starredInBooks.isNotEmpty()) {
+                        Column {
+                            Text(
+                                text = stringResource(CoreR.string.books_label),
+                                modifier = Modifier.padding(itemsPadding),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+                            GridRows(
+                                items = state.starredInBooks,
+                                columns = gridColumns(GridSize.POSTER),
+                                modifier = Modifier.padding(itemsPadding),
+                            ) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(PersonAction.NavigateToItem(item)) },
+                                    fillWidth = true,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(paddingBottom))
+            }
+        }
+            ?: run {
+                val error = state.error
+                if (error != null) {
+                    FullPageError(onRefresh = onRetry, isRefreshing = false, error = error)
+                } else {
+                    AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
-                ?: run {
-                    val error = state.error
-                    if (error != null) {
-                        FullPageError(onRefresh = onRetry, isRefreshing = false, error = error)
-                    } else {
-                        AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-                }
-        }
 
         PageTopBar(
             title =

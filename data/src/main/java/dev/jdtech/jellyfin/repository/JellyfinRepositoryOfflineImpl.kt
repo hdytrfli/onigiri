@@ -49,6 +49,7 @@ class JellyfinRepositoryOfflineImpl(
     private val database: ServerDatabaseDao,
     private val appPreferences: AppPreferences,
 ) : JellyfinRepository {
+    private val offlineGenreNames = mutableMapOf<UUID, String>()
 
     override suspend fun getPublicSystemInfo(): PublicSystemInfo {
         throw Exception("System info not available in offline mode")
@@ -84,7 +85,24 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun getItem(itemId: UUID): FindroidItem? {
         return withContext(Dispatchers.IO) {
-            database.getBook(itemId)?.toFindroidBook(database, jellyfinApi.userId!!)
+            val userId = jellyfinApi.userId ?: return@withContext null
+            runCatching {
+                database.getMovie(itemId).toFindroidMovie(database, userId)
+            }
+                .getOrNull()
+                ?: runCatching {
+                    database.getShow(itemId).toFindroidShow(database, userId)
+                }
+                    .getOrNull()
+                ?: runCatching {
+                    database.getSeason(itemId).toFindroidSeason(database, userId)
+                }
+                    .getOrNull()
+                ?: runCatching {
+                    database.getEpisode(itemId).toFindroidEpisode(database, userId)
+                }
+                    .getOrNull()
+                ?: database.getBook(itemId)?.toFindroidBook(database, userId)
         }
     }
 
@@ -119,11 +137,18 @@ class JellyfinRepositoryOfflineImpl(
                     }
                 }
             }
-        val searched =
-            if (searchTerm.isNullOrBlank()) {
+        val genreNames = genreIds?.mapNotNull { offlineGenreNames[it] }.orEmpty()
+        val filtered =
+            if (genreNames.isEmpty()) {
                 items
             } else {
-                items.filter { it.name.contains(searchTerm, ignoreCase = true) }
+                items.filter { item -> offlineGenres(item).any { genre -> genre in genreNames } }
+            }
+        val searched =
+            if (searchTerm.isNullOrBlank()) {
+                filtered
+            } else {
+                filtered.filter { it.name.contains(searchTerm, ignoreCase = true) }
             }
         val sorted =
             when (sortBy) {
@@ -145,8 +170,39 @@ class JellyfinRepositoryOfflineImpl(
         return ordered.drop(from).let { if (limit != null) it.take(limit) else it }
     }
 
-    override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> =
-        emptyList()
+    override suspend fun getGenres(includeTypes: List<BaseItemKind>): List<FindroidGenre> {
+        val types = includeTypes.toSet()
+        val names =
+            downloadedItems()
+                .filter { item ->
+                    when (item) {
+                        is FindroidMovie -> BaseItemKind.MOVIE in types
+                        is FindroidShow -> BaseItemKind.SERIES in types
+                        is FindroidBook ->
+                            if (item.isAudiobook) {
+                                BaseItemKind.AUDIO_BOOK in types
+                            } else {
+                                BaseItemKind.BOOK in types
+                            }
+                        else -> false
+                    }
+                }
+                .flatMap(::offlineGenres)
+                .distinct()
+        return names.map { name ->
+            val id = UUID.nameUUIDFromBytes(name.toByteArray())
+            offlineGenreNames[id] = name
+            FindroidGenre(id = id, name = name)
+        }
+    }
+
+    private fun offlineGenres(item: FindroidItem): List<String> =
+        when (item) {
+            is FindroidMovie -> item.genres
+            is FindroidShow -> item.genres
+            is FindroidBook -> item.genres
+            else -> emptyList()
+        }
 
     override suspend fun getMovieRecommendations(parentId: UUID?): List<RecommendationCategory> =
         emptyList()
@@ -173,43 +229,16 @@ class JellyfinRepositoryOfflineImpl(
     override suspend fun getFavoriteItems(): List<FindroidItem> =
         downloadedItems().filter { it.favorite }
 
-    override suspend fun getSearchItems(query: String): List<FindroidItem> {
-        return withContext(Dispatchers.IO) {
-            val movies =
-                database
-                    .searchMovies(appPreferences.getValue(appPreferences.currentServer)!!, query)
-                    .map { it.toFindroidMovie(database, jellyfinApi.userId!!) }
-            val shows =
-                database
-                    .searchShows(appPreferences.getValue(appPreferences.currentServer)!!, query)
-                    .map { it.toFindroidShow(database, jellyfinApi.userId!!) }
-            val episodes =
-                database
-                    .searchEpisodes(appPreferences.getValue(appPreferences.currentServer)!!, query)
-                    .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
-            movies + shows + episodes
-        }
-    }
+    override suspend fun getSearchItems(query: String): List<FindroidItem> =
+        downloadedItems().filter { it.name.contains(query, ignoreCase = true) }
 
     override suspend fun getSuggestions(): List<FindroidItem> {
-        return emptyList()
+        val downloaded = downloadedItems()
+        return downloaded.filter { it.favorite }.ifEmpty { downloaded }.take(18)
     }
 
-    override suspend fun getResumeItems(): List<FindroidItem> {
-        return withContext(Dispatchers.IO) {
-            val movies =
-                database
-                    .getMoviesByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
-                    .map { it.toFindroidMovie(database, jellyfinApi.userId!!) }
-                    .filter { it.playbackPositionTicks > 0 }
-            val episodes =
-                database
-                    .getEpisodesByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
-                    .map { it.toFindroidEpisode(database, jellyfinApi.userId!!) }
-                    .filter { it.playbackPositionTicks > 0 }
-            movies + episodes
-        }
-    }
+    override suspend fun getResumeItems(): List<FindroidItem> =
+        downloadedItems().filter { it.playbackPositionTicks > 0 }
 
     override suspend fun getLatestMedia(parentId: UUID): List<FindroidItem> {
         return emptyList()

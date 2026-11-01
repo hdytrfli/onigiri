@@ -44,22 +44,22 @@ import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
-import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.OverviewText
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
@@ -77,6 +77,7 @@ fun CollectionScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadItems(collectionId) }
+    OfflineModeReload { viewModel.loadItems(collectionId) }
 
     CollectionDetailLayout(
         state = state,
@@ -235,17 +236,18 @@ fun CollectionScreenLayout(
             )
         },
     ) { innerPadding ->
-        if (LocalOfflineMode.current) {
-            OfflineNotice(modifier = Modifier.padding(innerPadding))
-            return@PageScaffold
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (!state.isLoading && state.sections.isEmpty()) {
+                EmptyState(text = stringResource(CoreR.string.nothing_offline))
+            }
+            CollectionGrid(
+                sections = state.sections,
+                innerPadding = innerPadding,
+                contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
+                onAction = onAction,
+                displayFields = state.displayFields,
+            )
         }
-        CollectionGrid(
-            sections = state.sections,
-            innerPadding = innerPadding,
-            contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
-            onAction = onAction,
-            displayFields = state.displayFields,
-        )
     }
 }
 

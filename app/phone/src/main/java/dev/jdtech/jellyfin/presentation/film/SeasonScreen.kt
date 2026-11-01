@@ -34,6 +34,7 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
@@ -73,6 +74,7 @@ fun SeasonScreen(
         viewModel.loadSeason(seasonId = seasonId)
         onPauseOrDispose {}
     }
+    OfflineModeReload { viewModel.loadSeason(seasonId = seasonId) }
 
     SeasonScreenLayout(
         state = state,

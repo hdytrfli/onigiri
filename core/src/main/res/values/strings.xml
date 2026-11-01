@@ -26,6 +26,8 @@
     <string name="writers">Writers</string>
     <string name="cast_amp_crew"><![CDATA[Cast & Crew]]></string>
     <string name="media_detail">Media Detail</string>
+    <string name="nothing_offline">Nothing available offline</string>
+    <string name="nothing_offline_message">Download media to see it here while offline.</string>
     <string name="authors">Authors</string>
     <string name="seasons">Seasons</string>
     <string name="season_detail">Season detail</string>

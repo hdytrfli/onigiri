@@ -40,6 +40,7 @@ import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
@@ -85,6 +86,7 @@ fun ShowScreen(
         viewModel.loadShow(showId = showId)
         onPauseOrDispose {}
     }
+    OfflineModeReload { viewModel.loadShow(showId = showId) }
 
     ShowScreenLayout(
         state = state,

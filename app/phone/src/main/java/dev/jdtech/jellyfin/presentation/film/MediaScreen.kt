@@ -32,15 +32,14 @@ import dev.jdtech.jellyfin.film.presentation.search.SearchViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.components.MediaSearchBar
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
-import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
@@ -57,6 +56,10 @@ fun MediaScreen(
     val searchState by searchViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadData() }
+    OfflineModeReload {
+        viewModel.loadData()
+        searchViewModel.refresh()
+    }
 
     // Back closes the search instead of leaving the page.
     BackHandler(enabled = searchExpanded) { onSearchExpand(false) }
@@ -95,11 +98,6 @@ private fun MediaScreenLayout(
     onSearchAction: (SearchAction) -> Unit,
 ) {
     val safePadding = rememberSafePadding()
-
-    if (LocalOfflineMode.current) {
-        OfflineNotice()
-        return
-    }
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingTop = safePadding.top + MaterialTheme.spacings.small

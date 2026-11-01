@@ -28,6 +28,7 @@ import dev.jdtech.jellyfin.film.presentation.book.BookDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
@@ -61,6 +62,7 @@ fun BookDetailScreen(
         viewModel.load(bookId, force = true)
         onPauseOrDispose {}
     }
+    OfflineModeReload { viewModel.load(bookId, force = true) }
     LaunchedEffect(state.item) { state.item?.let { item -> downloaderViewModel.update(item) } }
     ObserveAsEvents(downloaderViewModel.events) { event ->
         when (event) {
