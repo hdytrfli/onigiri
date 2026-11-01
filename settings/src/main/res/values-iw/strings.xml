@@ -4,7 +4,6 @@
     <string name="title_download">הורדות</string>
     <string name="settings_preferred_audio_language">שפת שמע מועדפת</string>
     <string name="settings_preferred_subtitle_language">שפת כתוביות מועדפת</string>
-    <string name="settings_category_servers">שרתים</string>
     <string name="settings_category_player">נגן</string>
     <string name="settings_category_download">הורדות</string>
     <string name="settings_category_appearance">מראה</string>

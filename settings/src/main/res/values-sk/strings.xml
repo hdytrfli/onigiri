@@ -4,7 +4,6 @@
     <string name="settings_category_language">Jazyk</string>
     <string name="settings_preferred_audio_language">Preferovaný jazyk zvuku</string>
     <string name="settings_preferred_subtitle_language">Preferovaný jazyk titulkov</string>
-    <string name="settings_category_servers">Servery</string>
     <string name="settings_category_player">Prehrávač</string>
     <string name="settings_category_download">Stiahnuté</string>
     <string name="settings_category_device">Zariadenie</string>

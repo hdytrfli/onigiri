@@ -16,7 +16,6 @@
     <string name="mpv_player">Reprodutor mpv</string>
     <string name="download_mobile_data">Download usando dados móveis</string>
     <string name="gestures">Gestos</string>
-    <string name="settings_category_servers">Servidores</string>
     <string name="settings_category_download">Transferências</string>
     <string name="settings_use_cache_summary">Armazena imagens no disco para acelerar o tempo de carregamento. Surte efeito após reiniciar o aplicativo.</string>
     <string name="mpv_player_summary">Usar o reprodutor experimental mpv para reproduzir vídeos. mpv tem suporte a mais codecs de vídeo, áudio e legenda.</string>
@@ -60,7 +59,6 @@
     <string name="pref_player_gestures_seek_trickplay">Gesto de pré-visualizações de vídeo na barra de progresso</string>
     <string name="pref_player_gestures_seek_trickplay_summary">Mostrar prévias na barra de progresso</string>
     <string name="trickplay">Pré-visualizações de vídeo</string>
-    <string name="users">Usuários</string>
     <string name="home">Início</string>
     <string name="home_suggestions">Mostrar sugestões</string>
     <string name="home_continue_watching">Mostrar continuar assistindo</string>

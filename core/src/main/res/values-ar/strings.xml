@@ -99,7 +99,6 @@
     <string name="remove_from_favorites">إزالة من المفضلة</string>
     <string name="not_set">غير محدد</string>
     <string name="none">لا شيئ</string>
-    <string name="manage_servers">إدارة الخوادم</string>
     <string name="jellyfin_banner">لافتة جيلي فين</string>
     <string name="runtime_minutes_left">باقي %1$d دقيقة</string>
     <string name="delete_download">حذف</string>

@@ -7,7 +7,6 @@
     <string name="mpv_player_summary">Używaj eksperymentalnego odtwarzacza MPV do odtwarzania wideo. MPV wspiera więcej kodeków wideo, audio i napisów.</string>
     <string name="settings_category_language">Język</string>
     <string name="settings_preferred_subtitle_language">Preferowany język napisów</string>
-    <string name="settings_category_servers">Serwery</string>
     <string name="settings_category_player">Odtwarzacz</string>
     <string name="settings_category_download">Pobrane</string>
     <string name="settings_category_appearance">Wygląd</string>
@@ -59,7 +58,6 @@
     <string name="pref_player_gestures_seek_trickplay_summary">Wyświetlaj miniaturki przy gestach przewijania</string>
     <string name="settings_category_interface">Interfejs</string>
     <string name="cancel">Anuluj</string>
-    <string name="users">Użytkownicy</string>
     <string name="home">Start</string>
     <string name="home_suggestions">Wyświetl propozycje</string>
     <string name="home_continue_watching">Wyświetlaj oglądaj dalej</string>

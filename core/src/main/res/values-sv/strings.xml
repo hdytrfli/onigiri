@@ -94,7 +94,6 @@
     <string name="collection_no_media">Denna samling innehåller inte någon media</string>
     <string name="delete_download_message">Är du säker på att du vill ta bort denna nedladdning från din enhet?</string>
     <string name="none">Inga</string>
-    <string name="manage_servers">Hantera servrar</string>
     <string name="download_pending">Väntar…</string>
     <string name="download_paused">Pausad</string>
     <string name="download_downloading">Laddar ner…</string>

@@ -3,7 +3,6 @@
     <string name="settings_category_language">Language</string>
     <string name="settings_preferred_audio_language">Preferred audio language</string>
     <string name="settings_preferred_subtitle_language">Preferred subtitle language</string>
-    <string name="settings_category_servers">Servers</string>
     <string name="settings_category_player">Player</string>
     <string name="settings_group_server">Server</string>
     <string name="settings_group_storage">Storage</string>
@@ -83,7 +82,6 @@
     <string name="seek_back_increment">Seek back increment</string>
     <string name="seek_forward_increment">Seek forward increment</string>
     <string name="trickplay">Trickplay</string>
-    <string name="users">Users</string>
     <string name="title_download">Downloads</string>
     <string name="about">About</string>
     <string name="settings_group_about">About</string>
@@ -230,7 +228,6 @@
     <string name="settings_connect_timeout_summary">Wait for a server connection</string>
     <string name="settings_socket_timeout_summary">Wait for data on an open connection</string>
     <string name="users_summary">Switch between or manage server users</string>
-    <string name="settings_category_servers_summary">Manage the servers this app connects to</string>
     <string name="title_download_summary">Store media on this device</string>
     <string name="settings_category_cache_summary">Disk cache for images loaded from the server</string>
     <string name="about_summary">App version, licenses and links</string>

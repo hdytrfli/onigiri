@@ -96,7 +96,6 @@
     <string name="privacy_policy_notice">Ved at bruge Findroid accepterer du <a href="https://raw.githubusercontent.com/jarnedemeulemeester/findroid/main/PRIVACY">Privatlivspolitikken</a> som angiver, at vi ikke indsamler nogen data</string>
     <string name="live_tv">Live-TV</string>
     <string name="not_set">Ikke angivet</string>
-    <string name="manage_servers">Håndter servere</string>
     <string name="show_stacktrace">Vis stacktrace</string>
     <string name="error_preparing_player_items">Fejl i forberedelse af player-elementer.</string>
     <string name="image_description_backdrop">%1$s baggrund</string>

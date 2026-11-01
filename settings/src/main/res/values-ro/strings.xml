@@ -3,7 +3,6 @@
     <string name="settings_category_language">Limbă</string>
     <string name="settings_preferred_audio_language">Limbă audio preferată</string>
     <string name="settings_preferred_subtitle_language">Limbă preferată pentru subtitrări</string>
-    <string name="settings_category_servers">Servere</string>
     <string name="settings_category_player">Player</string>
     <string name="settings_category_download">Descărcări</string>
     <string name="settings_category_appearance">Aspect</string>
@@ -42,7 +41,6 @@
     <string name="seek_back_increment">Derulează înapoi cu increment (ms)</string>
     <string name="seek_forward_increment">Derulează înainte cu increment (ms)</string>
     <string name="trickplay">Trickplay</string>
-    <string name="users">Utilizatori</string>
     <string name="title_download">Descărcări</string>
     <string name="about">Despre aplicație</string>
     <string name="title_settings">Setări</string>

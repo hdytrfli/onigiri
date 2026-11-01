@@ -3,7 +3,6 @@
     <string name="settings_category_language">اللغة</string>
     <string name="settings_preferred_audio_language">لغة الصوت المفضلة</string>
     <string name="settings_preferred_subtitle_language">لغة الترجمة المفضلة</string>
-    <string name="settings_category_servers">الخوادم</string>
     <string name="settings_category_player">المشغل</string>
     <string name="settings_category_download">التنزيلات</string>
     <string name="settings_category_appearance">المظهر</string>
@@ -43,7 +42,6 @@
     <string name="seek_back_increment">التنقل للخلف</string>
     <string name="seek_forward_increment">التنقل للأمام</string>
     <string name="trickplay">تشغيل الصور المصغرة</string>
-    <string name="users">المستخدمون</string>
     <string name="title_download">التنزيلات</string>
     <string name="about">حول</string>
     <string name="home">الرئيسية</string>

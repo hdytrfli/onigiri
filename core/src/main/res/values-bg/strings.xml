@@ -103,7 +103,6 @@
     <string name="delete_download">Изтриване на изтегленото</string>
     <string name="delete_download_message">Сигурни ли сте, че искате да изтриете това от вашето устройство?</string>
     <string name="not_set">Незададен</string>
-    <string name="manage_servers">Управление на сървъри</string>
     <string name="download_pending">В очакване…</string>
     <string name="download_paused">Пауза</string>
     <string name="download_downloading">Изтегляне…</string>

@@ -44,9 +44,6 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM servers WHERE id = :id")
     suspend fun getServerWithAddresses(id: String): ServerWithAddresses
 
-    @Query("SELECT * FROM serverAddresses WHERE id = :id")
-    suspend fun getAddress(id: UUID): ServerAddress
-
     @Query("SELECT * FROM users WHERE serverId = :serverId")
     suspend fun getUsers(serverId: String): List<User>
 
@@ -58,13 +55,7 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM servers WHERE id = :id")
     suspend fun getServerWithAddressAndUser(id: String): ServerWithAddressAndUser?
 
-    @Transaction
-    @Query("SELECT * FROM servers")
-    suspend fun getServersWithAddresses(): List<ServerWithAddresses>
-
     @Query("SELECT * FROM servers") suspend fun getServers(): List<Server>
-
-    @Query("SELECT COUNT(*) FROM servers") suspend fun getServersCount(): Int
 
     @Query("SELECT COUNT(*) FROM servers") fun observeServersCount(): Flow<Int>
 
@@ -73,15 +64,11 @@ interface ServerDatabaseDao {
     @Query("SELECT currentUserId FROM servers WHERE id = :id")
     fun observeServerCurrentUserId(id: String): Flow<UUID?>
 
-    @Query("DELETE FROM servers WHERE id = :id") suspend fun deleteServer(id: String)
-
     @Query("DELETE FROM users") suspend fun deleteAllUsers()
 
     @Query("DELETE FROM servers") suspend fun deleteAllServers()
 
     @Query("DELETE FROM users WHERE id = :id") suspend fun deleteUser(id: UUID)
-
-    @Query("DELETE FROM serverAddresses WHERE id = :id") suspend fun deleteServerAddress(id: UUID)
 
     @Query("UPDATE servers SET currentUserId = :userId WHERE id = :serverId")
     suspend fun updateServerCurrentUser(serverId: String, userId: UUID)
@@ -90,11 +77,6 @@ interface ServerDatabaseDao {
         "SELECT * FROM users WHERE id = (SELECT currentUserId FROM servers WHERE id = :serverId)"
     )
     suspend fun getServerCurrentUser(serverId: String): User?
-
-    @Query(
-        "SELECT * FROM serverAddresses WHERE id = (SELECT currentServerAddressId FROM servers WHERE id = :serverId)"
-    )
-    suspend fun getServerCurrentAddress(serverId: String): ServerAddress?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertMovie(movie: FindroidMovieDto)
 

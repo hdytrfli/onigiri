@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +25,6 @@ import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
-import dev.jdtech.jellyfin.presentation.film.components.HomeHeader
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
@@ -36,9 +34,6 @@ import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 @Composable
 fun FavoritesScreen(
     onItemClick: (item: FindroidItem) -> Unit,
-    onSearchClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    embedded: Boolean = false,
     viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -48,10 +43,7 @@ fun FavoritesScreen(
     FavoritesScreenLayout(
         state = state,
         onItemClick = onItemClick,
-        onSearchClick = onSearchClick,
-        onSettingsClick = onSettingsClick,
         onRetryClick = { viewModel.loadItems() },
-        embedded = embedded,
     )
 }
 
@@ -59,23 +51,13 @@ fun FavoritesScreen(
 private fun FavoritesScreenLayout(
     state: CollectionState,
     onItemClick: (item: FindroidItem) -> Unit,
-    onSearchClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     onRetryClick: () -> Unit,
-    embedded: Boolean = false,
 ) {
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
-
-    val contentPaddingTop =
-        if (embedded) {
-            LocalRootPageContentInset.current
-        } else {
-            safePadding.top + 88.dp
-        }
 
     if (LocalOfflineMode.current) {
         OfflineNotice()
@@ -107,7 +89,7 @@ private fun FavoritesScreenLayout(
                 contentPadding =
                     PaddingValues(
                         start = paddingStart,
-                        top = contentPaddingTop,
+                        top = LocalRootPageContentInset.current,
                         end = paddingEnd,
                         bottom = paddingBottom,
                     ),
@@ -118,24 +100,6 @@ private fun FavoritesScreenLayout(
                 },
                 displayFields = state.displayFields,
             )
-
-            if (!embedded) {
-                HomeHeader(
-                    serverName = state.serverName ?: "",
-                    isLoading = state.isLoading,
-                    isError = state.error != null,
-                    onErrorClick = {},
-                    onRetryClick = onRetryClick,
-                    onSearchClick = onSearchClick,
-                    onUserClick = onSettingsClick,
-                    modifier =
-                        Modifier.padding(
-                            start = paddingStart,
-                            top = safePadding.top + MaterialTheme.spacings.small,
-                            end = paddingEnd,
-                        ),
-                )
-            }
         }
     }
 }
@@ -145,10 +109,8 @@ private fun FavoritesScreenLayout(
 private fun FavoritesScreenLayoutPreview() {
     FindroidTheme {
         FavoritesScreenLayout(
-            state = CollectionState(sections = mediaSections(dummyMovies), serverName = "Jellyfin"),
+            state = CollectionState(sections = mediaSections(dummyMovies)),
             onItemClick = {},
-            onSearchClick = {},
-            onSettingsClick = {},
             onRetryClick = {},
         )
     }

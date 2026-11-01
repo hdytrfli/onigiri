@@ -3,7 +3,6 @@
     <string name="settings_category_language">Bahasa</string>
     <string name="settings_preferred_audio_language">Bahasa audio yang disukai</string>
     <string name="settings_preferred_subtitle_language">Bahasa subtitle yang disukai</string>
-    <string name="settings_category_servers">Server</string>
     <string name="cancel">Batal</string>
     <string name="settings_category_player">Pemutar</string>
     <string name="title_download">Unduhan</string>
@@ -27,7 +26,6 @@
     <string name="mpv_player">pemutar mpv</string>
     <string name="download_mobile_data">Unduh menggunakan data seluler</string>
     <string name="download_roaming">Unduh ketika roaming</string>
-    <string name="users">Pengguna</string>
     <string name="mpv_player_summary">Gunakan pemutar mpv eksperimental untuk memutar video. mpv mendukung lebih banyak kodek video, audio, dan subtitle.</string>
     <string name="gestures">Gestur</string>
     <string name="player_gestures_zoom">Gestur zoom</string>

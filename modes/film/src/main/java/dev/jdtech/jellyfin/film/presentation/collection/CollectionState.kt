@@ -9,7 +9,6 @@ import java.util.UUID
 data class CollectionState(
     val collection: FindroidBoxSet? = null,
     val items: List<FindroidItem> = emptyList(),
-    val serverName: String? = null,
     val displayFields: Set<ListDisplayField> = emptySet(),
     val sections: List<CollectionSection> = emptyList(),
     val isLoading: Boolean = false,

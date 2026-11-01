@@ -95,7 +95,6 @@
     <string name="remove_from_favorites">Poista suosikeista</string>
     <string name="not_set">Ei asetettu</string>
     <string name="none">Ei mitään</string>
-    <string name="manage_servers">Hallitse palvelimia</string>
     <string name="cast_amp_crew"><![CDATA[Cast & Crew]]></string>
     <string name="episode_name">%1$d. %2$s</string>
     <string name="episode_name_with_end">%1$d-%2$d. %3$s</string>

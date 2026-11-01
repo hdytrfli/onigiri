@@ -103,7 +103,6 @@
     <string name="delete_download_message">Biztosan törölni szeretnéd a letöltést az eszközről?</string>
     <string name="not_set">Nincs beállítva</string>
     <string name="none">Egyik sem</string>
-    <string name="manage_servers">Szerverek kezelése</string>
     <string name="download_pending">Függőben…</string>
     <string name="download_paused">Megállítva</string>
     <string name="download_downloading">Letöltés…</string>

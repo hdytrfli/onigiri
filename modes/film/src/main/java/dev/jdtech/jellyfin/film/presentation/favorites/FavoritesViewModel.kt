@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.film.presentation.favorites
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.mediaSections
@@ -20,7 +19,6 @@ class FavoritesViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
-    private val database: ServerDatabaseDao,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
@@ -37,12 +35,6 @@ constructor(
             _state.emit(_state.value.copy(isLoading = true, error = null))
 
             try {
-                appPreferences.getValue(appPreferences.currentServer)?.let { serverId ->
-                    database.getServer(serverId)?.let { server ->
-                        _state.emit(_state.value.copy(serverName = server.name))
-                    }
-                }
-
                 val items = repository.getFavoriteItems()
 
                 _state.emit(

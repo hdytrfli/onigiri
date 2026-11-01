@@ -3,7 +3,6 @@
     <string name="settings_category_language">Език</string>
     <string name="settings_preferred_audio_language">Предпочитан аудио език</string>
     <string name="settings_preferred_subtitle_language">Предпочитан език на субтитрите</string>
-    <string name="settings_category_servers">Сървъри</string>
     <string name="settings_category_player">Плейър</string>
     <string name="settings_category_device">Устройство</string>
     <string name="settings_category_cache">Кеш</string>
@@ -58,7 +57,6 @@
     <string name="pref_player_gestures_seek_trickplay">Миниатюри при жест за превъртане</string>
     <string name="pref_player_gestures_seek_trickplay_summary">Показване на миниатюри (преглед) при жест за превъртане</string>
     <string name="trickplay">Миниатюри при превъртане</string>
-    <string name="users">Потребители</string>
     <string name="home">Начало</string>
     <string name="home_suggestions">Показване на предложения</string>
     <string name="home_continue_watching">Показване на „Продължи гледането“</string>

@@ -14,7 +14,6 @@
     <string name="extra_info_summary">Viser detaljeret information om Lyd, Video og Undertekster</string>
     <string name="settings_preferred_audio_language">Foretrukket sprog for lyd</string>
     <string name="settings_preferred_subtitle_language">Foretrukket sprog for undertekster</string>
-    <string name="settings_category_servers">Servere</string>
     <string name="settings_category_player">Afspiller</string>
     <string name="settings_category_download">Downloads</string>
     <string name="settings_category_appearance">Udseende</string>

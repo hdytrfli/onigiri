@@ -101,7 +101,6 @@
     <string name="episode_number">第 %1$d 集</string>
     <string name="runtime_minutes_left">剩余 %1$d 分钟</string>
     <string name="none">无</string>
-    <string name="manage_servers">管理服务器</string>
     <string name="delete_download">删除下载</string>
     <string name="delete_download_message">您确定要从设备中删除此下载内容吗？</string>
     <string name="download_pending">正在等待…</string>

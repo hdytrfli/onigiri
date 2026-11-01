@@ -4,7 +4,6 @@
     <string name="settings_category_language">Nyelv</string>
     <string name="settings_preferred_audio_language">Preferált beszéd nyelv</string>
     <string name="settings_preferred_subtitle_language">Preferált felirat nyelv</string>
-    <string name="settings_category_servers">Szerverek</string>
     <string name="settings_category_player">Lejátszó</string>
     <string name="settings_category_download">Letöltések</string>
     <string name="settings_category_device">Eszköz</string>

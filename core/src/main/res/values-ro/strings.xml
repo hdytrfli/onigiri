@@ -103,7 +103,6 @@
     <string name="delete_download">Șterge descărcarea</string>
     <string name="delete_download_message">Sigur vrei să ștergi această descărcare de pe dispozitivul tău?</string>
     <string name="none">Niciunul</string>
-    <string name="manage_servers">Gestionați serverele</string>
     <string name="download_pending">În așteptare…</string>
     <string name="download_paused">Pauzat</string>
     <string name="download_downloading">Se descarcă…</string>

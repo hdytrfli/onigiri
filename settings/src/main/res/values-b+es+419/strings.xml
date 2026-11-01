@@ -3,7 +3,6 @@
     <string name="settings_category_language">Idioma</string>
     <string name="settings_preferred_audio_language">Idioma de audio preferido</string>
     <string name="settings_preferred_subtitle_language">Idioma de subtitulo preferido</string>
-    <string name="settings_category_servers">Servidores</string>
     <string name="settings_category_player">Reproductor</string>
     <string name="settings_category_appearance">Apariencia</string>
     <string name="settings_category_device">Dispositivo</string>
@@ -57,5 +56,4 @@
     <string name="offline_mode">Modo desconectado</string>
     <string name="extra_info">Mostrar info extra</string>
     <string name="app_language">Idioma de la aplicación</string>
-    <string name="users">Usuarios</string>
 </resources>

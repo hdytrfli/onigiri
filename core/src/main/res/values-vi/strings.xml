@@ -101,5 +101,4 @@
     <string name="episode_number">Tập %1$d</string>
     <string name="runtime_minutes_left">Còn %1$d phút</string>
     <string name="none">Trống</string>
-    <string name="manage_servers">Quản lý máy chủ</string>
 </resources>

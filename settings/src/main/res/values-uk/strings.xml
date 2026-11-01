@@ -4,7 +4,6 @@
     <string name="settings_category_language">Мова</string>
     <string name="settings_preferred_subtitle_language">Бажана мова субтитрів</string>
     <string name="app_language">Мова додатку</string>
-    <string name="settings_category_servers">Сервера</string>
     <string name="settings_category_download">Завантаження</string>
     <string name="settings_category_appearance">Зовнішній вигляд</string>
     <string name="settings_category_cache">Кеш</string>
@@ -54,7 +53,6 @@
     <string name="player_gestures_chapter_skip_summary">Тривале натискання лівої/правої сторони для пропускання розділів (перевизначає жест подвійного прискорення)</string>
     <string name="player_start_maximized">Стартувати в режимі повного екрану</string>
     <string name="player_start_maximized_summary">Завжди відкривати відео в режимі повного екрану</string>
-    <string name="users">Користувачі</string>
     <string name="home">Головна</string>
     <string name="home_suggestions">Відобразити підказки</string>
     <string name="home_continue_watching">Відобразити розділ \"продовжити перегляд\"</string>

@@ -100,7 +100,6 @@
     <string name="offline_mode">Modalità Offline</string>
     <string name="not_set">Non impostato</string>
     <string name="none">Nessuno</string>
-    <string name="manage_servers">Gestisci server</string>
     <string name="runtime_minutes_left">%1$d minuti rimasti</string>
     <string name="delete_download">Elimina il download</string>
     <string name="delete_download_message">Sei sicuro di voler cancellare questo download dal tuo dispositivo?</string>

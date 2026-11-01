@@ -4,7 +4,6 @@
     <string name="settings_category_language">Idioma</string>
     <string name="settings_preferred_audio_language">Idioma d\'àudio preferit</string>
     <string name="settings_preferred_subtitle_language">Idioma de subtítols preferit</string>
-    <string name="settings_category_servers">Servidors</string>
     <string name="settings_category_download">Baixades</string>
     <string name="settings_category_appearance">Aparença</string>
     <string name="settings_category_interface">Interfície</string>

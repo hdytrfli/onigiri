@@ -103,7 +103,6 @@
     <string name="delete_download">İndirileni sil</string>
     <string name="delete_download_message">Bu indirileni cihazınızdan silmek istediğinizden emin misiniz?</string>
     <string name="none">Hiçbiri</string>
-    <string name="manage_servers">Sunucuları yönet</string>
     <string name="download_pending">Bekliyor…</string>
     <string name="download_paused">Durduruldu</string>
     <string name="download_downloading">İndiriliyor…</string>

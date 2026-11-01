@@ -61,7 +61,6 @@
     <string name="unmark_as_played">Marca com a no reproduït</string>
     <string name="add_to_favorites">Afegeix als preferits</string>
     <string name="remove_from_favorites">Treu dels preferits</string>
-    <string name="manage_servers">Gestiona els servidors</string>
     <string name="download_pending">Pendent…</string>
     <string name="download_button_description">Baixa</string>
     <string name="cancel_download">Cancel·la la baixada</string>

@@ -26,7 +26,6 @@
     <string name="settings_request_timeout">Pedido de tempo limite</string>
     <string name="settings_connect_timeout">Tempo limite de conexão</string>
     <string name="settings_socket_timeout">Tempo limite do soquete</string>
-    <string name="settings_category_servers">Servidores</string>
     <string name="settings_category_download">Transferências</string>
     <string name="settings_category_language">Idioma</string>
     <string name="settings_cache_size_message">A aplicação irá utilizar esta quantidade de MB do seu espaço em disco para armazenar imagens do servidor Jellyfin. Valores maiores podem ser benéficos em redes mais lentas.</string>
@@ -56,7 +55,6 @@
     <string name="pref_player_trickplay_summary">Exibir imagens de pré-visualização durante a navegação</string>
     <string name="pref_player_gestures_seek_trickplay_summary">Exibir imagens de pré-visualização ao realizar o gesto de pesquisa</string>
     <string name="trickplay">Trickplay</string>
-    <string name="users">Usuários</string>
     <string name="home">Página inicial</string>
     <string name="home_suggestions">Mostrar sugestões</string>
     <string name="home_continue_watching">Mostrar continuar a assistir</string>

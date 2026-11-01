@@ -99,7 +99,6 @@
     <string name="offline_mode">Tryb offline</string>
     <string name="not_set">Nie ustawione</string>
     <string name="none">Żadne</string>
-    <string name="manage_servers">Zarządzaj serwerami</string>
     <string name="show_stacktrace">Wyświetl stos wywołań</string>
     <string name="runtime_minutes_left">Pozostało %1$d minut</string>
     <string name="delete_download">Usuń pobrane</string>

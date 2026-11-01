@@ -4,7 +4,6 @@
     <string name="settings_category_language">Jazyk</string>
     <string name="settings_preferred_audio_language">Preferovaný jazyk zvuku</string>
     <string name="settings_preferred_subtitle_language">Preferovaný jazyk titulků</string>
-    <string name="settings_category_servers">Servery</string>
     <string name="settings_category_player">Přehrávač</string>
     <string name="settings_category_appearance">Vzhled</string>
     <string name="settings_category_device">Zařízení</string>
@@ -48,7 +47,6 @@
     <string name="player_gestures_seek_summary">Přejeďte prstem vodorovně, abyste posunuli video dopředu nebo dozadu</string>
     <string name="player_start_maximized">Spustit maximalizované</string>
     <string name="player_start_maximized_summary">Otevřít video automaticky v maximalizovaném režimu</string>
-    <string name="users">Uživatelé</string>
     <string name="picture_in_picture_gesture">Obraz v obraze pomocí gesta domovské obrazovky</string>
     <string name="picture_in_picture_gesture_summary">Pomocí tlačítka Domů nebo gesta přejde během přehrávání videa do režimu obraz v obraze</string>
     <string name="offline_mode_summary">Sledujte filmy a seriály bez připojení k serveru</string>

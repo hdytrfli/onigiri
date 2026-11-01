@@ -155,9 +155,6 @@ fun HomeScreen(
             1 ->
                 FavoritesScreen(
                     onItemClick = onItemClick,
-                    onSearchClick = onSearchClick,
-                    onSettingsClick = onSettingsClick,
-                    embedded = true,
                     viewModel = favoritesViewModel,
                 )
             else ->

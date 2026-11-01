@@ -5,7 +5,6 @@
     <string name="settings_category_language">Lingua</string>
     <string name="settings_preferred_audio_language">Lingua audio preferita</string>
     <string name="settings_preferred_subtitle_language">Lingua sottotitoli preferita</string>
-    <string name="settings_category_servers">Server</string>
     <string name="settings_category_player">Player</string>
     <string name="settings_category_download">Download</string>
     <string name="settings_category_appearance">Stile</string>
@@ -60,7 +59,6 @@
     <string name="cancel">Annulla</string>
     <string name="none">Nessuno</string>
     <string name="settings_category_interface">Interfaccia</string>
-    <string name="users">Utenti</string>
     <string name="home">Home</string>
     <string name="home_suggestions">Mostra suggerimenti</string>
     <string name="home_continue_watching">Mostra continua a guardare</string>

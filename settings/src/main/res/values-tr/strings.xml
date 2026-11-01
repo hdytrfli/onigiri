@@ -8,7 +8,6 @@
     <string name="title_settings">Ayarlar</string>
     <string name="settings_category_device">Cihaz</string>
     <string name="about">Hakkında</string>
-    <string name="settings_category_servers">Sunucular</string>
     <string name="subtitles">Altyazılar</string>
     <string name="settings_preferred_subtitle_language">Tercih edilen altyazı dili</string>
     <string name="settings_category_player">Oynatıcı</string>
@@ -52,7 +51,6 @@
     <string name="seek_back_increment">Geriye atlama süresi</string>
     <string name="seek_forward_increment">İleriye atlama süresi</string>
     <string name="trickplay">Trickplay</string>
-    <string name="users">Kullanıcılar</string>
     <string name="home">Ev</string>
     <string name="home_suggestions">Önerileri göster</string>
     <string name="home_continue_watching">İzlemeye devamı göster</string>

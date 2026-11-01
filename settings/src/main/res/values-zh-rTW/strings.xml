@@ -5,7 +5,6 @@
     <string name="settings_category_language">語言</string>
     <string name="settings_preferred_audio_language">偏好音訊語言</string>
     <string name="settings_preferred_subtitle_language">偏好字幕語言</string>
-    <string name="settings_category_servers">伺服器</string>
     <string name="settings_category_player">撥放器</string>
     <string name="settings_category_download">下載</string>
     <string name="settings_category_appearance">外觀</string>
@@ -55,7 +54,6 @@
     <string name="pref_player_trickplay_summary">快轉時顯示預覽畫面</string>
     <string name="pref_player_gestures_seek_trickplay">滑動快轉時啟用特技播放</string>
     <string name="pref_player_gestures_seek_trickplay_summary">手勢尋找時顯示預覽畫面</string>
-    <string name="users">使用者</string>
     <string name="settings_category_interface">介面</string>
     <string name="pref_player_trickplay">技巧播放</string>
     <string name="cancel">取消</string>

@@ -103,7 +103,6 @@
     <string name="add_to_favorites">Додати до обраного</string>
     <string name="remove_from_favorites">Видалити з обраного</string>
     <string name="not_set">Не встановлено</string>
-    <string name="manage_servers">Керування серверами</string>
     <string name="download_pending">Очікується…</string>
     <string name="download_paused">Призупинено</string>
     <string name="download_downloading">Завантажується…</string>

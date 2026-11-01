@@ -5,7 +5,6 @@
     <string name="settings_category_language">Idioma</string>
     <string name="settings_preferred_audio_language">Idioma de audio preferido</string>
     <string name="settings_preferred_subtitle_language">Idioma de subtítulo preferido</string>
-    <string name="settings_category_servers">Servidores</string>
     <string name="settings_category_player">Reproductor</string>
     <string name="settings_category_appearance">Apariencia</string>
     <string name="settings_category_device">Dispositivo</string>
@@ -57,7 +56,6 @@
     <string name="pref_player_gestures_seek_trickplay_summary">Muestra previsualizaciones al navegar en la barra de progreso</string>
     <string name="trickplay">Trickplay</string>
     <string name="picture_in_picture_gesture_summary">Use el botón Home o gesto para cambiar a pantalla en pantalla mientras se reproduce el video</string>
-    <string name="users">Usuarios</string>
     <string name="settings_category_interface">Interfaz</string>
     <string name="cancel">Cancelar</string>
     <string name="home">Inicio</string>

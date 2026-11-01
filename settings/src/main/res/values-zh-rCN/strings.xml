@@ -5,7 +5,6 @@
     <string name="settings_category_language">语言</string>
     <string name="settings_preferred_audio_language">偏好音频语言</string>
     <string name="settings_preferred_subtitle_language">偏好字幕语言</string>
-    <string name="settings_category_servers">服务器</string>
     <string name="settings_category_player">播放器</string>
     <string name="settings_category_download">下载</string>
     <string name="settings_category_appearance">外观</string>
@@ -59,7 +58,6 @@
     <string name="pref_player_gestures_seek_trickplay_summary">使用进度调节手势时显示进度条预览图</string>
     <string name="settings_category_interface">界面</string>
     <string name="cancel">取消</string>
-    <string name="users">用户</string>
     <string name="home">首页</string>
     <string name="home_suggestions">显示推荐</string>
     <string name="home_continue_watching">显示继续观看</string>

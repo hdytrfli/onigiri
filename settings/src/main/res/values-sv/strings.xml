@@ -4,7 +4,6 @@
     <string name="title_download">Nedladdningar</string>
     <string name="settings_category_language">Språk</string>
     <string name="settings_preferred_audio_language">Föredraget ljudspråk</string>
-    <string name="settings_category_servers">Servrar</string>
     <string name="settings_category_player">Spelare</string>
     <string name="settings_category_download">Nedladdningar</string>
     <string name="settings_category_appearance">Utseende</string>
@@ -43,7 +42,6 @@
     <string name="pref_player_mpv_hwdec">Hårdvaruavkodning</string>
     <string name="offline_mode">Offlineläge</string>
     <string name="pref_player_trickplay_summary">Visa förhandsgranskningsbilder medan du skrubbar</string>
-    <string name="users">Användare</string>
     <string name="pref_player_trickplay">Trickplay</string>
     <string name="picture_in_picture_gesture">Bild-i-bild hem gest</string>
     <string name="picture_in_picture_gesture_summary">Använd hemknappen eller gesten för att ange bild-i-bild medan videon spelas upp</string>

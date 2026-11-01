@@ -20,7 +20,6 @@
     <string name="settings_category_language">언어</string>
     <string name="settings_preferred_audio_language">선호하는 오디오 언어</string>
     <string name="settings_preferred_subtitle_language">선호하는 자막 언어</string>
-    <string name="settings_category_servers">서버</string>
     <string name="settings_category_player">플레이어</string>
     <string name="settings_cache_size_message">설정한 용량의 저장공간 용량을 Jellyfin 서버의 이미지 캐시를 저장하는 데 사용합니다. 값이 클수록 느린 네트워크에서 큰 효과가 있습니다.</string>
     <string name="seek_forward_increment">빨리 감기 시간</string>

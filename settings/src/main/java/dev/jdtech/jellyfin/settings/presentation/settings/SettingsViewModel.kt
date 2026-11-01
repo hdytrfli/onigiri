@@ -1765,9 +1765,7 @@ constructor(
                     preference.nameStringResource == R.string.settings_category_reader ||
                     preference.nameStringResource == R.string.settings_category_player ->
                     R.string.settings_group_app
-                preference.nameStringResource == R.string.users ||
-                    preference.nameStringResource == R.string.settings_category_servers ||
-                    preference.nameStringResource == R.string.settings_category_network ->
+                preference.nameStringResource == R.string.settings_category_network ->
                     R.string.settings_group_server
                 preference.nameStringResource == R.string.title_download ||
                     preference.nameStringResource == R.string.settings_category_cache ->

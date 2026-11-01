@@ -7,7 +7,6 @@ import dev.jdtech.jellyfin.models.ExceptionUiText
 import dev.jdtech.jellyfin.models.ExceptionUiTexts
 import dev.jdtech.jellyfin.models.Server
 import dev.jdtech.jellyfin.models.ServerAddress
-import dev.jdtech.jellyfin.models.ServerWithAddresses
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
@@ -15,7 +14,6 @@ import dev.jdtech.jellyfin.setup.R as SetupR
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.discovery.RecommendedServerInfo
 import org.jellyfin.sdk.discovery.RecommendedServerInfoScore
@@ -24,7 +22,6 @@ import org.jellyfin.sdk.model.api.AuthenticateUserByName
 import org.jellyfin.sdk.model.api.AuthenticationResult
 import org.jellyfin.sdk.model.api.QuickConnectDto
 import org.jellyfin.sdk.model.api.QuickConnectResult
-import org.jellyfin.sdk.model.api.ServerDiscoveryInfo
 import timber.log.Timber
 
 class SetupRepositoryImpl(
@@ -32,22 +29,10 @@ class SetupRepositoryImpl(
     private val database: ServerDatabaseDao,
     private val appPreferences: AppPreferences,
 ) : SetupRepository {
-    override fun discoverServers(): Flow<ServerDiscoveryInfo> {
-        return jellyfinApi.jellyfin.discovery.discoverLocalServers()
-    }
-
-    override suspend fun getServers(): List<ServerWithAddresses> {
-        return database.getServersWithAddresses()
-    }
-
     override suspend fun getCurrentServer(): Server? {
         return appPreferences.getValue(appPreferences.currentServer)?.let { id ->
             database.getServer(id)
         }
-    }
-
-    override suspend fun deleteServer(serverId: String) {
-        database.deleteServer(serverId)
     }
 
     override suspend fun getIsQuickConnectEnabled(): Boolean =
@@ -60,17 +45,6 @@ class SetupRepositoryImpl(
         withContext(Dispatchers.IO) {
             jellyfinApi.quickConnectApi.getQuickConnectState(secret).content
         }
-
-    override suspend fun setCurrentServer(serverId: String) {
-        val serverWithAddressAndUser = database.getServerWithAddressAndUser(serverId) ?: return
-        val serverAddress = serverWithAddressAndUser.address ?: return
-        val user = serverWithAddressAndUser.user
-
-        jellyfinApi.apply {
-            api.update(baseUrl = serverAddress.address, accessToken = user?.accessToken)
-            userId = user?.id
-        }
-    }
 
     override suspend fun addServer(address: String): Server {
         // Check if address is not blank
@@ -203,11 +177,6 @@ class SetupRepositoryImpl(
         }
     }
 
-    override suspend fun loadDisclaimer(): String? =
-        withContext(Dispatchers.IO) {
-            jellyfinApi.brandingApi.getBrandingOptions().content.loginDisclaimer
-        }
-
     override suspend fun login(username: String, password: String) {
         withContext(Dispatchers.IO) {
             val authenticationResult by
@@ -257,13 +226,6 @@ class SetupRepositoryImpl(
         return database.getUsers(serverId)
     }
 
-    override suspend fun getPublicUsers(serverId: String): List<User> =
-        withContext(Dispatchers.IO) {
-            jellyfinApi.userApi.getPublicUsers().content.mapNotNull {
-                User(id = it.id, name = it.name ?: return@mapNotNull null, serverId = serverId)
-            }
-        }
-
     override suspend fun getCurrentUser(): User? {
         val currentServer = getCurrentServer() ?: return null
         return database.getServerCurrentUser(currentServer.id)
@@ -299,16 +261,5 @@ class SetupRepositoryImpl(
             api.update(accessToken = null)
             userId = null
         }
-    }
-
-    override suspend fun setCurrentAddress(addressId: UUID) {
-        val server = getCurrentServer() ?: return
-        val address = database.getAddress(id = addressId)
-        if (address.serverId != server.id) {
-            return
-        }
-        server.currentServerAddressId = address.id
-        database.updateServer(server)
-        jellyfinApi.apply { api.update(baseUrl = address.address) }
     }
 }

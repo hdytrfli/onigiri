@@ -100,7 +100,6 @@
     <string name="episode_number">Épisode %1$d</string>
     <string name="show_stacktrace">Afficher la trace d’erreur</string>
     <string name="none">Aucun</string>
-    <string name="manage_servers">Gérer les serveurs</string>
     <string name="runtime_minutes_left">%1$d min restantes</string>
     <string name="delete_download">Supprimer le téléchargement</string>
     <string name="delete_download_message">Êtes-vous sûr de vouloir supprimer ce téléchargement de votre appareil ?</string>
