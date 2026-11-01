@@ -36,6 +36,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalSetOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.swr.SwrStore
 import dev.jdtech.jellyfin.utils.restart
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 import javax.inject.Inject
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     @Inject lateinit var appPreferences: AppPreferences
+    @Inject lateinit var swrStore: SwrStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,6 +141,7 @@ class MainActivity : AppCompatActivity() {
                                 onboardingComplete = state.onboardingComplete,
                                 profileLoggedOut = state.profileLoggedOut,
                                 confirmExit = state.confirmExit,
+                                swrStore = swrStore,
                             )
                         }
                     }

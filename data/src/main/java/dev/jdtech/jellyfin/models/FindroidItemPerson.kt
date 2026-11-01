@@ -3,11 +3,16 @@ package dev.jdtech.jellyfin.models
 import android.net.Uri
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemPerson
 import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.PersonKind
 
-data class FindroidItemPersonImage(val uri: Uri?, val blurHash: String?)
+@Serializable
+data class FindroidItemPersonImage(
+    @Serializable(with = UriSerializer::class) val uri: Uri?,
+    val blurHash: String?,
+)
 
 fun BaseItemPerson.toFindroidImage(repository: JellyfinRepository): FindroidItemPersonImage {
     val baseUrl = Uri.parse(repository.getBaseUrl())
@@ -25,8 +30,9 @@ fun BaseItemPerson.toFindroidImage(repository: JellyfinRepository): FindroidItem
     )
 }
 
+@Serializable
 data class FindroidItemPerson(
-    val id: UUID,
+    @Serializable(with = UuidSerializer::class) val id: UUID,
     val name: String,
     val type: PersonKind,
     val role: String,

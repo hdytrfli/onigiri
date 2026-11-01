@@ -106,16 +106,22 @@ class SetupRepositoryImpl(
         val server =
             if (serverInDatabase != null) {
                 val addresses = database.getServerWithAddresses(serverInDatabase.id).addresses
-                // If address is not in database, add it
-                if (addresses.none { it.address == recommendedServerInfo.address }) {
-                    val serverAddress =
-                        ServerAddress(
+                // Reuse the address if it is known, otherwise add it.
+                val address =
+                    addresses.firstOrNull { it.address == recommendedServerInfo.address }
+                        ?: ServerAddress(
                             id = UUID.randomUUID(),
                             serverId = serverInDatabase.id,
                             address = recommendedServerInfo.address,
                         )
+                if (addresses.none { it.id == address.id }) {
+                    database.insertServerAddress(address)
+                }
 
-                    database.insertServerAddress(serverAddress)
+                // The address we just connected through must become the persisted one.
+                if (serverInDatabase.currentServerAddressId != address.id) {
+                    serverInDatabase.currentServerAddressId = address.id
+                    database.updateServer(serverInDatabase)
                 }
                 serverInDatabase
             } else {

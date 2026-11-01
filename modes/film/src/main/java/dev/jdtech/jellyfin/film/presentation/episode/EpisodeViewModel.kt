@@ -7,8 +7,10 @@ import dev.jdtech.jellyfin.film.domain.VideoMetadataParser
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.swr.SwrStore
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +25,7 @@ constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
     private val videoMetadataParser: VideoMetadataParser,
+    private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EpisodeState())
     val state = _state.asStateFlow()
@@ -32,9 +35,11 @@ constructor(
     fun loadEpisode(episodeId: UUID) {
         this.episodeId = episodeId
         viewModelScope.launch {
+            _state.emit(_state.value.copy(error = null))
             try {
                 val episode = repository.getEpisode(episodeId)
-                val videoMetadata = videoMetadataParser.parse(episode.sources.first())
+                val source = episode.sources.firstOrNull()
+                val videoMetadata = if (source != null) videoMetadataParser.parse(source) else null
                 // Aggregate series-level cast & crew with episode-level entries so
                 // episodes without their own credits still show the series ones.
                 // Episode entries come first, series entries fill in the rest.
@@ -63,6 +68,8 @@ constructor(
                         displayExtraInfo = displayExtraInfo,
                     )
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
             }
@@ -85,31 +92,19 @@ constructor(
 
     fun onAction(action: EpisodeAction) {
         when (action) {
-            is EpisodeAction.MarkAsPlayed -> {
-                viewModelScope.launch {
-                    repository.markAsPlayed(episodeId)
-                    loadEpisode(episodeId)
-                }
-            }
-            is EpisodeAction.UnmarkAsPlayed -> {
-                viewModelScope.launch {
-                    repository.markAsUnplayed(episodeId)
-                    loadEpisode(episodeId)
-                }
-            }
-            is EpisodeAction.MarkAsFavorite -> {
-                viewModelScope.launch {
-                    repository.markAsFavorite(episodeId)
-                    loadEpisode(episodeId)
-                }
-            }
-            is EpisodeAction.UnmarkAsFavorite -> {
-                viewModelScope.launch {
-                    repository.unmarkAsFavorite(episodeId)
-                    loadEpisode(episodeId)
-                }
-            }
+            is EpisodeAction.MarkAsPlayed -> mutate { repository.markAsPlayed(episodeId) }
+            is EpisodeAction.UnmarkAsPlayed -> mutate { repository.markAsUnplayed(episodeId) }
+            is EpisodeAction.MarkAsFavorite -> mutate { repository.markAsFavorite(episodeId) }
+            is EpisodeAction.UnmarkAsFavorite -> mutate { repository.unmarkAsFavorite(episodeId) }
             else -> Unit
+        }
+    }
+
+    private fun mutate(block: suspend () -> Unit) {
+        viewModelScope.launch {
+            block()
+            swrStore.invalidateMediaLists()
+            loadEpisode(episodeId)
         }
     }
 }

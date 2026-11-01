@@ -1,5 +1,8 @@
 package dev.jdtech.jellyfin.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class CollectionType(val type: String) {
     Movies("movies"),
     TvShows("tvshows"),

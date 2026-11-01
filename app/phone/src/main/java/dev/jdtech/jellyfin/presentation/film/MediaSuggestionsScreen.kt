@@ -55,7 +55,6 @@ import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
-import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.section
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
@@ -205,61 +204,57 @@ private fun MediaPage(
             }
         }
     ) {
-        if (LocalOfflineMode.current) {
-            OfflineNotice()
-        } else {
-            when (selectedTab) {
-                0 ->
-                    LibraryContent(
-                        state = listState,
-                        onAction = { action ->
-                            if (action is LibraryAction.OnItemClick) {
-                                onItemClick(action.item)
-                            }
-                            listViewModel.onAction(action)
-                        },
-                        showSortDialog = showSortDialog,
-                        showDisplayDialog = false,
-                        onShowSortDialogChange = { showSortDialog = it },
-                        onShowDisplayDialogChange = {},
-                        embedded = true,
-                        sectionTitle =
-                            stringResource(
-                                if (kind == MediaKind.Movies) CoreR.string.all_movies
-                                else CoreR.string.all_shows
-                            ),
-                        showSearchField = false,
-                    )
-                1 ->
-                    CollectionsTab(
-                        kind = kind,
-                        displayFields = listState.displayFields,
-                        onItemClick = onItemClick,
-                    )
-                2 ->
-                    MediaSuggestionsContent(
-                        state = state,
-                        displayFields = listState.displayFields,
-                        onItemClick = onItemClick,
-                        onListClick = { selectedTab = 0 },
-                        onRetry = { viewModel.retry(kind) },
-                    )
-                else ->
-                    GenresContent(
-                        kind = kind,
-                        displayFields = listState.displayFields,
-                        onItemClick = onItemClick,
-                        onGenreClick = onGenreClick,
-                    )
-            }
-            // One dialog for every tab; the setting itself is global, never stored per page.
-            if (showDisplayDialog) {
-                DisplayInfoDialog(
-                    fields = listState.displayFields,
-                    onToggle = { listViewModel.onAction(LibraryAction.ToggleDisplayField(it)) },
-                    onDismiss = { showDisplayDialog = false },
+        when (selectedTab) {
+            0 ->
+                LibraryContent(
+                    state = listState,
+                    onAction = { action ->
+                        if (action is LibraryAction.OnItemClick) {
+                            onItemClick(action.item)
+                        }
+                        listViewModel.onAction(action)
+                    },
+                    showSortDialog = showSortDialog,
+                    showDisplayDialog = false,
+                    onShowSortDialogChange = { showSortDialog = it },
+                    onShowDisplayDialogChange = {},
+                    embedded = true,
+                    sectionTitle =
+                        stringResource(
+                            if (kind == MediaKind.Movies) CoreR.string.all_movies
+                            else CoreR.string.all_shows
+                        ),
+                    showSearchField = false,
                 )
-            }
+            1 ->
+                CollectionsTab(
+                    kind = kind,
+                    displayFields = listState.displayFields,
+                    onItemClick = onItemClick,
+                )
+            2 ->
+                MediaSuggestionsContent(
+                    state = state,
+                    displayFields = listState.displayFields,
+                    onItemClick = onItemClick,
+                    onListClick = { selectedTab = 0 },
+                    onRetry = { viewModel.retry(kind) },
+                )
+            else ->
+                GenresContent(
+                    kind = kind,
+                    displayFields = listState.displayFields,
+                    onItemClick = onItemClick,
+                    onGenreClick = onGenreClick,
+                )
+        }
+        // One dialog for every tab; the setting itself is global, never stored per page.
+        if (showDisplayDialog) {
+            DisplayInfoDialog(
+                fields = listState.displayFields,
+                onToggle = { listViewModel.onAction(LibraryAction.ToggleDisplayField(it)) },
+                onDismiss = { showDisplayDialog = false },
+            )
         }
     }
 }

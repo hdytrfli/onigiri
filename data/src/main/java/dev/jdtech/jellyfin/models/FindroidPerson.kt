@@ -2,10 +2,12 @@ package dev.jdtech.jellyfin.models
 
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 
+@Serializable
 data class FindroidPerson(
-    val id: UUID,
+    @Serializable(with = UuidSerializer::class) val id: UUID,
     val name: String,
     val overview: String,
     val images: FindroidImages,

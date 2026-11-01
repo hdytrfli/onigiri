@@ -14,6 +14,6 @@ data class DownloaderState(
                 arrayOf(
                     DownloadManager.STATUS_PENDING,
                     DownloadManager.STATUS_RUNNING,
-                    DownloadManager.STATUS_FAILED,
+                    DownloadManager.STATUS_PAUSED,
                 )
 }

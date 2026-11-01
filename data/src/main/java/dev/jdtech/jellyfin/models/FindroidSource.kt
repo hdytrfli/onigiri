@@ -4,9 +4,11 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.io.File
 import java.util.UUID
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.MediaProtocol
 import org.jellyfin.sdk.model.api.MediaSourceInfo
 
+@Serializable
 data class FindroidSource(
     val id: String,
     val name: String,
@@ -61,6 +63,7 @@ suspend fun FindroidSourceDto.toFindroidSource(
     )
 }
 
+@Serializable
 enum class FindroidSourceType {
     REMOTE,
     LOCAL,

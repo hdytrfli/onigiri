@@ -78,6 +78,20 @@ interface ServerDatabaseDao {
     )
     suspend fun getServerCurrentUser(serverId: String): User?
 
+    @Query("SELECT * FROM query_cache WHERE cacheKey = :cacheKey")
+    suspend fun getQueryCache(cacheKey: String): QueryCacheEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun putQueryCache(entry: QueryCacheEntity)
+
+    @Query("UPDATE query_cache SET updatedAt = 0 WHERE cacheKey = :cacheKey")
+    suspend fun invalidateQueryCache(cacheKey: String)
+
+    @Query("UPDATE query_cache SET updatedAt = 0 WHERE cacheKey LIKE :prefix || '%'")
+    suspend fun invalidateQueryCachePrefix(prefix: String)
+
+    @Query("DELETE FROM query_cache") suspend fun clearQueryCache()
+
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertMovie(movie: FindroidMovieDto)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertBook(book: FindroidBookDto)

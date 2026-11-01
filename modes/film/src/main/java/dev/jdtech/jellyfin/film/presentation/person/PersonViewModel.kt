@@ -9,6 +9,7 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ class PersonViewModel @Inject internal constructor(private val repository: Jelly
 
     fun loadPerson(personId: UUID) {
         viewModelScope.launch {
+            _state.emit(_state.value.copy(error = null))
             try {
                 val (person, items) =
                     coroutineScope {
@@ -56,6 +58,8 @@ class PersonViewModel @Inject internal constructor(private val repository: Jelly
                         starredInBooks = books,
                     )
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
             }

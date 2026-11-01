@@ -25,10 +25,8 @@ import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
-import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 
 @Composable
@@ -58,11 +56,6 @@ private fun FavoritesScreenLayout(
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
-
-    if (LocalOfflineMode.current) {
-        OfflineNotice()
-        return
-    }
 
     if (state.error != null && state.items.isEmpty()) {
         FullPageError(

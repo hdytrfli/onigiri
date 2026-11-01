@@ -3,20 +3,24 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.PlayAccess
 
+@Serializable
+@SerialName("season")
 data class FindroidSeason(
-    override val id: UUID,
+    @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
-    val seriesId: UUID,
+    @Serializable(with = UuidSerializer::class) val seriesId: UUID,
     val seriesName: String,
     val productionYear: Int? = null,
     override val originalTitle: String?,
     override val overview: String,
     override val sources: List<FindroidSource>,
     val indexNumber: Int,
-    val episodes: Collection<FindroidEpisode>,
+    val episodes: List<FindroidEpisode>,
     override val played: Boolean,
     override val favorite: Boolean,
     override val canPlay: Boolean,

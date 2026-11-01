@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.swr.SwrStore
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.ceil
@@ -32,6 +33,7 @@ class BookDetailViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
+    private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(BookDetailState())
     val state = _state.asStateFlow()
@@ -88,6 +90,7 @@ constructor(
     private fun update(bookId: UUID, block: suspend () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) { runCatching { block() } }
+            swrStore.invalidateMediaLists()
             load(bookId, force = true)
         }
     }

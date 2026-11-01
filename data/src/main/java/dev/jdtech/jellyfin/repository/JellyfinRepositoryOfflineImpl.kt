@@ -182,19 +182,23 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun getNextUp(seriesId: UUID?): List<FindroidEpisode> {
         return withContext(Dispatchers.IO) {
+            val serverId =
+                appPreferences.getValue(appPreferences.currentServer)
+                    ?: return@withContext emptyList()
+            val userId = jellyfinApi.userId ?: return@withContext emptyList()
             val result = mutableListOf<FindroidEpisode>()
             val shows =
-                database
-                    .getShowsByServerId(appPreferences.getValue(appPreferences.currentServer)!!)
-                    .filter { if (seriesId != null) it.id == seriesId else true }
+                database.getShowsByServerId(serverId).filter {
+                    if (seriesId != null) it.id == seriesId else true
+                }
             for (show in shows) {
                 val episodes =
                     database.getEpisodesByShowId(show.id).map {
-                        it.toFindroidEpisode(database, jellyfinApi.userId!!)
+                        it.toFindroidEpisode(database, userId)
                     }
                 val indexOfLastPlayed = episodes.indexOfLast { it.played }
                 if (indexOfLastPlayed == -1) {
-                    result.add(episodes.first())
+                    episodes.firstOrNull()?.let(result::add)
                 } else {
                     episodes.getOrNull(indexOfLastPlayed + 1)?.let { result.add(it) }
                 }

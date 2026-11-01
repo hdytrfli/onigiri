@@ -93,7 +93,8 @@ class JellyfinRepositoryImpl(
             jellyfinApi.userLibraryApi
                 .getItem(itemId, jellyfinApi.userId!!)
                 .content
-                .toFindroidEpisode(this@JellyfinRepositoryImpl, database)!!
+                .toFindroidEpisode(this@JellyfinRepositoryImpl, database)
+                ?: error("Episode $itemId could not be mapped from the server response")
         }
 
     override suspend fun getMovie(itemId: UUID): FindroidMovie =

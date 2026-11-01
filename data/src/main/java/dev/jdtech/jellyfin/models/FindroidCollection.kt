@@ -2,10 +2,14 @@ package dev.jdtech.jellyfin.models
 
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 
+@Serializable
+@SerialName("collection")
 data class FindroidCollection(
-    override val id: UUID,
+    @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
     override val originalTitle: String? = null,
     override val overview: String = "",

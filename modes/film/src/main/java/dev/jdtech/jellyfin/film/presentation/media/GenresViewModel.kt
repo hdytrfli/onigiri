@@ -4,21 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.models.GenreSection
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.repository.JellyfinRepository
-import java.util.UUID
+import dev.jdtech.jellyfin.swr.QueryKeys
+import dev.jdtech.jellyfin.swr.SwrStore
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.jellyfin.sdk.model.api.BaseItemKind
-
-data class GenreSection(
-    val id: UUID,
-    val name: String,
-    val items: List<FindroidItem>,
-)
 
 data class GenresState(
     val sections: List<GenreSection> = emptyList(),
@@ -27,56 +25,68 @@ data class GenresState(
 )
 
 @HiltViewModel
-class GenresViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class GenresViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val swrStore: SwrStore,
+) : ViewModel() {
     private val _state = MutableStateFlow(GenresState())
     val state = _state.asStateFlow()
 
-    private var loadedKind: MediaKind? = null
+    private val serializer = ListSerializer(GenreSection.serializer())
+    private var currentKind: MediaKind? = null
+    private var observeJob: Job? = null
 
-    fun load(kind: MediaKind, force: Boolean = false) {
-        if (loadedKind == kind && !force) return
-        if (_state.value.isLoading) return
-        // Switching between Movies and Shows must not show the other kind's sections while the
-        // new list loads.
-        if (loadedKind != null && loadedKind != kind) _state.value = GenresState()
-        loadedKind = kind
-        viewModelScope.launch(Dispatchers.IO) {
-            // Keep the current sections on screen while revalidating, so a pull-to-refresh or
-            // retry behaves like the other list pages instead of blanking the tab.
-            _state.emit(_state.value.copy(isLoading = true, error = null))
-            try {
-                val includeType =
-                    if (kind == MediaKind.Movies) BaseItemKind.MOVIE else BaseItemKind.SERIES
-                val genres = repository.getGenres(includeTypes = listOf(includeType))
-                val sections = genres.mapNotNull { genre ->
-                    val items =
-                        try {
-                            repository.getItems(
-                                includeTypes = listOf(includeType),
-                                recursive = true,
-                                sortBy = SortBy.NAME,
-                                genreIds = listOf(genre.id),
-                                limit = SECTION_LIMIT,
-                            )
-                        } catch (_: Exception) {
-                            emptyList()
-                        }
-                    if (items.isEmpty()) {
-                        null
-                    } else {
-                        GenreSection(id = genre.id, name = genre.name, items = items)
-                    }
+    /** Switches to [kind]'s cached row set and refreshes it only when it is stale. */
+    fun load(kind: MediaKind) {
+        val key = QueryKeys.genres(kind.name)
+        if (currentKind != kind) {
+            currentKind = kind
+            _state.value = GenresState()
+            observeJob?.cancel()
+            observeJob = viewModelScope.launch {
+                swrStore.observe(key, serializer).collect { entry ->
+                    _state.value =
+                        GenresState(
+                            sections = entry.data.orEmpty(),
+                            isLoading = entry.isRefreshing,
+                            error = entry.error as? Exception,
+                        )
                 }
-                _state.emit(_state.value.copy(sections = sections, isLoading = false))
-            } catch (e: Exception) {
-                _state.emit(_state.value.copy(isLoading = false, error = e))
             }
         }
+        swrStore.refresh(key, serializer) { fetchGenres(kind) }
     }
 
     fun retry(kind: MediaKind) {
-        load(kind, force = true)
+        swrStore.refresh(QueryKeys.genres(kind.name), serializer, force = true) {
+            fetchGenres(kind)
+        }
+    }
+
+    private suspend fun fetchGenres(kind: MediaKind): List<GenreSection> {
+        val includeType = if (kind == MediaKind.Movies) BaseItemKind.MOVIE else BaseItemKind.SERIES
+        val genres = repository.getGenres(includeTypes = listOf(includeType))
+        return genres.mapNotNull { genre ->
+            val items =
+                try {
+                    repository.getItems(
+                        includeTypes = listOf(includeType),
+                        recursive = true,
+                        sortBy = SortBy.NAME,
+                        genreIds = listOf(genre.id),
+                        limit = SECTION_LIMIT,
+                    )
+                } catch (_: Exception) {
+                    emptyList<FindroidItem>()
+                }
+            if (items.isEmpty()) {
+                null
+            } else {
+                GenreSection(id = genre.id, name = genre.name, items = items)
+            }
+        }
     }
 
     private companion object {

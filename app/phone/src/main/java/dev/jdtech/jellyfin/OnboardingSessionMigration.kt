@@ -34,6 +34,7 @@ constructor(
         runBlocking {
             database.deleteAllUsers()
             database.deleteAllServers()
+            database.clearQueryCache()
             appPreferences.setValue(appPreferences.currentServer, null)
             appPreferences.setValue(appPreferences.onboardingSessionCleared, true)
             jellyfinApi.api.update(accessToken = null)

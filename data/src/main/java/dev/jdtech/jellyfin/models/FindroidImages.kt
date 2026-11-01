@@ -3,16 +3,18 @@ package dev.jdtech.jellyfin.models
 import android.net.Uri
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.ImageType
 
+@Serializable
 data class FindroidImages(
-    val primary: Uri? = null,
-    val backdrop: Uri? = null,
-    val logo: Uri? = null,
-    val showPrimary: Uri? = null,
-    val showBackdrop: Uri? = null,
-    val showLogo: Uri? = null,
+    @Serializable(with = UriSerializer::class) val primary: Uri? = null,
+    @Serializable(with = UriSerializer::class) val backdrop: Uri? = null,
+    @Serializable(with = UriSerializer::class) val logo: Uri? = null,
+    @Serializable(with = UriSerializer::class) val showPrimary: Uri? = null,
+    @Serializable(with = UriSerializer::class) val showBackdrop: Uri? = null,
+    @Serializable(with = UriSerializer::class) val showLogo: Uri? = null,
     val primaryBlurHash: String? = null,
     val backdropBlurHash: String? = null,
 )

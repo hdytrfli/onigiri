@@ -146,6 +146,7 @@ class DownloaderImpl(
                     startImagesDownloader(show)
                     startImagesDownloader(season)
                 }
+                else -> Unit
             }
 
             val sourceDto = source.toFindroidSourceDto(item.id, path.path.orEmpty())
@@ -266,6 +267,7 @@ class DownloaderImpl(
                     }
                 }
             }
+            else -> Unit
         }
 
         database.deleteSource(source.id)
@@ -283,46 +285,47 @@ class DownloaderImpl(
         File(context.filesDir, "images/${item.id}").deleteRecursively()
     }
 
-    override suspend fun getProgress(downloadId: Long?): Pair<Int, Int> {
-        var downloadStatus = -1
-        var progress = -1
-        if (downloadId == null) {
-            return Pair(downloadStatus, progress)
-        }
-        val query = DownloadManager.Query().setFilterById(downloadId)
-        downloadManager.query(query).use { cursor ->
-            if (cursor.moveToFirst()) {
-                downloadStatus =
-                    cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-                when (downloadStatus) {
-                    DownloadManager.STATUS_RUNNING -> {
-                        val totalBytes =
-                            cursor.getLong(
-                                cursor.getColumnIndexOrThrow(
-                                    DownloadManager.COLUMN_TOTAL_SIZE_BYTES
-                                )
-                            )
-                        if (totalBytes > 0) {
-                            val downloadedBytes =
+    override suspend fun getProgress(downloadId: Long?): Pair<Int, Int> =
+        withContext(Dispatchers.IO) {
+            var downloadStatus = -1
+            var progress = -1
+            if (downloadId == null) {
+                return@withContext Pair(downloadStatus, progress)
+            }
+            val query = DownloadManager.Query().setFilterById(downloadId)
+            downloadManager.query(query).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    downloadStatus =
+                        cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                    when (downloadStatus) {
+                        DownloadManager.STATUS_RUNNING -> {
+                            val totalBytes =
                                 cursor.getLong(
                                     cursor.getColumnIndexOrThrow(
-                                        DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR
+                                        DownloadManager.COLUMN_TOTAL_SIZE_BYTES
                                     )
                                 )
-                            progress = downloadedBytes.times(100).div(totalBytes).toInt()
+                            if (totalBytes > 0) {
+                                val downloadedBytes =
+                                    cursor.getLong(
+                                        cursor.getColumnIndexOrThrow(
+                                            DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR
+                                        )
+                                    )
+                                progress = downloadedBytes.times(100).div(totalBytes).toInt()
+                            }
+                        }
+
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            progress = 100
                         }
                     }
-
-                    DownloadManager.STATUS_SUCCESSFUL -> {
-                        progress = 100
-                    }
+                } else {
+                    downloadStatus = DownloadManager.STATUS_FAILED
                 }
-            } else {
-                downloadStatus = DownloadManager.STATUS_FAILED
             }
+            Pair(downloadStatus, progress)
         }
-        return Pair(downloadStatus, progress)
-    }
 
     private suspend fun downloadExternalMediaStreams(
         item: FindroidItem,

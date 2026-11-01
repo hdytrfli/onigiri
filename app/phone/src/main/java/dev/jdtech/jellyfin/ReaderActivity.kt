@@ -23,8 +23,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import dev.jdtech.jellyfin.api.JellyfinApi
 import dev.jdtech.jellyfin.databinding.ActivityReaderBinding
+import dev.jdtech.jellyfin.models.FindroidBook
+import dev.jdtech.jellyfin.models.FindroidSourceType
 import dev.jdtech.jellyfin.presentation.reader.ReaderChapter
 import dev.jdtech.jellyfin.presentation.reader.ReaderOverlay
 import dev.jdtech.jellyfin.presentation.reader.ReaderSettings
@@ -91,8 +92,6 @@ import timber.log.Timber
 class ReaderActivity : AppCompatActivity() {
 
     @Inject lateinit var appPreferences: AppPreferences
-
-    @Inject lateinit var jellyfinApi: JellyfinApi
 
     @Inject lateinit var repository: JellyfinRepository
 
@@ -440,14 +439,24 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private suspend fun downloadBook(id: UUID): File {
+        // Prefer the downloaded copy so the reader works offline and does not fetch the whole
+        // book again just to open it.
+        val downloaded =
+            (repository.getItem(id) as? FindroidBook)
+                ?.sources
+                ?.firstOrNull {
+                    it.type == FindroidSourceType.LOCAL && !it.path.endsWith(".download")
+                }
+                ?.let { File(it.path) }
+                ?.takeIf { it.exists() && it.length() > 0 }
+        if (downloaded != null) return downloaded
+
         val file = File(cacheDir, "books/$id")
         if (file.exists() && file.length() > 0) return file
 
         file.parentFile?.mkdirs()
-
-        // Let the SDK make the request: it authenticates exactly like every other API call.
-        val bytes = jellyfinApi.libraryApi.getDownload(id).content
-        if (bytes.isEmpty()) throw IOException("Empty response")
+        val bytes = repository.getDownload(id)
+        if (bytes.isEmpty()) throw IOException("No downloaded copy is available")
         file.writeBytes(bytes)
         return file
     }

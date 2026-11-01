@@ -3,13 +3,17 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.DateTime
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.LocationType
 import org.jellyfin.sdk.model.api.PlayAccess
 
+@Serializable
+@SerialName("episode")
 data class FindroidEpisode(
-    override val id: UUID,
+    @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
     override val originalTitle: String?,
     override val overview: String,
@@ -23,10 +27,10 @@ data class FindroidEpisode(
     override val canDownload: Boolean,
     override val runtimeTicks: Long,
     override val playbackPositionTicks: Long,
-    val premiereDate: DateTime?,
-    val seriesId: UUID,
+    @Serializable(with = LocalDateTimeSerializer::class) val premiereDate: DateTime?,
+    @Serializable(with = UuidSerializer::class) val seriesId: UUID,
     val seriesName: String,
-    val seasonId: UUID,
+    @Serializable(with = UuidSerializer::class) val seasonId: UUID,
     val seasonName: String?,
     val communityRating: Float?,
     val people: List<FindroidItemPerson>,

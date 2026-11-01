@@ -5,13 +5,18 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
+import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.swr.QueryKeys
+import dev.jdtech.jellyfin.swr.SwrStore
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 
 @HiltViewModel
 class FavoritesViewModel
@@ -19,39 +24,40 @@ class FavoritesViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
+    private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
 
-    /** Loads once per ViewModel; pull-to-refresh calls [loadItems] directly. */
-    fun loadItemsIfNeeded() {
-        if (_state.value.items.isEmpty() && !_state.value.isLoading) {
-            loadItems()
-        }
-    }
+    private val key = QueryKeys.Favorites
+    private val serializer = ListSerializer(FindroidItem.serializer())
 
-    fun loadItems() {
+    init {
         viewModelScope.launch {
-            _state.emit(_state.value.copy(isLoading = true, error = null))
-
-            try {
-                val items = repository.getFavoriteItems()
-
-                _state.emit(
-                    _state.value.copy(
-                        isLoading = false,
+            swrStore.observe(key, serializer).collect { entry ->
+                val items = entry.data.orEmpty()
+                _state.value =
+                    CollectionState(
                         items = items,
                         sections = mediaSections(items),
                         displayFields =
                             ListDisplayField.fromKeys(
                                 appPreferences.getValue(appPreferences.listDisplayFields)
                             ),
+                        isLoading = entry.isRefreshing,
+                        error = entry.error as? Exception,
                     )
-                )
-            } catch (e: Exception) {
-                _state.emit(_state.value.copy(isLoading = false, error = e))
             }
         }
+    }
+
+    /** Entry load: uses the cached list and refreshes only when it is stale or absent. */
+    fun loadItemsIfNeeded() {
+        swrStore.refresh(key, serializer) { repository.getFavoriteItems() }
+    }
+
+    fun loadItems() {
+        swrStore.refresh(key, serializer, force = true) { repository.getFavoriteItems() }
     }
 
     /** Flips [field] in the shared list display preference every list page reads. */

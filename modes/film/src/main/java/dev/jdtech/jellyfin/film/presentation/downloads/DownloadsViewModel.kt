@@ -12,6 +12,8 @@ import dev.jdtech.jellyfin.models.isDownloading
 import dev.jdtech.jellyfin.models.mediaSections
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
+import dev.jdtech.jellyfin.swr.QueryKeys
+import dev.jdtech.jellyfin.swr.SwrStore
 import dev.jdtech.jellyfin.utils.Downloader
 import java.util.UUID
 import javax.inject.Inject
@@ -19,7 +21,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 
 @HiltViewModel
 class DownloadsViewModel
@@ -28,41 +32,42 @@ constructor(
     private val repository: JellyfinRepository,
     private val downloader: Downloader,
     private val appPreferences: AppPreferences,
+    private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
 
     private var progressJob: Job? = null
+    private val key = QueryKeys.Downloads
+    private val serializer = ListSerializer(FindroidItem.serializer())
 
-    /** Loads once per ViewModel; pull-to-refresh and download completion call [loadItems]. */
-    fun loadItemsIfNeeded() {
-        if (_state.value.items.isEmpty() && !_state.value.isLoading) {
-            loadItems()
-        }
-    }
-
-    fun loadItems() {
+    init {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
-            try {
-                val items = repository.getDownloads()
-
+            swrStore.observe(key, serializer).collect { entry ->
+                val items = entry.data.orEmpty()
                 _state.value =
                     _state.value.copy(
-                        isLoading = false,
                         items = items,
                         sections = mediaSections(items),
                         displayFields =
                             ListDisplayField.fromKeys(
                                 appPreferences.getValue(appPreferences.listDisplayFields)
                             ),
+                        isLoading = entry.isRefreshing,
+                        error = entry.error as? Exception,
                     )
                 startProgressPolling(items)
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = e)
             }
         }
+    }
+
+    /** Entry load: uses the cached list and refreshes only when it is stale or absent. */
+    fun loadItemsIfNeeded() {
+        swrStore.refresh(key, serializer) { repository.getDownloads() }
+    }
+
+    fun loadItems() {
+        swrStore.refresh(key, serializer, force = true) { repository.getDownloads() }
     }
 
     /** Flips [field] in the shared list display preference every list page reads. */

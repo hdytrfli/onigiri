@@ -3,12 +3,16 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.DateTime
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.PlayAccess
 
+@Serializable
+@SerialName("show")
 data class FindroidShow(
-    override val id: UUID,
+    @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
     override val originalTitle: String?,
     override val overview: String,
@@ -27,7 +31,7 @@ data class FindroidShow(
     val officialRating: String?,
     val status: String,
     val productionYear: Int?,
-    val endDate: DateTime?,
+    @Serializable(with = LocalDateTimeSerializer::class) val endDate: DateTime?,
     val trailer: String?,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter> = emptyList(),

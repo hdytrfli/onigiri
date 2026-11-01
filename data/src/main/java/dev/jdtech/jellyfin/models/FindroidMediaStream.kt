@@ -1,10 +1,12 @@
 package dev.jdtech.jellyfin.models
 
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.MediaStream
 import org.jellyfin.sdk.model.api.MediaStreamType
 import org.jellyfin.sdk.model.api.VideoRangeType
 
+@Serializable
 data class FindroidMediaStream(
     val index: Int,
     val mediaSourceId: String,

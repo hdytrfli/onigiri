@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
@@ -39,8 +37,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.core.presentation.theme.OnScrim
-import dev.jdtech.jellyfin.core.presentation.theme.ScrimMedium
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidBoxSet
@@ -53,6 +49,9 @@ import dev.jdtech.jellyfin.models.FindroidSeason
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.navigation.navigateOrReuse
 import dev.jdtech.jellyfin.navigation.resumedAction
+import dev.jdtech.jellyfin.presentation.components.AppSnackbarHost
+import dev.jdtech.jellyfin.presentation.components.AppSnackbarTone
+import dev.jdtech.jellyfin.presentation.components.showAppSnackbar
 import dev.jdtech.jellyfin.presentation.film.BookDetailScreen
 import dev.jdtech.jellyfin.presentation.film.BooksScreen
 import dev.jdtech.jellyfin.presentation.film.CollectionScreen
@@ -86,7 +85,9 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
 import dev.jdtech.jellyfin.settings.R as SettingsR
+import dev.jdtech.jellyfin.swr.SwrStore
 import java.util.UUID
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ImageType
 
@@ -140,6 +141,7 @@ fun NavigationRoot(
     hasCurrentUser: Boolean,
     onboardingComplete: Boolean,
     profileLoggedOut: Boolean,
+    swrStore: SwrStore,
     confirmExit: Boolean = false,
 ) {
     val setupComplete = onboardingComplete && hasServers && hasCurrentServer && hasCurrentUser
@@ -205,6 +207,7 @@ fun NavigationRoot(
             isOfflineMode = LocalOfflineMode.current,
             searchExpanded = searchExpanded,
             confirmExit = confirmExit,
+            swrStore = swrStore,
         )
     } else {
         SetupNavigation(
@@ -224,11 +227,33 @@ private fun MainNavigation(
     isOfflineMode: Boolean,
     searchExpanded: MutableState<Boolean>,
     confirmExit: Boolean,
+    swrStore: SwrStore,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var exitPending by remember { mutableStateOf(false) }
+
+    LaunchedEffect(swrStore) {
+        swrStore.failures.collect { failure ->
+            val messageRes =
+                when {
+                    failure.isOffline && failure.hasData -> R.string.swr_offline_cached
+                    failure.isOffline -> R.string.swr_offline_no_data
+                    else -> R.string.swr_refresh_failed
+                }
+            snackbarHostState.showAppSnackbar(
+                message = context.getString(messageRes),
+                duration = SnackbarDuration.Short,
+                tone =
+                    if (failure.isOffline) {
+                        AppSnackbarTone.Offline
+                    } else {
+                        AppSnackbarTone.Error
+                    },
+            )
+        }
+    }
 
     val tabRoutes = listOf(homeTab, moviesTab, showsTab, booksTab, settingsTab).map { it.route }
 
@@ -244,7 +269,7 @@ private fun MainNavigation(
         } else {
             exitPending = true
             scope.launch {
-                snackbarHostState.showSnackbar(
+                snackbarHostState.showAppSnackbar(
                     message = context.getString(SettingsR.string.back_again_to_close),
                     duration = SnackbarDuration.Short,
                 )
@@ -263,13 +288,11 @@ private fun MainNavigation(
     }
 
     val tabReselect = remember { TabReselect() }
-    val genreItemsCache = remember { GenreItemsCache() }
 
     val entryProvider = entryProvider {
         mainEntries(
             navigator = navigator,
             tabReselect = tabReselect,
-            genreItemsCache = genreItemsCache,
             onSearchClick = {
                 searchExpanded.value = true
                 navigator.navigate(MediaRoute)
@@ -340,22 +363,16 @@ private fun MainNavigation(
                     suiteType = suiteType,
                 )
             }
-            // Keep the snackbar above the bottom navigation bar, otherwise its translucent
-            // background reveals the (light) navigation bar behind it.
-            SnackbarHost(
+            AppSnackbarHost(
                 hostState = snackbarHostState,
                 modifier =
                     Modifier.align(Alignment.BottomCenter)
                         .padding(
-                            bottom = MaterialTheme.spacings.medium + LocalSuiteBottomInset.current
+                            start = MaterialTheme.spacings.gutter,
+                            end = MaterialTheme.spacings.gutter,
+                            bottom = MaterialTheme.spacings.medium + LocalSuiteBottomInset.current,
                         ),
-            ) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = ScrimMedium,
-                    contentColor = OnScrim,
-                )
-            }
+            )
         }
     }
 }
@@ -381,7 +398,6 @@ private fun SetupNavigation(
 private fun EntryProviderScope<NavKey>.mainEntries(
     navigator: Navigator,
     tabReselect: TabReselect,
-    genreItemsCache: GenreItemsCache,
     onSearchClick: () -> Unit,
     searchExpanded: MutableState<Boolean>,
 ) {
@@ -440,7 +456,6 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             genreId = UUID.fromString(key.genreId),
             genreName = key.genreName,
             libraryType = if (key.movies) CollectionType.Movies else CollectionType.TvShows,
-            genreItemsCache = genreItemsCache,
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )

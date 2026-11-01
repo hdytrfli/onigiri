@@ -96,28 +96,25 @@ class DownloaderViewModel @Inject constructor(private val downloader: Downloader
 
     private fun pollDownloadProgress(downloadId: Long?) {
         handler.removeCallbacksAndMessages(null)
-        val downloadProgressRunnable =
-            object : Runnable {
-                override fun run() {
-                    viewModelScope.launch {
-                        val (status, progress) = downloader.getProgress(downloadId)
-                        _state.emit(
-                            DownloaderState(
-                                status = status,
-                                progress = progress.coerceAtLeast(0) / 100f,
-                            )
-                        )
-                    }
+        lateinit var downloadProgressRunnable: Runnable
+        downloadProgressRunnable = Runnable {
+            viewModelScope.launch {
+                val (status, progress) = downloader.getProgress(downloadId)
+                val state =
+                    DownloaderState(
+                        status = status,
+                        progress = progress.coerceAtLeast(0) / 100f,
+                    )
+                _state.emit(state)
 
-                    if (_state.value.status == DownloadManager.STATUS_SUCCESSFUL) {
-                        eventsChannel.trySend(DownloaderEvent.Successful)
-                    }
-
-                    if (_state.value.isDownloading) {
-                        handler.postDelayed(this, 1000L)
-                    }
+                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    eventsChannel.send(DownloaderEvent.Successful)
+                }
+                if (state.isDownloading) {
+                    handler.postDelayed(downloadProgressRunnable, 1000L)
                 }
             }
+        }
         handler.post(downloadProgressRunnable)
     }
 

@@ -1,5 +1,10 @@
 package dev.jdtech.jellyfin.models
 
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
-data class FindroidGenre(val id: UUID, val name: String)
+@Serializable
+data class FindroidGenre(
+    @Serializable(with = UuidSerializer::class) val id: UUID,
+    val name: String,
+)

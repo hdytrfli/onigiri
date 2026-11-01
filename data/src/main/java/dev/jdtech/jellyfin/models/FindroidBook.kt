@@ -3,6 +3,8 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.MediaType
 import org.jellyfin.sdk.model.api.PlayAccess
@@ -11,8 +13,10 @@ import org.jellyfin.sdk.model.api.PlayAccess
  * A Jellyfin book rendered in the in-app reader. Only publication formats Readium can open are
  * mapped (EPUB, PDF, CBZ); audiobooks are a different item kind and are never mapped here.
  */
+@Serializable
+@SerialName("book")
 data class FindroidBook(
-    override val id: UUID,
+    @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
     override val originalTitle: String?,
     override val overview: String,
@@ -29,6 +33,7 @@ data class FindroidBook(
     /** Audiobooks are listed with the books but the reader cannot play them yet. */
     val isAudiobook: Boolean = false,
     val productionYear: Int? = null,
+    @Serializable(with = LocalDateTimeSerializer::class)
     val premiereDate: java.time.LocalDateTime? = null,
     val genres: List<String> = emptyList(),
     val studios: List<String> = emptyList(),

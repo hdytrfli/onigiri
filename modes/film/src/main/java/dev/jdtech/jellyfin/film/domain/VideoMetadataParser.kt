@@ -89,21 +89,14 @@ object VideoMetadataParser {
                                 else -> null
                             }?.let { displayProfiles.add(it) }
 
-                            /**
-                             * Force stream [org.jellyfin.sdk.model.api.MediaStream.height] and
-                             * [org.jellyfin.sdk.model.api.MediaStream.width] as not null since we
-                             * are inside [MediaStreamType.VIDEO] block
-                             */
+                            // Video streams normally carry both dimensions, but some servers omit
+                            // them; never let a missing field crash the detail page.
+                            val streamHeight = height ?: 0
+                            val streamWidth = width ?: 0
                             resolution.add(
                                 when {
-                                    height!! <= 1080 && width!! <= 1920 -> {
-                                        Resolution.HD
-                                    }
-
-                                    height!! <= 2160 && width!! <= 3840 -> {
-                                        Resolution.UHD
-                                    }
-
+                                    streamHeight >= 2160 || streamWidth >= 3840 -> Resolution.UHD
+                                    streamHeight >= 720 || streamWidth >= 1280 -> Resolution.HD
                                     else -> Resolution.SD
                                 }
                             )

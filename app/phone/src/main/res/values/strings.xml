@@ -165,4 +165,7 @@
     <string name="about_jellyfin">Jellyfin</string>
     <string name="about_open_link">Open link</string>
     <string name="about_fork_note">Findroid+ is an independent fork of Findroid. Licensed under GPLv3.</string>
+    <string name="swr_refresh_failed">Couldn\'t refresh. Showing cached data.</string>
+    <string name="swr_offline_cached">Offline. Showing cached data.</string>
+    <string name="swr_offline_no_data">Offline, and there is no cached data yet.</string>
 </resources>

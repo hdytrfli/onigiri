@@ -3,10 +3,12 @@ package dev.jdtech.jellyfin.models
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 
-interface FindroidItem {
+@Serializable
+sealed interface FindroidItem {
     val id: UUID
     val name: String
     val originalTitle: String?

@@ -45,6 +45,7 @@ fun ItemPoster(item: FindroidItem, direction: Direction, modifier: Modifier = Mo
                     // Jellyfin does not attach a blur hash for the series primary image.
                     blurHash = null
                 }
+                else -> Unit
             }
         }
     }

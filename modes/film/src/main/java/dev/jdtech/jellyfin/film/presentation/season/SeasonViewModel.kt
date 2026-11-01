@@ -4,16 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.swr.SwrStore
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.api.ItemFields
 
 @HiltViewModel
-class SeasonViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class SeasonViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val swrStore: SwrStore,
+) : ViewModel() {
     private val _state = MutableStateFlow(SeasonState())
     val state = _state.asStateFlow()
 
@@ -22,6 +28,7 @@ class SeasonViewModel @Inject constructor(private val repository: JellyfinReposi
     fun loadSeason(seasonId: UUID) {
         this.seasonId = seasonId
         viewModelScope.launch {
+            _state.emit(_state.value.copy(error = null))
             try {
                 val season = repository.getSeason(seasonId)
                 val episodes =
@@ -36,6 +43,8 @@ class SeasonViewModel @Inject constructor(private val repository: JellyfinReposi
                         episodes = episodes,
                     )
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
             }
@@ -44,31 +53,19 @@ class SeasonViewModel @Inject constructor(private val repository: JellyfinReposi
 
     fun onAction(action: SeasonAction) {
         when (action) {
-            is SeasonAction.MarkAsPlayed -> {
-                viewModelScope.launch {
-                    repository.markAsPlayed(seasonId)
-                    loadSeason(seasonId)
-                }
-            }
-            is SeasonAction.UnmarkAsPlayed -> {
-                viewModelScope.launch {
-                    repository.markAsUnplayed(seasonId)
-                    loadSeason(seasonId)
-                }
-            }
-            is SeasonAction.MarkAsFavorite -> {
-                viewModelScope.launch {
-                    repository.markAsFavorite(seasonId)
-                    loadSeason(seasonId)
-                }
-            }
-            is SeasonAction.UnmarkAsFavorite -> {
-                viewModelScope.launch {
-                    repository.unmarkAsFavorite(seasonId)
-                    loadSeason(seasonId)
-                }
-            }
+            is SeasonAction.MarkAsPlayed -> mutate { repository.markAsPlayed(seasonId) }
+            is SeasonAction.UnmarkAsPlayed -> mutate { repository.markAsUnplayed(seasonId) }
+            is SeasonAction.MarkAsFavorite -> mutate { repository.markAsFavorite(seasonId) }
+            is SeasonAction.UnmarkAsFavorite -> mutate { repository.unmarkAsFavorite(seasonId) }
             else -> Unit
+        }
+    }
+
+    private fun mutate(block: suspend () -> Unit) {
+        viewModelScope.launch {
+            block()
+            swrStore.invalidateMediaLists()
+            loadSeason(seasonId)
         }
     }
 }

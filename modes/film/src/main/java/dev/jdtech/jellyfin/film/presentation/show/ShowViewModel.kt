@@ -7,8 +7,10 @@ import dev.jdtech.jellyfin.models.FindroidEpisode
 import dev.jdtech.jellyfin.models.FindroidItemPerson
 import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.swr.SwrStore
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,12 @@ import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.api.PersonKind
 
 @HiltViewModel
-class ShowViewModel @Inject constructor(private val repository: JellyfinRepository) : ViewModel() {
+class ShowViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val swrStore: SwrStore,
+) : ViewModel() {
     private val _state = MutableStateFlow(ShowState())
     val state = _state.asStateFlow()
 
@@ -26,6 +33,7 @@ class ShowViewModel @Inject constructor(private val repository: JellyfinReposito
     fun loadShow(showId: UUID) {
         this.showId = showId
         viewModelScope.launch {
+            _state.emit(_state.value.copy(error = null))
             try {
                 val show = repository.getShow(showId)
                 val nextUp = getNextUp(showId)
@@ -43,6 +51,8 @@ class ShowViewModel @Inject constructor(private val repository: JellyfinReposito
                         writers = writers,
                     )
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
             }
@@ -74,31 +84,19 @@ class ShowViewModel @Inject constructor(private val repository: JellyfinReposito
 
     fun onAction(action: ShowAction) {
         when (action) {
-            is ShowAction.MarkAsPlayed -> {
-                viewModelScope.launch {
-                    repository.markAsPlayed(showId)
-                    loadShow(showId)
-                }
-            }
-            is ShowAction.UnmarkAsPlayed -> {
-                viewModelScope.launch {
-                    repository.markAsUnplayed(showId)
-                    loadShow(showId)
-                }
-            }
-            is ShowAction.MarkAsFavorite -> {
-                viewModelScope.launch {
-                    repository.markAsFavorite(showId)
-                    loadShow(showId)
-                }
-            }
-            is ShowAction.UnmarkAsFavorite -> {
-                viewModelScope.launch {
-                    repository.unmarkAsFavorite(showId)
-                    loadShow(showId)
-                }
-            }
+            is ShowAction.MarkAsPlayed -> mutate { repository.markAsPlayed(showId) }
+            is ShowAction.UnmarkAsPlayed -> mutate { repository.markAsUnplayed(showId) }
+            is ShowAction.MarkAsFavorite -> mutate { repository.markAsFavorite(showId) }
+            is ShowAction.UnmarkAsFavorite -> mutate { repository.unmarkAsFavorite(showId) }
             else -> Unit
+        }
+    }
+
+    private fun mutate(block: suspend () -> Unit) {
+        viewModelScope.launch {
+            block()
+            swrStore.invalidateMediaLists()
+            loadShow(showId)
         }
     }
 }

@@ -45,6 +45,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.jellyfin.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.material)
     implementation(libs.okhttp)
     implementation(libs.timber)

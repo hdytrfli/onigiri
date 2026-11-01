@@ -4,11 +4,15 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.PlayAccess
 
+@Serializable
+@SerialName("movie")
 data class FindroidMovie(
-    override val id: UUID,
+    @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
     override val originalTitle: String?,
     override val overview: String,
@@ -19,14 +23,14 @@ data class FindroidMovie(
     override val canDownload: Boolean,
     override val runtimeTicks: Long,
     override val playbackPositionTicks: Long,
-    val premiereDate: LocalDateTime?,
+    @Serializable(with = LocalDateTimeSerializer::class) val premiereDate: LocalDateTime?,
     val people: List<FindroidItemPerson>,
     val genres: List<String>,
     val communityRating: Float?,
     val officialRating: String?,
     val status: String,
     val productionYear: Int?,
-    val endDate: LocalDateTime?,
+    @Serializable(with = LocalDateTimeSerializer::class) val endDate: LocalDateTime?,
     val trailer: String?,
     override val unplayedItemCount: Int? = null,
     override val images: FindroidImages,
