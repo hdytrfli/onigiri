@@ -37,7 +37,6 @@ import dev.jdtech.jellyfin.presentation.utils.LocalTitleImageConfig
 import dev.jdtech.jellyfin.presentation.utils.TitleImageConfig
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.swr.SwrStore
-import dev.jdtech.jellyfin.utils.restart
 import dev.jdtech.jellyfin.viewmodels.MainViewModel
 import javax.inject.Inject
 
@@ -102,9 +101,6 @@ class MainActivity : AppCompatActivity() {
                             LocalSetOfflineMode provides
                                 { enabled ->
                                     viewModel.setOfflineMode(enabled)
-                                    // Same behaviour as the settings switch: relaunch the task so
-                                    // the repository bindings are injected for the new mode.
-                                    restart()
                                 },
                             LocalBlurHash provides state.blurHash,
                             LocalPredictiveBack provides state.predictiveBack,

@@ -1351,11 +1351,6 @@ constructor(
                             nameStringResource = R.string.offline_mode,
                             descriptionStringRes = R.string.offline_mode_summary,
                             iconDrawableId = R.drawable.ic_cloud_off,
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(SettingsEvent.RestartActivity)
-                                }
-                            },
                             backendPreference = appPreferences.offlineMode,
                         ),
                         PreferenceAction(

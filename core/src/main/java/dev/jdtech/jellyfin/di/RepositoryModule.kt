@@ -10,6 +10,7 @@ import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.repository.JellyfinRepository
 import dev.jdtech.jellyfin.repository.JellyfinRepositoryImpl
 import dev.jdtech.jellyfin.repository.JellyfinRepositoryOfflineImpl
+import dev.jdtech.jellyfin.repository.RoutingJellyfinRepository
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import javax.inject.Singleton
 
@@ -51,9 +52,10 @@ object RepositoryModule {
         jellyfinRepositoryOfflineImpl: JellyfinRepositoryOfflineImpl,
         appPreferences: AppPreferences,
     ): JellyfinRepository {
-        return when (appPreferences.getValue(appPreferences.offlineMode)) {
-            true -> jellyfinRepositoryOfflineImpl
-            false -> jellyfinRepositoryImpl
-        }
+        return RoutingJellyfinRepository(
+            online = jellyfinRepositoryImpl,
+            offline = jellyfinRepositoryOfflineImpl,
+            appPreferences = appPreferences,
+        )
     }
 }

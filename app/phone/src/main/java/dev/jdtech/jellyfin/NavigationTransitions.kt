@@ -3,6 +3,7 @@ package dev.jdtech.jellyfin
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,19 +13,26 @@ import androidx.compose.animation.togetherWith
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 
-// Material's fade-through, the motion Mihon uses when switching tabs: the leaving screen fades out
-// over the first 30% of the duration while the entering one fades in over the rest, so the two are
-// never both half-transparent — which is what made the old cross-fade feel muddy.
-private const val TAB_TRANSITION_FADE_OUT_MS = 60
-private const val TAB_TRANSITION_FADE_IN_MS = 140
+// A gentle fade-through, timed to feel like the page transition: the leaving screen clears first,
+// then the entering one fades in with the same easing. The two are never both half-transparent,
+// which is what made the old quick cross-fade feel muddy and jagged.
+private const val TAB_TRANSITION_FADE_OUT_MS = 120
+private const val TAB_TRANSITION_FADE_IN_MS = 300
 
 internal val TAB_TRANSITION_SPEC =
     fadeIn(
         tween(
             durationMillis = TAB_TRANSITION_FADE_IN_MS,
             delayMillis = TAB_TRANSITION_FADE_OUT_MS,
+            easing = FastOutSlowInEasing,
         )
-    ) togetherWith fadeOut(tween(durationMillis = TAB_TRANSITION_FADE_OUT_MS))
+    ) togetherWith
+        fadeOut(
+            tween(
+                durationMillis = TAB_TRANSITION_FADE_OUT_MS,
+                easing = FastOutSlowInEasing,
+            )
+        )
 
 // Pages slide in from 5% of their width to their place with a fade: a single-axis move, no
 // scaling, so the content keeps its size and only the horizontal offset changes. Symmetric, so

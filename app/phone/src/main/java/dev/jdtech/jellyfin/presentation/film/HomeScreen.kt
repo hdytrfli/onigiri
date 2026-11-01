@@ -54,12 +54,10 @@ import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
 import dev.jdtech.jellyfin.presentation.film.components.HomeView
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
-import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.film.components.Section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
-import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.flow.filter
 
@@ -212,11 +210,6 @@ private fun HomeScreenLayout(
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
     val contentPaddingTop = LocalRootPageContentInset.current
-
-    if (LocalOfflineMode.current) {
-        OfflineNotice()
-        return
-    }
 
     if (state.error != null && state.suggestionsSection == null && state.views.isEmpty()) {
         FullPageError(
