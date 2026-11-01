@@ -6,18 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object OnboardingRoute : NavKey
 
-@Serializable data object WelcomeRoute : NavKey
-
-@Serializable data object ServersRoute : NavKey
-
-@Serializable data object AddServerRoute : NavKey
-
-@Serializable data class ServerAddressesRoute(val serverId: String) : NavKey
-
-@Serializable data object UsersRoute : NavKey
-
-@Serializable data class LoginRoute(val username: String? = null) : NavKey
-
 @Serializable data object HomeRoute : NavKey
 
 @Serializable data object MoviesRoute : NavKey

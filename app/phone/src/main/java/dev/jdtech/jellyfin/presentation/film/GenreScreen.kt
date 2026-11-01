@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.jdtech.jellyfin.GenreItemsCache
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.film.presentation.library.LibraryAction
 import dev.jdtech.jellyfin.film.presentation.library.LibraryViewModel
@@ -36,11 +37,13 @@ fun GenreScreen(
     genreId: UUID,
     genreName: String,
     libraryType: CollectionType,
+    genreItemsCache: GenreItemsCache,
     onItemClick: (FindroidItem) -> Unit,
     navigateBack: () -> Unit,
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val cacheKey = GenreItemsCache.Key(genreId, libraryType)
     var showSortDialog by rememberSaveable { mutableStateOf(false) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -50,7 +53,17 @@ fun GenreScreen(
             libraryType = libraryType,
             genreIds = listOf(genreId),
         )
-        viewModel.loadItems()
+        // Genre entries are popped on back, so seed the fresh ViewModel with the last known list.
+        // The load below revalidates it in place.
+        viewModel.loadItems(cachedItems = genreItemsCache.get(cacheKey).orEmpty())
+    }
+
+    // Keep the full, unfiltered list as the stale snapshot. Search results and in-flight loads
+    // must not replace it.
+    LaunchedEffect(state.items, state.isLoading, state.searchExpanded, state.searchQuery) {
+        if (!state.isLoading && !state.searchExpanded && state.searchQuery.isBlank()) {
+            genreItemsCache.put(cacheKey, state.items)
+        }
     }
 
     BackHandler(enabled = state.searchExpanded) {

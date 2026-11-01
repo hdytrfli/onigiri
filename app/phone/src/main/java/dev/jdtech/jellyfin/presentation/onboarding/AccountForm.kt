@@ -29,7 +29,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppTextField
-import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
+import dev.jdtech.jellyfin.presentation.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @Composable

@@ -68,7 +68,6 @@ fun HomeScreen(
     onBooksClick: (audiobooks: Boolean) -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onManageServers: () -> Unit,
     onItemClick: (item: FindroidItem) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -108,7 +107,6 @@ fun HomeScreen(
             is HomeAction.OnLibraryClick -> onLibraryClick(action.library)
             is HomeAction.OnSearchClick -> onSearchClick()
             is HomeAction.OnSettingsClick -> onSettingsClick()
-            is HomeAction.OnManageServers -> onManageServers()
             else -> Unit
         }
         viewModel.onAction(action)

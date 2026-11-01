@@ -5,10 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +31,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -86,12 +83,6 @@ import dev.jdtech.jellyfin.presentation.settings.SettingsFileEditScreen
 import dev.jdtech.jellyfin.presentation.settings.SettingsProfileHeader
 import dev.jdtech.jellyfin.presentation.settings.SettingsScreen
 import dev.jdtech.jellyfin.presentation.settings.SubtitleFontScreen
-import dev.jdtech.jellyfin.presentation.setup.addresses.ServerAddressesScreen
-import dev.jdtech.jellyfin.presentation.setup.addserver.AddServerScreen
-import dev.jdtech.jellyfin.presentation.setup.login.LoginScreen
-import dev.jdtech.jellyfin.presentation.setup.servers.ServersScreen
-import dev.jdtech.jellyfin.presentation.setup.users.UsersScreen
-import dev.jdtech.jellyfin.presentation.setup.welcome.WelcomeScreen
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.LocalPredictiveBack
@@ -104,7 +95,6 @@ private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
 
 private val TOP_LEVEL_ROUTES =
     setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, SETTINGS_ROOT_ROUTE)
-private val GLOBAL_TRANSITION_SPEC = fadeIn(tween(300)) togetherWith fadeOut(tween(300))
 
 data class TabBarItem(
     @param:StringRes val title: Int,
@@ -195,21 +185,17 @@ fun NavigationRoot(
     // nav3 caches per back stack snapshot, always read the current value.
     val searchExpanded = remember { mutableStateOf(false) }
 
-    // Live setup condition: keep the back stacks in a consistent state across mode switches. The
-    // stacks are reconciled during composition (rather than in a LaunchedEffect, which only runs
-    // after the first frame has been composed) so the first frame of the new mode already shows
-    // the right screen.
+    // Keep the back stacks consistent across mode switches. Reconcile during composition, not in
+    // a LaunchedEffect, so the first frame of the new mode already shows the right screen.
     val appliedSetupMode = remember { AppliedSetupMode(mainMode) }
-    if (appliedSetupMode.setupComplete != mainMode) {
+    if (appliedSetupMode.mainMode != mainMode) {
         if (mainMode) {
-            // Setup completed: discard the setup flow and land on Home.
             if (!loggedOutProfileSelection) navigator.navigateHome()
         } else {
-            // Setup became incomplete: restart the setup flow at the appropriate screen.
             setupBackStack.clear()
             setupBackStack.add(setupStartRoute)
         }
-        appliedSetupMode.setupComplete = mainMode
+        appliedSetupMode.mainMode = mainMode
     }
 
     if (mainMode) {
@@ -229,11 +215,7 @@ fun NavigationRoot(
     }
 }
 
-/**
- * Remembers the setup mode that the back stacks were last reconciled for. Deliberately not
- * observable state: it is written during composition, which must not schedule recompositions.
- */
-private class AppliedSetupMode(var setupComplete: Boolean)
+private class AppliedSetupMode(var mainMode: Boolean)
 
 @Composable
 private fun MainNavigation(
@@ -282,11 +264,13 @@ private fun MainNavigation(
     }
 
     val tabReselect = remember { TabReselect() }
+    val genreItemsCache = remember { GenreItemsCache() }
 
     val entryProvider = entryProvider {
         mainEntries(
             navigator = navigator,
             tabReselect = tabReselect,
+            genreItemsCache = genreItemsCache,
             onSearchClick = {
                 searchExpanded.value = true
                 navigator.navigate(MediaRoute)
@@ -382,18 +366,9 @@ private fun SetupNavigation(
     backStack: NavBackStack<NavKey>,
     entryDecorators: List<NavEntryDecorator<NavKey>>,
 ) {
-    val navigate: (NavKey) -> Unit = backStack::add
     val goBack: () -> Unit = { backStack.removeLastOrNull() }
-    val navigateOrReuse: (NavKey) -> Unit = backStack::navigateOrReuse
-
-    val entryProvider = entryProvider {
-        setupEntries(
-            navigate = navigate,
-            goBack = goBack,
-            navigateOrReuse = navigateOrReuse,
-            showBack = backStack.size > 1,
-            onSetupComplete = {},
-        )
+    val entryProvider: (NavKey) -> NavEntry<NavKey> = entryProvider {
+        entry<OnboardingRoute> { OnboardingScreen(onComplete = {}) }
     }
 
     NavDisplay(
@@ -401,89 +376,16 @@ private fun SetupNavigation(
         onBack = goBack,
         entryDecorators = entryDecorators,
         entryProvider = entryProvider,
-        transitionSpec = { GLOBAL_TRANSITION_SPEC },
-        popTransitionSpec = { GLOBAL_TRANSITION_SPEC },
-        predictivePopTransitionSpec = { _ -> GLOBAL_TRANSITION_SPEC },
     )
-}
-
-/**
- * Registers the setup flow entries.
- *
- * The same entries serve both the dedicated setup mode and the setup flow reached from the main UI
- * (e.g. via "manage servers" in Settings). [onSetupComplete] captures the difference: in setup mode
- * completing the flow flips the live condition to the main UI (a no-op), while in the main UI it
- * navigates home. It is invoked through the nearest entry's RESUMED guard.
- */
-private fun EntryProviderScope<NavKey>.setupEntries(
-    navigate: (NavKey) -> Unit,
-    goBack: () -> Unit,
-    navigateOrReuse: (NavKey) -> Unit,
-    showBack: Boolean,
-    onSetupComplete: () -> Unit,
-) {
-    entry<OnboardingRoute> {
-        OnboardingScreen(onComplete = dropUnlessResumed { onSetupComplete() })
-    }
-    entry<WelcomeRoute> {
-        WelcomeScreen(onContinueClick = dropUnlessResumed { navigate(ServersRoute) })
-    }
-    entry<ServersRoute> {
-        ServersScreen(
-            navigateToUsers = dropUnlessResumed { navigate(UsersRoute) },
-            navigateToAddresses =
-                resumedAction { serverId -> navigate(ServerAddressesRoute(serverId)) },
-            onAddClick = dropUnlessResumed { navigate(AddServerRoute) },
-            onBackClick = dropUnlessResumed { goBack() },
-            showBack = showBack,
-        )
-    }
-    entry<AddServerRoute> {
-        AddServerScreen(
-            onSuccess = dropUnlessResumed { navigate(UsersRoute) },
-            onBackClick = dropUnlessResumed { goBack() },
-        )
-    }
-    entry<ServerAddressesRoute> { key ->
-        ServerAddressesScreen(
-            serverId = key.serverId,
-            navigateBack = dropUnlessResumed { goBack() },
-        )
-    }
-    entry<UsersRoute> {
-        UsersScreen(
-            navigateToHome = dropUnlessResumed { onSetupComplete() },
-            onChangeServerClick = dropUnlessResumed { navigateOrReuse(ServersRoute) },
-            onAddClick = dropUnlessResumed { navigate(LoginRoute()) },
-            onBackClick = dropUnlessResumed { goBack() },
-            onPublicUserClick =
-                resumedAction { username -> navigate(LoginRoute(username = username)) },
-            showBack = showBack,
-        )
-    }
-    entry<LoginRoute> { key ->
-        LoginScreen(
-            onSuccess = dropUnlessResumed { onSetupComplete() },
-            onChangeServerClick = dropUnlessResumed { navigateOrReuse(ServersRoute) },
-            onBackClick = dropUnlessResumed { goBack() },
-            prefilledUsername = key.username,
-        )
-    }
 }
 
 private fun EntryProviderScope<NavKey>.mainEntries(
     navigator: Navigator,
     tabReselect: TabReselect,
+    genreItemsCache: GenreItemsCache,
     onSearchClick: () -> Unit,
     searchExpanded: MutableState<Boolean>,
 ) {
-    setupEntries(
-        navigate = navigator::navigate,
-        goBack = navigator::goBack,
-        navigateOrReuse = navigator::navigateOrReuse,
-        showBack = true,
-        onSetupComplete = { navigator.navigateHome() },
-    )
     entry<HomeRoute> {
         SuiteInsetBox {
             HomeScreen(
@@ -514,7 +416,6 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 onSearchClick = dropUnlessResumed { onSearchClick() },
                 onSettingsClick =
                     dropUnlessResumed { navigator.navigate(SettingsRoute(indexes = emptyList())) },
-                onManageServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             )
         }
@@ -540,6 +441,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             genreId = UUID.fromString(key.genreId),
             genreName = key.genreName,
             libraryType = if (key.movies) CollectionType.Movies else CollectionType.TvShows,
+            genreItemsCache = genreItemsCache,
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
@@ -834,8 +736,6 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     resumedAction { filePath ->
                         navigator.navigate(SettingsFileEditRoute(filePath = filePath))
                     },
-                navigateToServers = dropUnlessResumed { navigator.navigate(ServersRoute) },
-                navigateToUsers = dropUnlessResumed { navigator.navigate(UsersRoute) },
                 navigateToAbout = dropUnlessResumed { navigator.navigate(AboutRoute) },
                 navigateToSubtitleFont =
                     dropUnlessResumed { navigator.navigate(SubtitleFontRoute) },

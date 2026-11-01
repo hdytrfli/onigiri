@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.CollectionType
+import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.repository.JellyfinRepository
@@ -54,7 +55,7 @@ constructor(
             )
     }
 
-    fun loadItems() {
+    fun loadItems(cachedItems: List<FindroidItem> = emptyList()) {
         val itemType =
             when (libraryType) {
                 CollectionType.Movies -> listOf(BaseItemKind.MOVIE)
@@ -70,7 +71,13 @@ constructor(
 
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            _state.emit(_state.value.copy(isLoading = true, error = null))
+            _state.emit(
+                _state.value.copy(
+                    items = if (_state.value.items.isEmpty()) cachedItems else _state.value.items,
+                    isLoading = true,
+                    error = null,
+                )
+            )
 
             initSorting()
 

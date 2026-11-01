@@ -13,7 +13,7 @@ import dev.jdtech.jellyfin.core.presentation.theme.OnScrimSecondary
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.setup.components.LoadingButton
+import dev.jdtech.jellyfin.presentation.components.LoadingButton
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 @Composable

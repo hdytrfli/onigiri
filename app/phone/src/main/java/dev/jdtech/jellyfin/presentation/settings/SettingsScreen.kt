@@ -51,8 +51,6 @@ fun SettingsScreen(
     indexes: List<Int> = emptyList(),
     navigateToSettings: (indexes: List<Int>) -> Unit,
     navigateToSettingsFileEdit: (filePath: String) -> Unit,
-    navigateToServers: () -> Unit,
-    navigateToUsers: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToSubtitleFont: () -> Unit,
     navigateToReaderFont: () -> Unit,
@@ -79,8 +77,6 @@ fun SettingsScreen(
             is SettingsEvent.NavigateToSettings -> navigateToSettings(event.indexes)
             is SettingsEvent.NavigateToSettingsFileEdit ->
                 navigateToSettingsFileEdit(event.filePath)
-            is SettingsEvent.NavigateToUsers -> navigateToUsers()
-            is SettingsEvent.NavigateToServers -> navigateToServers()
             is SettingsEvent.ResetServer -> showResetServerDialog = true
             is SettingsEvent.NavigateToAbout -> navigateToAbout()
             is SettingsEvent.NavigateToSubtitleFont -> navigateToSubtitleFont()

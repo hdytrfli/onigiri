@@ -34,11 +34,17 @@ class GenresViewModel @Inject constructor(private val repository: JellyfinReposi
 
     private var loadedKind: MediaKind? = null
 
-    fun load(kind: MediaKind) {
-        if (loadedKind == kind) return
+    fun load(kind: MediaKind, force: Boolean = false) {
+        if (loadedKind == kind && !force) return
+        if (_state.value.isLoading) return
+        // Switching between Movies and Shows must not show the other kind's sections while the
+        // new list loads.
+        if (loadedKind != null && loadedKind != kind) _state.value = GenresState()
         loadedKind = kind
         viewModelScope.launch(Dispatchers.IO) {
-            _state.emit(GenresState(isLoading = true))
+            // Keep the current sections on screen while revalidating, so a pull-to-refresh or
+            // retry behaves like the other list pages instead of blanking the tab.
+            _state.emit(_state.value.copy(isLoading = true, error = null))
             try {
                 val includeType =
                     if (kind == MediaKind.Movies) BaseItemKind.MOVIE else BaseItemKind.SERIES
@@ -62,16 +68,15 @@ class GenresViewModel @Inject constructor(private val repository: JellyfinReposi
                         GenreSection(id = genre.id, name = genre.name, items = items)
                     }
                 }
-                _state.emit(GenresState(sections = sections))
+                _state.emit(_state.value.copy(sections = sections, isLoading = false))
             } catch (e: Exception) {
-                _state.emit(GenresState(error = e))
+                _state.emit(_state.value.copy(isLoading = false, error = e))
             }
         }
     }
 
     fun retry(kind: MediaKind) {
-        loadedKind = null
-        load(kind)
+        load(kind, force = true)
     }
 
     private companion object {

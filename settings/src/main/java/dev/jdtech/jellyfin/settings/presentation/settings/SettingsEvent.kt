@@ -3,10 +3,6 @@ package dev.jdtech.jellyfin.settings.presentation.settings
 import android.content.Intent
 
 sealed interface SettingsEvent {
-    data object NavigateToUsers : SettingsEvent
-
-    data object NavigateToServers : SettingsEvent
-
     data object NavigateToAbout : SettingsEvent
 
     data object NavigateToSubtitleFont : SettingsEvent

@@ -54,8 +54,6 @@ class ReaderSettingsActivity : AppCompatActivity() {
                             indexes = listOf(SettingsR.string.settings_category_reader),
                             navigateToSettings = {},
                             navigateToSettingsFileEdit = {},
-                            navigateToServers = {},
-                            navigateToUsers = {},
                             navigateToAbout = {},
                             navigateToSubtitleFont = {},
                             navigateToReaderFont = { showFontPicker = true },
