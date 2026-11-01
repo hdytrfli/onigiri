@@ -110,13 +110,6 @@ private fun DownloadsScreenLayout(
             modifier = Modifier.fillMaxSize(),
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                if (state.sections.isEmpty()) {
-                    EmptyState(
-                        context = stringResource(CoreR.string.empty_context_downloads),
-                        onRefresh = onRefresh,
-                    )
-                }
-
                 CollectionGrid(
                     sections = state.sections,
                     innerPadding = innerPadding,
@@ -124,6 +117,13 @@ private fun DownloadsScreenLayout(
                     onAction = onAction,
                     displayFields = state.displayFields,
                 )
+
+                if (state.sections.isEmpty()) {
+                    EmptyState(
+                        context = stringResource(CoreR.string.empty_context_downloads),
+                        onRefresh = onRefresh,
+                    )
+                }
             }
         }
     }

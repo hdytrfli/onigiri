@@ -282,12 +282,6 @@ fun LibraryContent(
                 )
             } else {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (!state.isLoading && items.isEmpty()) {
-                        EmptyState(
-                            context = stringResource(CoreR.string.empty_context_items),
-                            onRefresh = { onAction(LibraryAction.RefreshItems) },
-                        )
-                    }
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                         modifier = Modifier.fillMaxSize(),
@@ -297,33 +291,42 @@ fun LibraryContent(
                     ) {
                         // The title is content, not a header: it scrolls away with the grid. The
                         // badge on its right shows the cached list's total.
-                        section(
-                            title = sectionTitle,
-                            trailingContent =
-                                itemCount?.let { count ->
-                                    {
-                                        ItemCountBadge(
-                                            count = count,
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                        ) {
-                            items(items = items, key = { it.id }) { item ->
-                                ItemCard(
-                                    item = item,
-                                    direction = Direction.VERTICAL,
-                                    onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                    modifier = Modifier.animateItem(),
-                                    fillWidth = true,
-                                    showYear = ListDisplayField.Year in state.displayFields,
-                                    showCommunityRating =
-                                        ListDisplayField.CommunityRating in state.displayFields,
-                                    showAgeRating =
-                                        ListDisplayField.AgeRating in state.displayFields,
-                                )
+                        if (items.isNotEmpty()) {
+                            section(
+                                title = sectionTitle,
+                                trailingContent =
+                                    itemCount?.let { count ->
+                                        {
+                                            ItemCountBadge(
+                                                count = count,
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
+                                    },
+                            ) {
+                                items(items = items, key = { it.id }) { item ->
+                                    ItemCard(
+                                        item = item,
+                                        direction = Direction.VERTICAL,
+                                        onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                        modifier = Modifier.animateItem(),
+                                        fillWidth = true,
+                                        showYear = ListDisplayField.Year in state.displayFields,
+                                        showCommunityRating =
+                                            ListDisplayField.CommunityRating in state.displayFields,
+                                        showAgeRating =
+                                            ListDisplayField.AgeRating in state.displayFields,
+                                    )
+                                }
                             }
                         }
+                    }
+
+                    if (!state.isLoading && items.isEmpty()) {
+                        EmptyState(
+                            context = stringResource(CoreR.string.empty_context_items),
+                            onRefresh = { onAction(LibraryAction.RefreshItems) },
+                        )
                     }
                 }
             }

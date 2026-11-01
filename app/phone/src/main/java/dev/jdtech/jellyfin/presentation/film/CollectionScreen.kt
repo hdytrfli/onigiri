@@ -134,64 +134,73 @@ private fun CollectionDetailLayout(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize(),
         ) {
+            state.collection
+                ?.takeIf { state.items.isNotEmpty() || state.isLoading }
+                ?.let { collection ->
+                    Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
+                        ItemHeader(
+                            item = collection,
+                            scrollState = scrollState,
+                            content = {
+                                Column(
+                                    modifier =
+                                        Modifier.align(Alignment.BottomStart)
+                                            .padding(start = paddingStart, end = paddingEnd)
+                                ) {
+                                    ItemTitle(
+                                        title = collection.name,
+                                        logoUri = collection.images.logo,
+                                    )
+                                }
+                            },
+                        )
+                        Column(
+                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd)
+                        ) {
+                            Spacer(Modifier.height(MaterialTheme.spacings.small))
+                            Row(
+                                horizontalArrangement =
+                                    Arrangement.spacedBy(MaterialTheme.spacings.small),
+                                verticalAlignment = Alignment.Bottom,
+                            ) {
+                                Text(
+                                    text =
+                                        stringResource(CoreR.string.items_count, state.items.size),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                yearRange?.let { range ->
+                                    Text(text = range, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                            if (collection.overview.isNotBlank()) {
+                                Spacer(Modifier.height(MaterialTheme.spacings.small))
+                                OverviewText(text = collection.overview, maxCollapsedLines = 3)
+                            }
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        }
+                        if (state.items.isNotEmpty()) {
+                            GridRows(
+                                items = state.items,
+                                columns = gridColumns(GridSize.POSTER),
+                                modifier = Modifier.padding(itemsPadding),
+                            ) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(CollectionAction.OnItemClick(item)) },
+                                    fillWidth = true,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(paddingBottom))
+                    }
+                }
+
             if (!state.isLoading && state.items.isEmpty()) {
                 EmptyState(
                     context = stringResource(CoreR.string.empty_context_items),
                     onRefresh = onRefresh,
                 )
-            }
-            state.collection?.let { collection ->
-                Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
-                    ItemHeader(
-                        item = collection,
-                        scrollState = scrollState,
-                        content = {
-                            Column(
-                                modifier =
-                                    Modifier.align(Alignment.BottomStart)
-                                        .padding(start = paddingStart, end = paddingEnd)
-                            ) {
-                                ItemTitle(title = collection.name, logoUri = collection.images.logo)
-                            }
-                        },
-                    )
-                    Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
-                        Spacer(Modifier.height(MaterialTheme.spacings.small))
-                        Row(
-                            horizontalArrangement =
-                                Arrangement.spacedBy(MaterialTheme.spacings.small),
-                            verticalAlignment = Alignment.Bottom,
-                        ) {
-                            Text(
-                                text = stringResource(CoreR.string.items_count, state.items.size),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            yearRange?.let { range ->
-                                Text(text = range, style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                        if (collection.overview.isNotBlank()) {
-                            Spacer(Modifier.height(MaterialTheme.spacings.small))
-                            OverviewText(text = collection.overview, maxCollapsedLines = 3)
-                        }
-                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                    }
-                    if (state.items.isNotEmpty()) {
-                        GridRows(
-                            items = state.items,
-                            columns = gridColumns(GridSize.POSTER),
-                            modifier = Modifier.padding(itemsPadding),
-                        ) { item ->
-                            ItemCard(
-                                item = item,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(CollectionAction.OnItemClick(item)) },
-                                fillWidth = true,
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(paddingBottom))
-                }
             }
         }
 
@@ -244,12 +253,6 @@ fun CollectionScreenLayout(
         },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            if (!state.isLoading && state.sections.isEmpty()) {
-                EmptyState(
-                    context = stringResource(CoreR.string.empty_context_items),
-                    onRefresh = onRefresh,
-                )
-            }
             CollectionGrid(
                 sections = state.sections,
                 innerPadding = innerPadding,
@@ -257,6 +260,13 @@ fun CollectionScreenLayout(
                 onAction = onAction,
                 displayFields = state.displayFields,
             )
+
+            if (!state.isLoading && state.sections.isEmpty()) {
+                EmptyState(
+                    context = stringResource(CoreR.string.empty_context_items),
+                    onRefresh = onRefresh,
+                )
+            }
         }
     }
 }

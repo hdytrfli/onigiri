@@ -50,6 +50,7 @@ import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.HomeCarousel
 import dev.jdtech.jellyfin.presentation.film.components.HomeSection
@@ -214,6 +215,13 @@ private fun HomeScreenLayout(
 
     val contentPaddingTop = LocalRootPageContentInset.current
     val offlineMode = LocalOfflineMode.current
+    val hasContent =
+        state.resumeSection != null ||
+            state.nextUpSection != null ||
+            state.latestBooksSection != null ||
+            state.latestAudiobooksSection != null ||
+            state.views.isNotEmpty() ||
+            (!offlineMode && state.suggestionsSection != null)
 
     if (state.error != null && state.suggestionsSection == null && state.views.isEmpty()) {
         FullPageError(
@@ -234,6 +242,15 @@ private fun HomeScreenLayout(
                 contentPadding = PaddingValues(top = contentPaddingTop, bottom = paddingBottom),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {
+                if (!hasContent && !state.isLoading) {
+                    item(key = "empty-state") {
+                        EmptyState(
+                            context = stringResource(CoreR.string.empty_context_media),
+                            onRefresh = { onAction(HomeAction.OnRetryClick) },
+                            modifier = Modifier.fillParentMaxSize(),
+                        )
+                    }
+                }
                 state.suggestionsSection
                     ?.takeUnless { offlineMode }
                     ?.let { section ->

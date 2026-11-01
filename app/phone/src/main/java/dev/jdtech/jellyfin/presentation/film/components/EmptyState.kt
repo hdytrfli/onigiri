@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.LocalOpenDownloads
 import dev.jdtech.jellyfin.core.R as CoreR
@@ -36,47 +37,50 @@ fun EmptyState(
     onRefresh: (() -> Unit)? = null,
 ) {
     val openDownloads = LocalOpenDownloads.current
-    Column(
+    Box(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(CoreR.drawable.ic_ghost),
-            contentDescription = null,
-            modifier = Modifier.size(32.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-        Text(
-            text = stringResource(CoreR.string.empty_state_title, context),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(MaterialTheme.spacings.small))
-        Text(
-            text = stringResource(CoreR.string.empty_state_message),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(MaterialTheme.spacings.medium))
-        Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
-            if (onRefresh != null) {
+        Column(
+            modifier = Modifier.widthIn(max = 320.dp).fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_ghost),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+            Text(
+                text = stringResource(CoreR.string.empty_state_title, context),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(MaterialTheme.spacings.small))
+            Text(
+                text = stringResource(CoreR.string.empty_state_message),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+            Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
+                if (onRefresh != null) {
+                    AppButton(
+                        onClick = onRefresh,
+                        content = { Text(stringResource(CoreR.string.refresh)) },
+                    )
+                }
                 AppButton(
-                    onClick = onRefresh,
-                    content = { Text(stringResource(CoreR.string.refresh)) },
+                    onClick = openDownloads,
+                    variant = AppButtonVariant.Secondary,
+                    content = { Text(stringResource(CoreR.string.title_download)) },
                 )
             }
-            AppButton(
-                onClick = openDownloads,
-                variant = AppButtonVariant.Secondary,
-                content = { Text(stringResource(CoreR.string.title_download)) },
-            )
         }
     }
 }

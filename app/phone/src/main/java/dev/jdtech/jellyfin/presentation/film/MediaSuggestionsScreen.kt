@@ -299,12 +299,6 @@ private fun CollectionsTab(
         modifier = Modifier.fillMaxSize(),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (!state.isLoading && items.isEmpty()) {
-                EmptyState(
-                    context = stringResource(CoreR.string.empty_context_collections),
-                    onRefresh = { viewModel.retry() },
-                )
-            }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
@@ -318,20 +312,30 @@ private fun CollectionsTab(
                 horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
-                section(title = title) {
-                    gridItems(items = items, key = { it.id }) { item ->
-                        ItemCard(
-                            item = item,
-                            direction = Direction.VERTICAL,
-                            onClick = { onItemClick(item) },
-                            modifier = Modifier.animateItem(),
-                            fillWidth = true,
-                            showYear = ListDisplayField.Year in displayFields,
-                            showCommunityRating = ListDisplayField.CommunityRating in displayFields,
-                            showAgeRating = ListDisplayField.AgeRating in displayFields,
-                        )
+                if (items.isNotEmpty()) {
+                    section(title = title) {
+                        gridItems(items = items, key = { it.id }) { item ->
+                            ItemCard(
+                                item = item,
+                                direction = Direction.VERTICAL,
+                                onClick = { onItemClick(item) },
+                                modifier = Modifier.animateItem(),
+                                fillWidth = true,
+                                showYear = ListDisplayField.Year in displayFields,
+                                showCommunityRating =
+                                    ListDisplayField.CommunityRating in displayFields,
+                                showAgeRating = ListDisplayField.AgeRating in displayFields,
+                            )
+                        }
                     }
                 }
+            }
+
+            if (!state.isLoading && items.isEmpty()) {
+                EmptyState(
+                    context = stringResource(CoreR.string.empty_context_collections),
+                    onRefresh = { viewModel.retry() },
+                )
             }
         }
     }

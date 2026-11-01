@@ -74,13 +74,6 @@ private fun FavoritesScreenLayout(
         modifier = Modifier.fillMaxSize(),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.sections.isEmpty()) {
-                EmptyState(
-                    context = stringResource(CoreR.string.empty_context_favorites),
-                    onRefresh = onRetryClick,
-                )
-            }
-
             CollectionGrid(
                 sections = state.sections,
                 innerPadding = PaddingValues(0.dp),
@@ -98,6 +91,13 @@ private fun FavoritesScreenLayout(
                 },
                 displayFields = state.displayFields,
             )
+
+            if (state.sections.isEmpty()) {
+                EmptyState(
+                    context = stringResource(CoreR.string.empty_context_favorites),
+                    onRefresh = onRetryClick,
+                )
+            }
         }
     }
 }

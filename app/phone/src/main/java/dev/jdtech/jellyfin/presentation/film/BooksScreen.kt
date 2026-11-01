@@ -183,19 +183,6 @@ fun BooksScreen(
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        if (!state.isLoading && items.isEmpty()) {
-                            EmptyState(
-                                context =
-                                    stringResource(
-                                        if (audiobooks) {
-                                            CoreR.string.empty_context_audiobooks
-                                        } else {
-                                            CoreR.string.empty_context_books
-                                        }
-                                    ),
-                                onRefresh = { viewModel.retry() },
-                            )
-                        }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                             modifier = Modifier.fillMaxSize(),
@@ -226,6 +213,20 @@ fun BooksScreen(
                                     }
                                 }
                             }
+                        }
+
+                        if (!state.isLoading && items.isEmpty()) {
+                            EmptyState(
+                                context =
+                                    stringResource(
+                                        if (audiobooks) {
+                                            CoreR.string.empty_context_audiobooks
+                                        } else {
+                                            CoreR.string.empty_context_books
+                                        }
+                                    ),
+                                onRefresh = { viewModel.retry() },
+                            )
                         }
                     }
                 }
