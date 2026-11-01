@@ -43,7 +43,6 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
-import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
@@ -186,7 +185,7 @@ private fun CollectionDetailLayout(
                     }
                     Spacer(Modifier.height(paddingBottom))
                 }
-            } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
+            }
         }
 
         ItemTopBar(

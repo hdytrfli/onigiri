@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +45,6 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
-import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
@@ -296,9 +294,6 @@ private fun CollectionsTab(
         modifier = Modifier.fillMaxSize(),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.isLoading && items.isEmpty()) {
-                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-            }
             if (!state.isLoading && items.isEmpty()) {
                 EmptyState(
                     text =
@@ -382,8 +377,6 @@ private fun MediaSuggestionsContent(
                     isRefreshing = state.isLoading,
                     error = state.error,
                 )
-            } else if (state.isLoading) {
-                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
     }
@@ -414,8 +407,6 @@ private fun GenresContent(
                     isRefreshing = state.isLoading,
                     error = state.error,
                 )
-            } else if (state.isLoading && state.sections.isEmpty()) {
-                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
