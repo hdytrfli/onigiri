@@ -43,7 +43,7 @@ fun FavoritesScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(true) { viewModel.loadItems() }
+    LaunchedEffect(true) { viewModel.loadItemsIfNeeded() }
 
     FavoritesScreenLayout(
         state = state,

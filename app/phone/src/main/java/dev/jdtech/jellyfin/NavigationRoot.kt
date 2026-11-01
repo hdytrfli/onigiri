@@ -60,7 +60,6 @@ import dev.jdtech.jellyfin.presentation.film.DownloadsScreen
 import dev.jdtech.jellyfin.presentation.film.EditImageSearchScreen
 import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
 import dev.jdtech.jellyfin.presentation.film.EpisodeScreen
-import dev.jdtech.jellyfin.presentation.film.FavoritesScreen
 import dev.jdtech.jellyfin.presentation.film.GenreScreen
 import dev.jdtech.jellyfin.presentation.film.HomeScreen
 import dev.jdtech.jellyfin.presentation.film.IdentifyResultsScreen
@@ -528,17 +527,6 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { itemId ->
                     navigator.navigate(EditImagesRoute(itemId = itemId.toString()))
                 },
-        )
-    }
-    entry<FavoritesRoute> {
-        FavoritesScreen(
-            onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
-            onSearchClick =
-                dropUnlessResumed {
-                    searchExpanded.value = true
-                    navigator.navigate(MediaRoute)
-                },
-            onSettingsClick = dropUnlessResumed { navigator.navigate(SETTINGS_ROOT_ROUTE) },
         )
     }
     entry<MovieRoute> { key ->

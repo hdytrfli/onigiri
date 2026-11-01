@@ -34,6 +34,13 @@ constructor(
 
     private var progressJob: Job? = null
 
+    /** Loads once per ViewModel; pull-to-refresh and download completion call [loadItems]. */
+    fun loadItemsIfNeeded() {
+        if (_state.value.items.isEmpty() && !_state.value.isLoading) {
+            loadItems()
+        }
+    }
+
     fun loadItems() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)

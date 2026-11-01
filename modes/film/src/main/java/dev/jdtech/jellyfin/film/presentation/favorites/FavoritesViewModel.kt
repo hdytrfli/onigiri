@@ -25,6 +25,13 @@ constructor(
     private val _state = MutableStateFlow(CollectionState())
     val state = _state.asStateFlow()
 
+    /** Loads once per ViewModel; pull-to-refresh calls [loadItems] directly. */
+    fun loadItemsIfNeeded() {
+        if (_state.value.items.isEmpty() && !_state.value.isLoading) {
+            loadItems()
+        }
+    }
+
     fun loadItems() {
         viewModelScope.launch {
             _state.emit(_state.value.copy(isLoading = true, error = null))
