@@ -1,7 +1,13 @@
-This privacy policy pertains the Findroid app.
+This privacy policy pertains to Findroid+.
 
-Findroid does not collect or access any personal information. No identifying information or user data of any kind is made available to third-parties.
+Findroid+ does not collect, sell, or share personal information. The app does not include analytics,
+advertising, or tracking services.
 
-This Privacy Policy is effective as of Feb 8th, 2023 and will remain in effect except with respect to any changes in its provisions in the future, which will be in effect immediately after being posted on this page. We reserve the right to update or change our Privacy Policy at any time and you should check this Privacy Policy periodically. Your continued use of the Service after we post any modifications to the Privacy Policy on this page will constitute your acknowledgment of the modifications and your consent to abide and be bound by the modified Privacy Policy.
+Data entered into the app, such as server addresses, account details, and profile PINs, is stored on
+the device and used only to connect to your Jellyfin server. Profile PINs are stored as salted
+hashes. Media metadata and download state are stored locally so the app can work offline.
 
-Findroid is published by Jarne Demeulemeester. Inquiries can be submitted to jarnedemeulemeester@gmail.com.
+Requests to your Jellyfin server are made directly between the app and the server address you
+provide. No project-operated server receives your data.
+
+For privacy questions, open an issue at https://github.com/hdytrfli/findroid/issues.

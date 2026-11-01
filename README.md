@@ -4,95 +4,97 @@
 
 <h1 align="center">Findroid+</h1>
 
-<p align="center">A native Jellyfin client for Android with a built-in reader.</p>
+<p align="center">A native Jellyfin client for Android, with a built-in reader.</p>
 
-<p align="center">Version 1.0.0-beta</p>
+<p align="center"><strong>1.0.0-beta</strong></p>
 
 Findroid+ is an independent Android client for Jellyfin. It began as a fork of
-[Findroid](https://github.com/jarnedemeulemeester/findroid) and builds on its native media
-experience while adding a complete reading workflow, a more personal profile system, and a
-refined interface.
+[Findroid](https://github.com/jarnedemeulemeester/findroid) and continues its native-first
+approach while adding a reading experience, a fuller profile system, and a more consistent
+interface.
 
-## Highlights
+## What this fork adds
 
-- Native Android interface built with Jetpack Compose and Material 3
-- Movies, TV shows, books, and audiobooks in one library
-- Built-in EPUB, PDF, and CBZ reader
-- Per-profile PIN protection and profile switching
-- Downloads and offline playback
-- ExoPlayer and mpv playback engines
+### Reading
 
-## Media playback
+- A dedicated Books tab for books and audiobooks
+- In-app reading for EPUB, PDF, and CBZ files using Readium
+- Reading progress and current position
+- Hierarchical table of contents
+- Pull-to-chapter navigation in scroll mode
+- Reader themes, text alignment, hyphenation, font selection, and maximum line width
+- Author pages and book metadata
+- Book downloads for offline reading
+- Search, sorting, and list-display options for books
 
-- Direct play for movies, episodes, and audiobooks
+### Profiles
+
+- Guided first-time setup with server and account details
+- Password or Quick Connect sign-in
+- Optional four-digit profile PIN
+- Profile picker with saved sessions and persistent logout
+- Profile switching that clears app caches and reader state while keeping downloads
+- Add and remove profiles inside the app
+- Profile controls that respect Jellyfin administrator permissions
+
+### Interface
+
+- Material 3 interface built with Jetpack Compose
+- Adaptive bottom navigation and navigation rail
+- Immersive detail pages and consistent page transitions
+- Search, sorting, and display controls for media and book lists
+- Shared dialogs, fields, buttons, and menus across screens
+- Configurable grids, artwork ratios, and content spacing
+
+## Library and playback
+
+- Movies, series, books, and audiobooks from one Jellyfin server
+- Native playback for movies and episodes
+- Direct play only; media is not transcoded by the app
 - ExoPlayer with FFmpeg audio decoding
-- Optional mpv playback for difficult formats
+- Optional mpv playback for additional formats
 - Picture-in-picture mode
 - Chapter markers and chapter navigation gestures
-- Trickplay thumbnails on supported Jellyfin servers
+- Trickplay thumbnails on supported servers
 - Media segment skipping and auto-skip
 - Embedded and external subtitles, including SRT, VTT, SSA/ASS, PGSSUB, and DVDSUB
 - Preferred audio and subtitle language selection
 
-## Reading
-
-- Dedicated Books tab for books and audiobooks
-- Readium-based EPUB, PDF, and CBZ rendering
-- Reading progress saved per profile
-- Table of contents with hierarchical chapters
-- Pull-to-chapter navigation in scroll mode
-- Reader font and typography settings
-- Author pages and book metadata
-- Book downloads and offline reading
-- Search, sorting, and display options for the book list
-
-## Profiles and onboarding
-
-- Guided first-time setup for a Jellyfin server and account
-- Password or Quick Connect sign-in
-- Optional four-digit profile PIN, stored as a salted hash on the device
-- Profile picker with admin and guest role badges
-- Profile management that respects Jellyfin permissions
-- Add and remove profiles without leaving the app
-- Persistent logout that returns to profile selection after restart
-- Profile switching keeps downloaded media while clearing app caches and reader state
-
 ## Downloads and offline use
 
-- Download movies, episodes, books, and audiobooks
-- Background downloads with selectable storage
+- Download movies, episodes, and books
+- Select the storage location for downloads
+- Background download progress
 - Offline mode for browsing and playing downloaded content
-- Download status and progress on detail pages
-- Downloaded items remain available across profile switches
-
-## Interface
-
-- Adaptive bottom navigation and navigation rail
-- Immersive detail pages and consistent page transitions
-- Shared dialogs, buttons, fields, and menus across the app
-- Search, sort, and display controls for media lists
-- Optional predictive-back preview
-- Configurable grid sizes, artwork ratios, and content spacing
+- Download state and progress on detail pages
 
 ## Requirements
 
-- Android 8.0 or newer
+- Android 9.0 or newer
 - A Jellyfin server
-- Direct network access to the server, or a reachable address while offline mode is disabled
+- Network access to the server unless offline mode is enabled
+- Jellyfin 10.9 or newer for trickplay
+- Jellyfin 10.10 or newer for media segments
 
-## Project links
+## Current limitations
+
+- Audiobooks are listed in the library, but audiobook playback is not yet available.
+- The app connects to one Jellyfin server at a time.
+- Video playback is direct play only.
+
+## Links
 
 - [Findroid+ on GitHub](https://github.com/hdytrfli/findroid)
 - [Findroid, the upstream project](https://github.com/jarnedemeulemeester/findroid)
 - [Jellyfin](https://jellyfin.org)
 
-## License and attribution
+## License
 
-Findroid+ is licensed under the GNU General Public License v3.0. It is an independent fork and is
-not affiliated with the Jellyfin project or the Findroid project.
+Findroid+ is licensed under the GNU General Public License v3.0.
 
-The original Findroid project and its contributors remain the foundation of this work. Playback,
-library browsing, and much of the application architecture originate there.
+Findroid+ is an independent fork and is not affiliated with the Jellyfin project or the Findroid
+project. The original Findroid project and its contributors remain the foundation of this work.
+Playback, library browsing, and much of the application architecture originate there.
 
-This project also depends on Jellyfin Server and its APIs, the Jellyfin Kotlin SDK, Readium, AndroidX
-Media3, mpv, and other open-source libraries.
+This project also depends on the Jellyfin Kotlin SDK, Readium, AndroidX Media3, mpv, and other
+open-source libraries.

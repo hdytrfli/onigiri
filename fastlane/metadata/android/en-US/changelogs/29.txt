@@ -1,3 +1,0 @@
-Improvements:
-- Upgrade mpv to 0.39.0
-- Play H.266 (VVC) content with mpv

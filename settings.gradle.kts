@@ -1,6 +1,6 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "findroid"
+rootProject.name = "findroid-plus"
 
 include(":app:phone")
 include(":core")

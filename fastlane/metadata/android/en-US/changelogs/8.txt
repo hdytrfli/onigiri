@@ -1,6 +1,0 @@
-Improvements:
-- Enable avi container format in mpv
-- Many dependencies updated
-
-Fixes:
-- Add missing check for if user is allowed to download in episode sheet

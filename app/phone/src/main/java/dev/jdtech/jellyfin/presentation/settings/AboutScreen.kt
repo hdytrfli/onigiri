@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -32,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import dev.jdtech.jellyfin.BuildConfig
 import dev.jdtech.jellyfin.R
 import dev.jdtech.jellyfin.core.R as CoreR
-import dev.jdtech.jellyfin.core.presentation.theme.Dimens
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
+import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
@@ -55,19 +54,12 @@ fun AboutScreen(navigateBack: () -> Unit) {
             PageTopBar(title = stringResource(SettingsR.string.about), onBack = navigateBack)
         }
     ) { innerPadding ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(
-                        horizontal = MaterialTheme.spacings.default,
-                        vertical = MaterialTheme.spacings.large,
-                    ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        PageContent(modifier = Modifier.padding(innerPadding)) {
             Column(
-                modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth(),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = MaterialTheme.spacings.large),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(

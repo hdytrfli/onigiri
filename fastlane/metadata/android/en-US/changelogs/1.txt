@@ -1,9 +1,10 @@
-Features:
-- Completely native interface
-- Supported media items: movies, series, seasons, episodes
-- Video codes: H.263, H.264, H.265, VP8, VP9, AV1
-- Audio codes: Vorbis, Opus, FLAC, ALAC, PCM µ-law, PCM A-law, MP1, MP2, MP3, AMR-NB, AMR-WB, AAC, AC-3, E-AC-3, DTS, DTS-HD, TrueHD
-- Subtitle codecs: SRT, VTT, SSA/ASS, PGSSUB
-- Support for multiple servers
-- Set preferred audio and subtitle language
-- Light & dark theme
+Initial Findroid+ beta release.
+
+- New Findroid+ name and launcher icon
+- Native Jellyfin library for movies, shows, books, and audiobooks
+- Built-in EPUB, PDF, and CBZ reader
+- Reading progress, table of contents, and reader typography settings
+- Profile picker with optional PIN protection
+- Quick Connect sign-in
+- Downloads and offline mode
+- Updated About page with project links
