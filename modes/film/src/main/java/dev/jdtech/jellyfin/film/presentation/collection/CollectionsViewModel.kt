@@ -40,10 +40,13 @@ constructor(
     val state = _state.asStateFlow()
 
     private var loaded = false
+    private var lastOfflineMode: Boolean? = null
 
     fun load() {
-        if (loaded) return
+        val offlineMode = appPreferences.getValue(appPreferences.offlineMode)
+        if (loaded && lastOfflineMode == offlineMode) return
         loaded = true
+        lastOfflineMode = offlineMode
         viewModelScope.launch(Dispatchers.IO) {
             _state.emit(
                 _state.value.copy(

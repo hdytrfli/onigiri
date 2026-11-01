@@ -355,6 +355,8 @@ private fun MediaSuggestionsContent(
             bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
         )
 
+    OfflineModeReload { onRetry() }
+
     AppPullToRefreshBox(
         isRefreshing = state.isLoading,
         onRefresh = onRetry,
@@ -378,6 +380,9 @@ private fun MediaSuggestionsContent(
                     item {
                         EmptyState(
                             text = stringResource(FilmR.string.suggestions_empty),
+                            icon = CoreR.drawable.ic_sparkles,
+                            actionLabel = stringResource(CoreR.string.refresh),
+                            onAction = onRetry,
                             modifier = Modifier.fillParentMaxSize(),
                         )
                     }
@@ -434,18 +439,32 @@ private fun GenresContent(
                         ),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                 ) {
-                    items(items = state.sections, key = { it.id }) { section ->
-                        MediaSectionRow(
-                            section =
-                                MediaSection(
-                                    id = section.id.toString(),
-                                    title = UiText.DynamicString(section.name),
-                                    items = section.items,
-                                ),
-                            displayFields = displayFields,
-                            onItemClick = onItemClick,
-                            onListClick = { onGenreClick(FindroidGenre(section.id, section.name)) },
-                        )
+                    if (state.sections.isEmpty()) {
+                        item {
+                            EmptyState(
+                                text = stringResource(FilmR.string.genres_empty),
+                                icon = CoreR.drawable.ic_layout_grid,
+                                actionLabel = stringResource(CoreR.string.refresh),
+                                onAction = { viewModel.retry(kind) },
+                                modifier = Modifier.fillParentMaxSize(),
+                            )
+                        }
+                    } else {
+                        items(items = state.sections, key = { it.id }) { section ->
+                            MediaSectionRow(
+                                section =
+                                    MediaSection(
+                                        id = section.id.toString(),
+                                        title = UiText.DynamicString(section.name),
+                                        items = section.items,
+                                    ),
+                                displayFields = displayFields,
+                                onItemClick = onItemClick,
+                                onListClick = {
+                                    onGenreClick(FindroidGenre(section.id, section.name))
+                                },
+                            )
+                        }
                     }
                 }
             }

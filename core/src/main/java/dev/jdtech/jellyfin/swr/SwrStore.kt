@@ -10,6 +10,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -68,6 +70,7 @@ constructor(
     }
 
     private val entries = ConcurrentHashMap<SwrKey, MutableStateFlow<SwrEntry<Any?>>>()
+    private val logicalEntries = ConcurrentHashMap<SwrKey, MutableStateFlow<SwrEntry<Any?>>>()
     private val loadedKeys = ConcurrentHashMap.newKeySet<SwrKey>()
     private val loadMutex = Mutex()
     private val inFlight = ConcurrentHashMap<SwrKey, Job>()
@@ -87,11 +90,18 @@ constructor(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Suppress("UNCHECKED_CAST")
     fun <T> observe(key: SwrKey, serializer: KSerializer<T>): StateFlow<SwrEntry<T>> {
-        val flow = flow(key)
+        val logical = logicalEntries.computeIfAbsent(key) { MutableStateFlow(SwrEntry()) }
+        scope.launch {
+            appPreferences
+                .observe(appPreferences.offlineMode)
+                .flatMapLatest { offlineMode -> rawFlow(scoped(key, offlineMode)) }
+                .collect { logical.value = it }
+        }
         scope.launch { ensureLoaded(key, serializer) }
-        return flow as StateFlow<SwrEntry<T>>
+        return logical as StateFlow<SwrEntry<T>>
     }
 
     /**
@@ -104,19 +114,21 @@ constructor(
         force: Boolean = false,
         fetcher: suspend () -> T,
     ) {
-        if (inFlight[key]?.isActive == true) return
-        inFlight[key] = scope.launch {
+        val storageKey = scoped(key)
+        if (inFlight[storageKey]?.isActive == true) return
+        inFlight[storageKey] = scope.launch {
+            val flow = rawFlow(storageKey)
             try {
                 ensureLoaded(key, serializer)
-                val current = flow(key).value
+                val current = flow.value
                 if (!force && current.data != null && !current.isStale) {
                     return@launch
                 }
-                flow(key).value = current.copy(isRefreshing = true, error = null, isOffline = false)
+                flow.value = current.copy(isRefreshing = true, error = null, isOffline = false)
 
                 val result = fetcher()
                 val fetchedAt = System.currentTimeMillis()
-                flow(key).value =
+                flow.value =
                     SwrEntry(
                         data = result,
                         updatedAt = fetchedAt,
@@ -124,7 +136,7 @@ constructor(
                     )
                 database.putQueryCache(
                     QueryCacheEntity(
-                        cacheKey = key.value,
+                        cacheKey = storageKey.value,
                         payload = json.encodeToString(serializer, result),
                         updatedAt = fetchedAt,
                     )
@@ -132,10 +144,10 @@ constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
-                val current = flow(key).value
+                val current = flow.value
                 val offline =
                     appPreferences.getValue(appPreferences.offlineMode) || e is IOException
-                flow(key).value =
+                flow.value =
                     current.copy(
                         error = e,
                         isRefreshing = false,
@@ -151,7 +163,7 @@ constructor(
                     )
                 )
             } finally {
-                inFlight.remove(key)
+                inFlight.remove(storageKey)
             }
         }
     }
@@ -161,9 +173,11 @@ constructor(
      */
     @Suppress("UNCHECKED_CAST")
     fun <T> mutate(key: SwrKey, serializer: KSerializer<T>, update: (T?) -> T?) {
+        val storageKey = scoped(key)
         scope.launch {
             ensureLoaded(key, serializer)
-            val current = flow(key).value as SwrEntry<T>
+            val flow = rawFlow(storageKey)
+            val current = flow.value as SwrEntry<T>
             val data = update(current.data)
             val updatedAt = System.currentTimeMillis()
             val updated =
@@ -173,11 +187,11 @@ constructor(
                     isStale = false,
                     error = null,
                 ) as SwrEntry<Any?>
-            flow(key).value = updated
+            flow.value = updated
             if (data != null) {
                 database.putQueryCache(
                     QueryCacheEntity(
-                        cacheKey = key.value,
+                        cacheKey = storageKey.value,
                         payload = json.encodeToString(serializer, data),
                         updatedAt = updatedAt,
                     )
@@ -186,21 +200,24 @@ constructor(
         }
     }
 
-    /** Marks one entry stale without discarding its data, and persists that fact. */
+    /** Marks one entry stale in both online and offline caches, without discarding its data. */
     fun invalidate(key: SwrKey) {
         scope.launch {
-            database.invalidateQueryCache(key.value)
-            flow(key).value = flow(key).value.copy(isStale = true)
+            MODES.forEach { mode ->
+                val storageKey = SwrKey("$mode|${key.value}")
+                database.invalidateQueryCache(storageKey.value)
+                rawFlow(storageKey).value = rawFlow(storageKey).value.copy(isStale = true)
+            }
         }
     }
 
-    /** Marks every entry under [prefix] stale, e.g. all library lists after a favorite change. */
+    /** Marks every entry under [prefix] stale in both modes. */
     fun invalidatePrefix(prefix: String) {
         scope.launch {
-            database.invalidateQueryCachePrefix(prefix)
+            MODES.forEach { mode -> database.invalidateQueryCachePrefix("$mode|$prefix") }
             entries.keys
-                .filter { it.value.startsWith(prefix) }
-                .forEach { flow(it).value = flow(it).value.copy(isStale = true) }
+                .filter { it.value.substringAfter('|').startsWith(prefix) }
+                .forEach { rawFlow(it).value = rawFlow(it).value.copy(isStale = true) }
         }
     }
 
@@ -227,18 +244,27 @@ constructor(
         inFlight.values.forEach { it.cancel() }
         inFlight.clear()
         entries.values.forEach { it.value = SwrEntry() }
+        logicalEntries.values.forEach { it.value = SwrEntry() }
         loadedKeys.clear()
         scope.launch { database.clearQueryCache() }
     }
 
-    private fun flow(key: SwrKey): MutableStateFlow<SwrEntry<Any?>> =
+    private fun scoped(key: SwrKey): SwrKey =
+        scoped(key, appPreferences.getValue(appPreferences.offlineMode))
+
+    private fun scoped(key: SwrKey, offlineMode: Boolean): SwrKey =
+        SwrKey("${if (offlineMode) "offline" else "online"}|${key.value}")
+
+    private fun rawFlow(key: SwrKey): MutableStateFlow<SwrEntry<Any?>> =
         entries.computeIfAbsent(key) { MutableStateFlow(SwrEntry()) }
 
     private suspend fun <T> ensureLoaded(key: SwrKey, serializer: KSerializer<T>) {
-        if (loadedKeys.contains(key)) return
+        val storageKey = scoped(key)
+        if (loadedKeys.contains(storageKey)) return
+        val flow = rawFlow(storageKey)
         loadMutex.withLock {
-            if (loadedKeys.contains(key)) return
-            val entity = database.getQueryCache(key.value)
+            if (loadedKeys.contains(storageKey)) return
+            val entity = database.getQueryCache(storageKey.value)
             if (entity != null) {
                 val data = runCatching {
                     json.decodeFromString(serializer, entity.payload)
@@ -246,7 +272,7 @@ constructor(
                     .getOrNull()
                 if (data != null) {
                     val now = System.currentTimeMillis()
-                    flow(key).value =
+                    flow.value =
                         SwrEntry(
                             data = data,
                             updatedAt = entity.updatedAt,
@@ -256,11 +282,12 @@ constructor(
                         )
                 }
             }
-            loadedKeys.add(key)
+            loadedKeys.add(storageKey)
         }
     }
 
     private companion object {
         const val DEFAULT_STALE_AFTER_MS = 5 * 60 * 1000L
+        val MODES = listOf("online", "offline")
     }
 }

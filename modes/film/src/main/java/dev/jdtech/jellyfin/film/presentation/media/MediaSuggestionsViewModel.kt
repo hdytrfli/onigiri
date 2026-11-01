@@ -12,6 +12,7 @@ import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.repository.JellyfinRepository
+import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,16 +27,26 @@ import org.jellyfin.sdk.model.api.BaseItemKind
  * cards rather than episodes.
  */
 @HiltViewModel
-class MediaSuggestionsViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class MediaSuggestionsViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val appPreferences: AppPreferences,
+) : ViewModel() {
     private val _state = MutableStateFlow(MediaSuggestionsState())
     val state = _state.asStateFlow()
 
     private var loadedKind: MediaKind? = null
+    private var lastOfflineMode: Boolean? = null
 
     fun load(kind: MediaKind) {
-        if (loadedKind == kind) return
+        val offlineMode = appPreferences.getValue(appPreferences.offlineMode)
+        if (loadedKind == kind && lastOfflineMode == offlineMode) return
+        if (loadedKind != null && loadedKind != kind) {
+            _state.value = _state.value.copy(sections = emptyList())
+        }
         loadedKind = kind
+        lastOfflineMode = offlineMode
         viewModelScope.launch(Dispatchers.Default) {
             _state.emit(
                 _state.value.copy(
