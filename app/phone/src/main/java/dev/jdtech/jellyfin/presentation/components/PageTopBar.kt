@@ -3,6 +3,8 @@ package dev.jdtech.jellyfin.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,6 +36,7 @@ fun PageTopBar(
     title: String,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val safePadding = rememberSafePadding()
 
@@ -49,7 +52,7 @@ fun PageTopBar(
                 ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppButtonGroup {
+        AppButtonGroup(modifier = Modifier.weight(1f, fill = false)) {
             if (onBack != null) {
                 AppIconButton(
                     onClick = onBack,
@@ -78,6 +81,10 @@ fun PageTopBar(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+        if (trailingContent != null) {
+            Spacer(Modifier.weight(1f))
+            AppButtonGroup(content = trailingContent)
         }
     }
 }

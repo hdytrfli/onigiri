@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +47,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
@@ -204,7 +204,7 @@ private fun ProfilePickerContent(
 
     if (state.isLoading) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color.White)
+            AppLoadingIndicator(color = Color.White)
         }
     } else {
         androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier) {

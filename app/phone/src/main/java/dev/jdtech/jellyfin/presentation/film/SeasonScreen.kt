@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import dev.jdtech.jellyfin.film.presentation.season.SeasonAction
 import dev.jdtech.jellyfin.film.presentation.season.SeasonState
 import dev.jdtech.jellyfin.film.presentation.season.SeasonViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
@@ -203,7 +203,7 @@ private fun SeasonScreenLayout(
                     }
                 }
             }
-        } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+        } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
 
         ItemTopBar(
             hasBackButton = true,

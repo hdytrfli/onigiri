@@ -1,18 +1,28 @@
 package dev.jdtech.jellyfin.settings.domain
 
+import android.content.Context
 import android.content.SharedPreferences
 import dev.jdtech.jellyfin.settings.domain.models.Preference
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Locale
 import java.util.UUID
-import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import timber.log.Timber
 
-class AppPreferences @Inject constructor(val sharedPreferences: SharedPreferences) {
+private const val TABLET_MIN_WIDTH_DP = 600
+
+class AppPreferences(
+    val sharedPreferences: SharedPreferences,
+    context: Context,
+) {
+    private val isTablet =
+        context.resources.configuration.smallestScreenWidthDp >= TABLET_MIN_WIDTH_DP
+
+    private fun responsive(phone: String, tablet: String): String = if (isTablet) tablet else phone
+
     /**
      * Default preferred language, matching the device language (ISO 639-2, e.g. "eng"), so the
      * audio/subtitle selectors start aligned with the app language.
@@ -51,14 +61,14 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val blurHash = Preference("pref_blur_hash", true)
 
     /** Preview the previous screen while swiping back (Android predictive back). */
-    val predictiveBack = Preference("pref_predictive_back", false)
+    val predictiveBack = Preference("pref_predictive_back", true)
 
     /** Whether the wide-layout navigation rail is used: automatic, always, landscape or never. */
     val tabletUiMode = Preference("pref_tablet_ui_mode", "auto")
 
     /** Which metadata the movie/show list cards show: release year, rating, age rating. */
     val listDisplayFields = Preference("pref_list_display_fields", setOf("year", "rating", "age"))
-    val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", "1.5")
+    val backdropPortraitRatio = Preference("pref_backdrop_portrait_ratio", responsive("1", "1.5"))
     val backdropLandscapeRatio = Preference("pref_backdrop_landscape_ratio", "2.3333333")
 
     /** The image header ratio in the player's media sheets, 4:3 by default. */
@@ -68,16 +78,20 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val titlePlayerWidth = Preference("pref_title_player_width", "0.2")
 
     // Layout grid (1..8 columns). "Poster" is the 2:3 poster shape; "thumbnail" is the 16:9 shape.
-    val gridPosterColumnsPortrait = Preference("pref_grid_poster_columns_portrait", "2")
-    val gridPosterColumnsLandscape = Preference("pref_grid_poster_columns_landscape", "4")
-    val gridThumbnailColumnsPortrait = Preference("pref_grid_thumbnail_columns_portrait", "3")
-    val gridThumbnailColumnsLandscape = Preference("pref_grid_thumbnail_columns_landscape", "4")
+    val gridPosterColumnsPortrait =
+        Preference("pref_grid_poster_columns_portrait", responsive("3", "5"))
+    val gridPosterColumnsLandscape =
+        Preference("pref_grid_poster_columns_landscape", responsive("6", "7"))
+    val gridThumbnailColumnsPortrait =
+        Preference("pref_grid_thumbnail_columns_portrait", responsive("2", "3"))
+    val gridThumbnailColumnsLandscape =
+        Preference("pref_grid_thumbnail_columns_landscape", responsive("3", "4"))
     // How many suggestions the home screen carousel shows at once, per orientation.
     val gridSuggestionColumnsPortrait = Preference("pref_grid_suggestion_columns_portrait", "1")
     val gridSuggestionColumnsLandscape = Preference("pref_grid_suggestion_columns_landscape", "3")
     val gridProfileColumnsPortrait = Preference("pref_grid_profile_columns_portrait", "4")
     val gridProfileColumnsLandscape = Preference("pref_grid_profile_columns_landscape", "6")
-    val gridSpacing = Preference("pref_grid_spacing", "1")
+    val gridSpacing = Preference("pref_grid_spacing", responsive("1", "1.5"))
 
     // Player
     val playerAlwaysPlaySubtitles = Preference("pref_player_always_play_subtitles", false)
@@ -100,27 +114,27 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val playerMpvAo = Preference("pref_player_mpv_ao", "aaudio")
 
     // Player - mpv subtitles (applied as mpv sub-* options at playback start)
-    val playerMpvSubFontSize = Preference("pref_player_mpv_sub_font_size", "28")
-    val playerMpvSubFont = Preference("pref_player_mpv_sub_font", SubtitleFonts.DEFAULT_FAMILY)
+    val playerMpvSubFontSize = Preference("pref_player_mpv_sub_font_size", responsive("48", "32"))
+    val playerMpvSubFont = Preference("pref_player_mpv_sub_font", "Archivo")
     val playerMpvSubFontWeight =
         Preference("pref_player_mpv_sub_font_weight", SubtitleFonts.DEFAULT_WEIGHT.toString())
     val playerMpvSubColor = Preference("pref_player_mpv_sub_color", "#FFFFFFFF")
-    val playerMpvSubPosition = Preference("pref_player_mpv_sub_pos", "100")
+    val playerMpvSubPosition = Preference("pref_player_mpv_sub_pos", "95")
 
     /** Where subtitles are anchored: the whole screen, or just the video frame. */
     val playerMpvSubAnchor = Preference("pref_player_mpv_sub_anchor", "screen")
 
     // Reader
-    val readerTheme = Preference("pref_reader_theme", "dark")
-    val readerFontFamily = Preference("pref_reader_font_family", "default")
-    val readerFontSize = Preference("pref_reader_font_size", "1.0")
+    val readerTheme = Preference("pref_reader_theme", "light")
+    val readerFontFamily = Preference("pref_reader_font_family", "Vollkorn")
+    val readerFontSize = Preference("pref_reader_font_size", responsive("1.0", "1.3"))
     val readerFontWeight = Preference("pref_reader_font_weight", "1.0")
     val readerPageMargins = Preference("pref_reader_page_margins", "1.0")
-    val readerMode = Preference("pref_reader_mode", "single")
-    val readerPullDistance = Preference("pref_reader_pull_distance", "0.2")
-    val readerTextAlign = Preference("pref_reader_text_align", "default")
-    val readerTextNormalization = Preference("pref_reader_normalize", true)
-    val readerHyphenation = Preference("pref_reader_hyphenation", false)
+    val readerMode = Preference("pref_reader_mode", "scroll")
+    val readerPullDistance = Preference("pref_reader_pull_distance", "0.15")
+    val readerTextAlign = Preference("pref_reader_text_align", "justify")
+    val readerTextNormalization = Preference("pref_reader_normalize", false)
+    val readerHyphenation = Preference("pref_reader_hyphenation", true)
     val readerTapTurn = Preference("pref_reader_tap_turn", true)
     val readerMaxWidth = Preference("pref_reader_max_width", "default")
     val readerLineHeight = Preference("pref_reader_line_height", "1.5")
@@ -128,9 +142,9 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
     val readerWordSpacing = Preference("pref_reader_word_spacing", "0.0")
     val readerLetterSpacing = Preference("pref_reader_letter_spacing", "0.0")
     val readerBrightness = Preference("pref_reader_brightness", "1.0")
-    val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "3")
+    val playerMpvSubBorderSize = Preference("pref_player_mpv_sub_border_size", "1")
     val playerMpvSubBorderColor = Preference("pref_player_mpv_sub_border_color", "#FF000000")
-    val playerMpvSubBorderOpacity = Preference("pref_player_mpv_sub_border_opacity", "255")
+    val playerMpvSubBorderOpacity = Preference("pref_player_mpv_sub_border_opacity", "179")
     val playerMpvSubAssOverride = Preference("pref_player_mpv_sub_ass_override", "scale")
     val playerMpvSubBorderEnabled = Preference("pref_player_mpv_sub_border_enabled", true)
     val playerMpvSubBorderStyle = Preference("pref_player_mpv_sub_border_style", "opaque-box")
@@ -199,7 +213,7 @@ class AppPreferences @Inject constructor(val sharedPreferences: SharedPreference
 
     // Cache
     val imageCache = Preference("pref_image_cache", true)
-    val imageCacheSize = Preference("pref_image_cache_size", 20)
+    val imageCacheSize = Preference("pref_image_cache_size", 128)
 
     // Sorting
     val sortBy = Preference("pref_sort_by", "SortName")

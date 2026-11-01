@@ -25,6 +25,10 @@ class TabReselect {
     private val _openDownloads = MutableStateFlow(false)
     val openDownloads: StateFlow<Boolean> = _openDownloads.asStateFlow()
 
+    /** A requested Books subtab: 0 for books, 1 for audiobooks. */
+    private val _booksTab = MutableStateFlow<Int?>(null)
+    val booksTab: StateFlow<Int?> = _booksTab.asStateFlow()
+
     fun reselect(route: NavKey) {
         _events.tryEmit(route)
     }
@@ -35,6 +39,14 @@ class TabReselect {
 
     fun consumeDownloads() {
         _openDownloads.value = false
+    }
+
+    fun requestBooksTab(tab: Int) {
+        _booksTab.value = tab
+    }
+
+    fun consumeBooksTab() {
+        _booksTab.value = null
     }
 }
 

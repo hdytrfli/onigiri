@@ -307,8 +307,7 @@ class ReaderActivity : AppCompatActivity() {
             return
         }
         val navigator = epubNavigator ?: return
-        val href =
-            locator?.href?.toString() ?: navigator.currentLocator.value?.href?.toString() ?: return
+        val href = locator?.href?.toString() ?: navigator.currentLocator.value.href.toString()
         if (href == scrollPaddingHref) return
         scrollPaddingHref = href
         scrollPaddingJob?.cancel()

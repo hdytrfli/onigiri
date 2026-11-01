@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,7 @@ import dev.jdtech.jellyfin.film.presentation.mediadetail.IdentifyViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.PageContent
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
@@ -127,7 +127,7 @@ private fun IdentifyResultsLayout(
         PageContent(modifier = Modifier.padding(innerPadding)) {
             when {
                 state.isSearching ->
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 state.error != null ->
                     Text(
                         text = stringResource(CoreR.string.identify_error),

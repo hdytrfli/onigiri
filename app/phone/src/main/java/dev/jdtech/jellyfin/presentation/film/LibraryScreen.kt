@@ -17,9 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,10 +48,12 @@ import dev.jdtech.jellyfin.presentation.components.AppButtonSize
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppOptionRow
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.AppTextField
 import dev.jdtech.jellyfin.presentation.components.BaseDialog
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
@@ -71,7 +70,6 @@ import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.pageContentWindowInsets
 import dev.jdtech.jellyfin.presentation.utils.plus
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 
 @Composable
@@ -83,6 +81,7 @@ fun LibraryScreen(
     navigateBack: () -> Unit,
     showTopBar: Boolean = true,
     embedded: Boolean = false,
+    sectionTitle: String? = null,
     genreIds: List<UUID> = emptyList(),
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
@@ -98,6 +97,7 @@ fun LibraryScreen(
         libraryName = libraryName,
         showTopBar = showTopBar,
         embedded = embedded,
+        sectionTitle = sectionTitle,
         state = state,
         onAction = { action ->
             when (action) {
@@ -116,15 +116,14 @@ private fun LibraryScreenLayout(
     libraryName: String?,
     showTopBar: Boolean,
     embedded: Boolean,
+    sectionTitle: String?,
     state: LibraryState,
     onAction: (LibraryAction) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showSortByDialog by remember { mutableStateOf(false) }
     var showDisplayDialog by remember { mutableStateOf(false) }
 
     PageScaffold(
-        scrollBehavior = scrollBehavior,
         contentWindowInsets =
             if (embedded) {
                 WindowInsets(0, 0, 0, 0)
@@ -133,30 +132,18 @@ private fun LibraryScreenLayout(
             },
         topBar = {
             if (showTopBar) {
-                TopAppBar(
-                    title = { Text(libraryName.orEmpty()) },
-                    navigationIcon = {
-                        AppIconButton(
-                            onClick = { onAction(LibraryAction.OnBackClick) },
-                            variant = AppButtonVariant.Ghost,
-                            content = {
-                                Icon(
-                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                    contentDescription = null,
-                                )
-                            },
-                        )
-                    },
-                    actions = {
+                PageTopBar(
+                    title =
+                        libraryName?.takeIf { it.isNotBlank() }
+                            ?: stringResource(CoreR.string.genres),
+                    onBack = { onAction(LibraryAction.OnBackClick) },
+                    trailingContent = {
                         LibraryActionButtons(
                             onSearch = { onAction(LibraryAction.ToggleSearch) },
-                            onRefresh = { onAction(LibraryAction.RefreshItems) },
                             onInfo = { showDisplayDialog = true },
                             onSort = { showSortByDialog = true },
                         )
                     },
-                    windowInsets = topBarWindowInsets(),
-                    scrollBehavior = scrollBehavior,
                 )
             }
         },
@@ -170,11 +157,13 @@ private fun LibraryScreenLayout(
             onShowDisplayDialogChange = { showDisplayDialog = it },
             embedded = embedded,
             innerPadding = innerPadding,
+            sectionTitle = sectionTitle,
         )
     }
 }
 
 /** The grid, its search field and its dialogs, without a top bar or window insets. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryContent(
     state: LibraryState,
@@ -279,50 +268,57 @@ fun LibraryContent(
                 },
             )
         }
-        if (LocalOfflineMode.current) {
-            OfflineNotice()
-        } else {
-            val error = state.error
-            if (error != null && items.isEmpty()) {
-                FullPageError(
-                    onRefresh = { onAction(LibraryAction.RefreshItems) },
-                    isRefreshing = state.isLoading,
-                    error = error,
-                )
+        AppPullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = { onAction(LibraryAction.RefreshItems) },
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            if (LocalOfflineMode.current) {
+                OfflineNotice()
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding,
-                    horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                    verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                ) {
-                    // The title is content, not a header: it scrolls away with the grid. The badge
-                    // on its right shows the cached list's total.
-                    section(
-                        title = sectionTitle,
-                        trailingContent =
-                            itemCount?.let { count ->
-                                {
-                                    ItemCountBadge(
-                                        count = count,
-                                        modifier = Modifier.padding(start = 8.dp),
-                                    )
-                                }
-                            },
+                val error = state.error
+                if (error != null && items.isEmpty()) {
+                    FullPageError(
+                        onRefresh = { onAction(LibraryAction.RefreshItems) },
+                        isRefreshing = state.isLoading,
+                        error = error,
+                    )
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = contentPadding,
+                        horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                        verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {
-                        items(items = items, key = { it.id }) { item ->
-                            ItemCard(
-                                item = item,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                modifier = Modifier.animateItem(),
-                                fillWidth = true,
-                                showYear = ListDisplayField.Year in state.displayFields,
-                                showCommunityRating =
-                                    ListDisplayField.CommunityRating in state.displayFields,
-                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                            )
+                        // The title is content, not a header: it scrolls away with the grid. The
+                        // badge on its right shows the cached list's total.
+                        section(
+                            title = sectionTitle,
+                            trailingContent =
+                                itemCount?.let { count ->
+                                    {
+                                        ItemCountBadge(
+                                            count = count,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                    }
+                                },
+                        ) {
+                            items(items = items, key = { it.id }) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                    modifier = Modifier.animateItem(),
+                                    fillWidth = true,
+                                    showYear = ListDisplayField.Year in state.displayFields,
+                                    showCommunityRating =
+                                        ListDisplayField.CommunityRating in state.displayFields,
+                                    showAgeRating =
+                                        ListDisplayField.AgeRating in state.displayFields,
+                                )
+                            }
                         }
                     }
                 }
@@ -353,13 +349,12 @@ fun LibraryContent(
 @Composable
 private fun LibraryActionButtons(
     onSearch: () -> Unit,
-    onRefresh: () -> Unit,
     onInfo: () -> Unit,
     onSort: () -> Unit,
 ) {
     AppIconButton(
         onClick = onSearch,
-        variant = AppButtonVariant.Ghost,
+        variant = AppButtonVariant.Secondary,
         content = {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_search),
@@ -368,18 +363,8 @@ private fun LibraryActionButtons(
         },
     )
     AppIconButton(
-        onClick = onRefresh,
-        variant = AppButtonVariant.Ghost,
-        content = {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_rotate_ccw),
-                contentDescription = null,
-            )
-        },
-    )
-    AppIconButton(
         onClick = onInfo,
-        variant = AppButtonVariant.Ghost,
+        variant = AppButtonVariant.Secondary,
         content = {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_tv_minimal),
@@ -389,7 +374,7 @@ private fun LibraryActionButtons(
     )
     AppIconButton(
         onClick = onSort,
-        variant = AppButtonVariant.Ghost,
+        variant = AppButtonVariant.Secondary,
         content = {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_arrow_down_up),
@@ -448,6 +433,7 @@ private fun LibraryScreenLayoutPreview() {
             libraryName = "Movies",
             showTopBar = true,
             embedded = false,
+            sectionTitle = null,
             state = LibraryState(items = dummyMovies),
             onAction = {},
         )

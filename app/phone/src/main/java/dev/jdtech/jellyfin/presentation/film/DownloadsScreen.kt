@@ -24,6 +24,7 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.downloads.DownloadsViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.mediaSections
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
@@ -52,6 +53,7 @@ fun DownloadsScreen(
                 is CollectionAction.OnBackClick -> Unit
             }
         },
+        onRefresh = { viewModel.loadItems() },
         embedded = embedded,
     )
 }
@@ -61,6 +63,7 @@ fun DownloadsScreen(
 private fun DownloadsScreenLayout(
     state: CollectionState,
     onAction: (CollectionAction) -> Unit,
+    onRefresh: () -> Unit = {},
     embedded: Boolean = false,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -99,18 +102,24 @@ private fun DownloadsScreenLayout(
                 PaddingValues(all = MaterialTheme.spacings.default)
             }
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (state.sections.isEmpty()) {
-                EmptyState(text = stringResource(CoreR.string.no_downloads))
-            }
+        AppPullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = onRefresh,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (state.sections.isEmpty()) {
+                    EmptyState(text = stringResource(CoreR.string.no_downloads))
+                }
 
-            CollectionGrid(
-                sections = state.sections,
-                innerPadding = innerPadding,
-                contentPadding = contentPadding,
-                onAction = onAction,
-                displayFields = state.displayFields,
-            )
+                CollectionGrid(
+                    sections = state.sections,
+                    innerPadding = innerPadding,
+                    contentPadding = contentPadding,
+                    onAction = onAction,
+                    displayFields = state.displayFields,
+                )
+            }
         }
     }
 }

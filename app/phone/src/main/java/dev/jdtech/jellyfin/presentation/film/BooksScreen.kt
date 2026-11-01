@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -35,6 +34,8 @@ import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
@@ -53,6 +54,7 @@ import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 
 /** The Books root page, split into books and audiobooks. */
 @Composable
@@ -79,6 +81,13 @@ fun BooksScreen(
         tabReselect.events
             .filter { it is BooksRoute }
             .collect { selectedTab = (selectedTab + 1) % 2 }
+    }
+
+    LaunchedEffect(tabReselect) {
+        tabReselect.booksTab.filterNotNull().collect { tab ->
+            selectedTab = tab
+            tabReselect.consumeBooksTab()
+        }
     }
 
     LifecycleResumeEffect(Unit) {
@@ -158,59 +167,66 @@ fun BooksScreen(
     ) {
         if (LocalOfflineMode.current) {
             OfflineNotice()
-            return@RootPage
-        }
-        if (state.error != null && items.isEmpty()) {
-            FullPageError(
-                onRefresh = { viewModel.retry() },
-                isRefreshing = state.isLoading,
-                error = state.error,
-                modifier = Modifier.fillMaxSize(),
-            )
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (state.isLoading && items.isEmpty()) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                if (!state.isLoading && items.isEmpty()) {
-                    EmptyState(
-                        text =
-                            stringResource(
-                                when {
-                                    state.libraries.isEmpty() -> CoreR.string.no_book_libraries
-                                    audiobooks -> CoreR.string.no_audiobooks
-                                    else -> CoreR.string.no_books
-                                }
-                            )
+            AppPullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = { viewModel.retry() },
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                if (state.error != null && items.isEmpty()) {
+                    FullPageError(
+                        onRefresh = { viewModel.retry() },
+                        isRefreshing = state.isLoading,
+                        error = state.error,
+                        modifier = Modifier.fillMaxSize(),
                     )
-                }
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding =
-                        PaddingValues(
-                            start = safePadding.start + MaterialTheme.spacings.gutter,
-                            top = LocalRootPageContentInset.current,
-                            end = safePadding.end + MaterialTheme.spacings.gutter,
-                            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                    verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                ) {
-                    if (items.isNotEmpty()) {
-                        section(title = sectionTitle) {
-                            items(items = items, key = { it.id }) { item ->
-                                ItemCard(
-                                    item = item,
-                                    direction = Direction.VERTICAL,
-                                    onClick = {
-                                        viewModel.onItemOpened(item.id)
-                                        onItemClick(item)
-                                    },
-                                    modifier = Modifier.animateItem(),
-                                    fillWidth = true,
-                                    showYear = ListDisplayField.Year in state.displayFields,
-                                )
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (state.isLoading && items.isEmpty()) {
+                            AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                        if (!state.isLoading && items.isEmpty()) {
+                            EmptyState(
+                                text =
+                                    stringResource(
+                                        when {
+                                            state.libraries.isEmpty() ->
+                                                CoreR.string.no_book_libraries
+                                            audiobooks -> CoreR.string.no_audiobooks
+                                            else -> CoreR.string.no_books
+                                        }
+                                    )
+                            )
+                        }
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding =
+                                PaddingValues(
+                                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                                    top = LocalRootPageContentInset.current,
+                                    end = safePadding.end + MaterialTheme.spacings.gutter,
+                                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                        ) {
+                            if (items.isNotEmpty()) {
+                                section(title = sectionTitle) {
+                                    items(items = items, key = { it.id }) { item ->
+                                        ItemCard(
+                                            item = item,
+                                            direction = Direction.VERTICAL,
+                                            onClick = {
+                                                viewModel.onItemOpened(item.id)
+                                                onItemClick(item)
+                                            },
+                                            modifier = Modifier.animateItem(),
+                                            fillWidth = true,
+                                            showYear = ListDisplayField.Year in state.displayFields,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

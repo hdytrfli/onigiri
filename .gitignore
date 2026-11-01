@@ -35,12 +35,6 @@ google-services.json
 # Android Profiling
 *.hprof
 
-# Fastlane
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots
-fastlane/test_output
-
 # Local-only tooling and notes
 /local/
 .handover/

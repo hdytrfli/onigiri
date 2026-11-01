@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,6 +89,8 @@ fun ReaderOverlay(
 ) {
     var scrubValue by remember { mutableStateOf<Float?>(null) }
     var isScrubbing by remember { mutableStateOf(false) }
+    val sliderState = remember { SliderState(state.progress) }
+    sliderState.value = scrubValue ?: state.progress
     LaunchedEffect(state.page) { if (!isScrubbing) scrubValue = null }
     val displayedPage =
         scrubValue?.let { value ->
@@ -204,7 +207,7 @@ fun ReaderOverlay(
                             )
                         }
                         Slider(
-                            value = scrubValue ?: state.progress,
+                            state = sliderState,
                             onValueChange = { value ->
                                 if (state.pageCount > 1) {
                                     isScrubbing = true

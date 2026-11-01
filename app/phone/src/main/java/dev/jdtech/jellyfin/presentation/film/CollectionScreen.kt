@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +43,8 @@ import dev.jdtech.jellyfin.models.FindroidShow
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
@@ -87,6 +88,7 @@ fun CollectionScreen(
             }
         },
         onEditImages = navigateToEditImages,
+        onRefresh = { viewModel.loadItems(collectionId) },
     )
 }
 
@@ -95,6 +97,7 @@ private fun CollectionDetailLayout(
     state: CollectionState,
     onAction: (CollectionAction) -> Unit,
     onEditImages: (UUID) -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -126,58 +129,65 @@ private fun CollectionDetailLayout(
         }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        state.collection?.let { collection ->
-            Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
-                ItemHeader(
-                    item = collection,
-                    scrollState = scrollState,
-                    content = {
-                        Column(
-                            modifier =
-                                Modifier.align(Alignment.BottomStart)
-                                    .padding(start = paddingStart, end = paddingEnd)
-                        ) {
-                            ItemTitle(title = collection.name, logoUri = collection.images.logo)
-                        }
-                    },
-                )
-                Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
-                    Spacer(Modifier.height(MaterialTheme.spacings.small))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-                        verticalAlignment = Alignment.Bottom,
-                    ) {
-                        Text(
-                            text = stringResource(CoreR.string.items_count, state.items.size),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        yearRange?.let { range ->
-                            Text(text = range, style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                    if (collection.overview.isNotBlank()) {
+        AppPullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = onRefresh,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            state.collection?.let { collection ->
+                Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
+                    ItemHeader(
+                        item = collection,
+                        scrollState = scrollState,
+                        content = {
+                            Column(
+                                modifier =
+                                    Modifier.align(Alignment.BottomStart)
+                                        .padding(start = paddingStart, end = paddingEnd)
+                            ) {
+                                ItemTitle(title = collection.name, logoUri = collection.images.logo)
+                            }
+                        },
+                    )
+                    Column(modifier = Modifier.padding(start = paddingStart, end = paddingEnd)) {
                         Spacer(Modifier.height(MaterialTheme.spacings.small))
-                        OverviewText(text = collection.overview, maxCollapsedLines = 3)
+                        Row(
+                            horizontalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacings.small),
+                            verticalAlignment = Alignment.Bottom,
+                        ) {
+                            Text(
+                                text = stringResource(CoreR.string.items_count, state.items.size),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            yearRange?.let { range ->
+                                Text(text = range, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                        if (collection.overview.isNotBlank()) {
+                            Spacer(Modifier.height(MaterialTheme.spacings.small))
+                            OverviewText(text = collection.overview, maxCollapsedLines = 3)
+                        }
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
                     }
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                }
-                if (state.items.isNotEmpty()) {
-                    GridRows(
-                        items = state.items,
-                        columns = gridColumns(GridSize.POSTER),
-                        modifier = Modifier.padding(itemsPadding),
-                    ) { item ->
-                        ItemCard(
-                            item = item,
-                            direction = Direction.VERTICAL,
-                            onClick = { onAction(CollectionAction.OnItemClick(item)) },
-                            fillWidth = true,
-                        )
+                    if (state.items.isNotEmpty()) {
+                        GridRows(
+                            items = state.items,
+                            columns = gridColumns(GridSize.POSTER),
+                            modifier = Modifier.padding(itemsPadding),
+                        ) { item ->
+                            ItemCard(
+                                item = item,
+                                direction = Direction.VERTICAL,
+                                onClick = { onAction(CollectionAction.OnItemClick(item)) },
+                                fillWidth = true,
+                            )
+                        }
                     }
+                    Spacer(Modifier.height(paddingBottom))
                 }
-                Spacer(Modifier.height(paddingBottom))
-            }
-        } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+            } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
+        }
 
         ItemTopBar(
             hasBackButton = true,

@@ -1,5 +1,0 @@
-Findroid+ is a native Android client for Jellyfin. Browse movies, shows, books, and audiobooks from your own Jellyfin server.
-
-The app plays movies and episodes, and includes a built-in EPUB, PDF, and CBZ reader. It also offers per-profile PIN protection, downloads for offline use, and both ExoPlayer and mpv playback.
-
-Findroid+ is an independent fork of the Findroid project. It is not affiliated with Jellyfin or the Findroid project.

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,7 @@ import dev.jdtech.jellyfin.models.buildItemImageUrl
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.ErrorDialog
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
@@ -128,7 +128,7 @@ private fun EditImagesScreenLayout(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 contentAlignment = Alignment.Center,
             ) {
-                CircularProgressIndicator()
+                AppLoadingIndicator()
             }
         } else {
             val isEpisode = state.kind == BaseItemKind.EPISODE
@@ -457,7 +457,7 @@ private fun BusyTile(ratio: Float) {
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
-        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
+        AppLoadingIndicator(modifier = Modifier.size(28.dp))
     }
 }
 

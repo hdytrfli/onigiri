@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +61,14 @@ fun SubtitleOffsetControl(
         onDelayChange(delaySeconds)
     }
 
+    val sliderState = remember {
+        SliderState(
+            value = delaySeconds,
+            trackRange = -MAX_OFFSET_SECONDS..MAX_OFFSET_SECONDS,
+        )
+    }
+    sliderState.value = delaySeconds
+
     Column(
         modifier =
             modifier
@@ -84,9 +93,8 @@ fun SubtitleOffsetControl(
                 onStep = { update(delaySeconds - STEP_SECONDS) },
             )
             Slider(
-                value = delaySeconds,
+                state = sliderState,
                 onValueChange = { update(it) },
-                valueRange = -MAX_OFFSET_SECONDS..MAX_OFFSET_SECONDS,
                 colors = sliderColors(),
                 thumb = {
                     Box(

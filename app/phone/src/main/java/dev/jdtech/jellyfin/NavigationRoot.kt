@@ -64,6 +64,7 @@ import dev.jdtech.jellyfin.presentation.film.EditImageSearchScreen
 import dev.jdtech.jellyfin.presentation.film.EditImagesScreen
 import dev.jdtech.jellyfin.presentation.film.EpisodeScreen
 import dev.jdtech.jellyfin.presentation.film.FavoritesScreen
+import dev.jdtech.jellyfin.presentation.film.GenreScreen
 import dev.jdtech.jellyfin.presentation.film.HomeScreen
 import dev.jdtech.jellyfin.presentation.film.IdentifyResultsScreen
 import dev.jdtech.jellyfin.presentation.film.IdentifyScreen
@@ -280,9 +281,12 @@ private fun MainNavigation(
         }
     }
 
+    val tabReselect = remember { TabReselect() }
+
     val entryProvider = entryProvider {
         mainEntries(
             navigator = navigator,
+            tabReselect = tabReselect,
             onSearchClick = {
                 searchExpanded.value = true
                 navigator.navigate(MediaRoute)
@@ -294,7 +298,6 @@ private fun MainNavigation(
     val suiteType = rememberNavigationSuiteType()
     val predictiveBack = LocalPredictiveBack.current
     val currentRoute = navigationState.currentBackStack().last()
-    val tabReselect = remember { TabReselect() }
     CompositionLocalProvider(
         LocalSuiteStartInset provides suiteType.suiteStartInset(),
         LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
@@ -470,6 +473,7 @@ private fun EntryProviderScope<NavKey>.setupEntries(
 
 private fun EntryProviderScope<NavKey>.mainEntries(
     navigator: Navigator,
+    tabReselect: TabReselect,
     onSearchClick: () -> Unit,
     searchExpanded: MutableState<Boolean>,
 ) {
@@ -485,13 +489,27 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             HomeScreen(
                 onLibraryClick =
                     resumedAction { library ->
-                        navigator.navigate(
-                            LibraryRoute(
-                                libraryId = library.id.toString(),
-                                libraryName = library.name,
-                                libraryType = library.type,
-                            )
-                        )
+                        when (library.type) {
+                            CollectionType.Movies -> navigator.navigate(MoviesRoute)
+                            CollectionType.TvShows -> navigator.navigate(ShowsRoute)
+                            CollectionType.Books -> {
+                                tabReselect.requestBooksTab(0)
+                                navigator.navigate(BooksRoute)
+                            }
+                            else ->
+                                navigator.navigate(
+                                    LibraryRoute(
+                                        libraryId = library.id.toString(),
+                                        libraryName = library.name,
+                                        libraryType = library.type,
+                                    )
+                                )
+                        }
+                    },
+                onBooksClick =
+                    resumedAction { audiobooks ->
+                        tabReselect.requestBooksTab(if (audiobooks) 1 else 0)
+                        navigator.navigate(BooksRoute)
                     },
                 onSearchClick = dropUnlessResumed { onSearchClick() },
                 onSettingsClick =
@@ -518,14 +536,12 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         }
     }
     entry<GenreListRoute> { key ->
-        LibraryScreen(
-            libraryId = null,
-            libraryName = key.genreName,
+        GenreScreen(
+            genreId = UUID.fromString(key.genreId),
+            genreName = key.genreName,
             libraryType = if (key.movies) CollectionType.Movies else CollectionType.TvShows,
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
             navigateBack = dropUnlessResumed { navigator.goBack() },
-            showTopBar = true,
-            genreIds = listOf(UUID.fromString(key.genreId)),
         )
     }
     entry<ShowsRoute> {

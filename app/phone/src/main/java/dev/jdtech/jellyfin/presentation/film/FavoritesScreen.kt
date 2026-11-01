@@ -21,6 +21,7 @@ import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.favorites.FavoritesViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.mediaSections
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
@@ -90,45 +91,51 @@ private fun FavoritesScreenLayout(
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (state.sections.isEmpty()) {
-            EmptyState(text = stringResource(CoreR.string.no_favorites))
-        }
+    AppPullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = onRetryClick,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (state.sections.isEmpty()) {
+                EmptyState(text = stringResource(CoreR.string.no_favorites))
+            }
 
-        CollectionGrid(
-            sections = state.sections,
-            innerPadding = PaddingValues(0.dp),
-            contentPadding =
-                PaddingValues(
-                    start = paddingStart,
-                    top = contentPaddingTop,
-                    end = paddingEnd,
-                    bottom = paddingBottom,
-                ),
-            onAction = { action ->
-                if (action is CollectionAction.OnItemClick) {
-                    onItemClick(action.item)
-                }
-            },
-            displayFields = state.displayFields,
-        )
-
-        if (!embedded) {
-            HomeHeader(
-                serverName = state.serverName ?: "",
-                isLoading = state.isLoading,
-                isError = state.error != null,
-                onErrorClick = {},
-                onRetryClick = onRetryClick,
-                onSearchClick = onSearchClick,
-                onUserClick = onSettingsClick,
-                modifier =
-                    Modifier.padding(
+            CollectionGrid(
+                sections = state.sections,
+                innerPadding = PaddingValues(0.dp),
+                contentPadding =
+                    PaddingValues(
                         start = paddingStart,
-                        top = safePadding.top + MaterialTheme.spacings.small,
+                        top = contentPaddingTop,
                         end = paddingEnd,
+                        bottom = paddingBottom,
                     ),
+                onAction = { action ->
+                    if (action is CollectionAction.OnItemClick) {
+                        onItemClick(action.item)
+                    }
+                },
+                displayFields = state.displayFields,
             )
+
+            if (!embedded) {
+                HomeHeader(
+                    serverName = state.serverName ?: "",
+                    isLoading = state.isLoading,
+                    isError = state.error != null,
+                    onErrorClick = {},
+                    onRetryClick = onRetryClick,
+                    onSearchClick = onSearchClick,
+                    onUserClick = onSettingsClick,
+                    modifier =
+                        Modifier.padding(
+                            start = paddingStart,
+                            top = safePadding.top + MaterialTheme.spacings.small,
+                            end = paddingEnd,
+                        ),
+                )
+            }
         }
     }
 }

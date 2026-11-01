@@ -8,7 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -28,11 +30,12 @@ fun SteppedSlider(
     modifier: Modifier = Modifier,
 ) {
     val steps = count.coerceAtLeast(2)
+    val valueRange = 0f..(steps - 1).toFloat()
+    val state = remember(steps) { SliderState(index.toFloat(), steps - 2, valueRange) }
+    state.value = index.coerceIn(0, steps - 1).toFloat()
     Slider(
-        value = index.coerceIn(0, steps - 1).toFloat(),
+        state = state,
         onValueChange = { onIndexChange(it.roundToInt()) },
-        valueRange = 0f..(steps - 1).toFloat(),
-        steps = steps - 2,
         colors = playerSliderColors(),
         thumb = {
             Box(

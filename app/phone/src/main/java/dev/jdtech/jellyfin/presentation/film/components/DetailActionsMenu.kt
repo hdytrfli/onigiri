@@ -2,7 +2,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +21,7 @@ import dev.jdtech.jellyfin.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppDropdownMenu
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.MenuActionItem
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
@@ -86,7 +86,7 @@ fun DetailActionsMenu(
             variant = AppButtonVariant.Secondary,
             content = {
                 if (identifyState.isApplying) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    AppLoadingIndicator(modifier = Modifier.size(20.dp))
                 } else {
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_bolt),

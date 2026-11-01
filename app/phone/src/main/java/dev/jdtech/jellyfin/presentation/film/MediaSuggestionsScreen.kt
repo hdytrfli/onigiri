@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -47,6 +46,8 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.UiText
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
@@ -289,44 +290,50 @@ private fun CollectionsTab(
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading && items.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-        if (!state.isLoading && items.isEmpty()) {
-            EmptyState(
-                text =
-                    stringResource(
-                        if (kind == MediaKind.Movies) CoreR.string.no_movie_collections
-                        else CoreR.string.no_show_collections
-                    )
-            )
-        }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding =
-                PaddingValues(
-                    start = safePadding.start + MaterialTheme.spacings.gutter,
-                    top = LocalRootPageContentInset.current,
-                    end = safePadding.end + MaterialTheme.spacings.gutter,
-                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                ),
-            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-        ) {
-            section(title = title) {
-                gridItems(items = items, key = { it.id }) { item ->
-                    ItemCard(
-                        item = item,
-                        direction = Direction.VERTICAL,
-                        onClick = { onItemClick(item) },
-                        modifier = Modifier.animateItem(),
-                        fillWidth = true,
-                        showYear = ListDisplayField.Year in displayFields,
-                        showCommunityRating = ListDisplayField.CommunityRating in displayFields,
-                        showAgeRating = ListDisplayField.AgeRating in displayFields,
-                    )
+    AppPullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = viewModel::retry,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (state.isLoading && items.isEmpty()) {
+                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            if (!state.isLoading && items.isEmpty()) {
+                EmptyState(
+                    text =
+                        stringResource(
+                            if (kind == MediaKind.Movies) CoreR.string.no_movie_collections
+                            else CoreR.string.no_show_collections
+                        )
+                )
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding =
+                    PaddingValues(
+                        start = safePadding.start + MaterialTheme.spacings.gutter,
+                        top = LocalRootPageContentInset.current,
+                        end = safePadding.end + MaterialTheme.spacings.gutter,
+                        bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+            ) {
+                section(title = title) {
+                    gridItems(items = items, key = { it.id }) { item ->
+                        ItemCard(
+                            item = item,
+                            direction = Direction.VERTICAL,
+                            onClick = { onItemClick(item) },
+                            modifier = Modifier.animateItem(),
+                            fillWidth = true,
+                            showYear = ListDisplayField.Year in displayFields,
+                            showCommunityRating = ListDisplayField.CommunityRating in displayFields,
+                            showAgeRating = ListDisplayField.AgeRating in displayFields,
+                        )
+                    }
                 }
             }
         }
@@ -348,30 +355,36 @@ private fun MediaSuggestionsContent(
             bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
         )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (state.sections.isNotEmpty()) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = contentPadding,
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-            ) {
-                items(items = state.sections, key = { it.id }) { section ->
-                    MediaSectionRow(
-                        section = section,
-                        displayFields = displayFields,
-                        onItemClick = onItemClick,
-                        onListClick = if (section.showsListLink) onListClick else null,
-                    )
+    AppPullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = onRetry,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (state.sections.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding,
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                ) {
+                    items(items = state.sections, key = { it.id }) { section ->
+                        MediaSectionRow(
+                            section = section,
+                            displayFields = displayFields,
+                            onItemClick = onItemClick,
+                            onListClick = if (section.showsListLink) onListClick else null,
+                        )
+                    }
                 }
+            } else if (state.error != null) {
+                FullPageError(
+                    onRefresh = onRetry,
+                    isRefreshing = state.isLoading,
+                    error = state.error,
+                )
+            } else if (state.isLoading) {
+                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
             }
-        } else if (state.error != null) {
-            FullPageError(
-                onRefresh = onRetry,
-                isRefreshing = state.isLoading,
-                error = state.error,
-            )
-        } else if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
 }
@@ -389,37 +402,43 @@ private fun GenresContent(
 
     LaunchedEffect(kind) { viewModel.load(kind) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (state.error != null && state.sections.isEmpty()) {
-            FullPageError(
-                onRefresh = { viewModel.retry(kind) },
-                isRefreshing = state.isLoading,
-                error = state.error,
-            )
-        } else if (state.isLoading && state.sections.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding =
-                    PaddingValues(
-                        top = LocalRootPageContentInset.current,
-                        bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-            ) {
-                items(items = state.sections, key = { it.id }) { section ->
-                    MediaSectionRow(
-                        section =
-                            MediaSection(
-                                id = section.id.toString(),
-                                title = UiText.DynamicString(section.name),
-                                items = section.items,
-                            ),
-                        displayFields = displayFields,
-                        onItemClick = onItemClick,
-                        onListClick = { onGenreClick(FindroidGenre(section.id, section.name)) },
-                    )
+    AppPullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = { viewModel.retry(kind) },
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (state.error != null && state.sections.isEmpty()) {
+                FullPageError(
+                    onRefresh = { viewModel.retry(kind) },
+                    isRefreshing = state.isLoading,
+                    error = state.error,
+                )
+            } else if (state.isLoading && state.sections.isEmpty()) {
+                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding =
+                        PaddingValues(
+                            top = LocalRootPageContentInset.current,
+                            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                ) {
+                    items(items = state.sections, key = { it.id }) { section ->
+                        MediaSectionRow(
+                            section =
+                                MediaSection(
+                                    id = section.id.toString(),
+                                    title = UiText.DynamicString(section.name),
+                                    items = section.items,
+                                ),
+                            displayFields = displayFields,
+                            onItemClick = onItemClick,
+                            onListClick = { onGenreClick(FindroidGenre(section.id, section.name)) },
+                        )
+                    }
                 }
             }
         }

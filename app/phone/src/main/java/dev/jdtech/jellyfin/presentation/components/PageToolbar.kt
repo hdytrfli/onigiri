@@ -65,12 +65,17 @@ fun PageToolbar(
     modifier: Modifier = Modifier,
     tabIcons: List<Int>? = null,
     dropdownOnCompact: Boolean = false,
+    leadingContent: (@Composable RowScope.() -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.gutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (leadingContent != null) {
+            AppButtonGroup(content = leadingContent)
+            Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+        }
         if (dropdownOnCompact && isCompactWindow()) {
             TabDropdown(
                 tabs = tabs,

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +27,7 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.film.presentation.book.BookDetailViewModel
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
@@ -79,7 +79,7 @@ fun BookDetailScreen(
                     modifier = Modifier.fillMaxSize(),
                 )
             state.isLoading || state.item == null ->
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
             else -> {
                 val item = state.item!!
                 val progress = state.readingProgress

@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +38,7 @@ import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchEvent
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchState
 import dev.jdtech.jellyfin.film.presentation.editimages.EditImageSearchViewModel
 import dev.jdtech.jellyfin.film.presentation.editimages.imageTypeAspectRatio
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
@@ -113,7 +113,7 @@ private fun EditImageSearchLayout(
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             when {
                 state.isSearching ->
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 state.error != null ->
                     Text(
                         text = stringResource(CoreR.string.identify_error),

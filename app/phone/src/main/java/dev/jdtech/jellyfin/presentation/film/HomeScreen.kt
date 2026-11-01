@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +44,7 @@ import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
@@ -65,6 +65,7 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun HomeScreen(
     onLibraryClick: (library: FindroidCollection) -> Unit,
+    onBooksClick: (audiobooks: Boolean) -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onManageServers: () -> Unit,
@@ -147,7 +148,12 @@ fun HomeScreen(
         }
     ) {
         when (selectedTab) {
-            0 -> HomeScreenLayout(state = state, onAction = onAction)
+            0 ->
+                HomeScreenLayout(
+                    state = state,
+                    onAction = onAction,
+                    onBooksClick = onBooksClick,
+                )
             1 ->
                 FavoritesScreen(
                     onItemClick = onItemClick,
@@ -194,7 +200,11 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
+private fun HomeScreenLayout(
+    state: HomeState,
+    onAction: (HomeAction) -> Unit,
+    onBooksClick: (audiobooks: Boolean) -> Unit = {},
+) {
     val safePadding = rememberSafePadding()
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
@@ -220,7 +230,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize().semantics { isTraversalGroup = true }) {
-        PullToRefreshBox(
+        AppPullToRefreshBox(
             isRefreshing = state.isLoading,
             onRefresh = { onAction(HomeAction.OnRetryClick) },
         ) {
@@ -291,6 +301,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                             displayFields = state.displayFields,
                             gridSize = GridSize.POSTER,
                             vertical = true,
+                            onMoreClick = { onBooksClick(false) },
                         )
                     }
                 }
@@ -304,6 +315,7 @@ private fun HomeScreenLayout(state: HomeState, onAction: (HomeAction) -> Unit) {
                             displayFields = state.displayFields,
                             gridSize = GridSize.POSTER,
                             vertical = true,
+                            onMoreClick = { onBooksClick(true) },
                         )
                     }
                 }

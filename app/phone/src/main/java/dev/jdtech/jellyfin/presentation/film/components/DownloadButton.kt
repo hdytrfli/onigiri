@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.film.components
 import android.os.Environment
 import android.os.StatFs
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +24,7 @@ import dev.jdtech.jellyfin.presentation.components.AppButton
 import dev.jdtech.jellyfin.presentation.components.AppButtonGroup
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
+import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 
 /**
  * The media download action shown in the detail top bar. It reflects the download state: an
@@ -59,10 +59,7 @@ fun DownloadButton(
                     onClick = onNavigateToDownloads,
                     variant = AppButtonVariant.Secondary,
                     content = {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                        )
+                        AppLoadingIndicator(modifier = Modifier.size(20.dp))
                         Text(text = stringResource(CoreR.string.downloading_at, percent))
                     },
                 )
