@@ -1,74 +1,98 @@
-![Findroid banner](images/findroid-banner.png)
+<p align="center">
+  <img src="icons/ic_launcher-web.png" width="120" alt="Findroid+ icon">
+</p>
 
-# Findroid
-![GitHub release (with filter)](https://img.shields.io/github/v/release/jarnedemeulemeester/findroid?style=for-the-badge)
-![GitHub repo stars](https://img.shields.io/github/stars/jarnedemeulemeester/findroid?style=for-the-badge)
-![GitHub issues](https://img.shields.io/github/issues/jarnedemeulemeester/findroid?style=for-the-badge)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/jarnedemeulemeester/findroid?style=for-the-badge)
-![GitHub all releases](https://img.shields.io/github/downloads/jarnedemeulemeester/findroid/total?style=for-the-badge)
-![GitHub](https://img.shields.io/github/license/jarnedemeulemeester/findroid?style=for-the-badge)
+<h1 align="center">Findroid+</h1>
 
-Findroid is third-party Android application for Jellyfin that provides a native user interface to browse and play movies and series.
+<p align="center">A native Jellyfin client for Android with a built-in reader.</p>
 
-I am developing this application in my spare time.
+<p align="center">Version 1.0.0-beta</p>
 
-**This project is in its early stages so expect bugs.**
+Findroid+ is an independent Android client for Jellyfin. It began as a fork of
+[Findroid](https://github.com/jarnedemeulemeester/findroid) and builds on its native media
+experience while adding a complete reading workflow, a more personal profile system, and a
+refined interface.
 
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=dev.jdtech.jellyfin)
-[<img src="https://user-images.githubusercontent.com/32322857/219019331-027a6775-7362-44bb-a026-281f71e9b37b.png" alt="Available at Amazon Appstore" height="80">](https://www.amazon.com/gp/product/B0BTWC8DNZ)
-[<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/dev.jdtech.jellyfin)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/dev.jdtech.jellyfin)
+## Highlights
 
-## Screenshots
-| Home                                | Library                             | Movie                           | Season                            | Episode                             |
-|-------------------------------------|-------------------------------------|---------------------------------|-----------------------------------|-------------------------------------|
-| ![Home](fastlane/metadata/android/en-US/images/phoneScreenshots/1_en-US.png) | ![Library](fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.png) | ![Movie](fastlane/metadata/android/en-US/images/phoneScreenshots/3_en-US.png) | ![Season](fastlane/metadata/android/en-US/images/phoneScreenshots/4_en-US.png) | ![Episode](fastlane/metadata/android/en-US/images/phoneScreenshots/5_en-US.png) |
+- Native Android interface built with Jetpack Compose and Material 3
+- Movies, TV shows, books, and audiobooks in one library
+- Built-in EPUB, PDF, and CBZ reader
+- Per-profile PIN protection and profile switching
+- Downloads and offline playback
+- ExoPlayer and mpv playback engines
 
-## Features
-- Completely native interface
-- Supported media items: movies, series, seasons, episodes 
-  - Direct play only, (no transcoding)
-- Offline playback / downloads
-- ExoPlayer
-  - Video codecs: H.263, H.264, H.265, VP8, VP9, AV1 
-    - Support depends on Android device
-  - Audio codecs: Vorbis, Opus, FLAC, ALAC, PCM, MP3, AAC, AC-3, E-AC-3, DTS, DTS-HD, TrueHD 
-    - Support provided by ExoPlayer FFmpeg extension
-  - Subtitle codecs: SRT, VTT, SSA/ASS, PGSSUB
-    - SSA/ASS has limited styling support see [this issue](https://github.com/google/ExoPlayer/issues/8435)
-- mpv
-  - Container formats: mkv, mov, mp4, avi
-  - Video codecs: H.264, H.265, H.266, VP8, VP9, AV1
-  - Audio codecs: Opus, FLAC, MP3, AAC, AC-3, E-AC-3, TrueHD, DTS, DTS-HD
-  - Subtitle codecs: SRT, VTT, SSA/ASS, DVDSUB
-  - Optionally force software decoding when hardware decoding has issues.
+## Media playback
+
+- Direct play for movies, episodes, and audiobooks
+- ExoPlayer with FFmpeg audio decoding
+- Optional mpv playback for difficult formats
 - Picture-in-picture mode
-- Media chapters
-  - Timeline markers
-  - Chapter navigation gestures
-- Trickplay (requires Jellyfin 10.9 or higher)
-- Media segments (requires Jellyfin 10.10 or higher)
-  - Skip button
-  - Auto skip
+- Chapter markers and chapter navigation gestures
+- Trickplay thumbnails on supported Jellyfin servers
+- Media segment skipping and auto-skip
+- Embedded and external subtitles, including SRT, VTT, SSA/ASS, PGSSUB, and DVDSUB
+- Preferred audio and subtitle language selection
 
-## Planned features
-- Android TV
-- Websocket connection (Syncplay)
-- Chromecast support
+## Reading
 
-## Translating
-[JDTech Weblate](https://weblate.jdtech.dev) is a self-hosted instance of Weblate where you can translate this project and future projects of mine.
+- Dedicated Books tab for books and audiobooks
+- Readium-based EPUB, PDF, and CBZ rendering
+- Reading progress saved per profile
+- Table of contents with hierarchical chapters
+- Pull-to-chapter navigation in scroll mode
+- Reader font and typography settings
+- Author pages and book metadata
+- Book downloads and offline reading
+- Search, sorting, and display options for the book list
 
-## Questions?
-We have a [Discord server](https://discord.gg/tg5VvTFwTV) to discuss future development or ask general questions.
+## Profiles and onboarding
 
-## License
-This project is licensed under [GPLv3](LICENSE).
+- Guided first-time setup for a Jellyfin server and account
+- Password or Quick Connect sign-in
+- Optional four-digit profile PIN, stored as a salted hash on the device
+- Profile picker with admin and guest role badges
+- Profile management that respects Jellyfin permissions
+- Add and remove profiles without leaving the app
+- Persistent logout that returns to profile selection after restart
+- Profile switching keeps downloaded media while clearing app caches and reader state
 
-The logo is a combination of the Jellyfin logo and the Android robot.
+## Downloads and offline use
 
-The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
+- Download movies, episodes, books, and audiobooks
+- Background downloads with selectable storage
+- Offline mode for browsing and playing downloaded content
+- Download status and progress on detail pages
+- Downloaded items remain available across profile switches
 
-Android is a trademark of Google LLC.
+## Interface
 
-Google Play and the Google Play logo are trademarks of Google LLC.
+- Adaptive bottom navigation and navigation rail
+- Immersive detail pages and consistent page transitions
+- Shared dialogs, buttons, fields, and menus across the app
+- Search, sort, and display controls for media lists
+- Optional predictive-back preview
+- Configurable grid sizes, artwork ratios, and content spacing
+
+## Requirements
+
+- Android 8.0 or newer
+- A Jellyfin server
+- Direct network access to the server, or a reachable address while offline mode is disabled
+
+## Project links
+
+- [Findroid+ on GitHub](https://github.com/hdytrfli/findroid)
+- [Findroid, the upstream project](https://github.com/jarnedemeulemeester/findroid)
+- [Jellyfin](https://jellyfin.org)
+
+## License and attribution
+
+Findroid+ is licensed under the GNU General Public License v3.0. It is an independent fork and is
+not affiliated with the Jellyfin project or the Findroid project.
+
+The original Findroid project and its contributors remain the foundation of this work. Playback,
+library browsing, and much of the application architecture originate there.
+
+This project also depends on Jellyfin Server and its APIs, the Jellyfin Kotlin SDK, Readium, AndroidX
+Media3, mpv, and other open-source libraries.

@@ -1,1 +1,1 @@
-Third-party native Jellyfin app
+Native Jellyfin client with a built-in reader

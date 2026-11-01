@@ -1,5 +1,4 @@
 [versions]
-aboutlibraries = "15.2.0"
 android-plugin = "9.4.1"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.8.0"
@@ -34,8 +33,6 @@ slf4j = "2.0.20"
 slf4j-android = "2.0.20-0"
 
 [libraries]
-aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibraries" }
-aboutlibraries-compose-m3 = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "androidx-activity" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
@@ -93,8 +90,6 @@ slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version.ref = "slf4j-android" }
 
 [plugins]
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
-aboutlibraries-android = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 android-application = { id = "com.android.application", version.ref = "android-plugin" }
 android-library = { id = "com.android.library", version.ref = "android-plugin" }
 androidx-room3 = { id = "androidx.room3", version.ref = "androidx-room3" }

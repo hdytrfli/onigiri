@@ -5,8 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.aboutlibraries)
-    alias(libs.plugins.aboutlibraries.android)
 }
 
 java { toolchain { languageVersion = Versions.JAVA } }
@@ -102,8 +100,6 @@ dependencies {
     implementation(projects.modes.film)
     implementation(projects.settings)
 
-    implementation(libs.aboutlibraries.core)
-    implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
