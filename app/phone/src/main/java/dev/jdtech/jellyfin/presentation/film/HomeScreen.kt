@@ -59,6 +59,7 @@ import dev.jdtech.jellyfin.presentation.film.components.Section
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import kotlinx.coroutines.flow.filter
 
@@ -212,6 +213,7 @@ private fun HomeScreenLayout(
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
     val contentPaddingTop = LocalRootPageContentInset.current
+    val offlineMode = LocalOfflineMode.current
 
     if (state.error != null && state.suggestionsSection == null && state.views.isEmpty()) {
         FullPageError(
@@ -232,21 +234,23 @@ private fun HomeScreenLayout(
                 contentPadding = PaddingValues(top = contentPaddingTop, bottom = paddingBottom),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {
-                state.suggestionsSection?.let { section ->
-                    item(key = section.id) {
-                        Section(
-                            title = stringResource(FilmR.string.suggestions),
-                            titleModifier =
-                                Modifier.padding(start = paddingStart, end = paddingEnd),
-                        ) {
-                            HomeCarousel(
-                                items = section.items,
-                                itemsPadding = itemsPadding,
-                                onAction = onAction,
-                            )
+                state.suggestionsSection
+                    ?.takeUnless { offlineMode }
+                    ?.let { section ->
+                        item(key = section.id) {
+                            Section(
+                                title = stringResource(FilmR.string.suggestions),
+                                titleModifier =
+                                    Modifier.padding(start = paddingStart, end = paddingEnd),
+                            ) {
+                                HomeCarousel(
+                                    items = section.items,
+                                    itemsPadding = itemsPadding,
+                                    onAction = onAction,
+                                )
+                            }
                         }
                     }
-                }
                 state.resumeSection?.let { section ->
                     item(key = section.id) {
                         MediaSectionRow(

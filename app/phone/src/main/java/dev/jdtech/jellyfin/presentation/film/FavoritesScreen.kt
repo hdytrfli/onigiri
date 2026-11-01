@@ -75,7 +75,10 @@ private fun FavoritesScreenLayout(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (state.sections.isEmpty()) {
-                EmptyState(text = stringResource(CoreR.string.no_favorites))
+                EmptyState(
+                    context = stringResource(CoreR.string.empty_context_favorites),
+                    onRefresh = onRetryClick,
+                )
             }
 
             CollectionGrid(

@@ -301,11 +301,8 @@ private fun CollectionsTab(
         Box(modifier = Modifier.fillMaxSize()) {
             if (!state.isLoading && items.isEmpty()) {
                 EmptyState(
-                    text =
-                        stringResource(
-                            if (kind == MediaKind.Movies) CoreR.string.no_movie_collections
-                            else CoreR.string.no_show_collections
-                        )
+                    context = stringResource(CoreR.string.empty_context_collections),
+                    onRefresh = { viewModel.retry() },
                 )
             }
             LazyVerticalGrid(
@@ -379,10 +376,8 @@ private fun MediaSuggestionsContent(
                 if (state.sections.isEmpty()) {
                     item {
                         EmptyState(
-                            text = stringResource(FilmR.string.suggestions_empty),
-                            icon = CoreR.drawable.ic_sparkles,
-                            actionLabel = stringResource(CoreR.string.refresh),
-                            onAction = onRetry,
+                            context = stringResource(CoreR.string.empty_context_suggestions),
+                            onRefresh = onRetry,
                             modifier = Modifier.fillParentMaxSize(),
                         )
                     }
@@ -442,10 +437,8 @@ private fun GenresContent(
                     if (state.sections.isEmpty()) {
                         item {
                             EmptyState(
-                                text = stringResource(FilmR.string.genres_empty),
-                                icon = CoreR.drawable.ic_layout_grid,
-                                actionLabel = stringResource(CoreR.string.refresh),
-                                onAction = { viewModel.retry(kind) },
+                                context = stringResource(CoreR.string.empty_context_genres),
+                                onRefresh = { viewModel.retry(kind) },
                                 modifier = Modifier.fillParentMaxSize(),
                             )
                         }

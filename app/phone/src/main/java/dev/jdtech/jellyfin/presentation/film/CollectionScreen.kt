@@ -134,6 +134,12 @@ private fun CollectionDetailLayout(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize(),
         ) {
+            if (!state.isLoading && state.items.isEmpty()) {
+                EmptyState(
+                    context = stringResource(CoreR.string.empty_context_items),
+                    onRefresh = onRefresh,
+                )
+            }
             state.collection?.let { collection ->
                 Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
                     ItemHeader(
@@ -211,6 +217,7 @@ fun CollectionScreenLayout(
     collectionName: String,
     state: CollectionState,
     onAction: (CollectionAction) -> Unit,
+    onRefresh: () -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -238,7 +245,10 @@ fun CollectionScreenLayout(
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (!state.isLoading && state.sections.isEmpty()) {
-                EmptyState(text = stringResource(CoreR.string.nothing_offline))
+                EmptyState(
+                    context = stringResource(CoreR.string.empty_context_items),
+                    onRefresh = onRefresh,
+                )
             }
             CollectionGrid(
                 sections = state.sections,

@@ -56,6 +56,7 @@ import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.EmptyState
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemCountBadge
@@ -280,39 +281,48 @@ fun LibraryContent(
                     error = error,
                 )
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding,
-                    horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                    verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                ) {
-                    // The title is content, not a header: it scrolls away with the grid. The
-                    // badge on its right shows the cached list's total.
-                    section(
-                        title = sectionTitle,
-                        trailingContent =
-                            itemCount?.let { count ->
-                                {
-                                    ItemCountBadge(
-                                        count = count,
-                                        modifier = Modifier.padding(start = 8.dp),
-                                    )
-                                }
-                            },
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (!state.isLoading && items.isEmpty()) {
+                        EmptyState(
+                            context = stringResource(CoreR.string.empty_context_items),
+                            onRefresh = { onAction(LibraryAction.RefreshItems) },
+                        )
+                    }
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = contentPadding,
+                        horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                        verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {
-                        items(items = items, key = { it.id }) { item ->
-                            ItemCard(
-                                item = item,
-                                direction = Direction.VERTICAL,
-                                onClick = { onAction(LibraryAction.OnItemClick(item)) },
-                                modifier = Modifier.animateItem(),
-                                fillWidth = true,
-                                showYear = ListDisplayField.Year in state.displayFields,
-                                showCommunityRating =
-                                    ListDisplayField.CommunityRating in state.displayFields,
-                                showAgeRating = ListDisplayField.AgeRating in state.displayFields,
-                            )
+                        // The title is content, not a header: it scrolls away with the grid. The
+                        // badge on its right shows the cached list's total.
+                        section(
+                            title = sectionTitle,
+                            trailingContent =
+                                itemCount?.let { count ->
+                                    {
+                                        ItemCountBadge(
+                                            count = count,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                    }
+                                },
+                        ) {
+                            items(items = items, key = { it.id }) { item ->
+                                ItemCard(
+                                    item = item,
+                                    direction = Direction.VERTICAL,
+                                    onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                    modifier = Modifier.animateItem(),
+                                    fillWidth = true,
+                                    showYear = ListDisplayField.Year in state.displayFields,
+                                    showCommunityRating =
+                                        ListDisplayField.CommunityRating in state.displayFields,
+                                    showAgeRating =
+                                        ListDisplayField.AgeRating in state.displayFields,
+                                )
+                            }
                         }
                     }
                 }

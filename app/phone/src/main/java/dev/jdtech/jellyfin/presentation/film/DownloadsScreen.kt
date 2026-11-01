@@ -111,7 +111,10 @@ private fun DownloadsScreenLayout(
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (state.sections.isEmpty()) {
-                    EmptyState(text = stringResource(CoreR.string.no_downloads))
+                    EmptyState(
+                        context = stringResource(CoreR.string.empty_context_downloads),
+                        onRefresh = onRefresh,
+                    )
                 }
 
                 CollectionGrid(

@@ -1,10 +1,11 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -14,44 +15,68 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.jdtech.jellyfin.LocalOpenDownloads
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.presentation.components.AppButton
+import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
 /**
- * The shared empty state: an icon, a short message, and an optional action, centered in the page.
- * Pages can compose it behind a grid so section titles stay visible.
+ * The app-wide empty state: one ghost icon, a contextual "No … yet" message, and the same two
+ * actions everywhere: refresh, and open downloads.
  */
 @Composable
 fun EmptyState(
-    text: String,
+    context: String,
     modifier: Modifier = Modifier,
-    @DrawableRes icon: Int = CoreR.drawable.ic_info,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null,
+    onRefresh: (() -> Unit)? = null,
 ) {
+    val openDownloads = LocalOpenDownloads.current
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            painter = painterResource(icon),
+            painter = painterResource(CoreR.drawable.ic_ghost),
             contentDescription = null,
             modifier = Modifier.size(32.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(MaterialTheme.spacings.medium))
         Text(
-            text = text,
+            text = stringResource(CoreR.string.empty_state_title, context),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
-        if (actionLabel != null && onAction != null) {
-            Spacer(Modifier.height(MaterialTheme.spacings.medium))
-            AppButton(onClick = onAction) { Text(actionLabel) }
+        Spacer(Modifier.height(MaterialTheme.spacings.small))
+        Text(
+            text = stringResource(CoreR.string.empty_state_message),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+        Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
+            if (onRefresh != null) {
+                AppButton(
+                    onClick = onRefresh,
+                    content = { Text(stringResource(CoreR.string.refresh)) },
+                )
+            }
+            AppButton(
+                onClick = openDownloads,
+                variant = AppButtonVariant.Secondary,
+                content = { Text(stringResource(CoreR.string.title_download)) },
+            )
         }
     }
 }

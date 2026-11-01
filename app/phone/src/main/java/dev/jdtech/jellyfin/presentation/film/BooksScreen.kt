@@ -185,15 +185,15 @@ fun BooksScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         if (!state.isLoading && items.isEmpty()) {
                             EmptyState(
-                                text =
+                                context =
                                     stringResource(
-                                        when {
-                                            state.libraries.isEmpty() ->
-                                                CoreR.string.no_book_libraries
-                                            audiobooks -> CoreR.string.no_audiobooks
-                                            else -> CoreR.string.no_books
+                                        if (audiobooks) {
+                                            CoreR.string.empty_context_audiobooks
+                                        } else {
+                                            CoreR.string.empty_context_books
                                         }
-                                    )
+                                    ),
+                                onRefresh = { viewModel.retry() },
                             )
                         }
                         LazyVerticalGrid(
