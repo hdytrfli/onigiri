@@ -24,16 +24,13 @@ import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.PageSearchField
-import dev.jdtech.jellyfin.presentation.components.PageToolbar
+import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import java.util.UUID
 
-/**
- * A genre's media grid, using the same root-page header, search field, and toolbar as the Movies
- * and Shows list pages.
- */
+/** A genre's media grid, with a floating title bar, search field, and display/sort actions. */
 @Composable
 fun GenreScreen(
     genreId: UUID,
@@ -109,31 +106,11 @@ fun GenreScreen(
                         onClose = { viewModel.onAction(LibraryAction.ToggleSearch) },
                     )
                 } else {
-                    PageToolbar(
-                        tabs = listOf(genreName.ifBlank { stringResource(CoreR.string.genres) }),
-                        selectedIndex = 0,
-                        onSelect = {},
-                        tabIcons =
-                            listOf(
-                                if (libraryType == CollectionType.Movies) {
-                                    CoreR.drawable.ic_clapperboard
-                                } else {
-                                    CoreR.drawable.ic_tv
-                                }
-                            ),
-                        leadingContent = {
-                            AppIconButton(
-                                onClick = navigateBack,
-                                variant = AppButtonVariant.Secondary,
-                                content = {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                        contentDescription = null,
-                                    )
-                                },
-                            )
-                        },
-                        actions = toolbarActions,
+                    PageTopBar(
+                        title = genreName.ifBlank { stringResource(CoreR.string.genres) },
+                        onBack = navigateBack,
+                        trailingContent = toolbarActions,
+                        includeTopInset = false,
                     )
                 }
             }

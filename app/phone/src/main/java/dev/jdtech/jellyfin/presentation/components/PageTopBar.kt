@@ -37,6 +37,7 @@ fun PageTopBar(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    includeTopInset: Boolean = true,
 ) {
     val safePadding = rememberSafePadding()
 
@@ -46,7 +47,12 @@ fun PageTopBar(
                 .fillMaxWidth()
                 .padding(
                     start = safePadding.start + MaterialTheme.spacings.gutter,
-                    top = safePadding.top + MaterialTheme.spacings.gutter,
+                    top =
+                        if (includeTopInset) {
+                            safePadding.top + MaterialTheme.spacings.gutter
+                        } else {
+                            0.dp
+                        },
                     end = safePadding.end + MaterialTheme.spacings.gutter,
                     bottom = MaterialTheme.spacings.gutter,
                 ),
