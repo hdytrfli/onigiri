@@ -393,8 +393,9 @@ private fun GenresContent(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val safePadding = rememberSafePadding()
 
-    // Revalidate whenever the tab is entered, keeping the last sections on screen meanwhile.
-    LaunchedEffect(kind) { viewModel.load(kind, force = true) }
+    // Load once; the cached sections stay put until the user pulls to refresh or the cache is
+    // invalidated by a new ViewModel.
+    LaunchedEffect(kind) { viewModel.load(kind) }
 
     AppPullToRefreshBox(
         isRefreshing = state.isLoading,
