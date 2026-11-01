@@ -51,6 +51,7 @@ import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.DownloadButton
 import dev.jdtech.jellyfin.presentation.film.components.ExtraInfoText
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
@@ -139,6 +140,7 @@ fun EpisodeScreen(
         onSubtitleSearch = navigateToSubtitleSearch,
         onEditImages = navigateToEditImages,
         onNavigateToDownloads = navigateToDownloads,
+        onRetry = { viewModel.loadEpisode(episodeId = episodeId) },
     )
 }
 
@@ -151,6 +153,7 @@ private fun EpisodeScreenLayout(
     onSubtitleSearch: (UUID) -> Unit = {},
     onEditImages: (UUID) -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -270,10 +273,6 @@ private fun EpisodeScreenLayout(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.small * spacingScale))
-                    if (state.displayExtraInfo && state.videoMetadata != null) {
-                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
-                    }
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     OverviewText(text = episode.overview, maxCollapsedLines = 3)
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
@@ -283,6 +282,10 @@ private fun EpisodeScreenLayout(
                             director = state.director,
                             writers = state.writers,
                         )
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    }
+                    if (state.displayExtraInfo && state.videoMetadata != null) {
+                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                 }
@@ -297,7 +300,15 @@ private fun EpisodeScreenLayout(
                 }
                 Spacer(Modifier.height(paddingBottom))
             }
-        } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
+        }
+            ?: run {
+                val error = state.error
+                if (error != null) {
+                    FullPageError(onRefresh = onRetry, isRefreshing = false, error = error)
+                } else {
+                    AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
 
         ItemTopBar(
             hasBackButton = true,

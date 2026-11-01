@@ -32,6 +32,7 @@ import dev.jdtech.jellyfin.film.presentation.books.BooksViewModel
 import dev.jdtech.jellyfin.film.presentation.library.ListDisplayField
 import dev.jdtech.jellyfin.models.FindroidBook
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AnimatedTabContent
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
@@ -94,16 +95,6 @@ fun BooksScreen(
         onPauseOrDispose {}
     }
 
-    val audiobooks = selectedTab == 1
-    val sectionTitle =
-        stringResource(if (audiobooks) CoreR.string.audiobooks_label else CoreR.string.books_label)
-    val items =
-        state.items.values
-            .flatten()
-            .filter { item -> item is FindroidBook && item.isAudiobook == audiobooks }
-            .distinctBy { it.id }
-            .filter { item -> searchQuery.isBlank() || item.name.contains(searchQuery, true) }
-
     RootPage(
         header = {
             AnimatedContent(targetState = searchExpanded, label = "books-search") { expanded ->
@@ -163,63 +154,80 @@ fun BooksScreen(
             }
         }
     ) {
-        if (LocalOfflineMode.current) {
-            OfflineNotice()
-        } else {
-            AppPullToRefreshBox(
-                isRefreshing = state.isLoading,
-                onRefresh = { viewModel.retry() },
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                if (state.error != null && items.isEmpty()) {
-                    FullPageError(
-                        onRefresh = { viewModel.retry() },
-                        isRefreshing = state.isLoading,
-                        error = state.error,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        if (!state.isLoading && items.isEmpty()) {
-                            EmptyState(
-                                text =
-                                    stringResource(
-                                        when {
-                                            state.libraries.isEmpty() ->
-                                                CoreR.string.no_book_libraries
-                                            audiobooks -> CoreR.string.no_audiobooks
-                                            else -> CoreR.string.no_books
-                                        }
-                                    )
-                            )
-                        }
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+        AnimatedTabContent(selectedTab = selectedTab) { tab ->
+            val audiobooks = tab == 1
+            val sectionTitle =
+                stringResource(
+                    if (audiobooks) CoreR.string.audiobooks_label else CoreR.string.books_label
+                )
+            val items =
+                state.items.values
+                    .flatten()
+                    .filter { item -> item is FindroidBook && item.isAudiobook == audiobooks }
+                    .distinctBy { it.id }
+                    .filter { item ->
+                        searchQuery.isBlank() || item.name.contains(searchQuery, true)
+                    }
+
+            if (LocalOfflineMode.current) {
+                OfflineNotice()
+            } else {
+                AppPullToRefreshBox(
+                    isRefreshing = state.isLoading,
+                    onRefresh = { viewModel.retry() },
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    if (state.error != null && items.isEmpty()) {
+                        FullPageError(
+                            onRefresh = { viewModel.retry() },
+                            isRefreshing = state.isLoading,
+                            error = state.error,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding =
-                                PaddingValues(
-                                    start = safePadding.start + MaterialTheme.spacings.gutter,
-                                    top = LocalRootPageContentInset.current,
-                                    end = safePadding.end + MaterialTheme.spacings.gutter,
-                                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                                ),
-                            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
-                        ) {
-                            if (items.isNotEmpty()) {
-                                section(title = sectionTitle) {
-                                    items(items = items, key = { it.id }) { item ->
-                                        ItemCard(
-                                            item = item,
-                                            direction = Direction.VERTICAL,
-                                            onClick = {
-                                                viewModel.onItemOpened(item.id)
-                                                onItemClick(item)
-                                            },
-                                            modifier = Modifier.animateItem(),
-                                            fillWidth = true,
-                                            showYear = ListDisplayField.Year in state.displayFields,
+                        )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            if (!state.isLoading && items.isEmpty()) {
+                                EmptyState(
+                                    text =
+                                        stringResource(
+                                            when {
+                                                state.libraries.isEmpty() ->
+                                                    CoreR.string.no_book_libraries
+                                                audiobooks -> CoreR.string.no_audiobooks
+                                                else -> CoreR.string.no_books
+                                            }
                                         )
+                                )
+                            }
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding =
+                                    PaddingValues(
+                                        start = safePadding.start + MaterialTheme.spacings.gutter,
+                                        top = LocalRootPageContentInset.current,
+                                        end = safePadding.end + MaterialTheme.spacings.gutter,
+                                        bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                                    ),
+                                horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                                verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                            ) {
+                                if (items.isNotEmpty()) {
+                                    section(title = sectionTitle) {
+                                        items(items = items, key = { it.id }) { item ->
+                                            ItemCard(
+                                                item = item,
+                                                direction = Direction.VERTICAL,
+                                                onClick = {
+                                                    viewModel.onItemOpened(item.id)
+                                                    onItemClick(item)
+                                                },
+                                                modifier = Modifier.animateItem(),
+                                                fillWidth = true,
+                                                showYear =
+                                                    ListDisplayField.Year in state.displayFields,
+                                            )
+                                        }
                                     }
                                 }
                             }

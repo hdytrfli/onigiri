@@ -44,6 +44,7 @@ import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
@@ -113,6 +114,7 @@ fun ShowScreen(
         onIdentify = navigateToIdentify,
         onIdentifyApplied = { viewModel.loadShow(showId = showId) },
         onEditImages = navigateToEditImages,
+        onRetry = { viewModel.loadShow(showId = showId) },
     )
 }
 
@@ -123,6 +125,7 @@ private fun ShowScreenLayout(
     onIdentify: (UUID) -> Unit = {},
     onIdentifyApplied: () -> Unit = {},
     onEditImages: (UUID) -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -266,7 +269,15 @@ private fun ShowScreenLayout(
                 }
                 Spacer(Modifier.height(paddingBottom))
             }
-        } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
+        }
+            ?: run {
+                val error = state.error
+                if (error != null) {
+                    FullPageError(onRefresh = onRetry, isRefreshing = false, error = error)
+                } else {
+                    AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
 
         ItemTopBar(
             hasBackButton = true,

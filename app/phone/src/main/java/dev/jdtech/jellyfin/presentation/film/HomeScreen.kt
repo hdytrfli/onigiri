@@ -42,6 +42,7 @@ import dev.jdtech.jellyfin.film.presentation.home.HomeViewModel
 import dev.jdtech.jellyfin.film.presentation.media.MediaSection
 import dev.jdtech.jellyfin.models.FindroidCollection
 import dev.jdtech.jellyfin.models.FindroidItem
+import dev.jdtech.jellyfin.presentation.components.AnimatedTabContent
 import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
 import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
@@ -145,24 +146,26 @@ fun HomeScreen(
             )
         }
     ) {
-        when (selectedTab) {
-            0 ->
-                HomeScreenLayout(
-                    state = state,
-                    onAction = onAction,
-                    onBooksClick = onBooksClick,
-                )
-            1 ->
-                FavoritesScreen(
-                    onItemClick = onItemClick,
-                    viewModel = favoritesViewModel,
-                )
-            else ->
-                DownloadsScreen(
-                    onItemClick = onItemClick,
-                    embedded = true,
-                    viewModel = downloadsViewModel,
-                )
+        AnimatedTabContent(selectedTab = selectedTab) { tab ->
+            when (tab) {
+                0 ->
+                    HomeScreenLayout(
+                        state = state,
+                        onAction = onAction,
+                        onBooksClick = onBooksClick,
+                    )
+                1 ->
+                    FavoritesScreen(
+                        onItemClick = onItemClick,
+                        viewModel = favoritesViewModel,
+                    )
+                else ->
+                    DownloadsScreen(
+                        onItemClick = onItemClick,
+                        embedded = true,
+                        viewModel = downloadsViewModel,
+                    )
+            }
         }
     }
 

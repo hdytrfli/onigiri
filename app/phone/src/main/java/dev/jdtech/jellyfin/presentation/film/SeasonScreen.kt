@@ -37,6 +37,7 @@ import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.EpisodeGridCard
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemTitle
@@ -92,6 +93,7 @@ fun SeasonScreen(
             viewModel.onAction(action)
         },
         onEditImages = navigateToEditImages,
+        onRetry = { viewModel.loadSeason(seasonId = seasonId) },
     )
 }
 
@@ -100,6 +102,7 @@ private fun SeasonScreenLayout(
     state: SeasonState,
     onAction: (SeasonAction) -> Unit,
     onEditImages: (UUID) -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -203,7 +206,15 @@ private fun SeasonScreenLayout(
                     }
                 }
             }
-        } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
+        }
+            ?: run {
+                val error = state.error
+                if (error != null) {
+                    FullPageError(onRefresh = onRetry, isRefreshing = false, error = error)
+                } else {
+                    AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            }
 
         ItemTopBar(
             hasBackButton = true,

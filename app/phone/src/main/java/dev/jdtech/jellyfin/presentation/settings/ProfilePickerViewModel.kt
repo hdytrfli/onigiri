@@ -10,6 +10,7 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.setup.domain.SetupRepository
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,31 +67,37 @@ constructor(
 
     fun load() {
         viewModelScope.launch {
-            val server = repository.getCurrentServer()
-            if (server == null) {
+            try {
+                val server = repository.getCurrentServer()
+                if (server == null) {
+                    _state.update { it.copy(isLoading = false) }
+                    return@launch
+                }
+                val users = repository.getUsers(server.id)
+                val profiles = users.map { user ->
+                    ProfileItem(
+                        id = user.id,
+                        name = user.name,
+                        isLocked = appPreferences.hasProfilePin(server.id, user.id),
+                        isCurrent = user.id == server.currentUserId,
+                        isAdmin = appPreferences.isProfileAdmin(server.id, user.id),
+                        accessToken = user.accessToken,
+                    )
+                }
+                _state.update {
+                    it.copy(
+                        profiles = profiles,
+                        serverId = server.id,
+                        baseUrl = jellyfinApi.api.baseUrl?.trimEnd('/'),
+                        viewerIsAdmin =
+                            profiles.firstOrNull { profile -> profile.isCurrent }?.isAdmin == true,
+                        isLoading = false,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false) }
-                return@launch
-            }
-            val users = repository.getUsers(server.id)
-            val profiles = users.map { user ->
-                ProfileItem(
-                    id = user.id,
-                    name = user.name,
-                    isLocked = appPreferences.hasProfilePin(server.id, user.id),
-                    isCurrent = user.id == server.currentUserId,
-                    isAdmin = appPreferences.isProfileAdmin(server.id, user.id),
-                    accessToken = user.accessToken,
-                )
-            }
-            _state.update {
-                it.copy(
-                    profiles = profiles,
-                    serverId = server.id,
-                    baseUrl = jellyfinApi.api.baseUrl?.trimEnd('/'),
-                    viewerIsAdmin =
-                        profiles.firstOrNull { profile -> profile.isCurrent }?.isAdmin == true,
-                    isLoading = false,
-                )
             }
         }
     }
@@ -179,9 +186,13 @@ constructor(
         if (_state.value.isBusy) return
         viewModelScope.launch {
             _state.update { it.copy(isBusy = true, pinEditorError = null) }
-            appPreferences.setProfilePin(serverId, profile.id, pin)
-            _state.update { it.copy(isBusy = false, pinEditorPrompt = null) }
-            load()
+            try {
+                appPreferences.setProfilePin(serverId, profile.id, pin)
+                _state.update { it.copy(pinEditorPrompt = null) }
+                load()
+            } finally {
+                _state.update { it.copy(isBusy = false) }
+            }
         }
     }
 
@@ -205,14 +216,18 @@ constructor(
         if (_state.value.isBusy) return
         viewModelScope.launch {
             _state.update { it.copy(isBusy = true) }
-            repository.deleteUser(profile.id)
-            appPreferences.clearProfileMetadata(serverId, profile.id)
-            if (profile.isCurrent) {
-                repository.logout()
-                appPreferences.setValue(appPreferences.profileLoggedOut, true)
+            try {
+                repository.deleteUser(profile.id)
+                appPreferences.clearProfileMetadata(serverId, profile.id)
+                if (profile.isCurrent) {
+                    repository.logout()
+                    appPreferences.setValue(appPreferences.profileLoggedOut, true)
+                }
+                _state.update { it.copy(removePrompt = null) }
+                load()
+            } finally {
+                _state.update { it.copy(isBusy = false) }
             }
-            _state.update { it.copy(isBusy = false, removePrompt = null) }
-            load()
         }
     }
 
@@ -220,11 +235,14 @@ constructor(
         if (_state.value.isBusy) return
         viewModelScope.launch {
             _state.update { it.copy(isBusy = true) }
-            repository.setCurrentUser(profile.id)
-            appPreferences.setValue(appPreferences.profileLoggedOut, false)
-            appPreferences.clearReaderState()
-            _state.update { it.copy(isBusy = false) }
-            eventsChannel.send(ProfilePickerEvent.Switched)
+            try {
+                repository.setCurrentUser(profile.id)
+                appPreferences.setValue(appPreferences.profileLoggedOut, false)
+                appPreferences.clearReaderState()
+                eventsChannel.send(ProfilePickerEvent.Switched)
+            } finally {
+                _state.update { it.copy(isBusy = false) }
+            }
         }
     }
 }

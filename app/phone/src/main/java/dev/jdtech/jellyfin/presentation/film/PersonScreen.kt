@@ -47,6 +47,7 @@ import dev.jdtech.jellyfin.models.FindroidPerson
 import dev.jdtech.jellyfin.presentation.components.AppLoadingIndicator
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
+import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.GridRows
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.OfflineNotice
@@ -82,6 +83,7 @@ fun PersonScreen(
                 is PersonAction.NavigateToItem -> navigateToItem(action.item)
             }
         },
+        onRetry = { viewModel.loadPerson(personId) },
     )
 }
 
@@ -90,6 +92,7 @@ private fun PersonScreenLayout(
     state: PersonState,
     isAuthor: Boolean = false,
     onAction: (PersonAction) -> Unit,
+    onRetry: () -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
@@ -237,7 +240,15 @@ private fun PersonScreenLayout(
 
                     Spacer(Modifier.height(paddingBottom))
                 }
-            } ?: run { AppLoadingIndicator(modifier = Modifier.align(Alignment.Center)) }
+            }
+                ?: run {
+                    val error = state.error
+                    if (error != null) {
+                        FullPageError(onRefresh = onRetry, isRefreshing = false, error = error)
+                    } else {
+                        AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                }
         }
 
         PageTopBar(

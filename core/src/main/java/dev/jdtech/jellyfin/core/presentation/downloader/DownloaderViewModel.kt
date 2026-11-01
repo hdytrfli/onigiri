@@ -86,10 +86,9 @@ class DownloaderViewModel @Inject constructor(private val downloader: Downloader
 
     private fun deleteDownload(item: FindroidItem) {
         viewModelScope.launch {
-            downloader.deleteItem(
-                item = item,
-                source = item.sources.first { it.type == FindroidSourceType.LOCAL },
-            )
+            val source =
+                item.sources.firstOrNull { it.type == FindroidSourceType.LOCAL } ?: return@launch
+            downloader.deleteItem(item = item, source = source)
             eventsChannel.send(DownloaderEvent.Deleted)
         }
     }
