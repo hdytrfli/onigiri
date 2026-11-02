@@ -84,7 +84,6 @@ android {
         // Required by the Readium toolkit.
         isCoreLibraryDesugaringEnabled = true
     }
-
 }
 
 dependencies {
