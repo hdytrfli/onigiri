@@ -285,7 +285,7 @@ private fun EpisodeScreenLayout(
                         Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                     if (state.displayExtraInfo && state.videoMetadata != null) {
-                        ExtraInfoText(videoMetadata = state.videoMetadata!!)
+                        ExtraInfoText(videoMetadata = state.videoMetadata)
                         Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     }
                 }

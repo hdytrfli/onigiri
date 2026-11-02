@@ -106,7 +106,7 @@ fun DownloaderCard(state: DownloaderState, onCancelClick: () -> Unit, onRetryCli
                 Spacer(Modifier.height(MaterialTheme.spacings.small))
                 if (state.errorText != null) {
                     Text(
-                        text = state.errorText!!.asString(),
+                        text = state.errorText.asString(),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                     )

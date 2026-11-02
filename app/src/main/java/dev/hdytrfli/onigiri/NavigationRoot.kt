@@ -821,6 +821,5 @@ private fun navigateToItem(navigator: Navigator, item: FindroidItem) {
                     libraryType = CollectionType.Folders,
                 )
             )
-        else -> Unit
     }
 }

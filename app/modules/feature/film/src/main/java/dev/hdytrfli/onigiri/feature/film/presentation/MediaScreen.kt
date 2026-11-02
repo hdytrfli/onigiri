@@ -158,7 +158,7 @@ private fun MediaScreenLayout(
 
         if (state.error != null && showErrorDialog) {
             ErrorDialog(
-                exception = state.error!!,
+                exception = state.error,
                 onDismissRequest = { showErrorDialog = false },
             )
         }
