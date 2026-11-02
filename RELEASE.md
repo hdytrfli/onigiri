@@ -36,7 +36,7 @@ Review, then push when ready:
 git push origin HEAD --follow-tags
 ```
 
-A prerelease tag builds a staging APK and creates a GitHub prerelease. It is not
+A **beta** tag builds a staging APK and creates a GitHub prerelease. It is not
 marked as the latest release. In CI it uses the stable release key; local builds
 fall back to the debug key if the release key is unavailable.
 
@@ -109,5 +109,6 @@ back to the debug keystore.
 
 - GitHub Actions runs only for version tags.
 - No build or format workflow runs on every push or pull request.
-- Tags build and publish either a staging prerelease or a stable release.
-- Formatting is checked as part of the release workflow.
+- `v*-beta*` tags run the Staging workflow.
+- Other `v*` tags run the Release workflow.
+- Formatting is checked as part of the build workflow.

@@ -4,100 +4,22 @@ on:
   push:
     tags:
       - 'v*'
+      - '!v*-beta*'
 
 permissions:
   contents: write
+  pull-requests: read
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Build and publish
-    runs-on: ubuntu-26.04
-    env:
-      RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-      RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-      RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-      RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Set up JDK
-        uses: actions/setup-java@v6
-        with:
-          java-version: 17
-          distribution: temurin
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Check formatting
-        run: ./gradlew ktfmtCheck ktfmtCheckScripts
-
-      - name: Validate tag against app version
-        shell: bash
-        run: |
-          version="$(sed -n 's/^app-name = "\(.*\)"$/\1/p' gradle/libs.versions.toml)"
-          test -n "$version"
-          test "v$version" = "$GITHUB_REF_NAME"
-
-      - name: Prepare signing key
-        shell: bash
-        run: |
-          if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
-            echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
-            echo "RELEASE_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
-          fi
-
-      - name: Build staging APK
-        if: ${{ contains(github.ref_name, '-') }}
-        run: ./gradlew :app:assembleLibreStaging -PtargetAbi=arm64-v8a
-
-      - name: Build release APK
-        if: ${{ !contains(github.ref_name, '-') }}
-        shell: bash
-        run: |
-          test -n "${RELEASE_KEYSTORE_PATH:-}" || {
-            echo "Release signing secrets are required for a stable release."
-            exit 1
-          }
-          ./gradlew :app:assembleLibreRelease -PtargetAbi=arm64-v8a
-
-      - name: Generate release notes
-        uses: orhun/git-cliff-action@v4
-        with:
-          config: cliff.toml
-          args: --latest --strip header
-        env:
-          OUTPUT: release-notes.md
-          GITHUB_REPO: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish GitHub prerelease
-        if: ${{ contains(github.ref_name, '-') }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
-            --notes-file release-notes.md \
-            --prerelease \
-            app/build/outputs/apk/libre/staging/*.apk
-
-      - name: Publish GitHub release
-        if: ${{ !contains(github.ref_name, '-') }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
-            --notes-file release-notes.md \
-            --latest \
-            app/build/outputs/apk/libre/release/*.apk
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      gradle_task: assembleLibreRelease
+      apk_directory: app/build/outputs/apk/libre/release
+      prerelease: false
+      make_latest: true
+    secrets: inherit
