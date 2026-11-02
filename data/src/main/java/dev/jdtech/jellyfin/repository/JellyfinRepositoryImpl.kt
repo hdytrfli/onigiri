@@ -228,6 +228,7 @@ class JellyfinRepositoryImpl(
                         listOf(
                             BaseItemKind.MOVIE,
                             BaseItemKind.SERIES,
+                            BaseItemKind.SEASON,
                             BaseItemKind.EPISODE,
                             BaseItemKind.BOOK,
                             BaseItemKind.AUDIO_BOOK,
