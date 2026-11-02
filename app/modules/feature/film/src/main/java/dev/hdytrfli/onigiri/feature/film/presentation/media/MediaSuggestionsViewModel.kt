@@ -12,12 +12,16 @@ import dev.hdytrfli.onigiri.models.SortBy
 import dev.hdytrfli.onigiri.models.SortOrder
 import dev.hdytrfli.onigiri.models.UiText
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
-import dev.hdytrfli.onigiri.settings.domain.AppPreferences
+import dev.hdytrfli.onigiri.swr.QueryKeys
+import dev.hdytrfli.onigiri.swr.SwrEntry
+import dev.hdytrfli.onigiri.swr.SwrStore
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import org.jellyfin.sdk.model.api.BaseItemKind
 
 /**
@@ -31,46 +35,56 @@ class MediaSuggestionsViewModel
 @Inject
 constructor(
     private val repository: JellyfinRepository,
-    private val appPreferences: AppPreferences,
+    private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MediaSuggestionsState())
     val state = _state.asStateFlow()
 
-    private var loadedKind: MediaKind? = null
-    private var lastOfflineMode: Boolean? = null
+    private val serializer = ListSerializer(MediaSection.serializer())
+    private var currentKind: MediaKind? = null
+    private var observeJob: Job? = null
 
-    fun load(kind: MediaKind) {
-        val offlineMode = appPreferences.getValue(appPreferences.offlineMode)
-        if (loadedKind == kind && lastOfflineMode == offlineMode) return
-        if (loadedKind != null && loadedKind != kind) {
-            _state.value = _state.value.copy(sections = emptyList())
-        }
-        loadedKind = kind
-        lastOfflineMode = offlineMode
-        viewModelScope.launch(Dispatchers.Default) {
-            _state.emit(
-                _state.value.copy(
-                    isLoading = true,
-                    error = null,
-                )
-            )
-            try {
-                val sections =
-                    when (kind) {
-                        MediaKind.Movies -> loadMovies()
-                        MediaKind.Shows -> loadShows()
-                    }
-                _state.emit(_state.value.copy(sections = sections, isLoading = false))
-            } catch (e: Exception) {
-                _state.emit(_state.value.copy(error = e, isLoading = false))
-            }
+    fun load(kind: MediaKind, force: Boolean = false) {
+        observe(kind)
+        swrStore.refresh(QueryKeys.suggestions(kind.name), serializer, force = force) {
+            fetchSections(kind)
         }
     }
 
     fun retry(kind: MediaKind) {
-        loadedKind = null
-        load(kind)
+        load(kind, force = true)
     }
+
+    private fun observe(kind: MediaKind) {
+        if (currentKind == kind) return
+        currentKind = kind
+        _state.value = MediaSuggestionsState(isLoading = true)
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            swrStore.observe(QueryKeys.suggestions(kind.name), serializer).collect(::applyEntry)
+        }
+    }
+
+    private fun applyEntry(entry: SwrEntry<List<MediaSection>>) {
+        _state.value =
+            _state.value.copy(
+                sections =
+                    entry.data
+                        ?: if (entry.isRefreshing || entry.error != null) {
+                            _state.value.sections
+                        } else {
+                            emptyList()
+                        },
+                isLoading = entry.isRefreshing,
+                error = entry.error as? Exception,
+            )
+    }
+
+    private suspend fun fetchSections(kind: MediaKind): List<MediaSection> =
+        when (kind) {
+            MediaKind.Movies -> loadMovies()
+            MediaKind.Shows -> loadShows()
+        }
 
     private suspend fun loadMovies(): List<MediaSection> {
         val sections = mutableListOf<MediaSection>()

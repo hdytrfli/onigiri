@@ -65,7 +65,7 @@ fun CollectionScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadItems(collectionId) }
-    OfflineModeReload { viewModel.loadItems(collectionId) }
+    OfflineModeReload { viewModel.loadItems(collectionId, force = true) }
 
     CollectionDetailLayout(
         state = state,
@@ -76,7 +76,7 @@ fun CollectionScreen(
             }
         },
         onEditImages = navigateToEditImages,
-        onRefresh = { viewModel.loadItems(collectionId) },
+        onRefresh = { viewModel.retry(collectionId) },
     )
 }
 

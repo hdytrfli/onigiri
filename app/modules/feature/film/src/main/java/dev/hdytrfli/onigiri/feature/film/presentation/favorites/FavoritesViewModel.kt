@@ -35,7 +35,13 @@ constructor(
     init {
         viewModelScope.launch {
             swrStore.observe(key, serializer).collect { entry ->
-                val items = entry.data.orEmpty()
+                val items =
+                    entry.data
+                        ?: if (entry.isRefreshing || entry.error != null) {
+                            _state.value.items
+                        } else {
+                            emptyList()
+                        }
                 _state.value =
                     CollectionState(
                         items = items,
@@ -53,11 +59,11 @@ constructor(
 
     /** Entry load: uses the cached list and refreshes only when it is stale or absent. */
     fun loadItemsIfNeeded() {
-        swrStore.refresh(key, serializer) { repository.getFavoriteItems() }
+        loadItems()
     }
 
-    fun loadItems() {
-        swrStore.refresh(key, serializer, force = true) { repository.getFavoriteItems() }
+    fun loadItems(force: Boolean = false) {
+        swrStore.refresh(key, serializer, force = force) { repository.getFavoriteItems() }
     }
 
     /** Flips [field] in the shared list display preference every list page reads. */

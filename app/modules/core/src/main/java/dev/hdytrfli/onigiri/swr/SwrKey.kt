@@ -27,12 +27,22 @@ object QueryKeys {
 
     const val LibraryPrefix = "library|"
     const val GenresPrefix = "genres|"
+    const val SuggestionsPrefix = "suggestions|"
     const val CollectionsPrefix = "collections|"
+    const val CollectionPrefix = "collection|"
+    const val BooksPrefix = "books|"
     const val ItemPrefix = "item|"
 
     fun genres(kind: String): SwrKey = SwrKey("$GenresPrefix$kind")
 
+    fun suggestions(kind: String): SwrKey = SwrKey("$SuggestionsPrefix$kind")
+
     fun collections(kind: String): SwrKey = SwrKey("$CollectionsPrefix$kind")
+
+    fun collection(id: UUID): SwrKey = SwrKey("$CollectionPrefix$id")
+
+    fun books(sortBy: SortBy, sortOrder: SortOrder): SwrKey =
+        SwrKey("$BooksPrefix${sortBy.name}|${sortOrder.name}")
 
     fun library(
         parentId: UUID?,

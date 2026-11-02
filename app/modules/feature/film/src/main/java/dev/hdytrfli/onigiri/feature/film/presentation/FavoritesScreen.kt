@@ -37,12 +37,12 @@ fun FavoritesScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadItemsIfNeeded() }
-    OfflineModeReload { viewModel.loadItems() }
+    OfflineModeReload { viewModel.loadItems(force = true) }
 
     FavoritesScreenLayout(
         state = state,
         onItemClick = onItemClick,
-        onRetryClick = { viewModel.loadItems() },
+        onRetryClick = { viewModel.loadItems(force = true) },
     )
 }
 

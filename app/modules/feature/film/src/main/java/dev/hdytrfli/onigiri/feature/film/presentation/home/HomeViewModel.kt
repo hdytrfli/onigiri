@@ -7,22 +7,40 @@ import dev.hdytrfli.onigiri.database.ServerDatabaseDao
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
 import dev.hdytrfli.onigiri.models.CollectionType
+import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.HomeItem
 import dev.hdytrfli.onigiri.models.HomeSection
 import dev.hdytrfli.onigiri.models.SortBy
 import dev.hdytrfli.onigiri.models.SortOrder
 import dev.hdytrfli.onigiri.models.UiText
+import dev.hdytrfli.onigiri.models.View
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
+import dev.hdytrfli.onigiri.swr.QueryKeys
+import dev.hdytrfli.onigiri.swr.SwrEntry
+import dev.hdytrfli.onigiri.swr.SwrStore
 import dev.hdytrfli.onigiri.utils.toView
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemKind
-import timber.log.Timber
+
+/** The whole Home payload is one cache entry so every row appears and refreshes together. */
+@Serializable
+data class HomeCache(
+    val suggestions: List<FindroidItem> = emptyList(),
+    val resume: List<FindroidItem> = emptyList(),
+    val nextUp: List<FindroidItem> = emptyList(),
+    val latestBooks: List<FindroidItem> = emptyList(),
+    val latestAudiobooks: List<FindroidItem> = emptyList(),
+    val views: List<View> = emptyList(),
+)
 
 @HiltViewModel
 class HomeViewModel
@@ -31,6 +49,7 @@ constructor(
     val repository: JellyfinRepository,
     val appPreferences: AppPreferences,
     val database: ServerDatabaseDao,
+    private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
@@ -48,219 +67,205 @@ constructor(
     private val uiTextLatestBooks = UiText.StringResource(FilmR.string.latest_books)
     private val uiTextLatestAudiobooks = UiText.StringResource(FilmR.string.latest_audiobooks)
 
-    private var hasLoadedOnce = false
-    private var lastOfflineMode: Boolean? = null
+    private val serializer = HomeCache.serializer()
 
-    /**
-     * Loads everything on first entry. On later entries (coming back from a detail page) it
-     * refreshes the sections but leaves the suggestions alone, so the carousel keeps its items and
-     * scroll position. Use [loadData] for a full refresh.
-     */
-    fun refresh() {
-        val offlineMode = appPreferences.getValue(appPreferences.offlineMode)
-        if (!hasLoadedOnce || lastOfflineMode != offlineMode) {
-            hasLoadedOnce = true
-            loadData()
-            return
-        }
-        viewModelScope.launch(Dispatchers.Default) {
-            try {
-                loadDisplayFields()
-                loadResumeItems()
-                loadNextUpItems()
-                loadLatestBooks()
-                loadLatestAudiobooks()
-                loadViews()
-            } catch (e: Exception) {
-                _state.emit(_state.value.copy(error = e))
-            }
+    init {
+        viewModelScope.launch {
+            swrStore.observe(QueryKeys.Home, serializer).collect { entry -> applyEntry(entry) }
         }
     }
 
-    fun loadData() {
-        Timber.i("Loading data")
-        lastOfflineMode = appPreferences.getValue(appPreferences.offlineMode)
-        viewModelScope.launch(Dispatchers.Default) {
-            _state.emit(_state.value.copy(isLoading = true, error = null))
-            try {
-                appPreferences.getValue(appPreferences.currentServer)?.let { serverId ->
-                    loadServerName(serverId)
-                }
+    /** Entry load: cached rows appear immediately and stale data revalidates in the background. */
+    fun refresh() {
+        load()
+    }
 
-                loadDisplayFields()
-                loadSuggestions()
-                loadResumeItems()
-                loadNextUpItems()
-                loadLatestBooks()
-                loadLatestAudiobooks()
-                loadViews()
-            } catch (e: Exception) {
-                _state.emit(_state.value.copy(error = e))
+    fun loadData(force: Boolean = false) {
+        load(force = force)
+    }
+
+    fun load(force: Boolean = false) {
+        viewModelScope.launch {
+            loadDisplayFields()
+            appPreferences.getValue(appPreferences.currentServer)?.let { serverId ->
+                loadServerName(serverId)
             }
-            _state.emit(_state.value.copy(isLoading = false))
         }
+        swrStore.refresh(QueryKeys.Home, serializer, force = force) { fetchHome() }
+    }
+
+    fun retry() {
+        load(force = true)
     }
 
     private suspend fun loadDisplayFields() {
-        _state.emit(
+        _state.value =
             _state.value.copy(
                 displayFields =
                     ListDisplayField.fromKeys(
                         appPreferences.getValue(appPreferences.listDisplayFields)
                     )
             )
-        )
     }
 
     private suspend fun loadServerName(serverId: String) {
         val server = database.getServer(serverId)
         if (server != null) {
-            _state.emit(_state.value.copy(server = server))
+            _state.value = _state.value.copy(server = server)
         }
     }
 
-    private suspend fun loadSuggestions() {
-        Timber.i("Loading suggestions")
-        if (!appPreferences.getValue(appPreferences.homeSuggestions)) {
-            _state.emit(_state.value.copy(suggestionsSection = null))
+    private suspend fun applyEntry(entry: SwrEntry<HomeCache>) {
+        val cache = entry.data
+        if (cache == null) {
+            _state.value =
+                if (entry.isRefreshing || entry.error != null) {
+                    _state.value.copy(
+                        isLoading = entry.isRefreshing,
+                        error = entry.error as? Exception,
+                    )
+                } else {
+                    _state.value.copy(
+                        suggestionsSection = null,
+                        resumeSection = null,
+                        nextUpSection = null,
+                        latestBooksSection = null,
+                        latestAudiobooksSection = null,
+                        views = emptyList(),
+                        isLoading = entry.isRefreshing,
+                        error = null,
+                    )
+                }
             return
         }
 
-        val items = repository.getSuggestions()
+        // Preferences can change without invalidating the cached payload, so hide disabled rows
+        // here as well as when fetching.
+        val showSuggestions = appPreferences.getValue(appPreferences.homeSuggestions)
+        val showContinueWatching = appPreferences.getValue(appPreferences.homeContinueWatching)
+        val showNextUp = appPreferences.getValue(appPreferences.homeNextUp)
+        val showLatest = appPreferences.getValue(appPreferences.homeLatest)
 
-        val section =
-            if (items.isEmpty()) {
-                null
-            } else {
-                HomeItem.Suggestions(id = uuidSuggestions, items = items)
-            }
-
-        _state.emit(_state.value.copy(suggestionsSection = section))
-    }
-
-    private suspend fun loadResumeItems() {
-        Timber.i("Loading resume items")
-        if (!appPreferences.getValue(appPreferences.homeContinueWatching)) {
-            _state.emit(_state.value.copy(resumeSection = null))
-            return
-        }
-
-        val resumeItems = repository.getResumeItems()
-
-        val section =
-            if (resumeItems.isEmpty()) {
-                null
-            } else {
-                HomeItem.Section(
-                    HomeSection(uuidContinueWatching, uiTextContinueWatching, resumeItems)
-                )
-            }
-
-        _state.emit(_state.value.copy(resumeSection = section))
-    }
-
-    private suspend fun loadNextUpItems() {
-        Timber.i("Loading next up items")
-        if (!appPreferences.getValue(appPreferences.homeNextUp)) {
-            _state.emit(_state.value.copy(nextUpSection = null))
-            return
-        }
-
-        val nextUpItems = repository.getNextUp()
-
-        val section =
-            if (nextUpItems.isEmpty()) {
-                null
-            } else {
-                HomeItem.Section(HomeSection(uuidNextUp, uiTextNextUp, nextUpItems))
-            }
-
-        _state.emit(_state.value.copy(nextUpSection = section))
-    }
-
-    /**
-     * The newest books across every library, whether the server typed the library as Books or not.
-     */
-    private suspend fun loadLatestBooks() {
-        Timber.i("Loading latest books")
-        if (!appPreferences.getValue(appPreferences.homeLatest)) {
-            _state.emit(_state.value.copy(latestBooksSection = null))
-            return
-        }
-
-        val books =
-            repository.getItems(
-                includeTypes = listOf(BaseItemKind.BOOK),
-                recursive = true,
-                sortBy = SortBy.DATE_ADDED,
-                sortOrder = SortOrder.DESCENDING,
-                limit = 16,
+        _state.value =
+            _state.value.copy(
+                suggestionsSection =
+                    cache.suggestions
+                        .takeIf { showSuggestions && it.isNotEmpty() }
+                        ?.let { HomeItem.Suggestions(id = uuidSuggestions, items = it) },
+                resumeSection =
+                    cache.resume.toHomeSection(
+                        show = showContinueWatching,
+                        id = uuidContinueWatching,
+                        title = uiTextContinueWatching,
+                    ),
+                nextUpSection =
+                    cache.nextUp.toHomeSection(
+                        show = showNextUp,
+                        id = uuidNextUp,
+                        title = uiTextNextUp,
+                    ),
+                latestBooksSection =
+                    cache.latestBooks.toHomeSection(
+                        show = showLatest,
+                        id = uuidLatestBooks,
+                        title = uiTextLatestBooks,
+                    ),
+                latestAudiobooksSection =
+                    cache.latestAudiobooks.toHomeSection(
+                        show = showLatest,
+                        id = uuidLatestAudiobooks,
+                        title = uiTextLatestAudiobooks,
+                    ),
+                views =
+                    if (showLatest) {
+                        cache.views.map { HomeItem.ViewItem(it) }
+                    } else {
+                        emptyList()
+                    },
+                isLoading = entry.isRefreshing,
+                error = entry.error as? Exception,
             )
-
-        val section =
-            if (books.isEmpty()) {
-                null
-            } else {
-                HomeItem.Section(HomeSection(uuidLatestBooks, uiTextLatestBooks, books))
-            }
-
-        _state.emit(_state.value.copy(latestBooksSection = section))
     }
 
-    private suspend fun loadLatestAudiobooks() {
-        Timber.i("Loading latest audiobooks")
-        if (!appPreferences.getValue(appPreferences.homeLatest)) {
-            _state.emit(_state.value.copy(latestAudiobooksSection = null))
-            return
+    private fun List<FindroidItem>.toHomeSection(
+        show: Boolean,
+        id: UUID,
+        title: UiText,
+    ): HomeItem.Section? = takeIf {
+        show && it.isNotEmpty()
+    }
+        ?.let { HomeItem.Section(HomeSection(id, title, it)) }
+
+    private suspend fun fetchHome(): HomeCache = coroutineScope {
+        val showSuggestions = appPreferences.getValue(appPreferences.homeSuggestions)
+        val showContinueWatching = appPreferences.getValue(appPreferences.homeContinueWatching)
+        val showNextUp = appPreferences.getValue(appPreferences.homeNextUp)
+        val showLatest = appPreferences.getValue(appPreferences.homeLatest)
+
+        val suggestions = async {
+            if (showSuggestions) repository.getSuggestions() else emptyList()
         }
-
-        val audiobooks =
-            repository.getItems(
-                includeTypes = listOf(BaseItemKind.AUDIO_BOOK),
-                recursive = true,
-                sortBy = SortBy.DATE_ADDED,
-                sortOrder = SortOrder.DESCENDING,
-                limit = 16,
-            )
-
-        val section =
-            if (audiobooks.isEmpty()) {
-                null
-            } else {
-                HomeItem.Section(
-                    HomeSection(uuidLatestAudiobooks, uiTextLatestAudiobooks, audiobooks)
+        val resume = async {
+            if (showContinueWatching) repository.getResumeItems() else emptyList()
+        }
+        val nextUp = async { if (showNextUp) repository.getNextUp() else emptyList() }
+        val latestBooks = async {
+            if (showLatest) {
+                repository.getItems(
+                    includeTypes = listOf(BaseItemKind.BOOK),
+                    recursive = true,
+                    sortBy = SortBy.DATE_ADDED,
+                    sortOrder = SortOrder.DESCENDING,
+                    limit = LATEST_LIMIT,
                 )
+            } else {
+                emptyList()
             }
-
-        _state.emit(_state.value.copy(latestAudiobooksSection = section))
-    }
-
-    private suspend fun loadViews() {
-        Timber.i("Loading views")
-        val items =
-            if (appPreferences.getValue(appPreferences.homeLatest)) {
+        }
+        val latestAudiobooks = async {
+            if (showLatest) {
+                repository.getItems(
+                    includeTypes = listOf(BaseItemKind.AUDIO_BOOK),
+                    recursive = true,
+                    sortBy = SortBy.DATE_ADDED,
+                    sortOrder = SortOrder.DESCENDING,
+                    limit = LATEST_LIMIT,
+                )
+            } else {
+                emptyList()
+            }
+        }
+        val views = async {
+            if (showLatest) {
                 repository
                     .getUserViews()
                     .filter { view ->
                         val type = CollectionType.fromString(view.collectionType?.serialName)
-                        // Board books in their own row, independent of the library type.
+                        // Board books have their own row, independent of the library type.
                         type in CollectionType.supported && type != CollectionType.Books
                     }
                     .map { view -> view to repository.getLatestMedia(view.id) }
                     .filter { (_, latest) -> latest.isNotEmpty() }
                     .map { (view, latest) -> view.toView(latest) }
-                    .map { HomeItem.ViewItem(it) }
             } else {
                 emptyList()
             }
+        }
 
-        _state.emit(_state.value.copy(views = items))
+        HomeCache(
+            suggestions = suggestions.await(),
+            resume = resume.await(),
+            nextUp = nextUp.await(),
+            latestBooks = latestBooks.await(),
+            latestAudiobooks = latestAudiobooks.await(),
+            views = views.await(),
+        )
     }
 
     fun onAction(action: HomeAction) {
         when (action) {
             is HomeAction.OnRetryClick -> {
-                loadData()
+                retry()
             }
             is HomeAction.ToggleDisplayField -> {
                 val fields = _state.value.displayFields.toMutableSet()
@@ -275,5 +280,9 @@ constructor(
             }
             else -> Unit
         }
+    }
+
+    private companion object {
+        const val LATEST_LIMIT = 16
     }
 }

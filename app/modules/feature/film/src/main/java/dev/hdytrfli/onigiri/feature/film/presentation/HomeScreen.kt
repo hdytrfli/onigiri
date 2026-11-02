@@ -81,7 +81,7 @@ fun HomeScreen(
     val downloadsState by downloadsViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.refresh() }
-    OfflineModeReload { viewModel.loadData() }
+    OfflineModeReload { viewModel.loadData(force = true) }
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }

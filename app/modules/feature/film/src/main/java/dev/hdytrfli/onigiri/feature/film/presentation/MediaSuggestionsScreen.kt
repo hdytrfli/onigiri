@@ -277,10 +277,10 @@ private fun CollectionsTab(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val safePadding = rememberSafePadding()
 
-    LaunchedEffect(kind) { viewModel.load() }
-    OfflineModeReload { viewModel.retry() }
+    LaunchedEffect(kind) { viewModel.load(kind) }
+    OfflineModeReload { viewModel.retry(kind) }
 
-    val items = if (kind == MediaKind.Movies) state.movies else state.shows
+    val items = state.items
     val title = stringResource(CoreR.string.collections_label)
     val contentPadding =
         PaddingValues(
@@ -292,7 +292,7 @@ private fun CollectionsTab(
 
     if (state.error != null && items.isEmpty()) {
         FullPageError(
-            onRefresh = { viewModel.retry() },
+            onRefresh = { viewModel.retry(kind) },
             isRefreshing = state.isLoading,
             error = state.error,
         )
@@ -301,14 +301,14 @@ private fun CollectionsTab(
 
     AppPullToRefreshBox(
         isRefreshing = state.isLoading,
-        onRefresh = viewModel::retry,
+        onRefresh = { viewModel.retry(kind) },
         modifier = Modifier.fillMaxSize(),
     ) {
         EmptyStateOverlay(
             visible = items.isEmpty(),
             loading = state.isLoading,
             context = stringResource(CoreR.string.empty_context_collections),
-            onRefresh = { viewModel.retry() },
+            onRefresh = { viewModel.retry(kind) },
             title = title,
             contentPadding = contentPadding,
         ) {
@@ -411,8 +411,7 @@ private fun GenresContent(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val safePadding = rememberSafePadding()
 
-    // Load once; the cached sections stay put until the user pulls to refresh or the cache is
-    // invalidated by a new ViewModel.
+    // Entry load: cached sections appear immediately and stale data revalidates in the background.
     LaunchedEffect(kind) { viewModel.load(kind) }
     OfflineModeReload { viewModel.retry(kind) }
 

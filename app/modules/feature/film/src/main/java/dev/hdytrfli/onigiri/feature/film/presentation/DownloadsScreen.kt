@@ -44,7 +44,7 @@ fun DownloadsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadItemsIfNeeded() }
-    OfflineModeReload { viewModel.loadItems() }
+    OfflineModeReload { viewModel.loadItems(force = true) }
 
     DownloadsScreenLayout(
         state = state,
@@ -54,7 +54,7 @@ fun DownloadsScreen(
                 is CollectionAction.OnBackClick -> Unit
             }
         },
-        onRefresh = { viewModel.loadItems() },
+        onRefresh = { viewModel.loadItems(force = true) },
         embedded = embedded,
     )
 }

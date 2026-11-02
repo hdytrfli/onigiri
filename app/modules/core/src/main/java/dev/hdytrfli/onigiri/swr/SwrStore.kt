@@ -236,7 +236,10 @@ constructor(
         invalidate(QueryKeys.Home)
         invalidatePrefix(QueryKeys.LibraryPrefix)
         invalidatePrefix(QueryKeys.GenresPrefix)
+        invalidatePrefix(QueryKeys.SuggestionsPrefix)
         invalidatePrefix(QueryKeys.CollectionsPrefix)
+        invalidatePrefix(QueryKeys.CollectionPrefix)
+        invalidatePrefix(QueryKeys.BooksPrefix)
         invalidatePrefix(QueryKeys.ItemPrefix)
     }
 

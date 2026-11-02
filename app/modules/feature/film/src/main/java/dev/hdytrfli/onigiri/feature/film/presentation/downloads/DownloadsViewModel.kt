@@ -44,7 +44,13 @@ constructor(
     init {
         viewModelScope.launch {
             swrStore.observe(key, serializer).collect { entry ->
-                val items = entry.data.orEmpty()
+                val items =
+                    entry.data
+                        ?: if (entry.isRefreshing || entry.error != null) {
+                            _state.value.items
+                        } else {
+                            emptyList()
+                        }
                 _state.value =
                     _state.value.copy(
                         items = items,
@@ -63,11 +69,11 @@ constructor(
 
     /** Entry load: uses the cached list and refreshes only when it is stale or absent. */
     fun loadItemsIfNeeded() {
-        swrStore.refresh(key, serializer) { repository.getDownloads() }
+        loadItems()
     }
 
-    fun loadItems() {
-        swrStore.refresh(key, serializer, force = true) { repository.getDownloads() }
+    fun loadItems(force: Boolean = false) {
+        swrStore.refresh(key, serializer, force = force) { repository.getDownloads() }
     }
 
     /** Flips [field] in the shared list display preference every list page reads. */
@@ -103,7 +109,7 @@ constructor(
                     progress[item.id] = value.coerceIn(0, 100)
                 }
                 if (finished) {
-                    loadItems()
+                    loadItems(force = true)
                     return@launch
                 }
                 _state.value = _state.value.copy(downloadProgress = progress)

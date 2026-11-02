@@ -8,6 +8,7 @@ import dev.hdytrfli.onigiri.models.GenreSection
 import dev.hdytrfli.onigiri.models.SortBy
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import dev.hdytrfli.onigiri.swr.QueryKeys
+import dev.hdytrfli.onigiri.swr.SwrEntry
 import dev.hdytrfli.onigiri.swr.SwrStore
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -39,30 +40,40 @@ constructor(
     private var observeJob: Job? = null
 
     /** Switches to [kind]'s cached row set and refreshes it only when it is stale. */
-    fun load(kind: MediaKind) {
-        val key = QueryKeys.genres(kind.name)
-        if (currentKind != kind) {
-            currentKind = kind
-            _state.value = GenresState()
-            observeJob?.cancel()
-            observeJob = viewModelScope.launch {
-                swrStore.observe(key, serializer).collect { entry ->
-                    _state.value =
-                        GenresState(
-                            sections = entry.data.orEmpty(),
-                            isLoading = entry.isRefreshing,
-                            error = entry.error as? Exception,
-                        )
-                }
-            }
+    fun load(kind: MediaKind, force: Boolean = false) {
+        observe(kind)
+        swrStore.refresh(QueryKeys.genres(kind.name), serializer, force = force) {
+            fetchGenres(kind)
         }
-        swrStore.refresh(key, serializer) { fetchGenres(kind) }
     }
 
     fun retry(kind: MediaKind) {
-        swrStore.refresh(QueryKeys.genres(kind.name), serializer, force = true) {
-            fetchGenres(kind)
+        load(kind, force = true)
+    }
+
+    private fun observe(kind: MediaKind) {
+        if (currentKind == kind) return
+        currentKind = kind
+        _state.value = GenresState(isLoading = true)
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            swrStore.observe(QueryKeys.genres(kind.name), serializer).collect(::applyEntry)
         }
+    }
+
+    private fun applyEntry(entry: SwrEntry<List<GenreSection>>) {
+        _state.value =
+            _state.value.copy(
+                sections =
+                    entry.data
+                        ?: if (entry.isRefreshing || entry.error != null) {
+                            _state.value.sections
+                        } else {
+                            emptyList()
+                        },
+                isLoading = entry.isRefreshing,
+                error = entry.error as? Exception,
+            )
     }
 
     private suspend fun fetchGenres(kind: MediaKind): List<GenreSection> {

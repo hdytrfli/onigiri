@@ -2,6 +2,7 @@ package dev.hdytrfli.onigiri.feature.film.presentation.media
 
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.UiText
+import kotlinx.serialization.Serializable
 
 enum class MediaKind {
     Movies,
@@ -9,6 +10,7 @@ enum class MediaKind {
 }
 
 /** One horizontally scrolling row on the Movies/Shows page. */
+@Serializable
 data class MediaSection(
     val id: String,
     val title: UiText,

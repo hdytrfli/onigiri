@@ -3,6 +3,7 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
