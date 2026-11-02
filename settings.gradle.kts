@@ -2,14 +2,15 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "findroid-plus"
 
-include(":app:phone")
+include(":app")
 include(":core")
 include(":data")
 include(":player:core")
 include(":player:local")
 include(":setup")
-include(":modes:film")
+include(":feature:film")
 include(":settings")
+include(":ui")
 
 pluginManagement {
     repositories {

@@ -1,0 +1,42 @@
+package dev.hdytrfli.onigiri.ui.theme
+
+import androidx.compose.material3.darkColorScheme
+
+val darkScheme =
+    darkColorScheme(
+        primary = ColorDark.primaryDark,
+        onPrimary = ColorDark.onPrimaryDark,
+        primaryContainer = ColorDark.primaryContainerDark,
+        onPrimaryContainer = ColorDark.onPrimaryContainerDark,
+        secondary = ColorDark.secondaryDark,
+        onSecondary = ColorDark.onSecondaryDark,
+        secondaryContainer = ColorDark.secondaryContainerDark,
+        onSecondaryContainer = ColorDark.onSecondaryContainerDark,
+        tertiary = ColorDark.tertiaryDark,
+        onTertiary = ColorDark.onTertiaryDark,
+        tertiaryContainer = ColorDark.tertiaryContainerDark,
+        onTertiaryContainer = ColorDark.onTertiaryContainerDark,
+        error = ColorDark.errorDark,
+        onError = ColorDark.onErrorDark,
+        errorContainer = ColorDark.errorContainerDark,
+        onErrorContainer = ColorDark.onErrorContainerDark,
+        background = ColorDark.backgroundDark,
+        onBackground = ColorDark.onBackgroundDark,
+        surface = ColorDark.surfaceDark,
+        onSurface = ColorDark.onSurfaceDark,
+        surfaceVariant = ColorDark.surfaceVariantDark,
+        onSurfaceVariant = ColorDark.onSurfaceVariantDark,
+        outline = ColorDark.outlineDark,
+        outlineVariant = ColorDark.outlineVariantDark,
+        scrim = ColorDark.scrimDark,
+        inverseSurface = ColorDark.inverseSurfaceDark,
+        inverseOnSurface = ColorDark.inverseOnSurfaceDark,
+        inversePrimary = ColorDark.inversePrimaryDark,
+        surfaceDim = ColorDark.surfaceDimDark,
+        surfaceBright = ColorDark.surfaceBrightDark,
+        surfaceContainerLowest = ColorDark.surfaceContainerLowestDark,
+        surfaceContainerLow = ColorDark.surfaceContainerLowDark,
+        surfaceContainer = ColorDark.surfaceContainerDark,
+        surfaceContainerHigh = ColorDark.surfaceContainerHighDark,
+        surfaceContainerHighest = ColorDark.surfaceContainerHighestDark,
+    )

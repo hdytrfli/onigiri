@@ -1,0 +1,18 @@
+package dev.hdytrfli.onigiri.ui.components
+
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+
+/** The app's loading indicator, using the Material 3 expressive morphing shape. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun AppLoadingIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary,
+) {
+    LoadingIndicator(modifier = modifier, color = color)
+}

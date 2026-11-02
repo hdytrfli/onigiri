@@ -1,4 +1,11 @@
 [versions]
+app-code = "1"
+app-name = "1.0.0-beta"
+build-tools = "37.0.0"
+compile-sdk = "37"
+java = "17"
+min-sdk = "28"
+target-sdk = "36"
 android-plugin = "9.4.1"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.8.0"

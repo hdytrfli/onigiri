@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Views-only colour resources. The authoritative Compose palette lives in
-    core/src/main/java/dev/jdtech/jellyfin/core/presentation/theme/Color.kt;
+    core/src/main/java/dev/hdytrfli/onigiri/core/presentation/theme/Color.kt;
     the Material role colours below mirror it and must keep the same values.
 -->
 <resources>

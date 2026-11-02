@@ -1,0 +1,23 @@
+package dev.hdytrfli.onigiri.feature.film.presentation.mediadetail
+
+import dev.hdytrfli.onigiri.models.FindroidItemPerson
+import dev.hdytrfli.onigiri.models.VideoMetadata
+
+data class MediaDetailState(
+    val isLoading: Boolean = false,
+    val title: String? = null,
+    val originalTitle: String? = null,
+    val overview: String? = null,
+    val year: Int? = null,
+    val runtimeMinutes: Long? = null,
+    val officialRating: String? = null,
+    val communityRating: Float? = null,
+    val genres: List<String> = emptyList(),
+    val people: List<FindroidItemPerson> = emptyList(),
+    val actors: List<FindroidItemPerson> = emptyList(),
+    val director: FindroidItemPerson? = null,
+    val writers: List<FindroidItemPerson> = emptyList(),
+    val videoMetadata: VideoMetadata? = null,
+    val backdropUri: String? = null,
+    val error: Exception? = null,
+)

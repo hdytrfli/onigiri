@@ -1,3 +1,5 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.androidx.room3)
@@ -5,18 +7,18 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-java { toolchain { languageVersion = Versions.JAVA } }
+java { toolchain { languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt()) } }
 
 android {
-    namespace = "dev.jdtech.jellyfin.data"
-    compileSdk = Versions.COMPILE_SDK
-    buildToolsVersion = Versions.BUILD_TOOLS
+    namespace = "dev.hdytrfli.onigiri.data"
+    compileSdk = libs.versions.compile.sdk.get().toInt()
+    buildToolsVersion = libs.versions.build.tools.get()
 
     defaultConfig {
-        minSdk = Versions.MIN_SDK
+        minSdk = libs.versions.min.sdk.get().toInt()
 
-        buildConfigField("int", "VERSION_CODE", Versions.APP_CODE.toString())
-        buildConfigField("String", "VERSION_NAME", "\"${Versions.APP_NAME}\"")
+        buildConfigField("int", "VERSION_CODE", libs.versions.app.code.get().toInt().toString())
+        buildConfigField("String", "VERSION_NAME", "\"${libs.versions.app.name.get()}\"")
 
         consumerProguardFile("proguard-rules.pro")
     }

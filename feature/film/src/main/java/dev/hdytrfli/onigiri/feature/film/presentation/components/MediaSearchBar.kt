@@ -1,0 +1,221 @@
+package dev.hdytrfli.onigiri.feature.film.presentation.components
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material3.ExpandedFullScreenSearchBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSearchBarState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.R as FilmR
+import dev.hdytrfli.onigiri.feature.film.presentation.search.SearchAction
+import dev.hdytrfli.onigiri.feature.film.presentation.search.SearchState
+import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
+import dev.hdytrfli.onigiri.ui.theme.spacings
+import dev.hdytrfli.onigiri.ui.utils.GridSize
+import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
+import dev.hdytrfli.onigiri.ui.utils.gridColumns
+import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
+import kotlinx.coroutines.delay
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun MediaSearchBar(
+    state: SearchState,
+    expanded: Boolean,
+    onExpand: (Boolean) -> Unit,
+    onAction: (SearchAction) -> Unit,
+    modifier: Modifier = Modifier,
+    paddingStart: Dp = 0.dp,
+    paddingEnd: Dp = 0.dp,
+) {
+    val focusRequester = remember { FocusRequester() }
+    val safePadding = rememberSafePadding()
+
+    val searchBarState =
+        rememberSearchBarState(
+            initialValue = if (expanded) SearchBarValue.Expanded else SearchBarValue.Collapsed
+        )
+    val textFieldState = rememberTextFieldState()
+    val query = textFieldState.text.toString()
+
+    val searchBarPaddingStart by
+        animateDpAsState(
+            targetValue = if (expanded) 0.dp else paddingStart,
+            label = "search_bar_padding_start",
+        )
+
+    val searchBarPaddingEnd by
+        animateDpAsState(
+            targetValue = if (expanded) 0.dp else paddingEnd,
+            label = "search_bar_padding_end",
+        )
+
+    val searchBarInputPaddingStart by
+        animateDpAsState(
+            targetValue = if (expanded) safePadding.start else 0.dp,
+            label = "search_bar_padding_start",
+        )
+
+    val searchBarInputPaddingEnd by
+        animateDpAsState(
+            targetValue = if (expanded) safePadding.end else 0.dp,
+            label = "search_bar_padding_end",
+        )
+
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            searchBarState.animateToExpanded()
+            focusRequester.requestFocus()
+        } else {
+            searchBarState.animateToCollapsed()
+        }
+    }
+
+    // Keep the page's expanded flag in sync when the search bar collapses itself (for example
+    // through the system back gesture).
+    LaunchedEffect(searchBarState) {
+        snapshotFlow { searchBarState.targetValue }
+            .collect { value -> onExpand(value == SearchBarValue.Expanded) }
+    }
+
+    LaunchedEffect(query) {
+        if (query.isNotBlank()) {
+            // Debounce scales with input length. Max debounce of 300ms.
+            delay(minOf(50L + (query.count() * 50L), 300L))
+        }
+        onAction(SearchAction.Search(query))
+    }
+
+    val inputField: @Composable () -> Unit = {
+        SearchBarDefaults.InputField(
+            textFieldState = textFieldState,
+            searchBarState = searchBarState,
+            onSearch = { onExpand(true) },
+            modifier =
+                Modifier.padding(
+                        start = searchBarInputPaddingStart,
+                        end = searchBarInputPaddingEnd,
+                    )
+                    .focusRequester(focusRequester),
+            placeholder = {
+                Text(
+                    text = stringResource(FilmR.string.search_placeholder),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            },
+            leadingIcon = {
+                AnimatedContent(targetState = expanded, label = "search_to_back") { targetExpanded
+                    ->
+                    if (targetExpanded) {
+                        AppIconButton(
+                            onClick = { onExpand(false) },
+                            variant = AppButtonVariant.Ghost,
+                            content = {
+                                Icon(
+                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_search),
+                            contentDescription = null,
+                        )
+                    }
+                }
+            },
+            trailingIcon = {
+                if (state.loading) {
+                    Box(modifier = Modifier.size(32.dp)) { AppLoadingIndicator() }
+                } else if (query.isNotEmpty()) {
+                    AppIconButton(
+                        onClick = { textFieldState.setTextAndPlaceCursorAtEnd("") },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_x),
+                                contentDescription = null,
+                            )
+                        },
+                    )
+                }
+            },
+        )
+    }
+
+    val results: @Composable () -> Unit = {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding =
+                PaddingValues(
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                    top = MaterialTheme.spacings.default,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                ),
+            horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+            verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+        ) {
+            items(items = state.items, key = { it.id }) { item ->
+                ItemCard(
+                    item = item,
+                    direction = Direction.VERTICAL,
+                    onClick = { onAction(SearchAction.OnItemClick(item)) },
+                    modifier = Modifier.animateItem(),
+                    fillWidth = true,
+                )
+            }
+        }
+    }
+
+    if (expanded) {
+        ExpandedFullScreenSearchBar(
+            state = searchBarState,
+            inputField = inputField,
+            modifier = modifier,
+        ) {
+            results()
+        }
+    } else {
+        SearchBar(
+            state = searchBarState,
+            inputField = inputField,
+            modifier = modifier.padding(start = searchBarPaddingStart, end = searchBarPaddingEnd),
+        )
+    }
+}

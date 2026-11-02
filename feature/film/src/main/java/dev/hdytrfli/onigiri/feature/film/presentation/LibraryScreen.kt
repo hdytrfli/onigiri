@@ -1,0 +1,445 @@
+package dev.hdytrfli.onigiri.feature.film.presentation
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.presentation.components.Direction
+import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverlay
+import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCard
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
+import dev.hdytrfli.onigiri.feature.film.presentation.components.SortByDialog
+import dev.hdytrfli.onigiri.feature.film.presentation.components.section
+import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryAction
+import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryState
+import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryViewModel
+import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
+import dev.hdytrfli.onigiri.models.CollectionType
+import dev.hdytrfli.onigiri.models.FindroidItem
+import dev.hdytrfli.onigiri.ui.components.AppButtonSize
+import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.AppOptionRow
+import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
+import dev.hdytrfli.onigiri.ui.components.AppTextField
+import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
+import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.PageScaffold
+import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.preview.dummyMovies
+import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
+import dev.hdytrfli.onigiri.ui.theme.spacings
+import dev.hdytrfli.onigiri.ui.utils.GridSize
+import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
+import dev.hdytrfli.onigiri.ui.utils.gridColumns
+import dev.hdytrfli.onigiri.ui.utils.pageContentWindowInsets
+import dev.hdytrfli.onigiri.ui.utils.plus
+import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
+import java.util.UUID
+
+@Composable
+fun LibraryScreen(
+    libraryId: UUID?,
+    libraryName: String?,
+    libraryType: CollectionType,
+    onItemClick: (item: FindroidItem) -> Unit,
+    navigateBack: () -> Unit,
+    showTopBar: Boolean = true,
+    embedded: Boolean = false,
+    sectionTitle: String? = null,
+    genreIds: List<UUID> = emptyList(),
+    viewModel: LibraryViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(true) {
+        viewModel.setup(parentId = libraryId, libraryType = libraryType, genreIds = genreIds)
+        viewModel.loadItemsIfNeeded()
+    }
+    OfflineModeReload { viewModel.loadItems(force = true) }
+
+    LibraryScreenLayout(
+        libraryName = libraryName,
+        showTopBar = showTopBar,
+        embedded = embedded,
+        sectionTitle = sectionTitle,
+        state = state,
+        onAction = { action ->
+            when (action) {
+                is LibraryAction.OnItemClick -> onItemClick(action.item)
+                is LibraryAction.OnBackClick -> navigateBack()
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LibraryScreenLayout(
+    libraryName: String?,
+    showTopBar: Boolean,
+    embedded: Boolean,
+    sectionTitle: String?,
+    state: LibraryState,
+    onAction: (LibraryAction) -> Unit,
+) {
+    var showSortByDialog by remember { mutableStateOf(false) }
+    var showDisplayDialog by remember { mutableStateOf(false) }
+
+    PageScaffold(
+        contentWindowInsets =
+            if (embedded) {
+                WindowInsets(0, 0, 0, 0)
+            } else {
+                pageContentWindowInsets()
+            },
+        topBar = {
+            if (showTopBar) {
+                PageTopBar(
+                    title =
+                        libraryName?.takeIf { it.isNotBlank() }
+                            ?: stringResource(CoreR.string.genres),
+                    onBack = { onAction(LibraryAction.OnBackClick) },
+                    trailingContent = {
+                        LibraryActionButtons(
+                            onSearch = { onAction(LibraryAction.ToggleSearch) },
+                            onInfo = { showDisplayDialog = true },
+                            onSort = { showSortByDialog = true },
+                        )
+                    },
+                )
+            }
+        },
+    ) { innerPadding ->
+        LibraryContent(
+            state = state,
+            onAction = onAction,
+            showSortDialog = showSortByDialog,
+            showDisplayDialog = showDisplayDialog,
+            onShowSortDialogChange = { showSortByDialog = it },
+            onShowDisplayDialogChange = { showDisplayDialog = it },
+            embedded = embedded,
+            innerPadding = innerPadding,
+            sectionTitle = sectionTitle,
+        )
+    }
+}
+
+/** The grid, its search field and its dialogs, without a top bar or window insets. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LibraryContent(
+    state: LibraryState,
+    onAction: (LibraryAction) -> Unit,
+    showSortDialog: Boolean,
+    showDisplayDialog: Boolean,
+    onShowSortDialogChange: (Boolean) -> Unit,
+    onShowDisplayDialogChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    embedded: Boolean = false,
+    innerPadding: PaddingValues = PaddingValues(0.dp),
+    sectionTitle: String? = null,
+    showSearchField: Boolean = true,
+) {
+    val safePadding = rememberSafePadding()
+    // Under a root page the floating header overlays the content, so the first grid item
+    // starts below it; standalone the grid keeps its own spacing.
+    val rootInset = LocalRootPageContentInset.current
+    val contentPadding =
+        if (embedded) {
+            PaddingValues(
+                start = safePadding.start + MaterialTheme.spacings.gutter,
+                top =
+                    rootInset +
+                        if (sectionTitle != null) {
+                            0.dp
+                        } else {
+                            MaterialTheme.spacings.default
+                        },
+                end = safePadding.end + MaterialTheme.spacings.gutter,
+                bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+            )
+        } else {
+            PaddingValues(all = MaterialTheme.spacings.default)
+        }
+
+    val items = state.items
+    // The badge on the section title shows the cached list's total.
+    val itemCount = items.size.takeIf { it > 0 }
+
+    // Do not refresh the paged list on resume: reloading it resets the scroll position. Only the
+    // item whose detail page was opened can have changed, so the ViewModel re-fetches just that.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { onAction(LibraryAction.RefreshOpenedItem) }
+
+    val focusRequester = remember { FocusRequester() }
+
+    // Back closes the search instead of leaving the screen: the query is cleared on the way out so
+    // reopening starts fresh.
+    BackHandler(enabled = showSearchField && state.searchExpanded) {
+        onAction(LibraryAction.SetSearchQuery(""))
+        onAction(LibraryAction.ToggleSearch)
+    }
+
+    LaunchedEffect(state.searchExpanded) {
+        if (showSearchField && state.searchExpanded) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    Column(modifier = modifier.fillMaxSize().padding(innerPadding)) {
+        if (showSearchField && state.searchExpanded) {
+            AppTextField(
+                value = state.searchQuery,
+                onValueChange = { onAction(LibraryAction.SetSearchQuery(it)) },
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(
+                            start = MaterialTheme.spacings.default,
+                            top = MaterialTheme.spacings.small,
+                            end = MaterialTheme.spacings.default,
+                        )
+                        .focusRequester(focusRequester),
+                hint = stringResource(CoreR.string.search),
+                shape = CircleShape,
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_search),
+                        contentDescription = null,
+                    )
+                },
+                trailingContent = {
+                    // Keep the clear button's footprint even while the field is empty, otherwise
+                    // the text area jumps sideways as soon as the first character is typed.
+                    Box(
+                        modifier = Modifier.size(32.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (state.searchQuery.isNotEmpty()) {
+                            AppIconButton(
+                                onClick = { onAction(LibraryAction.SetSearchQuery("")) },
+                                size = AppButtonSize.Decorator,
+                                variant = AppButtonVariant.Ghost,
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_x),
+                                        contentDescription = null,
+                                    )
+                                },
+                            )
+                        }
+                    }
+                },
+            )
+        }
+        AppPullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = { onAction(LibraryAction.RefreshItems) },
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            val error = state.error
+            if (error != null && items.isEmpty()) {
+                FullPageError(
+                    onRefresh = { onAction(LibraryAction.RefreshItems) },
+                    isRefreshing = state.isLoading,
+                    error = error,
+                )
+            } else {
+                EmptyStateOverlay(
+                    visible = !state.isLoading && items.isEmpty(),
+                    context = stringResource(CoreR.string.empty_context_items),
+                    onRefresh = { onAction(LibraryAction.RefreshItems) },
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = contentPadding,
+                        horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                        verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
+                    ) {
+                        // The title is content, not a header: it scrolls away with the grid. The
+                        // badge on its right shows the cached list's total.
+                        if (items.isNotEmpty()) {
+                            section(
+                                title = sectionTitle,
+                                trailingContent =
+                                    itemCount?.let { count ->
+                                        {
+                                            ItemCountBadge(
+                                                count = count,
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
+                                    },
+                            ) {
+                                items(items = items, key = { it.id }) { item ->
+                                    ItemCard(
+                                        item = item,
+                                        direction = Direction.VERTICAL,
+                                        onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                                        modifier = Modifier.animateItem(),
+                                        fillWidth = true,
+                                        showYear = ListDisplayField.Year in state.displayFields,
+                                        showCommunityRating =
+                                            ListDisplayField.CommunityRating in state.displayFields,
+                                        showAgeRating =
+                                            ListDisplayField.AgeRating in state.displayFields,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showSortDialog) {
+        SortByDialog(
+            currentSortBy = state.sortBy,
+            currentSortOrder = state.sortOrder,
+            onUpdate = { sortBy, sortOrder ->
+                onAction(LibraryAction.ChangeSorting(sortBy, sortOrder))
+            },
+            onDismissRequest = { onShowSortDialogChange(false) },
+        )
+    }
+
+    if (showDisplayDialog) {
+        DisplayInfoDialog(
+            fields = state.displayFields,
+            onToggle = { onAction(LibraryAction.ToggleDisplayField(it)) },
+            onDismiss = { onShowDisplayDialogChange(false) },
+        )
+    }
+}
+
+@Composable
+private fun LibraryActionButtons(
+    onSearch: () -> Unit,
+    onInfo: () -> Unit,
+    onSort: () -> Unit,
+) {
+    AppIconButton(
+        onClick = onSearch,
+        variant = AppButtonVariant.Secondary,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_search),
+                contentDescription = null,
+            )
+        },
+    )
+    AppIconButton(
+        onClick = onInfo,
+        variant = AppButtonVariant.Secondary,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_tv_minimal),
+                contentDescription = null,
+            )
+        },
+    )
+    AppIconButton(
+        onClick = onSort,
+        variant = AppButtonVariant.Secondary,
+        content = {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
+                contentDescription = null,
+            )
+        },
+    )
+}
+
+@Composable
+fun DisplayInfoDialog(
+    fields: Set<ListDisplayField>,
+    onToggle: (ListDisplayField) -> Unit,
+    onDismiss: () -> Unit,
+    availableFields: Set<ListDisplayField> = ListDisplayField.entries.toSet(),
+) {
+    BaseDialog(
+        title = stringResource(CoreR.string.display_info),
+        description = stringResource(CoreR.string.display_info_summary),
+        onDismiss = onDismiss,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (ListDisplayField.Year in availableFields) {
+                AppOptionRow(
+                    text = stringResource(CoreR.string.display_year),
+                    onClick = { onToggle(ListDisplayField.Year) },
+                    selected = ListDisplayField.Year in fields,
+                    role = Role.Checkbox,
+                )
+            }
+            if (ListDisplayField.CommunityRating in availableFields) {
+                AppOptionRow(
+                    text = stringResource(CoreR.string.display_rating),
+                    onClick = { onToggle(ListDisplayField.CommunityRating) },
+                    selected = ListDisplayField.CommunityRating in fields,
+                    role = Role.Checkbox,
+                )
+            }
+            if (ListDisplayField.AgeRating in availableFields) {
+                AppOptionRow(
+                    text = stringResource(CoreR.string.display_age_rating),
+                    onClick = { onToggle(ListDisplayField.AgeRating) },
+                    selected = ListDisplayField.AgeRating in fields,
+                    role = Role.Checkbox,
+                )
+            }
+        }
+    }
+}
+
+@PreviewScreenSizes
+@Composable
+private fun LibraryScreenLayoutPreview() {
+    FindroidTheme {
+        LibraryScreenLayout(
+            libraryName = "Movies",
+            showTopBar = true,
+            embedded = false,
+            sectionTitle = null,
+            state = LibraryState(items = dummyMovies),
+            onAction = {},
+        )
+    }
+}

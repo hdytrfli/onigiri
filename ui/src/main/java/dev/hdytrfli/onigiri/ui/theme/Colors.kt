@@ -1,0 +1,59 @@
+package dev.hdytrfli.onigiri.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+/** Brand red: backs the Material error role and the played/favourite accents. */
+val Red = Color(0xFFEB5757)
+
+/** Brand yellow: rating stars and the paused-download status. */
+val Yellow = Color(0xFFF2C94C)
+
+/** Brand green: the successful-download status. */
+val Green = Color(0xFF24B364)
+
+/** Translucent black ramp drawn over artwork (backdrops/posters). */
+val ScrimLight = Color.Black.copy(alpha = 0.1f)
+val ScrimMedium = Color.Black.copy(alpha = 0.5f)
+val ScrimStrong = Color.Black.copy(alpha = 0.6f)
+
+/** Foreground colours for content drawn over artwork. */
+val OnScrim = Color.White
+val OnScrimSecondary = Color.LightGray
+
+data object ColorDark {
+    val primaryDark = Color(0xFFE6E6E6)
+    val onPrimaryDark = Color(0xFF1A1A1A)
+    val primaryContainerDark = Color(0xFF2A2A2A)
+    val onPrimaryContainerDark = Color(0xFFEDEDED)
+    val secondaryDark = Color(0xFFB0B0B0)
+    val onSecondaryDark = Color(0xFF1A1A1A)
+    val secondaryContainerDark = Color(0xFF2A2A2A)
+    val onSecondaryContainerDark = Color(0xFFEDEDED)
+    val tertiaryDark = Color(0xFFB0B0B0)
+    val onTertiaryDark = Color(0xFF1A1A1A)
+    val tertiaryContainerDark = Color(0xFF2A2A2A)
+    val onTertiaryContainerDark = Color(0xFFEDEDED)
+    val errorDark = Red
+    val onErrorDark = Color(0xFF1A1A1A)
+    val errorContainerDark = Color(0xFF8C1D18)
+    val onErrorContainerDark = Color(0xFFF2B8B5)
+    val backgroundDark = Color(0xFF121212)
+    val onBackgroundDark = Color(0xFFEDEDED)
+    val surfaceDark = Color(0xFF121212)
+    val onSurfaceDark = Color(0xFFEDEDED)
+    val surfaceVariantDark = Color(0xFF2A2A2A)
+    val onSurfaceVariantDark = Color(0xFFC7C7C7)
+    val outlineDark = Color(0xFF6E6E6E)
+    val outlineVariantDark = Color(0xFF3A3A3A)
+    val scrimDark = Color(0xFF000000)
+    val inverseSurfaceDark = Color(0xFFEDEDED)
+    val inverseOnSurfaceDark = Color(0xFF1A1A1A)
+    val inversePrimaryDark = Color(0xFF1A1A1A)
+    val surfaceDimDark = Color(0xFF121212)
+    val surfaceBrightDark = Color(0xFF3A3A3A)
+    val surfaceContainerLowestDark = Color(0xFF0D0D0D)
+    val surfaceContainerLowDark = Color(0xFF1A1A1A)
+    val surfaceContainerDark = Color(0xFF1E1E1E)
+    val surfaceContainerHighDark = Color(0xFF262626)
+    val surfaceContainerHighestDark = Color(0xFF2E2E2E)
+}

@@ -1,0 +1,88 @@
+package dev.hdytrfli.onigiri.presentation.settings.components
+
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
+import dev.hdytrfli.onigiri.settings.R as SettingsR
+import dev.hdytrfli.onigiri.settings.domain.models.Preference
+import dev.hdytrfli.onigiri.settings.presentation.models.OptionIcon
+import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceMultiSelect
+import dev.hdytrfli.onigiri.ui.components.AppOptionRow
+import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.drawableRes
+import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
+
+@Composable
+fun SettingsMultiSelectDialog(
+    preference: PreferenceMultiSelect,
+    options: List<Pair<String, String>>,
+    onUpdate: (value: Set<String>) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    val lazyListState = rememberLazyListState()
+
+    var selectedOptions by remember { mutableStateOf(preference.value) }
+
+    // No action row: a multi-select applies each toggle immediately, like the single-select dialog.
+    BaseDialog(
+        title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
+        onDismiss = onDismissRequest,
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
+            state = lazyListState,
+        ) {
+            items(items = options, key = { it.first }) { option ->
+                val checked = selectedOptions.contains(option.first)
+                AppOptionRow(
+                    text = option.second,
+                    onClick = {
+                        val updatedOptions =
+                            if (checked) {
+                                selectedOptions - setOfNotNull(option.first)
+                            } else {
+                                selectedOptions + listOfNotNull(option.first)
+                            }
+                        selectedOptions = updatedOptions
+                        onUpdate(updatedOptions)
+                    },
+                    selected = checked,
+                    role = Role.Checkbox,
+                    iconDrawableId = preference.optionIcon?.drawableRes(),
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsMultiSelectDialogPreview() {
+    FindroidTheme {
+        SettingsMultiSelectDialog(
+            preference =
+                PreferenceMultiSelect(
+                    nameStringResource =
+                        SettingsR.string.pref_player_media_segments_skip_button_type,
+                    backendPreference = Preference("", emptySet()),
+                    options = SettingsR.array.media_segments_type,
+                    optionValues = SettingsR.array.media_segments_type_values,
+                    optionIcon = OptionIcon.Segment,
+                ),
+            options = listOf("a" to "Option A", "b" to "Option B", "c" to "Option C"),
+            onUpdate = {},
+            onDismissRequest = {},
+        )
+    }
+}

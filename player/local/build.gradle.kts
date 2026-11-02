@@ -1,3 +1,5 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.parcelize)
@@ -5,14 +7,14 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-java { toolchain { languageVersion = Versions.JAVA } }
+java { toolchain { languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt()) } }
 
 android {
-    namespace = "dev.jdtech.jellyfin.player.local"
-    compileSdk = Versions.COMPILE_SDK
-    buildToolsVersion = Versions.BUILD_TOOLS
+    namespace = "dev.hdytrfli.onigiri.player.local"
+    compileSdk = libs.versions.compile.sdk.get().toInt()
+    buildToolsVersion = libs.versions.build.tools.get()
 
-    defaultConfig { minSdk = Versions.MIN_SDK }
+    defaultConfig { minSdk = libs.versions.min.sdk.get().toInt() }
 
     buildTypes {
         named("release") { isMinifyEnabled = false }

@@ -1,0 +1,124 @@
+package dev.hdytrfli.onigiri.feature.film.presentation.components
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeAction
+import dev.hdytrfli.onigiri.models.FindroidItem
+import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidShow
+import dev.hdytrfli.onigiri.ui.preview.dummyMovie
+import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
+import dev.hdytrfli.onigiri.ui.theme.OnScrim
+import dev.hdytrfli.onigiri.ui.theme.OnScrimSecondary
+import dev.hdytrfli.onigiri.ui.theme.ScrimLight
+import dev.hdytrfli.onigiri.ui.theme.ScrimMedium
+import dev.hdytrfli.onigiri.ui.theme.ScrimStrong
+import dev.hdytrfli.onigiri.ui.theme.spacings
+
+@Composable
+fun HomeCarouselItem(item: FindroidItem, onAction: (HomeAction) -> Unit) {
+    val colorStops =
+        arrayOf(
+            0.0f to ScrimLight,
+            0.5f to ScrimMedium,
+            1f to ScrimStrong,
+        )
+
+    val context = LocalContext.current
+    val backdrop = item.images.backdrop
+    val model =
+        remember(context, backdrop) {
+            ImageRequest.Builder(context)
+                .data(backdrop)
+                // Backdrops are multi-megabyte bitmaps: let the disk cache serve them instead of
+                // keeping them in the shared memory pool.
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .build()
+        }
+    val placeholder =
+        rememberBlurHashPainter(
+            hash = item.images.backdropBlurHash,
+            width = BLUR_HASH_LANDSCAPE_WIDTH,
+            height = BLUR_HASH_LANDSCAPE_HEIGHT,
+        )
+
+    Box(
+        modifier =
+            Modifier.aspectRatio(1.77f).clip(MaterialTheme.shapes.large).clickable {
+                onAction(HomeAction.OnItemClick(item))
+            }
+    ) {
+        AsyncImage(
+            model = model,
+            placeholder = placeholder ?: ColorPainter(MaterialTheme.colorScheme.surfaceContainer),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawRect(brush = Brush.verticalGradient(colorStops = colorStops))
+        }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+            modifier =
+                Modifier.padding(
+                        horizontal = MaterialTheme.spacings.gutter,
+                        vertical = MaterialTheme.spacings.medium,
+                    )
+                    .align(Alignment.BottomStart)
+                    .onGloballyPositioned { coordinates -> coordinates.size },
+        ) {
+            val genres =
+                when (item) {
+                    is FindroidMovie -> item.genres
+                    is FindroidShow -> item.genres
+                    else -> emptyList()
+                }
+            Text(
+                text = genres.joinToString(),
+                color = OnScrimSecondary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.labelMedium,
+            )
+            Text(
+                text = item.name,
+                modifier = Modifier,
+                color = OnScrim,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun HomeCarouselItemPreview() {
+    FindroidTheme { HomeCarouselItem(item = dummyMovie, onAction = {}) }
+}

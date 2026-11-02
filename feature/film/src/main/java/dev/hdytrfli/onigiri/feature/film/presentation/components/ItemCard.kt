@@ -1,0 +1,221 @@
+package dev.hdytrfli.onigiri.feature.film.presentation.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import dev.hdytrfli.onigiri.core.R
+import dev.hdytrfli.onigiri.models.FindroidBook
+import dev.hdytrfli.onigiri.models.FindroidBoxSet
+import dev.hdytrfli.onigiri.models.FindroidCollection
+import dev.hdytrfli.onigiri.models.FindroidEpisode
+import dev.hdytrfli.onigiri.models.FindroidItem
+import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidShow
+import dev.hdytrfli.onigiri.models.isDownloaded
+import dev.hdytrfli.onigiri.ui.preview.dummyEpisode
+import dev.hdytrfli.onigiri.ui.preview.dummyMovie
+import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
+import dev.hdytrfli.onigiri.ui.theme.Red
+import dev.hdytrfli.onigiri.ui.theme.spacings
+
+@Composable
+fun ItemCard(
+    item: FindroidItem,
+    direction: Direction,
+    onClick: (FindroidItem) -> Unit,
+    modifier: Modifier = Modifier,
+    fillWidth: Boolean = false,
+    showRemainingTime: Boolean = false,
+    showYear: Boolean = false,
+    showCommunityRating: Boolean = false,
+    showAgeRating: Boolean = false,
+) {
+    val productionYear =
+        when (item) {
+            is FindroidMovie -> item.productionYear ?: item.premiereDate?.year
+            is FindroidShow -> item.productionYear
+            is FindroidBook -> item.productionYear ?: item.premiereDate?.year
+            else -> null
+        }
+    val communityRating =
+        when (item) {
+            is FindroidMovie -> item.communityRating
+            is FindroidShow -> item.communityRating
+            else -> null
+        }
+    val ageRating =
+        when (item) {
+            is FindroidMovie -> item.officialRating
+            is FindroidShow -> item.officialRating
+            else -> null
+        }?.takeIf { it.isNotBlank() }
+    // Collections carry no rating; their card shows how many items are inside instead.
+    val collectionItemCount =
+        when (item) {
+            is FindroidCollection -> item.itemCount
+            is FindroidBoxSet -> item.itemCount
+            else -> null
+        }?.takeIf { it > 0 }
+    val isCollection = item is FindroidCollection || item is FindroidBoxSet
+
+    val width =
+        when (direction) {
+            Direction.HORIZONTAL -> 260
+            Direction.VERTICAL -> 150
+        }
+    Column(
+        modifier =
+            modifier
+                .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(width.dp))
+                .clip(MaterialTheme.shapes.small)
+                .clickable(onClick = { onClick(item) })
+    ) {
+        Surface(shape = MaterialTheme.shapes.small) {
+            Box {
+                ItemPoster(item = item, direction = direction)
+                Row(
+                    modifier =
+                        Modifier.align(Alignment.TopEnd).padding(MaterialTheme.spacings.small),
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+                ) {
+                    if (item.isDownloaded()) DownloadedBadge()
+                    if (item.played) PlayedBadge()
+                    if (isCollection) {
+                        collectionItemCount?.let { ItemCountBadge(it) }
+                    } else {
+                        item.unplayedItemCount?.takeIf { it > 0 }?.let { ItemCountBadge(it) }
+                    }
+                }
+                if (direction == Direction.HORIZONTAL && !showRemainingTime) {
+                    ProgressBar(
+                        item = item,
+                        modifier =
+                            Modifier.align(Alignment.BottomStart)
+                                .padding(MaterialTheme.spacings.small),
+                    )
+                }
+                if (showRemainingTime && item.playbackPositionTicks > 0) {
+                    RemainingTimeBadge(
+                        item = item,
+                        modifier =
+                            Modifier.align(Alignment.BottomEnd)
+                                .padding(MaterialTheme.spacings.small),
+                    )
+                }
+                // Episodes do not carry the movie/show official rating; don't label them Unrated.
+                // Collections have no rating either - they show their item count instead.
+                if (
+                    showAgeRating &&
+                        item !is FindroidEpisode &&
+                        item !is FindroidBook &&
+                        !isCollection
+                ) {
+                    AgeRatingBadge(
+                        rating = ageRating ?: stringResource(R.string.unrated),
+                        modifier =
+                            Modifier.align(Alignment.BottomEnd)
+                                .padding(MaterialTheme.spacings.small),
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
+        Text(
+            text = if (item is FindroidEpisode) item.seriesName else item.name,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (item is FindroidEpisode) {
+            Text(
+                text =
+                    stringResource(
+                        id = R.string.episode_name_extended,
+                        item.parentIndexNumber,
+                        item.indexNumber,
+                        item.name,
+                    ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (
+            (showYear && productionYear != null) || (showCommunityRating && communityRating != null)
+        ) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (showYear && productionYear != null) {
+                    Text(
+                        text = productionYear.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                    )
+                }
+                if (showCommunityRating && communityRating != null) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_star_filled),
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = Red,
+                    )
+                    Text(
+                        text = "%.1f".format(communityRating),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(2.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemCardPreviewMovie() {
+    FindroidTheme { ItemCard(item = dummyMovie, direction = Direction.HORIZONTAL, onClick = {}) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemCardPreviewMovieVertical() {
+    FindroidTheme { ItemCard(item = dummyMovie, direction = Direction.VERTICAL, onClick = {}) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemCardPreviewEpisode() {
+    FindroidTheme { ItemCard(item = dummyEpisode, direction = Direction.HORIZONTAL, onClick = {}) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ItemCardPreviewEpisodeVertical() {
+    FindroidTheme { ItemCard(item = dummyEpisode, direction = Direction.VERTICAL, onClick = {}) }
+}

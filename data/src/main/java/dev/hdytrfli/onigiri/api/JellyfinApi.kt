@@ -1,0 +1,94 @@
+package dev.hdytrfli.onigiri.api
+
+import android.content.Context
+import dev.hdytrfli.onigiri.data.BuildConfig
+import dev.hdytrfli.onigiri.settings.domain.Constants
+import java.util.UUID
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
+import org.jellyfin.sdk.api.client.HttpClientOptions
+import org.jellyfin.sdk.api.client.extensions.brandingApi
+import org.jellyfin.sdk.api.client.extensions.devicesApi
+import org.jellyfin.sdk.api.client.extensions.genresApi
+import org.jellyfin.sdk.api.client.extensions.imageApi
+import org.jellyfin.sdk.api.client.extensions.itemLookupApi
+import org.jellyfin.sdk.api.client.extensions.itemsApi
+import org.jellyfin.sdk.api.client.extensions.libraryApi
+import org.jellyfin.sdk.api.client.extensions.mediaInfoApi
+import org.jellyfin.sdk.api.client.extensions.mediaSegmentsApi
+import org.jellyfin.sdk.api.client.extensions.moviesApi
+import org.jellyfin.sdk.api.client.extensions.playStateApi
+import org.jellyfin.sdk.api.client.extensions.quickConnectApi
+import org.jellyfin.sdk.api.client.extensions.remoteImageApi
+import org.jellyfin.sdk.api.client.extensions.sessionApi
+import org.jellyfin.sdk.api.client.extensions.subtitleApi
+import org.jellyfin.sdk.api.client.extensions.suggestionsApi
+import org.jellyfin.sdk.api.client.extensions.systemApi
+import org.jellyfin.sdk.api.client.extensions.trickplayApi
+import org.jellyfin.sdk.api.client.extensions.tvShowsApi
+import org.jellyfin.sdk.api.client.extensions.userApi
+import org.jellyfin.sdk.api.client.extensions.userLibraryApi
+import org.jellyfin.sdk.api.client.extensions.userViewsApi
+import org.jellyfin.sdk.api.client.extensions.videosApi
+import org.jellyfin.sdk.createJellyfin
+import org.jellyfin.sdk.model.ClientInfo
+
+/**
+ * Jellyfin API class using org.jellyfin.sdk:jellyfin-platform-android
+ *
+ * @param androidContext The context
+ * @param socketTimeout The socket timeout
+ * @constructor Creates a new [JellyfinApi] instance
+ */
+class JellyfinApi(
+    androidContext: Context,
+    requestTimeout: Long = Constants.NETWORK_DEFAULT_REQUEST_TIMEOUT,
+    connectTimeout: Long = Constants.NETWORK_DEFAULT_CONNECT_TIMEOUT,
+    socketTimeout: Long = Constants.NETWORK_DEFAULT_SOCKET_TIMEOUT,
+) {
+    val jellyfin = createJellyfin {
+        clientInfo =
+            ClientInfo(
+                name =
+                    androidContext.applicationInfo
+                        .loadLabel(androidContext.packageManager)
+                        .toString(),
+                version = BuildConfig.VERSION_NAME,
+            )
+        context = androidContext
+    }
+    val api =
+        jellyfin.createApi(
+            httpClientOptions =
+                HttpClientOptions(
+                    requestTimeout = requestTimeout.toDuration(DurationUnit.MILLISECONDS),
+                    connectTimeout = connectTimeout.toDuration(DurationUnit.MILLISECONDS),
+                    socketTimeout = socketTimeout.toDuration(DurationUnit.MILLISECONDS),
+                )
+        )
+    var userId: UUID? = null
+
+    val brandingApi = api.brandingApi
+    val devicesApi = api.devicesApi
+    val genresApi = api.genresApi
+    val imageApi = api.imageApi
+    val itemsApi = api.itemsApi
+    val libraryApi = api.libraryApi
+    val itemLookupApi = api.itemLookupApi
+    val mediaInfoApi = api.mediaInfoApi
+    val mediaSegmentsApi = api.mediaSegmentsApi
+    val moviesApi = api.moviesApi
+    val playStateApi = api.playStateApi
+    val quickConnectApi = api.quickConnectApi
+    val remoteImageApi = api.remoteImageApi
+    val sessionApi = api.sessionApi
+    val showsApi = api.tvShowsApi
+    val subtitleApi = api.subtitleApi
+    val suggestionsApi = api.suggestionsApi
+    val systemApi = api.systemApi
+    val trickplayApi = api.trickplayApi
+    val userApi = api.userApi
+    val userLibraryApi = api.userLibraryApi
+    val videosApi = api.videosApi
+    val viewsApi = api.userViewsApi
+}

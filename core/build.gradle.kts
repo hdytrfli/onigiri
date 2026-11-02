@@ -1,19 +1,22 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose.compiler)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
 
-java { toolchain { languageVersion = Versions.JAVA } }
+java { toolchain { languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt()) } }
 
 android {
-    namespace = "dev.jdtech.jellyfin.core"
-    compileSdk = Versions.COMPILE_SDK
-    buildToolsVersion = Versions.BUILD_TOOLS
+    namespace = "dev.hdytrfli.onigiri.core"
+    compileSdk = libs.versions.compile.sdk.get().toInt()
+    buildToolsVersion = libs.versions.build.tools.get()
 
-    defaultConfig { minSdk = Versions.MIN_SDK }
+    defaultConfig { minSdk = libs.versions.min.sdk.get().toInt() }
 
     buildTypes {
         named("release") { isMinifyEnabled = false }

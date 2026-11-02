@@ -1,0 +1,19 @@
+package dev.hdytrfli.onigiri.settings.presentation.settings
+
+import android.content.Intent
+
+sealed interface SettingsEvent {
+    data object NavigateToAbout : SettingsEvent
+
+    data object NavigateToSubtitleFont : SettingsEvent
+
+    data object NavigateToReaderFont : SettingsEvent
+
+    data class NavigateToSettings(val indexes: List<Int>) : SettingsEvent
+
+    data class NavigateToSettingsFileEdit(val filePath: String) : SettingsEvent
+
+    data class LaunchIntent(val intent: Intent) : SettingsEvent
+
+    data object ResetServer : SettingsEvent
+}
