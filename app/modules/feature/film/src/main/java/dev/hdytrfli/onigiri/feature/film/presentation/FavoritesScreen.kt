@@ -57,6 +57,13 @@ private fun FavoritesScreenLayout(
     val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
     val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
     val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
+    val contentPadding =
+        PaddingValues(
+            start = paddingStart,
+            top = LocalRootPageContentInset.current,
+            end = paddingEnd,
+            bottom = paddingBottom,
+        )
 
     if (state.error != null && state.items.isEmpty()) {
         FullPageError(
@@ -74,19 +81,16 @@ private fun FavoritesScreenLayout(
     ) {
         EmptyStateOverlay(
             visible = state.sections.isEmpty(),
+            loading = state.isLoading,
             context = stringResource(CoreR.string.empty_context_favorites),
             onRefresh = onRetryClick,
+            title = stringResource(CoreR.string.title_favorite),
+            contentPadding = contentPadding,
         ) {
             CollectionGrid(
                 sections = state.sections,
                 innerPadding = PaddingValues(0.dp),
-                contentPadding =
-                    PaddingValues(
-                        start = paddingStart,
-                        top = LocalRootPageContentInset.current,
-                        end = paddingEnd,
-                        bottom = paddingBottom,
-                    ),
+                contentPadding = contentPadding,
                 onAction = { action ->
                     if (action is CollectionAction.OnItemClick) {
                         onItemClick(action.item)

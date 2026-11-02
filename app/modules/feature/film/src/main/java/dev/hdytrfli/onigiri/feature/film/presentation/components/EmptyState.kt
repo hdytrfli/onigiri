@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
@@ -97,13 +99,31 @@ fun EmptyStateOverlay(
     context: String,
     onRefresh: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    title: String? = null,
+    titlePadding: PaddingValues = PaddingValues(),
+    contentPadding: PaddingValues = PaddingValues(),
+    loading: Boolean = false,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         content()
 
         if (visible) {
-            EmptyState(context = context, onRefresh = onRefresh)
+            Column(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+                if (title != null) {
+                    SectionHeader(
+                        title = title,
+                        modifier = Modifier.padding(titlePadding),
+                    )
+                }
+                if (!loading) {
+                    EmptyState(
+                        context = context,
+                        onRefresh = onRefresh,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
     }
 }

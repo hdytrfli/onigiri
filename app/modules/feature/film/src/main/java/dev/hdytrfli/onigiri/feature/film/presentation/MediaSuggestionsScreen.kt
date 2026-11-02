@@ -3,7 +3,6 @@ package dev.hdytrfli.onigiri.feature.film.presentation
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +32,6 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.collection.CollectionsViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Direction
-import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyState
 import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverlay
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCard
@@ -284,6 +282,13 @@ private fun CollectionsTab(
 
     val items = if (kind == MediaKind.Movies) state.movies else state.shows
     val title = stringResource(CoreR.string.collections_label)
+    val contentPadding =
+        PaddingValues(
+            start = safePadding.start + MaterialTheme.spacings.gutter,
+            top = LocalRootPageContentInset.current,
+            end = safePadding.end + MaterialTheme.spacings.gutter,
+            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+        )
 
     if (state.error != null && items.isEmpty()) {
         FullPageError(
@@ -300,20 +305,17 @@ private fun CollectionsTab(
         modifier = Modifier.fillMaxSize(),
     ) {
         EmptyStateOverlay(
-            visible = !state.isLoading && items.isEmpty(),
+            visible = items.isEmpty(),
+            loading = state.isLoading,
             context = stringResource(CoreR.string.empty_context_collections),
             onRefresh = { viewModel.retry() },
+            title = title,
+            contentPadding = contentPadding,
         ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding =
-                    PaddingValues(
-                        start = safePadding.start + MaterialTheme.spacings.gutter,
-                        top = LocalRootPageContentInset.current,
-                        end = safePadding.end + MaterialTheme.spacings.gutter,
-                        bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                    ),
+                contentPadding = contentPadding,
                 horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                 verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
             ) {
@@ -368,22 +370,22 @@ private fun MediaSuggestionsContent(
                 error = state.error,
             )
         } else {
-            // Keep a scrollable container even when there are no rows, otherwise the pull gesture
-            // has nothing to attach to and the empty state cannot be refreshed by dragging.
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+            // Keep a scrollable container behind the overlay so pull-to-refresh still works when
+            // there are no rows.
+            EmptyStateOverlay(
+                visible = state.sections.isEmpty(),
+                loading = state.isLoading,
+                context = stringResource(CoreR.string.empty_context_suggestions),
+                onRefresh = onRetry,
+                title = stringResource(FilmR.string.suggestions),
+                titlePadding = PaddingValues(horizontal = MaterialTheme.spacings.gutter),
                 contentPadding = contentPadding,
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {
-                if (state.sections.isEmpty()) {
-                    item {
-                        EmptyState(
-                            context = stringResource(CoreR.string.empty_context_suggestions),
-                            onRefresh = onRetry,
-                            modifier = Modifier.fillParentMaxSize(),
-                        )
-                    }
-                } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = contentPadding,
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                ) {
                     items(items = state.sections, key = { it.id }) { section ->
                         MediaSectionRow(
                             section = section,
@@ -419,47 +421,44 @@ private fun GenresContent(
         onRefresh = { viewModel.retry(kind) },
         modifier = Modifier.fillMaxSize(),
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (state.error != null && state.sections.isEmpty()) {
-                FullPageError(
-                    onRefresh = { viewModel.retry(kind) },
-                    isRefreshing = state.isLoading,
-                    error = state.error,
+        if (state.error != null && state.sections.isEmpty()) {
+            FullPageError(
+                onRefresh = { viewModel.retry(kind) },
+                isRefreshing = state.isLoading,
+                error = state.error,
+            )
+        } else {
+            val contentPadding =
+                PaddingValues(
+                    top = LocalRootPageContentInset.current,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
                 )
-            } else {
+            EmptyStateOverlay(
+                visible = state.sections.isEmpty(),
+                loading = state.isLoading,
+                context = stringResource(CoreR.string.empty_context_genres),
+                onRefresh = { viewModel.retry(kind) },
+                title = stringResource(FilmR.string.genres),
+                titlePadding = PaddingValues(horizontal = MaterialTheme.spacings.gutter),
+                contentPadding = contentPadding,
+            ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding =
-                        PaddingValues(
-                            top = LocalRootPageContentInset.current,
-                            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                        ),
+                    contentPadding = contentPadding,
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                 ) {
-                    if (state.sections.isEmpty()) {
-                        item {
-                            EmptyState(
-                                context = stringResource(CoreR.string.empty_context_genres),
-                                onRefresh = { viewModel.retry(kind) },
-                                modifier = Modifier.fillParentMaxSize(),
-                            )
-                        }
-                    } else {
-                        items(items = state.sections, key = { it.id }) { section ->
-                            MediaSectionRow(
-                                section =
-                                    MediaSection(
-                                        id = section.id.toString(),
-                                        title = UiText.DynamicString(section.name),
-                                        items = section.items,
-                                    ),
-                                displayFields = displayFields,
-                                onItemClick = onItemClick,
-                                onListClick = {
-                                    onGenreClick(FindroidGenre(section.id, section.name))
-                                },
-                            )
-                        }
+                    items(items = state.sections, key = { it.id }) { section ->
+                        MediaSectionRow(
+                            section =
+                                MediaSection(
+                                    id = section.id.toString(),
+                                    title = UiText.DynamicString(section.name),
+                                    items = section.items,
+                                ),
+                            displayFields = displayFields,
+                            onItemClick = onItemClick,
+                            onListClick = { onGenreClick(FindroidGenre(section.id, section.name)) },
+                        )
                     }
                 }
             }

@@ -282,9 +282,12 @@ fun LibraryContent(
                 )
             } else {
                 EmptyStateOverlay(
-                    visible = !state.isLoading && items.isEmpty(),
+                    visible = items.isEmpty(),
+                    loading = state.isLoading,
                     context = stringResource(CoreR.string.empty_context_items),
                     onRefresh = { onAction(LibraryAction.RefreshItems) },
+                    title = sectionTitle,
+                    contentPadding = contentPadding,
                 ) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),

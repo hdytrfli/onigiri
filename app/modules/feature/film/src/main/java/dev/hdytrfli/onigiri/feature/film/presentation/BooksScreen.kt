@@ -165,6 +165,13 @@ fun BooksScreen(
                     .filter { item ->
                         searchQuery.isBlank() || item.name.contains(searchQuery, true)
                     }
+            val contentPadding =
+                PaddingValues(
+                    start = safePadding.start + MaterialTheme.spacings.gutter,
+                    top = LocalRootPageContentInset.current,
+                    end = safePadding.end + MaterialTheme.spacings.gutter,
+                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                )
 
             AppPullToRefreshBox(
                 isRefreshing = state.isLoading,
@@ -180,7 +187,8 @@ fun BooksScreen(
                     )
                 } else {
                     EmptyStateOverlay(
-                        visible = !state.isLoading && items.isEmpty(),
+                        visible = items.isEmpty(),
+                        loading = state.isLoading,
                         context =
                             stringResource(
                                 if (audiobooks) {
@@ -190,17 +198,13 @@ fun BooksScreen(
                                 }
                             ),
                         onRefresh = { viewModel.retry() },
+                        title = sectionTitle,
+                        contentPadding = contentPadding,
                     ) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding =
-                                PaddingValues(
-                                    start = safePadding.start + MaterialTheme.spacings.gutter,
-                                    top = LocalRootPageContentInset.current,
-                                    end = safePadding.end + MaterialTheme.spacings.gutter,
-                                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                                ),
+                            contentPadding = contentPadding,
                             horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                             verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         ) {

@@ -110,8 +110,11 @@ private fun DownloadsScreenLayout(
         ) {
             EmptyStateOverlay(
                 visible = state.sections.isEmpty(),
+                loading = state.isLoading,
                 context = stringResource(CoreR.string.empty_context_downloads),
                 onRefresh = onRefresh,
+                title = stringResource(CoreR.string.title_download),
+                contentPadding = contentPadding,
             ) {
                 CollectionGrid(
                     sections = state.sections,
