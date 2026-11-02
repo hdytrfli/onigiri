@@ -1,6 +1,5 @@
 package dev.jdtech.jellyfin.presentation.film
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +28,7 @@ import dev.jdtech.jellyfin.presentation.components.LocalRootPageContentInset
 import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
-import dev.jdtech.jellyfin.presentation.film.components.EmptyState
+import dev.jdtech.jellyfin.presentation.film.components.EmptyStateOverlay
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.pageContentWindowInsets
@@ -109,7 +108,11 @@ private fun DownloadsScreenLayout(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize(),
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            EmptyStateOverlay(
+                visible = state.sections.isEmpty(),
+                context = stringResource(CoreR.string.empty_context_downloads),
+                onRefresh = onRefresh,
+            ) {
                 CollectionGrid(
                     sections = state.sections,
                     innerPadding = innerPadding,
@@ -117,13 +120,6 @@ private fun DownloadsScreenLayout(
                     onAction = onAction,
                     displayFields = state.displayFields,
                 )
-
-                if (state.sections.isEmpty()) {
-                    EmptyState(
-                        context = stringResource(CoreR.string.empty_context_downloads),
-                        onRefresh = onRefresh,
-                    )
-                }
             }
         }
     }

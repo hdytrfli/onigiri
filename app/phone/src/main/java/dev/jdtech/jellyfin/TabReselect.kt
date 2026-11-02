@@ -2,12 +2,14 @@ package dev.jdtech.jellyfin
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.navigation3.runtime.NavKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 
 /**
  * Re-taps of the already-selected navigation item: the suite emits the route and the matching tab
@@ -32,6 +34,9 @@ class TabReselect {
     fun reselect(route: NavKey) {
         _events.tryEmit(route)
     }
+
+    /** Re-taps of [route], for the page that owns that tab to perform its secondary action. */
+    fun reselects(route: NavKey): Flow<NavKey> = events.filter { it == route }
 
     fun requestDownloads() {
         _openDownloads.value = true

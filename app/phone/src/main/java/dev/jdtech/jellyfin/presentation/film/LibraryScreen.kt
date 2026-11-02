@@ -56,7 +56,7 @@ import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
 import dev.jdtech.jellyfin.presentation.components.PageScaffold
 import dev.jdtech.jellyfin.presentation.components.PageTopBar
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.EmptyState
+import dev.jdtech.jellyfin.presentation.film.components.EmptyStateOverlay
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.ItemCountBadge
@@ -281,7 +281,11 @@ fun LibraryContent(
                     error = error,
                 )
             } else {
-                Box(modifier = Modifier.fillMaxSize()) {
+                EmptyStateOverlay(
+                    visible = !state.isLoading && items.isEmpty(),
+                    context = stringResource(CoreR.string.empty_context_items),
+                    onRefresh = { onAction(LibraryAction.RefreshItems) },
+                ) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                         modifier = Modifier.fillMaxSize(),
@@ -320,13 +324,6 @@ fun LibraryContent(
                                 }
                             }
                         }
-                    }
-
-                    if (!state.isLoading && items.isEmpty()) {
-                        EmptyState(
-                            context = stringResource(CoreR.string.empty_context_items),
-                            onRefresh = { onAction(LibraryAction.RefreshItems) },
-                        )
                     }
                 }
             }

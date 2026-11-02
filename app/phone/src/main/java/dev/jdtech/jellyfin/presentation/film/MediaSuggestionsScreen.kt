@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavKey
 import dev.jdtech.jellyfin.LocalTabReselect
 import dev.jdtech.jellyfin.MoviesRoute
 import dev.jdtech.jellyfin.ShowsRoute
@@ -54,6 +55,7 @@ import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.EmptyState
+import dev.jdtech.jellyfin.presentation.film.components.EmptyStateOverlay
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.MediaSectionRow
@@ -64,7 +66,6 @@ import dev.jdtech.jellyfin.presentation.utils.LocalGridGap
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import kotlinx.coroutines.flow.filter
 
 /** The Movies root page: Movies (sortable list), Suggestions and Genres tabs. */
 @Composable
@@ -117,8 +118,8 @@ private fun MediaPage(
     // Re-tap cycles the pills, exactly like Home: list -> collections -> suggestions -> genres.
     val tabReselect = LocalTabReselect.current
     LaunchedEffect(tabReselect, kind) {
-        val route: Any = if (kind == MediaKind.Movies) MoviesRoute else ShowsRoute
-        tabReselect.events.filter { it == route }.collect { selectedTab = (selectedTab + 1) % 4 }
+        val route: NavKey = if (kind == MediaKind.Movies) MoviesRoute else ShowsRoute
+        tabReselect.reselects(route).collect { selectedTab = (selectedTab + 1) % 4 }
     }
 
     // Back closes the search instead of leaving the page: the query is cleared on the way out so
@@ -298,7 +299,11 @@ private fun CollectionsTab(
         onRefresh = viewModel::retry,
         modifier = Modifier.fillMaxSize(),
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        EmptyStateOverlay(
+            visible = !state.isLoading && items.isEmpty(),
+            context = stringResource(CoreR.string.empty_context_collections),
+            onRefresh = { viewModel.retry() },
+        ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                 modifier = Modifier.fillMaxSize(),
@@ -329,13 +334,6 @@ private fun CollectionsTab(
                         }
                     }
                 }
-            }
-
-            if (!state.isLoading && items.isEmpty()) {
-                EmptyState(
-                    context = stringResource(CoreR.string.empty_context_collections),
-                    onRefresh = { viewModel.retry() },
-                )
             }
         }
     }

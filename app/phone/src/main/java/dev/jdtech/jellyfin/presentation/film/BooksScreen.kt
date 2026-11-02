@@ -3,7 +3,6 @@ package dev.jdtech.jellyfin.presentation.film
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -41,7 +40,7 @@ import dev.jdtech.jellyfin.presentation.components.PageSearchField
 import dev.jdtech.jellyfin.presentation.components.PageToolbar
 import dev.jdtech.jellyfin.presentation.components.RootPage
 import dev.jdtech.jellyfin.presentation.film.components.Direction
-import dev.jdtech.jellyfin.presentation.film.components.EmptyState
+import dev.jdtech.jellyfin.presentation.film.components.EmptyStateOverlay
 import dev.jdtech.jellyfin.presentation.film.components.FullPageError
 import dev.jdtech.jellyfin.presentation.film.components.ItemCard
 import dev.jdtech.jellyfin.presentation.film.components.SortByDialog
@@ -76,9 +75,7 @@ fun BooksScreen(
     // Pressing the Books item again cycles Books <-> Audiobooks.
     val tabReselect = LocalTabReselect.current
     LaunchedEffect(tabReselect) {
-        tabReselect.events
-            .filter { it is BooksRoute }
-            .collect { selectedTab = (selectedTab + 1) % 2 }
+        tabReselect.reselects(BooksRoute).collect { selectedTab = (selectedTab + 1) % 2 }
     }
 
     LaunchedEffect(tabReselect) {
@@ -182,7 +179,18 @@ fun BooksScreen(
                         modifier = Modifier.fillMaxSize(),
                     )
                 } else {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    EmptyStateOverlay(
+                        visible = !state.isLoading && items.isEmpty(),
+                        context =
+                            stringResource(
+                                if (audiobooks) {
+                                    CoreR.string.empty_context_audiobooks
+                                } else {
+                                    CoreR.string.empty_context_books
+                                }
+                            ),
+                        onRefresh = { viewModel.retry() },
+                    ) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                             modifier = Modifier.fillMaxSize(),
@@ -213,20 +221,6 @@ fun BooksScreen(
                                     }
                                 }
                             }
-                        }
-
-                        if (!state.isLoading && items.isEmpty()) {
-                            EmptyState(
-                                context =
-                                    stringResource(
-                                        if (audiobooks) {
-                                            CoreR.string.empty_context_audiobooks
-                                        } else {
-                                            CoreR.string.empty_context_books
-                                        }
-                                    ),
-                                onRefresh = { viewModel.retry() },
-                            )
                         }
                     }
                 }

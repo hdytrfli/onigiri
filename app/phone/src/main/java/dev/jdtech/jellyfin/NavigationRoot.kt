@@ -186,17 +186,16 @@ fun NavigationRoot(
     // nav3 caches per back stack snapshot, always read the current value.
     val searchExpanded = remember { mutableStateOf(false) }
 
-    // Keep the back stacks consistent across mode switches. Reconcile during composition, not in
-    // a LaunchedEffect, so the first frame of the new mode already shows the right screen.
-    val appliedSetupMode = remember { AppliedSetupMode(mainMode) }
-    if (appliedSetupMode.mainMode != mainMode) {
+    // Keep the back stacks consistent across mode switches. This is an effect rather than a
+    // composition-time mutation; the navigation state is already retained per mode, so the reset
+    // only normalizes the stacks that the new mode is about to show.
+    LaunchedEffect(mainMode, loggedOutProfileSelection) {
         if (mainMode) {
             if (!loggedOutProfileSelection) navigator.navigateHome()
         } else {
             setupBackStack.clear()
             setupBackStack.add(setupStartRoute)
         }
-        appliedSetupMode.mainMode = mainMode
     }
 
     if (mainMode) {
@@ -216,8 +215,6 @@ fun NavigationRoot(
         )
     }
 }
-
-private class AppliedSetupMode(var mainMode: Boolean)
 
 @Composable
 private fun MainNavigation(

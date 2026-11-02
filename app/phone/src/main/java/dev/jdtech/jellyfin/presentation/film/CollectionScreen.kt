@@ -12,19 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -34,19 +29,13 @@ import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionAction
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionState
 import dev.jdtech.jellyfin.film.presentation.collection.CollectionViewModel
-import dev.jdtech.jellyfin.models.CollectionSection
 import dev.jdtech.jellyfin.models.FindroidBoxSet
 import dev.jdtech.jellyfin.models.FindroidImages
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.FindroidMovie
 import dev.jdtech.jellyfin.models.FindroidShow
-import dev.jdtech.jellyfin.models.UiText
-import dev.jdtech.jellyfin.presentation.components.AppButtonVariant
-import dev.jdtech.jellyfin.presentation.components.AppIconButton
 import dev.jdtech.jellyfin.presentation.components.AppPullToRefreshBox
 import dev.jdtech.jellyfin.presentation.components.OfflineModeReload
-import dev.jdtech.jellyfin.presentation.components.PageScaffold
-import dev.jdtech.jellyfin.presentation.film.components.CollectionGrid
 import dev.jdtech.jellyfin.presentation.film.components.DetailAction
 import dev.jdtech.jellyfin.presentation.film.components.DetailActionsMenu
 import dev.jdtech.jellyfin.presentation.film.components.Direction
@@ -62,7 +51,6 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.gridColumns
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import dev.jdtech.jellyfin.presentation.utils.topBarWindowInsets
 import java.util.UUID
 
 @Composable
@@ -220,57 +208,6 @@ private fun CollectionDetailLayout(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CollectionScreenLayout(
-    collectionName: String,
-    state: CollectionState,
-    onAction: (CollectionAction) -> Unit,
-    onRefresh: () -> Unit = {},
-) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-    PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = {
-            TopAppBar(
-                title = { Text(collectionName) },
-                navigationIcon = {
-                    AppIconButton(
-                        onClick = { onAction(CollectionAction.OnBackClick) },
-                        variant = AppButtonVariant.Ghost,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                contentDescription = null,
-                            )
-                        },
-                    )
-                },
-                windowInsets = topBarWindowInsets(),
-                scrollBehavior = scrollBehavior,
-            )
-        },
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            CollectionGrid(
-                sections = state.sections,
-                innerPadding = innerPadding,
-                contentPadding = PaddingValues(all = MaterialTheme.spacings.default),
-                onAction = onAction,
-                displayFields = state.displayFields,
-            )
-
-            if (!state.isLoading && state.sections.isEmpty()) {
-                EmptyState(
-                    context = stringResource(CoreR.string.empty_context_items),
-                    onRefresh = onRefresh,
-                )
-            }
-        }
-    }
-}
-
 @PreviewScreenSizes
 @Composable
 private fun CollectionDetailLayoutPreview() {
@@ -286,28 +223,6 @@ private fun CollectionDetailLayoutPreview() {
                             images = FindroidImages(),
                         ),
                     items = dummyMovies,
-                ),
-            onAction = {},
-        )
-    }
-}
-
-@PreviewScreenSizes
-@Composable
-private fun CollectionScreenLayoutPreview() {
-    FindroidTheme {
-        CollectionScreenLayout(
-            collectionName = "Marvel",
-            state =
-                CollectionState(
-                    sections =
-                        listOf(
-                            CollectionSection(
-                                id = 0,
-                                name = UiText.StringResource(CoreR.string.movies_label),
-                                items = dummyMovies,
-                            )
-                        )
                 ),
             onAction = {},
         )

@@ -2,6 +2,7 @@ package dev.jdtech.jellyfin.presentation.film.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -81,6 +82,28 @@ fun EmptyState(
                     content = { Text(stringResource(CoreR.string.title_download)) },
                 )
             }
+        }
+    }
+}
+
+/**
+ * A media grid with the shared empty state drawn on top of it. Keeping the state above the grid
+ * means the empty state's buttons receive taps, while the grid underneath still owns the scroll
+ * gesture used by pull-to-refresh.
+ */
+@Composable
+fun EmptyStateOverlay(
+    visible: Boolean,
+    context: String,
+    onRefresh: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        content()
+
+        if (visible) {
+            EmptyState(context = context, onRefresh = onRefresh)
         }
     }
 }

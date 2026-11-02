@@ -11,19 +11,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -59,7 +62,12 @@ fun MediaSearchBar(
     val focusRequester = remember { FocusRequester() }
     val safePadding = rememberSafePadding()
 
-    var query by rememberSaveable { mutableStateOf("") }
+    val searchBarState =
+        rememberSearchBarState(
+            initialValue = if (expanded) SearchBarValue.Expanded else SearchBarValue.Collapsed
+        )
+    val textFieldState = rememberTextFieldState()
+    val query = textFieldState.text.toString()
 
     val searchBarPaddingStart by
         animateDpAsState(
@@ -87,8 +95,18 @@ fun MediaSearchBar(
 
     LaunchedEffect(expanded) {
         if (expanded) {
+            searchBarState.animateToExpanded()
             focusRequester.requestFocus()
+        } else {
+            searchBarState.animateToCollapsed()
         }
+    }
+
+    // Keep the page's expanded flag in sync when the search bar collapses itself (for example
+    // through the system back gesture).
+    LaunchedEffect(searchBarState) {
+        snapshotFlow { searchBarState.targetValue }
+            .collect { value -> onExpand(value == SearchBarValue.Expanded) }
     }
 
     LaunchedEffect(query) {
@@ -99,71 +117,66 @@ fun MediaSearchBar(
         onAction(SearchAction.Search(query))
     }
 
-    SearchBar(
-        inputField = {
-            SearchBarDefaults.InputField(
-                query = query,
-                onQueryChange = { query = it },
-                onSearch = { onExpand(true) },
-                expanded = expanded,
-                onExpandedChange = { onExpand(it) },
-                modifier =
-                    Modifier.padding(
-                            start = searchBarInputPaddingStart,
-                            end = searchBarInputPaddingEnd,
-                        )
-                        .focusRequester(focusRequester),
-                placeholder = {
-                    Text(
-                        text = stringResource(FilmR.string.search_placeholder),
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
+    val inputField: @Composable () -> Unit = {
+        SearchBarDefaults.InputField(
+            textFieldState = textFieldState,
+            searchBarState = searchBarState,
+            onSearch = { onExpand(true) },
+            modifier =
+                Modifier.padding(
+                        start = searchBarInputPaddingStart,
+                        end = searchBarInputPaddingEnd,
                     )
-                },
-                leadingIcon = {
-                    AnimatedContent(targetState = expanded, label = "search_to_back") {
-                        targetExpanded ->
-                        if (targetExpanded) {
-                            AppIconButton(
-                                onClick = { onExpand(false) },
-                                variant = AppButtonVariant.Ghost,
-                                content = {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_arrow_left),
-                                        contentDescription = null,
-                                    )
-                                },
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_search),
-                                contentDescription = null,
-                            )
-                        }
-                    }
-                },
-                trailingIcon = {
-                    if (state.loading) {
-                        Box(modifier = Modifier.size(32.dp)) { AppLoadingIndicator() }
-                    } else if (query.isNotEmpty()) {
+                    .focusRequester(focusRequester),
+            placeholder = {
+                Text(
+                    text = stringResource(FilmR.string.search_placeholder),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            },
+            leadingIcon = {
+                AnimatedContent(targetState = expanded, label = "search_to_back") { targetExpanded
+                    ->
+                    if (targetExpanded) {
                         AppIconButton(
-                            onClick = { query = "" },
+                            onClick = { onExpand(false) },
                             variant = AppButtonVariant.Ghost,
                             content = {
                                 Icon(
-                                    painter = painterResource(CoreR.drawable.ic_x),
+                                    painter = painterResource(CoreR.drawable.ic_arrow_left),
                                     contentDescription = null,
                                 )
                             },
                         )
+                    } else {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_search),
+                            contentDescription = null,
+                        )
                     }
-                },
-            )
-        },
-        expanded = expanded,
-        onExpandedChange = { onExpand(it) },
-        modifier = modifier.padding(start = searchBarPaddingStart, end = searchBarPaddingEnd),
-    ) {
+                }
+            },
+            trailingIcon = {
+                if (state.loading) {
+                    Box(modifier = Modifier.size(32.dp)) { AppLoadingIndicator() }
+                } else if (query.isNotEmpty()) {
+                    AppIconButton(
+                        onClick = { textFieldState.setTextAndPlaceCursorAtEnd("") },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_x),
+                                contentDescription = null,
+                            )
+                        },
+                    )
+                }
+            },
+        )
+    }
+
+    val results: @Composable () -> Unit = {
         LazyVerticalGrid(
             columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
             modifier = Modifier.fillMaxSize(),
@@ -187,5 +200,21 @@ fun MediaSearchBar(
                 )
             }
         }
+    }
+
+    if (expanded) {
+        ExpandedFullScreenSearchBar(
+            state = searchBarState,
+            inputField = inputField,
+            modifier = modifier,
+        ) {
+            results()
+        }
+    } else {
+        SearchBar(
+            state = searchBarState,
+            inputField = inputField,
+            modifier = modifier.padding(start = searchBarPaddingStart, end = searchBarPaddingEnd),
+        )
     }
 }

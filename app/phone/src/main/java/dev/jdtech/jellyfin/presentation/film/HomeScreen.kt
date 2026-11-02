@@ -62,7 +62,6 @@ import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.presentation.utils.GridSize
 import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
-import kotlinx.coroutines.flow.filter
 
 @Composable
 fun HomeScreen(
@@ -90,9 +89,7 @@ fun HomeScreen(
     // Pressing the Home item again cycles Home -> Favorites -> Downloads.
     val tabReselect = LocalTabReselect.current
     LaunchedEffect(tabReselect) {
-        tabReselect.events
-            .filter { it is HomeRoute }
-            .collect { selectedTab = (selectedTab + 1) % 3 }
+        tabReselect.reselects(HomeRoute).collect { selectedTab = (selectedTab + 1) % 3 }
     }
 
     // The offline notice's Downloads action: open this page on the Downloads tab.

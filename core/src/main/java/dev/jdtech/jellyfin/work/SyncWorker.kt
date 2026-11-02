@@ -7,12 +7,12 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dev.jdtech.jellyfin.api.JellyfinApi
+import dev.jdtech.jellyfin.api.JellyfinApiFactory
 import dev.jdtech.jellyfin.database.ServerDatabaseDao
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.models.User
 import dev.jdtech.jellyfin.models.toFindroidEpisode
 import dev.jdtech.jellyfin.models.toFindroidMovie
-import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import org.jellyfin.sdk.model.api.UpdateUserItemDataDto
 
 @HiltWorker
@@ -22,17 +22,11 @@ constructor(
     @Assisted private val context: Context,
     @Assisted private val workerParams: WorkerParameters,
     val database: ServerDatabaseDao,
-    val appPreferences: AppPreferences,
+    val jellyfinApiFactory: JellyfinApiFactory,
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        val jellyfinApi =
-            JellyfinApi(
-                androidContext = context.applicationContext,
-                requestTimeout = appPreferences.getValue(appPreferences.requestTimeout),
-                connectTimeout = appPreferences.getValue(appPreferences.connectTimeout),
-                socketTimeout = appPreferences.getValue(appPreferences.socketTimeout),
-            )
+        val jellyfinApi = jellyfinApiFactory.create()
 
         val servers = database.getServers()
 

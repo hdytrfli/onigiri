@@ -91,30 +91,4 @@ class JellyfinApi(
     val userLibraryApi = api.userLibraryApi
     val videosApi = api.videosApi
     val viewsApi = api.userViewsApi
-
-    companion object {
-        @Volatile private var INSTANCE: JellyfinApi? = null
-
-        fun getInstance(
-            context: Context,
-            requestTimeout: Long = Constants.NETWORK_DEFAULT_REQUEST_TIMEOUT,
-            connectTimeout: Long = Constants.NETWORK_DEFAULT_CONNECT_TIMEOUT,
-            socketTimeout: Long = Constants.NETWORK_DEFAULT_SOCKET_TIMEOUT,
-        ): JellyfinApi {
-            synchronized(this) {
-                var instance = INSTANCE
-                if (instance == null) {
-                    instance =
-                        JellyfinApi(
-                            androidContext = context.applicationContext,
-                            requestTimeout = requestTimeout,
-                            connectTimeout = connectTimeout,
-                            socketTimeout = socketTimeout,
-                        )
-                    INSTANCE = instance
-                }
-                return instance
-            }
-        }
-    }
 }
