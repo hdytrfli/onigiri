@@ -37,7 +37,6 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
 import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.models.FindroidItem
-import dev.hdytrfli.onigiri.ui.components.AnimatedTabContent
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
@@ -45,6 +44,7 @@ import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.RootPage
+import dev.hdytrfli.onigiri.ui.components.TabContent
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -151,7 +151,7 @@ fun BooksScreen(
             }
         }
     ) {
-        AnimatedTabContent(selectedTab = selectedTab) { tab ->
+        TabContent(selectedTab = selectedTab) { tab ->
             val audiobooks = tab == 1
             val sectionTitle =
                 stringResource(

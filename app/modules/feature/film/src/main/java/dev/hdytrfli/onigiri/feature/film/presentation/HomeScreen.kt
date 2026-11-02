@@ -45,7 +45,6 @@ import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.media.MediaSection
 import dev.hdytrfli.onigiri.models.FindroidCollection
 import dev.hdytrfli.onigiri.models.FindroidItem
-import dev.hdytrfli.onigiri.ui.components.AnimatedTabContent
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
@@ -53,6 +52,7 @@ import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.RootPage
+import dev.hdytrfli.onigiri.ui.components.TabContent
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeSection
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeSuggestions
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeView
@@ -145,7 +145,7 @@ fun HomeScreen(
             )
         }
     ) {
-        AnimatedTabContent(selectedTab = selectedTab) { tab ->
+        TabContent(selectedTab = selectedTab) { tab ->
             when (tab) {
                 0 ->
                     HomeScreenLayout(

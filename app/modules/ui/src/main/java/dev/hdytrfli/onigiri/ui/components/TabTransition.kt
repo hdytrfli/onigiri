@@ -6,16 +6,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 
-// A gentle fade-through, timed to feel like the page transition: the leaving screen clears first,
-// then the entering one fades in with the same easing.
-private const val TAB_TRANSITION_FADE_OUT_MS = 120
-private const val TAB_TRANSITION_FADE_IN_MS = 300
+// A gentle crossfade for navigation tab switches. This is separate from the pill-tab content,
+// which intentionally switches without any transition.
+private const val TAB_TRANSITION_FADE_OUT_MS = 180
+private const val TAB_TRANSITION_FADE_IN_MS = 240
+private const val TAB_TRANSITION_FADE_IN_DELAY_MS = 40
 
 val TAB_TRANSITION_SPEC =
     fadeIn(
         tween(
             durationMillis = TAB_TRANSITION_FADE_IN_MS,
-            delayMillis = TAB_TRANSITION_FADE_OUT_MS,
+            delayMillis = TAB_TRANSITION_FADE_IN_DELAY_MS,
             easing = FastOutSlowInEasing,
         )
     ) togetherWith

@@ -49,7 +49,6 @@ import dev.hdytrfli.onigiri.models.CollectionType
 import dev.hdytrfli.onigiri.models.FindroidGenre
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.UiText
-import dev.hdytrfli.onigiri.ui.components.AnimatedTabContent
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
@@ -58,6 +57,7 @@ import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.RootPage
+import dev.hdytrfli.onigiri.ui.components.TabContent
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -210,7 +210,7 @@ private fun MediaPage(
             }
         }
     ) {
-        AnimatedTabContent(selectedTab = selectedTab) { tab ->
+        TabContent(selectedTab = selectedTab) { tab ->
             when (tab) {
                 0 ->
                     LibraryContent(
