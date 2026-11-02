@@ -50,19 +50,21 @@ suspend fun BaseItemDto.toFindroidBook(
         sources.addAll(serverDatabase.getSources(id).map { it.toFindroidSource(serverDatabase) })
     }
     val localUserData = serverDatabase?.getUserData(id, jellyfinRepository.getUserId())
+    // Only pending local changes override the server; synced rows must not mask other clients.
+    val pendingUserData = localUserData?.takeIf { it.toBeSynced }
     return FindroidBook(
         id = id,
         name = name.orEmpty(),
         originalTitle = originalTitle,
         overview = overview.orEmpty(),
         sources = sources,
-        played = localUserData?.played ?: (userData?.played == true),
-        favorite = localUserData?.favorite ?: (userData?.isFavorite == true),
+        played = pendingUserData?.played ?: (userData?.played == true),
+        favorite = pendingUserData?.favorite ?: (userData?.isFavorite == true),
         canPlay = playAccess != PlayAccess.NONE,
         canDownload = canDownload == true,
         runtimeTicks = 0,
         playbackPositionTicks =
-            localUserData?.playbackPositionTicks ?: userData?.playbackPositionTicks ?: 0,
+            pendingUserData?.playbackPositionTicks ?: userData?.playbackPositionTicks ?: 0,
         images = toFindroidImages(jellyfinRepository),
         chapters = toFindroidChapters(),
         isAudiobook =

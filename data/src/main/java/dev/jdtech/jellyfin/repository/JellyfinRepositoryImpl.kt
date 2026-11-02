@@ -532,27 +532,43 @@ class JellyfinRepositoryImpl(
     ) {
         Timber.d("Sending stop $itemId")
         withContext(Dispatchers.IO) {
-            when {
-                playedPercentage < 10 -> {
-                    database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, 0)
-                    database.setPlayed(jellyfinApi.userId!!, itemId, false)
-                }
-                playedPercentage > 90 -> {
-                    database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, 0)
-                    database.setPlayed(jellyfinApi.userId!!, itemId, true)
-                }
-                else -> {
-                    database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, positionTicks)
-                    database.setPlayed(jellyfinApi.userId!!, itemId, false)
-                }
-            }
+            val userId = jellyfinApi.userId!!
             try {
                 jellyfinApi.playStateApi.reportPlaybackStopped(
                     PlaybackStopInfo(itemId = itemId, positionTicks = positionTicks, failed = false)
                 )
-            } catch (_: Exception) {
-                database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
+                updateLocalPlaybackStop(userId, itemId, positionTicks, playedPercentage, false)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to report playback stop for $itemId")
+                updateLocalPlaybackStop(userId, itemId, positionTicks, playedPercentage, true)
             }
+        }
+    }
+
+    private suspend fun updateLocalPlaybackStop(
+        userId: UUID,
+        itemId: UUID,
+        positionTicks: Long,
+        playedPercentage: Int,
+        pendingSync: Boolean,
+    ) {
+        database.getUserDataOrCreateNew(itemId, userId)
+        when {
+            playedPercentage < 10 -> {
+                database.setPlaybackPositionTicks(itemId, userId, 0)
+                database.setPlayed(userId, itemId, false)
+            }
+            playedPercentage > 90 -> {
+                database.setPlaybackPositionTicks(itemId, userId, 0)
+                database.setPlayed(userId, itemId, true)
+            }
+            else -> {
+                database.setPlaybackPositionTicks(itemId, userId, positionTicks)
+                database.setPlayed(userId, itemId, false)
+            }
+        }
+        if (pendingSync) {
+            database.setUserDataToBeSynced(userId, itemId, true)
         }
     }
 
@@ -563,7 +579,7 @@ class JellyfinRepositoryImpl(
     ) {
         Timber.d("Posting progress of $itemId, position: $positionTicks")
         withContext(Dispatchers.IO) {
-            database.setPlaybackPositionTicks(itemId, jellyfinApi.userId!!, positionTicks)
+            val userId = jellyfinApi.userId!!
             try {
                 jellyfinApi.playStateApi.reportPlaybackProgress(
                     PlaybackProgressInfo(
@@ -577,9 +593,24 @@ class JellyfinRepositoryImpl(
                         positionTicks = positionTicks,
                     )
                 )
-            } catch (_: Exception) {
-                database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
+                updateLocalPlaybackProgress(userId, itemId, positionTicks, false)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to report playback progress for $itemId")
+                updateLocalPlaybackProgress(userId, itemId, positionTicks, true)
             }
+        }
+    }
+
+    private suspend fun updateLocalPlaybackProgress(
+        userId: UUID,
+        itemId: UUID,
+        positionTicks: Long,
+        pendingSync: Boolean,
+    ) {
+        database.getUserDataOrCreateNew(itemId, userId)
+        database.setPlaybackPositionTicks(itemId, userId, positionTicks)
+        if (pendingSync) {
+            database.setUserDataToBeSynced(userId, itemId, true)
         }
     }
 
@@ -594,52 +625,37 @@ class JellyfinRepositoryImpl(
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
+            jellyfinApi.userLibraryApi.markFavoriteItem(itemId)
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, true)
-            try {
-                jellyfinApi.userLibraryApi.markFavoriteItem(itemId)
-            } catch (_: Exception) {
-                database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
-            }
         }
     }
 
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
+            jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId)
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, false)
-            try {
-                jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId)
-            } catch (_: Exception) {
-                database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
-            }
         }
     }
 
     override suspend fun markAsPlayed(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
+            jellyfinApi.playStateApi.markPlayedItem(itemId)
             database.getUserDataOrCreateNew(itemId, userId)
             database.setPlayed(userId, itemId, true)
-            try {
-                jellyfinApi.playStateApi.markPlayedItem(itemId)
-            } catch (_: Exception) {
-                database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
-            }
+            database.setPlaybackPositionTicks(itemId, userId, 0)
         }
     }
 
     override suspend fun markAsUnplayed(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
+            jellyfinApi.playStateApi.markUnplayedItem(itemId)
             database.getUserDataOrCreateNew(itemId, userId)
             database.setPlayed(userId, itemId, false)
-            try {
-                jellyfinApi.playStateApi.markUnplayedItem(itemId)
-            } catch (_: Exception) {
-                database.setUserDataToBeSynced(jellyfinApi.userId!!, itemId, true)
-            }
         }
     }
 

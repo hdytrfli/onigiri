@@ -94,9 +94,10 @@ constructor(
 
     private fun mutate(block: suspend () -> Unit) {
         viewModelScope.launch {
-            block()
-            swrStore.invalidateMediaLists()
-            loadShow(showId)
+            if (runCatching { block() }.isSuccess) {
+                swrStore.invalidateMediaLists()
+                loadShow(showId)
+            }
         }
     }
 }

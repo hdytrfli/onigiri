@@ -66,22 +66,19 @@ constructor(
     }
 
     fun setPlayed(bookId: UUID, played: Boolean) {
-        if (played) {
-            appPreferences.sharedPreferences
-                .edit()
-                .remove("reader_locator_$bookId")
-                .remove("reader_page_count_$bookId")
-                .apply()
-            _state.value = _state.value.copy(readingProgress = 0f, pagesLeft = 0)
-        }
-        _state.value = _state.value.copy(item = _state.value.item?.copy(played = played))
         update(bookId) {
             if (played) repository.markAsPlayed(bookId) else repository.markAsUnplayed(bookId)
+            if (played) {
+                appPreferences.sharedPreferences
+                    .edit()
+                    .remove("reader_locator_$bookId")
+                    .remove("reader_page_count_$bookId")
+                    .apply()
+            }
         }
     }
 
     fun setFavorite(bookId: UUID, favorite: Boolean) {
-        _state.value = _state.value.copy(item = _state.value.item?.copy(favorite = favorite))
         update(bookId) {
             if (favorite) repository.markAsFavorite(bookId) else repository.unmarkAsFavorite(bookId)
         }
@@ -89,9 +86,11 @@ constructor(
 
     private fun update(bookId: UUID, block: suspend () -> Unit) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { runCatching { block() } }
-            swrStore.invalidateMediaLists()
-            load(bookId, force = true)
+            val result = withContext(Dispatchers.IO) { runCatching { block() } }
+            if (result.isSuccess) {
+                swrStore.invalidateMediaLists()
+                load(bookId, force = true)
+            }
         }
     }
 
