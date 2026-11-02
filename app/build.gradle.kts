@@ -27,11 +27,24 @@ android {
         testInstrumentationRunner = "dev.hdytrfli.onigiri.HiltTestRunner"
     }
 
+    signingConfigs {
+        val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+        if (keystorePath != null) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         named("debug") { applicationIdSuffix = ".debug" }
         named("release") {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -40,8 +53,10 @@ android {
         register("staging") {
             initWith(getByName("release"))
             applicationIdSuffix = ".staging"
-            // Sign staging with the debug keystore so it installs locally.
-            signingConfig = signingConfigs.getByName("debug")
+            // Use the stable key where available so distributed beta APKs remain updateable.
+            // Local builds without release credentials fall back to the debug keystore.
+            signingConfig =
+                signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 

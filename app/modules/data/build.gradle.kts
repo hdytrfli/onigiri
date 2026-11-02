@@ -9,6 +9,8 @@ plugins {
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt()) } }
 
+val appVersionName = libs.versions.app.name.get()
+
 android {
     namespace = "dev.hdytrfli.onigiri.data"
     compileSdk = libs.versions.compile.sdk.get().toInt()
@@ -17,8 +19,7 @@ android {
     defaultConfig {
         minSdk = libs.versions.min.sdk.get().toInt()
 
-        buildConfigField("int", "VERSION_CODE", libs.versions.app.code.get().toInt().toString())
-        buildConfigField("String", "VERSION_NAME", "\"${libs.versions.app.name.get()}\"")
+        buildConfigField("String", "VERSION_NAME", "\"$appVersionName\"")
 
         consumerProguardFile("proguard-rules.pro")
     }
