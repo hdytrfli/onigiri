@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="icons/ic_launcher-web.png" width="120" alt="Findroid+ icon">
+  <img src="icons/findroid-plus.svg" width="120" alt="Findroid+ logo">
 </p>
 
 <h1 align="center">Findroid+</h1>
 
 <p align="center">A native Jellyfin client for Android, with a built-in reader.</p>
 
-<p align="center"><strong>1.0.0-beta</strong></p>
+<p align="center"><strong>1.0.0-beta.1</strong></p>
 
 Findroid+ is an independent Android client for Jellyfin. It began as a fork of
 [Findroid](https://github.com/jarnedemeulemeester/findroid) and continues its native-first
