@@ -4,6 +4,7 @@ import java.util.UUID
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.ImageType
 
 @Serializable
 @SerialName("musicSong")
@@ -21,8 +22,23 @@ data class FindroidMusicSong(
 
 fun BaseItemDto.toFindroidMusicSong(
     repository: dev.hdytrfli.onigiri.repository.JellyfinRepository
-): FindroidMusicSong =
-    FindroidMusicSong(
+): FindroidMusicSong {
+    val baseImages = toFindroidImages(repository)
+    val albumImage =
+        if (baseImages.primary == null && albumId != null) {
+            albumPrimaryImageTag?.let {
+                buildItemImageUrl(
+                    repository.getBaseUrl(),
+                    albumId!!,
+                    ImageType.PRIMARY,
+                    tag = it,
+                )
+            }
+        } else {
+            null
+        }
+
+    return FindroidMusicSong(
         id = id,
         name = name.orEmpty(),
         albumId = albumId,
@@ -35,5 +51,6 @@ fun BaseItemDto.toFindroidMusicSong(
         indexNumber = indexNumber,
         productionYear = productionYear,
         runtimeTicks = runTimeTicks ?: 0,
-        images = toFindroidImages(repository),
+        images = baseImages.copy(primary = baseImages.primary ?: albumImage),
     )
+}
