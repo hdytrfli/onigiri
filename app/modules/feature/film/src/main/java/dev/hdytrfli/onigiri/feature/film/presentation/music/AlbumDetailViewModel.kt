@@ -51,7 +51,7 @@ class AlbumDetailViewModel @Inject constructor(private val repository: JellyfinR
                 _state.value =
                     AlbumDetailState(
                         album = album,
-                        songs = songs,
+                        songs = songs.sortedBy { it.indexNumber ?: Int.MAX_VALUE },
                     )
             } catch (e: CancellationException) {
                 throw e

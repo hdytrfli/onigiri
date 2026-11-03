@@ -250,7 +250,9 @@ private fun BaseItemKind?.isNavigable(): Boolean =
         BaseItemKind.SEASON,
         BaseItemKind.BOOK,
         BaseItemKind.AUDIO_BOOK,
-        BaseItemKind.BOX_SET -> true
+        BaseItemKind.BOX_SET,
+        BaseItemKind.MUSIC_ARTIST,
+        BaseItemKind.MUSIC_ALBUM -> true
         else -> false
     }
 
