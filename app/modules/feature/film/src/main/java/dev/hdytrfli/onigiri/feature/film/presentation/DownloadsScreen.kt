@@ -8,6 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageScaffold
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -40,6 +43,8 @@ fun DownloadsScreen(
     onItemClick: (item: FindroidItem) -> Unit,
     embedded: Boolean = false,
     viewModel: DownloadsViewModel = hiltViewModel(),
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+    showPullIndicator: Boolean = false,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -56,6 +61,8 @@ fun DownloadsScreen(
         },
         onRefresh = { viewModel.loadItems(force = true) },
         embedded = embedded,
+        pullToRefreshState = pullToRefreshState,
+        showPullIndicator = showPullIndicator,
     )
 }
 
@@ -66,6 +73,8 @@ private fun DownloadsScreenLayout(
     onAction: (CollectionAction) -> Unit,
     onRefresh: () -> Unit = {},
     embedded: Boolean = false,
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+    showPullIndicator: Boolean = false,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val safePadding = rememberSafePadding()
@@ -78,6 +87,13 @@ private fun DownloadsScreenLayout(
                     title = { Text(text = stringResource(CoreR.string.title_download)) },
                     windowInsets = topBarWindowInsets(),
                     scrollBehavior = scrollBehavior,
+                    actions = {
+                        PullToRefreshButton(
+                            state = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                            onRefresh = onRefresh,
+                        )
+                    },
                 )
             }
         },
@@ -107,6 +123,8 @@ private fun DownloadsScreenLayout(
             isRefreshing = state.isLoading,
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize(),
+            state = pullToRefreshState,
+            showIndicator = showPullIndicator,
         ) {
             EmptyStateOverlay(
                 visible = state.sections.isEmpty(),

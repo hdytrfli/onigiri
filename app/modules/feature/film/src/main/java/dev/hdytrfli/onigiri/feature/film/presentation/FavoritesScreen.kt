@@ -3,6 +3,8 @@ package dev.hdytrfli.onigiri.feature.film.presentation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +35,8 @@ import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 fun FavoritesScreen(
     onItemClick: (item: FindroidItem) -> Unit,
     viewModel: FavoritesViewModel = hiltViewModel(),
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+    showPullIndicator: Boolean = true,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -43,6 +47,8 @@ fun FavoritesScreen(
         state = state,
         onItemClick = onItemClick,
         onRetryClick = { viewModel.loadItems(force = true) },
+        pullToRefreshState = pullToRefreshState,
+        showPullIndicator = showPullIndicator,
     )
 }
 
@@ -51,6 +57,8 @@ private fun FavoritesScreenLayout(
     state: CollectionState,
     onItemClick: (item: FindroidItem) -> Unit,
     onRetryClick: () -> Unit,
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+    showPullIndicator: Boolean = true,
 ) {
     val safePadding = rememberSafePadding()
 
@@ -78,6 +86,8 @@ private fun FavoritesScreenLayout(
         isRefreshing = state.isLoading,
         onRefresh = onRetryClick,
         modifier = Modifier.fillMaxSize(),
+        state = pullToRefreshState,
+        showIndicator = showPullIndicator,
     ) {
         EmptyStateOverlay(
             visible = state.sections.isEmpty(),

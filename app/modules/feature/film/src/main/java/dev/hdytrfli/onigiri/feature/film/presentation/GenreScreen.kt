@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryAction
 import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryViewModel
 import dev.hdytrfli.onigiri.models.CollectionType
@@ -26,6 +28,7 @@ import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.RootPage
 import java.util.UUID
 
@@ -42,6 +45,7 @@ fun GenreScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showSortDialog by rememberSaveable { mutableStateOf(false) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(genreId, libraryType) {
         viewModel.setup(
@@ -59,6 +63,11 @@ fun GenreScreen(
     }
 
     val toolbarActions: @Composable RowScope.() -> Unit = {
+        PullToRefreshButton(
+            state = pullToRefreshState,
+            isRefreshing = state.isLoading,
+            onRefresh = { viewModel.onAction(LibraryAction.RefreshItems) },
+        )
         if (!state.searchExpanded) {
             AppIconButton(
                 onClick = { viewModel.onAction(LibraryAction.ToggleSearch) },
@@ -71,25 +80,9 @@ fun GenreScreen(
                 },
             )
         }
-        AppIconButton(
-            onClick = { showDisplayDialog = true },
-            variant = AppButtonVariant.Secondary,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_tv_minimal),
-                    contentDescription = stringResource(CoreR.string.display_info),
-                )
-            },
-        )
-        AppIconButton(
-            onClick = { showSortDialog = true },
-            variant = AppButtonVariant.Secondary,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                    contentDescription = stringResource(CoreR.string.sort_by),
-                )
-            },
+        ListOptionsMenu(
+            onDisplayInfoClick = { showDisplayDialog = true },
+            onSortClick = { showSortDialog = true },
         )
     }
 
@@ -128,6 +121,8 @@ fun GenreScreen(
             showDisplayDialog = showDisplayDialog,
             onShowSortDialogChange = { showSortDialog = it },
             onShowDisplayDialogChange = { showDisplayDialog = it },
+            pullToRefreshState = pullToRefreshState,
+            showPullIndicator = false,
             embedded = true,
             sectionTitle = genreName.takeIf { it.isNotBlank() },
             showSearchField = false,

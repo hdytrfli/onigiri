@@ -30,6 +30,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +62,7 @@ import dev.hdytrfli.onigiri.ui.components.BaseDialog
 import dev.hdytrfli.onigiri.ui.components.PageContent
 import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.LocalOfflineMode
@@ -107,6 +110,7 @@ private fun SubtitleSearchScreenLayout(
     onInfo: (RemoteSubtitleInfo) -> Unit,
     onCloseInfo: () -> Unit,
     navigateBack: () -> Unit,
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
 ) {
     val languageNames = stringArrayResource(SettingsR.array.languages)
     val languageValues = stringArrayResource(SettingsR.array.languages_values)
@@ -119,6 +123,13 @@ private fun SubtitleSearchScreenLayout(
             PageTopBar(
                 title = stringResource(CoreR.string.search_subtitles),
                 onBack = navigateBack,
+                trailingContent = {
+                    PullToRefreshButton(
+                        state = pullToRefreshState,
+                        isRefreshing = state.isRefreshing,
+                        onRefresh = onRefresh,
+                    )
+                },
             )
         }
     ) { innerPadding ->
@@ -130,6 +141,8 @@ private fun SubtitleSearchScreenLayout(
             isRefreshing = state.isRefreshing,
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize().padding(innerPadding),
+            state = pullToRefreshState,
+            showIndicator = false,
         ) {
             PageContent {
                 LazyColumn(

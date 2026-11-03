@@ -14,6 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,8 +45,10 @@ import dev.hdytrfli.onigiri.models.FindroidImages
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
 import dev.hdytrfli.onigiri.models.FindroidShow
+import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -86,6 +90,7 @@ private fun CollectionDetailLayout(
     onAction: (CollectionAction) -> Unit,
     onEditImages: (UUID) -> Unit = {},
     onRefresh: () -> Unit = {},
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
 ) {
     val safePadding = rememberSafePadding()
 
@@ -121,6 +126,8 @@ private fun CollectionDetailLayout(
             isRefreshing = state.isLoading,
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize(),
+            state = pullToRefreshState,
+            showIndicator = false,
         ) {
             state.collection
                 ?.takeIf { state.items.isNotEmpty() || state.isLoading }
@@ -196,12 +203,19 @@ private fun CollectionDetailLayout(
             hasBackButton = true,
             onBackClick = { onAction(CollectionAction.OnBackClick) },
             trailingContent = {
-                state.collection?.let { collection ->
-                    DetailActionsMenu(
-                        itemId = collection.id,
-                        actions = setOf(DetailAction.EDIT_IMAGES),
-                        onEditImages = { onEditImages(collection.id) },
+                AppButtonGroup {
+                    PullToRefreshButton(
+                        state = pullToRefreshState,
+                        isRefreshing = state.isLoading,
+                        onRefresh = onRefresh,
                     )
+                    state.collection?.let { collection ->
+                        DetailActionsMenu(
+                            itemId = collection.id,
+                            actions = setOf(DetailAction.EDIT_IMAGES),
+                            onEditImages = { onEditImages(collection.id) },
+                        )
+                    }
                 }
             },
         )

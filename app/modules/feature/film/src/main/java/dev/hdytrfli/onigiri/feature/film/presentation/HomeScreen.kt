@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -35,6 +35,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.HomeCarousel
 import dev.hdytrfli.onigiri.feature.film.presentation.components.HomeSection
 import dev.hdytrfli.onigiri.feature.film.presentation.components.HomeView
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MediaSectionRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
 import dev.hdytrfli.onigiri.feature.film.presentation.downloads.DownloadsViewModel
@@ -45,12 +46,11 @@ import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.media.MediaSection
 import dev.hdytrfli.onigiri.models.FindroidCollection
 import dev.hdytrfli.onigiri.models.FindroidItem
-import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
-import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeSection
@@ -85,6 +85,20 @@ fun HomeScreen(
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
+    val activeRefreshing =
+        when (selectedTab) {
+            0 -> state.isLoading
+            1 -> favoritesState.isLoading
+            else -> downloadsState.isLoading
+        }
+    val activeRefresh: () -> Unit = {
+        when (selectedTab) {
+            0 -> viewModel.onAction(HomeAction.OnRetryClick)
+            1 -> favoritesViewModel.loadItems(force = true)
+            else -> downloadsViewModel.loadItems(force = true)
+        }
+    }
 
     // Pressing the Home item again cycles Home -> Favorites -> Downloads.
     val tabReselect = LocalTabReselect.current
@@ -131,15 +145,15 @@ fun HomeScreen(
                 onSelect = { selectedTab = it },
                 dropdownOnCompact = true,
                 actions = {
-                    AppIconButton(
-                        onClick = { showDisplayDialog = true },
-                        variant = AppButtonVariant.Secondary,
-                        content = {
-                            Icon(
-                                painter = painterResource(CoreR.drawable.ic_tv_minimal),
-                                contentDescription = null,
-                            )
-                        },
+                    PullToRefreshButton(
+                        state = pullToRefreshState,
+                        isRefreshing = activeRefreshing,
+                        onRefresh = activeRefresh,
+                    )
+                    ListOptionsMenu(
+                        onDisplayInfoClick = { showDisplayDialog = true },
+                        onSortClick = {},
+                        showSort = false,
                     )
                 },
             )
@@ -152,17 +166,22 @@ fun HomeScreen(
                         state = state,
                         onAction = onAction,
                         onBooksClick = onBooksClick,
+                        pullToRefreshState = pullToRefreshState,
                     )
                 1 ->
                     FavoritesScreen(
                         onItemClick = onItemClick,
                         viewModel = favoritesViewModel,
+                        pullToRefreshState = pullToRefreshState,
+                        showPullIndicator = false,
                     )
                 else ->
                     DownloadsScreen(
                         onItemClick = onItemClick,
                         embedded = true,
                         viewModel = downloadsViewModel,
+                        pullToRefreshState = pullToRefreshState,
+                        showPullIndicator = false,
                     )
             }
         }
@@ -201,6 +220,7 @@ private fun HomeScreenLayout(
     state: HomeState,
     onAction: (HomeAction) -> Unit,
     onBooksClick: (audiobooks: Boolean) -> Unit = {},
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
 ) {
     val safePadding = rememberSafePadding()
 
@@ -233,6 +253,8 @@ private fun HomeScreenLayout(
         AppPullToRefreshBox(
             isRefreshing = state.isLoading,
             onRefresh = { onAction(HomeAction.OnRetryClick) },
+            state = pullToRefreshState,
+            showIndicator = false,
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().semantics { traversalIndex = 1f },

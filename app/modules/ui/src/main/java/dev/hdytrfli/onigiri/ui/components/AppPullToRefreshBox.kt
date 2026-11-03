@@ -6,6 +6,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,29 +22,31 @@ fun AppPullToRefreshBox(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    state: PullToRefreshState = rememberPullToRefreshState(),
+    showIndicator: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val state = rememberPullToRefreshState()
-
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier,
         state = state,
         indicator = {
-            PullToRefreshDefaults.IndicatorBox(
-                state = state,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            ) {
-                if (isRefreshing) {
-                    LoadingIndicator(color = MaterialTheme.colorScheme.primary)
-                } else {
-                    LoadingIndicator(
-                        progress = { state.distanceFraction.coerceIn(0f, 1f) },
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+            if (showIndicator) {
+                PullToRefreshDefaults.IndicatorBox(
+                    state = state,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ) {
+                    if (isRefreshing) {
+                        LoadingIndicator(color = MaterialTheme.colorScheme.primary)
+                    } else {
+                        LoadingIndicator(
+                            progress = { state.distanceFraction.coerceIn(0f, 1f) },
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         },

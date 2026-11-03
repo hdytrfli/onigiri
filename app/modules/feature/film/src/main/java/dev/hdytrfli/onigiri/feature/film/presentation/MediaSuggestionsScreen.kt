@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,16 +32,19 @@ import dev.hdytrfli.onigiri.MoviesRoute
 import dev.hdytrfli.onigiri.ShowsRoute
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
+import dev.hdytrfli.onigiri.feature.film.presentation.collection.CollectionsState
 import dev.hdytrfli.onigiri.feature.film.presentation.collection.CollectionsViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Direction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverlay
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCard
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MediaSectionRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryAction
 import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
+import dev.hdytrfli.onigiri.feature.film.presentation.media.GenresState
 import dev.hdytrfli.onigiri.feature.film.presentation.media.GenresViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.media.MediaKind
 import dev.hdytrfli.onigiri.feature.film.presentation.media.MediaSection
@@ -56,6 +61,7 @@ import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -97,8 +103,13 @@ private fun MediaPage(
 
     val listViewModel: LibraryViewModel = hiltViewModel()
     val listState by listViewModel.state.collectAsStateWithLifecycle()
+    val collectionsViewModel: CollectionsViewModel = hiltViewModel()
+    val collectionsState by collectionsViewModel.state.collectAsStateWithLifecycle()
+    val genresViewModel: GenresViewModel = hiltViewModel()
+    val genresState by genresViewModel.state.collectAsStateWithLifecycle()
     var showSortDialog by rememberSaveable { mutableStateOf(false) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
     val libraryType =
         if (kind == MediaKind.Movies) CollectionType.Movies else CollectionType.TvShows
 
@@ -106,11 +117,15 @@ private fun MediaPage(
         viewModel.load(kind)
         listViewModel.setup(parentId = null, libraryType = libraryType)
         listViewModel.loadItems()
+        collectionsViewModel.load(kind)
+        genresViewModel.load(kind)
     }
 
     OfflineModeReload {
         listViewModel.loadItems(force = true)
         viewModel.retry(kind)
+        collectionsViewModel.retry(kind)
+        genresViewModel.retry(kind)
     }
 
     // Re-tap cycles the pills, exactly like Home: list -> collections -> suggestions -> genres.
@@ -127,9 +142,30 @@ private fun MediaPage(
         listViewModel.onAction(LibraryAction.ToggleSearch)
     }
 
+    val activeRefreshing =
+        when (selectedTab) {
+            0 -> listState.isLoading
+            1 -> collectionsState.isLoading
+            2 -> state.isLoading
+            else -> genresState.isLoading
+        }
+    val activeRefresh: () -> Unit = {
+        when (selectedTab) {
+            0 -> listViewModel.onAction(LibraryAction.RefreshItems)
+            1 -> collectionsViewModel.retry(kind)
+            2 -> viewModel.retry(kind)
+            else -> genresViewModel.retry(kind)
+        }
+    }
+
     // Search and sort only exist on the list tab; the display-info trigger lives on every
     // tab and drives the one global listDisplayFields setting through the list ViewModel.
     val toolbarActions: @Composable RowScope.() -> Unit = {
+        PullToRefreshButton(
+            state = pullToRefreshState,
+            isRefreshing = activeRefreshing,
+            onRefresh = activeRefresh,
+        )
         if (selectedTab == 0 && !LocalOfflineMode.current) {
             AppIconButton(
                 onClick = { listViewModel.onAction(LibraryAction.ToggleSearch) },
@@ -142,28 +178,11 @@ private fun MediaPage(
                 },
             )
         }
-        AppIconButton(
-            onClick = { showDisplayDialog = true },
-            variant = AppButtonVariant.Secondary,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_tv_minimal),
-                    contentDescription = stringResource(CoreR.string.display_info),
-                )
-            },
+        ListOptionsMenu(
+            onDisplayInfoClick = { showDisplayDialog = true },
+            onSortClick = { showSortDialog = true },
+            showSort = selectedTab == 0,
         )
-        if (selectedTab == 0) {
-            AppIconButton(
-                onClick = { showSortDialog = true },
-                variant = AppButtonVariant.Secondary,
-                content = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                        contentDescription = stringResource(CoreR.string.sort_by),
-                    )
-                },
-            )
-        }
     }
 
     RootPage(
@@ -225,6 +244,8 @@ private fun MediaPage(
                         showDisplayDialog = false,
                         onShowSortDialogChange = { showSortDialog = it },
                         onShowDisplayDialogChange = {},
+                        pullToRefreshState = pullToRefreshState,
+                        showPullIndicator = false,
                         embedded = true,
                         sectionTitle =
                             stringResource(
@@ -235,9 +256,11 @@ private fun MediaPage(
                     )
                 1 ->
                     CollectionsTab(
-                        kind = kind,
                         displayFields = listState.displayFields,
                         onItemClick = onItemClick,
+                        state = collectionsState,
+                        onRefresh = { collectionsViewModel.retry(kind) },
+                        pullToRefreshState = pullToRefreshState,
                     )
                 2 ->
                     MediaSuggestionsContent(
@@ -246,13 +269,16 @@ private fun MediaPage(
                         onItemClick = onItemClick,
                         onListClick = { selectedTab = 0 },
                         onRetry = { viewModel.retry(kind) },
+                        pullToRefreshState = pullToRefreshState,
                     )
                 else ->
                     GenresContent(
-                        kind = kind,
                         displayFields = listState.displayFields,
                         onItemClick = onItemClick,
                         onGenreClick = onGenreClick,
+                        state = genresState,
+                        onRefresh = { genresViewModel.retry(kind) },
+                        pullToRefreshState = pullToRefreshState,
                     )
             }
         }
@@ -269,16 +295,13 @@ private fun MediaPage(
 
 @Composable
 private fun CollectionsTab(
-    kind: MediaKind,
     displayFields: Set<ListDisplayField>,
     onItemClick: (FindroidItem) -> Unit,
-    viewModel: CollectionsViewModel = hiltViewModel(),
+    state: CollectionsState,
+    onRefresh: () -> Unit,
+    pullToRefreshState: PullToRefreshState,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
     val safePadding = rememberSafePadding()
-
-    LaunchedEffect(kind) { viewModel.load(kind) }
-    OfflineModeReload { viewModel.retry(kind) }
 
     val items = state.items
     val title = stringResource(CoreR.string.collections_label)
@@ -292,7 +315,7 @@ private fun CollectionsTab(
 
     if (state.error != null && items.isEmpty()) {
         FullPageError(
-            onRefresh = { viewModel.retry(kind) },
+            onRefresh = onRefresh,
             isRefreshing = state.isLoading,
             error = state.error,
         )
@@ -301,14 +324,16 @@ private fun CollectionsTab(
 
     AppPullToRefreshBox(
         isRefreshing = state.isLoading,
-        onRefresh = { viewModel.retry(kind) },
+        onRefresh = onRefresh,
         modifier = Modifier.fillMaxSize(),
+        state = pullToRefreshState,
+        showIndicator = false,
     ) {
         EmptyStateOverlay(
             visible = items.isEmpty(),
             loading = state.isLoading,
             context = stringResource(CoreR.string.empty_context_collections),
-            onRefresh = { viewModel.retry(kind) },
+            onRefresh = onRefresh,
             title = title,
             contentPadding = contentPadding,
         ) {
@@ -348,6 +373,7 @@ private fun MediaSuggestionsContent(
     onItemClick: (FindroidItem) -> Unit,
     onListClick: () -> Unit,
     onRetry: () -> Unit,
+    pullToRefreshState: PullToRefreshState,
 ) {
     val safePadding = rememberSafePadding()
     val contentPadding =
@@ -362,6 +388,8 @@ private fun MediaSuggestionsContent(
         isRefreshing = state.isLoading,
         onRefresh = onRetry,
         modifier = Modifier.fillMaxSize(),
+        state = pullToRefreshState,
+        showIndicator = false,
     ) {
         if (state.error != null && state.sections.isEmpty()) {
             FullPageError(
@@ -402,27 +430,25 @@ private fun MediaSuggestionsContent(
 
 @Composable
 private fun GenresContent(
-    kind: MediaKind,
     displayFields: Set<ListDisplayField>,
     onItemClick: (FindroidItem) -> Unit,
     onGenreClick: (FindroidGenre) -> Unit,
-    viewModel: GenresViewModel = hiltViewModel(),
+    state: GenresState,
+    onRefresh: () -> Unit,
+    pullToRefreshState: PullToRefreshState,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
     val safePadding = rememberSafePadding()
-
-    // Entry load: cached sections appear immediately and stale data revalidates in the background.
-    LaunchedEffect(kind) { viewModel.load(kind) }
-    OfflineModeReload { viewModel.retry(kind) }
 
     AppPullToRefreshBox(
         isRefreshing = state.isLoading,
-        onRefresh = { viewModel.retry(kind) },
+        onRefresh = onRefresh,
         modifier = Modifier.fillMaxSize(),
+        state = pullToRefreshState,
+        showIndicator = false,
     ) {
         if (state.error != null && state.sections.isEmpty()) {
             FullPageError(
-                onRefresh = { viewModel.retry(kind) },
+                onRefresh = onRefresh,
                 isRefreshing = state.isLoading,
                 error = state.error,
             )
@@ -436,7 +462,7 @@ private fun GenresContent(
                 visible = state.sections.isEmpty(),
                 loading = state.isLoading,
                 context = stringResource(CoreR.string.empty_context_genres),
-                onRefresh = { viewModel.retry(kind) },
+                onRefresh = onRefresh,
                 title = stringResource(FilmR.string.genres),
                 titlePadding = PaddingValues(horizontal = MaterialTheme.spacings.gutter),
                 contentPadding = contentPadding,

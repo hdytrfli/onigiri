@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.Direction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverlay
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCard
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SortByDialog
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
@@ -43,6 +45,7 @@ import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -66,6 +69,7 @@ fun BooksScreen(
     var showSortDialog by remember { mutableStateOf(false) }
     var showDisplayDialog by remember { mutableStateOf(false) }
     val safePadding = rememberSafePadding()
+    val pullToRefreshState = rememberPullToRefreshState()
 
     BackHandler(enabled = searchExpanded) {
         searchExpanded = false
@@ -117,6 +121,11 @@ fun BooksScreen(
                         onSelect = { selectedTab = it },
                         dropdownOnCompact = true,
                         actions = {
+                            PullToRefreshButton(
+                                state = pullToRefreshState,
+                                isRefreshing = state.isLoading,
+                                onRefresh = { viewModel.retry() },
+                            )
                             AppIconButton(
                                 onClick = { searchExpanded = true },
                                 content = {
@@ -126,24 +135,9 @@ fun BooksScreen(
                                     )
                                 },
                             )
-                            AppIconButton(
-                                onClick = { showDisplayDialog = true },
-                                content = {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_tv_minimal),
-                                        contentDescription =
-                                            stringResource(CoreR.string.display_info),
-                                    )
-                                },
-                            )
-                            AppIconButton(
-                                onClick = { showSortDialog = true },
-                                content = {
-                                    Icon(
-                                        painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                                        contentDescription = stringResource(CoreR.string.sort_by),
-                                    )
-                                },
+                            ListOptionsMenu(
+                                onDisplayInfoClick = { showDisplayDialog = true },
+                                onSortClick = { showSortDialog = true },
                             )
                         },
                     )
@@ -177,6 +171,8 @@ fun BooksScreen(
                 isRefreshing = state.isLoading,
                 onRefresh = { viewModel.retry() },
                 modifier = Modifier.fillMaxSize(),
+                state = pullToRefreshState,
+                showIndicator = false,
             ) {
                 if (state.error != null && items.isEmpty()) {
                     FullPageError(

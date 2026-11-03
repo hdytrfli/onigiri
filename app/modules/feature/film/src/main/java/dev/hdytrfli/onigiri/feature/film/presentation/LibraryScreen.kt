@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +44,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverl
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCard
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SortByDialog
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.feature.film.presentation.library.LibraryAction
@@ -61,6 +64,7 @@ import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -122,6 +126,7 @@ private fun LibraryScreenLayout(
 ) {
     var showSortByDialog by remember { mutableStateOf(false) }
     var showDisplayDialog by remember { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
 
     PageScaffold(
         contentWindowInsets =
@@ -142,6 +147,9 @@ private fun LibraryScreenLayout(
                             onSearch = { onAction(LibraryAction.ToggleSearch) },
                             onInfo = { showDisplayDialog = true },
                             onSort = { showSortByDialog = true },
+                            pullToRefreshState = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                            onRefresh = { onAction(LibraryAction.RefreshItems) },
                         )
                     },
                 )
@@ -155,6 +163,8 @@ private fun LibraryScreenLayout(
             showDisplayDialog = showDisplayDialog,
             onShowSortDialogChange = { showSortByDialog = it },
             onShowDisplayDialogChange = { showDisplayDialog = it },
+            pullToRefreshState = pullToRefreshState,
+            showPullIndicator = !showTopBar,
             embedded = embedded,
             innerPadding = innerPadding,
             sectionTitle = sectionTitle,
@@ -172,6 +182,8 @@ fun LibraryContent(
     showDisplayDialog: Boolean,
     onShowSortDialogChange: (Boolean) -> Unit,
     onShowDisplayDialogChange: (Boolean) -> Unit,
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+    showPullIndicator: Boolean = true,
     modifier: Modifier = Modifier,
     embedded: Boolean = false,
     innerPadding: PaddingValues = PaddingValues(0.dp),
@@ -272,6 +284,8 @@ fun LibraryContent(
             isRefreshing = state.isLoading,
             onRefresh = { onAction(LibraryAction.RefreshItems) },
             modifier = Modifier.fillMaxSize(),
+            state = pullToRefreshState,
+            showIndicator = showPullIndicator,
         ) {
             val error = state.error
             if (error != null && items.isEmpty()) {
@@ -358,7 +372,15 @@ private fun LibraryActionButtons(
     onSearch: () -> Unit,
     onInfo: () -> Unit,
     onSort: () -> Unit,
+    pullToRefreshState: PullToRefreshState,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
 ) {
+    PullToRefreshButton(
+        state = pullToRefreshState,
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+    )
     AppIconButton(
         onClick = onSearch,
         variant = AppButtonVariant.Secondary,
@@ -369,25 +391,9 @@ private fun LibraryActionButtons(
             )
         },
     )
-    AppIconButton(
-        onClick = onInfo,
-        variant = AppButtonVariant.Secondary,
-        content = {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_tv_minimal),
-                contentDescription = null,
-            )
-        },
-    )
-    AppIconButton(
-        onClick = onSort,
-        variant = AppButtonVariant.Secondary,
-        content = {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_arrow_down_up),
-                contentDescription = null,
-            )
-        },
+    ListOptionsMenu(
+        onDisplayInfoClick = onInfo,
+        onSortClick = onSort,
     )
 }
 
