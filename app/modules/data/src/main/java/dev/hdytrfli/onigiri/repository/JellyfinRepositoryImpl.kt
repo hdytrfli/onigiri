@@ -37,6 +37,10 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.FileInfo
+import org.jellyfin.sdk.model.api.AlbumInfo
+import org.jellyfin.sdk.model.api.AlbumInfoRemoteSearchQuery
+import org.jellyfin.sdk.model.api.ArtistInfo
+import org.jellyfin.sdk.model.api.ArtistInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.DeviceOptionsDto
@@ -861,6 +865,72 @@ class JellyfinRepositoryImpl(
                             null,
                             null,
                             false,
+                        ),
+                        itemId,
+                        null,
+                        false,
+                    )
+                )
+                .content
+        }
+
+    override suspend fun searchRemoteMusicArtists(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi
+                .getMusicArtistRemoteSearchResults(
+                    ArtistInfoRemoteSearchQuery(
+                        ArtistInfo(
+                            name = name,
+                            originalTitle = null,
+                            path = null,
+                            metadataLanguage = null,
+                            metadataCountryCode = null,
+                            providerIds = providerIds,
+                            year = year,
+                            indexNumber = null,
+                            parentIndexNumber = null,
+                            premiereDate = null,
+                            isAutomated = false,
+                            songInfos = emptyList(),
+                        ),
+                        itemId,
+                        null,
+                        false,
+                    )
+                )
+                .content
+        }
+
+    override suspend fun searchRemoteMusicAlbums(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi
+                .getMusicAlbumRemoteSearchResults(
+                    AlbumInfoRemoteSearchQuery(
+                        AlbumInfo(
+                            name = name,
+                            originalTitle = null,
+                            path = null,
+                            metadataLanguage = null,
+                            metadataCountryCode = null,
+                            providerIds = providerIds,
+                            year = year,
+                            indexNumber = null,
+                            parentIndexNumber = null,
+                            premiereDate = null,
+                            isAutomated = false,
+                            albumArtists = emptyList(),
+                            artistProviderIds = emptyMap(),
+                            songInfos = emptyList(),
                         ),
                         itemId,
                         null,

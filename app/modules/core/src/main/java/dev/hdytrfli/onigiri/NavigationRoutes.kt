@@ -56,7 +56,12 @@ data class BookDetailRoute(val bookId: String, val audiobook: Boolean = false) :
 
 @Serializable data class SubtitleSearchRoute(val itemId: String) : NavKey
 
-@Serializable data class IdentifyRoute(val itemId: String, val series: Boolean = false) : NavKey
+@Serializable
+data class IdentifyRoute(
+    val itemId: String,
+    val series: Boolean = false,
+    val musicKind: String? = null,
+) : NavKey
 
 @Serializable data class EditImagesRoute(val itemId: String) : NavKey
 
@@ -76,6 +81,7 @@ data class IdentifyResultsRoute(
     val tmdbId: String,
     val tvdbId: String,
     val series: Boolean = false,
+    val musicKind: String? = null,
 ) : NavKey
 
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey

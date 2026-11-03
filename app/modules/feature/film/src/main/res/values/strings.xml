@@ -41,4 +41,6 @@
     <string name="music_album_count">%1$d albums</string>
     <string name="music_song_count">%1$d songs</string>
     <string name="music_unknown_artist">Unknown artist</string>
+    <string name="music_no_albums">No albums</string>
+    <string name="music_no_songs">No songs</string>
 </resources>

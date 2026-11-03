@@ -67,6 +67,7 @@ fun IdentifyResultsScreen(
     tmdbId: String,
     tvdbId: String,
     series: Boolean = false,
+    musicKind: String? = null,
     navigateBack: () -> Unit,
     onApplied: () -> Unit,
     viewModel: IdentifyViewModel = hiltViewModel(),
@@ -85,6 +86,7 @@ fun IdentifyResultsScreen(
             year = year.trim().toIntOrNull(),
             providerIds = providerIds,
             series = series,
+            musicKind = musicKind,
         )
     }
 

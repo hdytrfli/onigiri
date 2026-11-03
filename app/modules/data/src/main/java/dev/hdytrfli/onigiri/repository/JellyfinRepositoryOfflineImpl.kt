@@ -444,6 +444,20 @@ class JellyfinRepositoryOfflineImpl(
         providerIds: Map<String, String>,
     ): List<RemoteSearchResult> = emptyList()
 
+    override suspend fun searchRemoteMusicArtists(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> = emptyList()
+
+    override suspend fun searchRemoteMusicAlbums(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> = emptyList()
+
     override suspend fun applyRemoteSearchResult(
         itemId: UUID,
         result: RemoteSearchResult,

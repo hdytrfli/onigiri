@@ -59,6 +59,8 @@ import dev.hdytrfli.onigiri.feature.film.presentation.ShowScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.ShowsScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.SubtitleSearchScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchResult
+import dev.hdytrfli.onigiri.feature.film.presentation.music.AlbumDetailScreen
+import dev.hdytrfli.onigiri.feature.film.presentation.music.ArtistDetailScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.music.MusicScreen
 import dev.hdytrfli.onigiri.models.CollectionType
 import dev.hdytrfli.onigiri.models.FindroidBook
@@ -513,6 +515,34 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             )
         }
     }
+    entry<ArtistDetailRoute> { key ->
+        ArtistDetailScreen(
+            artistId = key.artistId,
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onAlbumClick =
+                resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
+            navigateToEditImages =
+                resumedAction { itemId -> navigator.navigate(EditImagesRoute(itemId = itemId)) },
+            navigateToIdentify =
+                resumedAction { itemId ->
+                    navigator.navigate(IdentifyRoute(itemId = itemId, musicKind = "artist"))
+                },
+        )
+    }
+    entry<AlbumDetailRoute> { key ->
+        AlbumDetailScreen(
+            albumId = key.albumId,
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onArtistClick =
+                resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
+            navigateToEditImages =
+                resumedAction { itemId -> navigator.navigate(EditImagesRoute(itemId = itemId)) },
+            navigateToIdentify =
+                resumedAction { itemId ->
+                    navigator.navigate(IdentifyRoute(itemId = itemId, musicKind = "album"))
+                },
+        )
+    }
     entry<MediaRoute> {
         MediaScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
@@ -696,6 +726,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         tmdbId = tmdbId,
                         tvdbId = tvdbId,
                         series = key.series,
+                        musicKind = key.musicKind,
                     )
                 )
             },
@@ -710,6 +741,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             tmdbId = key.tmdbId,
             tvdbId = key.tvdbId,
             series = key.series,
+            musicKind = key.musicKind,
             navigateBack = dropUnlessResumed { navigator.goBack() },
             onApplied = {
                 // Return to the media detail page (form + results are on the stack).
@@ -832,6 +864,10 @@ private fun navigateToSearchResult(navigator: Navigator, result: HomeSearchResul
                     collectionName = result.name,
                 )
             )
+        BaseItemKind.MUSIC_ARTIST ->
+            navigator.navigate(ArtistDetailRoute(artistId = result.id.toString()))
+        BaseItemKind.MUSIC_ALBUM ->
+            navigator.navigate(AlbumDetailRoute(albumId = result.id.toString()))
         else -> Unit
     }
 }

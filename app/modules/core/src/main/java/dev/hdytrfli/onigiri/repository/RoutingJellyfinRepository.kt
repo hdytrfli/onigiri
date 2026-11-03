@@ -233,6 +233,21 @@ class RoutingJellyfinRepository(
         providerIds: Map<String, String>,
     ): List<RemoteSearchResult> = current().searchRemoteSeries(itemId, name, year, providerIds)
 
+    override suspend fun searchRemoteMusicArtists(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> =
+        current().searchRemoteMusicArtists(itemId, name, year, providerIds)
+
+    override suspend fun searchRemoteMusicAlbums(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> = current().searchRemoteMusicAlbums(itemId, name, year, providerIds)
+
     override suspend fun applyRemoteSearchResult(
         itemId: UUID,
         result: RemoteSearchResult,

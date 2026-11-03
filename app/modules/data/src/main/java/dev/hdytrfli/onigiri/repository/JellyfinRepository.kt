@@ -176,6 +176,20 @@ interface JellyfinRepository {
         providerIds: Map<String, String> = emptyMap(),
     ): List<RemoteSearchResult>
 
+    suspend fun searchRemoteMusicArtists(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String> = emptyMap(),
+    ): List<RemoteSearchResult>
+
+    suspend fun searchRemoteMusicAlbums(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String> = emptyMap(),
+    ): List<RemoteSearchResult>
+
     /** Applies the chosen remote search [result] to [itemId], replacing its metadata. */
     suspend fun applyRemoteSearchResult(
         itemId: UUID,
