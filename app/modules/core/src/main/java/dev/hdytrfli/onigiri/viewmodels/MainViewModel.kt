@@ -154,6 +154,14 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                     portrait to landscape
                 }
 
+            val avatarGridPrefs =
+                combine(
+                    appPreferences.observe(appPreferences.gridAvatarColumnsPortrait),
+                    appPreferences.observe(appPreferences.gridAvatarColumnsLandscape),
+                ) { portrait, landscape ->
+                    portrait to landscape
+                }
+
             val gridAndSuggestionPrefs =
                 gridPrefs
                     .combine(suggestionPrefs) { grid, (suggestionPortrait, suggestionLandscape) ->
@@ -171,6 +179,12 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         grid.copy(
                             profilePortrait = profilePortrait,
                             profileLandscape = profileLandscape,
+                        )
+                    }
+                    .combine(avatarGridPrefs) { grid, (avatarPortrait, avatarLandscape) ->
+                        grid.copy(
+                            avatarPortrait = avatarPortrait,
+                            avatarLandscape = avatarLandscape,
                         )
                     }
 
@@ -205,6 +219,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
                         gridPosterLandscape = gridPrefs.posterLandscape.toIntOrNull() ?: 4,
                         gridThumbnailPortrait = gridPrefs.thumbnailPortrait.toIntOrNull() ?: 3,
                         gridThumbnailLandscape = gridPrefs.thumbnailLandscape.toIntOrNull() ?: 4,
+                        gridAvatarPortrait = gridPrefs.avatarPortrait.toIntOrNull() ?: 3,
+                        gridAvatarLandscape = gridPrefs.avatarLandscape.toIntOrNull() ?: 5,
                         gridSuggestionPortrait = gridPrefs.suggestionPortrait.toIntOrNull() ?: 1,
                         gridSuggestionLandscape = gridPrefs.suggestionLandscape.toIntOrNull() ?: 3,
                         gridProfilePortrait = gridPrefs.profilePortrait.toIntOrNull() ?: 4,
@@ -257,6 +273,8 @@ constructor(private val appPreferences: AppPreferences, private val database: Se
         val spacing: String,
         val profilePortrait: String = "4",
         val profileLandscape: String = "6",
+        val avatarPortrait: String = "3",
+        val avatarLandscape: String = "5",
     )
 }
 
@@ -282,6 +300,8 @@ data class MainState(
     val gridPosterLandscape: Int = 4,
     val gridThumbnailPortrait: Int = 3,
     val gridThumbnailLandscape: Int = 4,
+    val gridAvatarPortrait: Int = 3,
+    val gridAvatarLandscape: Int = 5,
     val gridSuggestionPortrait: Int = 1,
     val gridSuggestionLandscape: Int = 3,
     val gridProfilePortrait: Int = 4,

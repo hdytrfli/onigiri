@@ -58,6 +58,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.SeasonScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.ShowScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.ShowsScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.SubtitleSearchScreen
+import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchResult
 import dev.hdytrfli.onigiri.models.CollectionType
 import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.models.FindroidBoxSet
@@ -93,6 +94,7 @@ import dev.hdytrfli.onigiri.ui.utils.PlaybackLauncher
 import java.util.UUID
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ImageType
 
 private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
@@ -441,6 +443,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 onSettingsClick =
                     dropUnlessResumed { navigator.navigate(SettingsRoute(indexes = emptyList())) },
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
+                onSearchResultClick =
+                    resumedAction { result -> navigateToSearchResult(navigator, result) },
             )
         }
     }
@@ -788,6 +792,28 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     }
     entry<ReaderFontRoute> {
         SuiteInsetBox { ReaderFontScreen(navigateBack = dropUnlessResumed { navigator.goBack() }) }
+    }
+}
+
+private fun navigateToSearchResult(navigator: Navigator, result: HomeSearchResult) {
+    when (result.kind) {
+        BaseItemKind.MOVIE -> navigator.navigate(MovieRoute(result.id.toString()))
+        BaseItemKind.SERIES -> navigator.navigate(ShowRoute(result.id.toString()))
+        BaseItemKind.EPISODE -> navigator.navigate(EpisodeRoute(result.id.toString()))
+        BaseItemKind.SEASON -> navigator.navigate(SeasonRoute(result.id.toString()))
+        BaseItemKind.PERSON -> navigator.navigate(PersonRoute(result.id.toString()))
+        BaseItemKind.BOOK ->
+            navigator.navigate(BookDetailRoute(bookId = result.id.toString(), audiobook = false))
+        BaseItemKind.AUDIO_BOOK ->
+            navigator.navigate(BookDetailRoute(bookId = result.id.toString(), audiobook = true))
+        BaseItemKind.BOX_SET ->
+            navigator.navigate(
+                CollectionRoute(
+                    collectionId = result.id.toString(),
+                    collectionName = result.name,
+                )
+            )
+        else -> Unit
     }
 }
 

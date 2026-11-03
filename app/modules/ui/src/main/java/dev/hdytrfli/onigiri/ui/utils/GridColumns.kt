@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 enum class GridSize {
     POSTER,
     THUMBNAIL,
+    AVATAR,
     SUGGESTIONS,
     PROFILE,
 }
@@ -32,6 +33,9 @@ data class GridColumns(
     val posterLandscape: Int = 4,
     val thumbnailPortrait: Int = 3,
     val thumbnailLandscape: Int = 4,
+    /** Cast, crew and author avatars; defaults to one more column than the primary grid. */
+    val avatarPortrait: Int = 3,
+    val avatarLandscape: Int = 5,
     /** How many suggestions the home carousel shows at once, per orientation. */
     val suggestionPortrait: Int = 1,
     val suggestionLandscape: Int = 3,
@@ -43,6 +47,7 @@ data class GridColumns(
         when (size) {
             GridSize.POSTER -> if (isLandscape) posterLandscape else posterPortrait
             GridSize.THUMBNAIL -> if (isLandscape) thumbnailLandscape else thumbnailPortrait
+            GridSize.AVATAR -> if (isLandscape) avatarLandscape else avatarPortrait
             GridSize.SUGGESTIONS -> if (isLandscape) suggestionLandscape else suggestionPortrait
             GridSize.PROFILE -> if (isLandscape) profileLandscape else profilePortrait
         }

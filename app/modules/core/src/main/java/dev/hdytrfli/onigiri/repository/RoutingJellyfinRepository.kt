@@ -23,6 +23,7 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
+import org.jellyfin.sdk.model.api.SearchHint
 import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
@@ -100,6 +101,9 @@ class RoutingJellyfinRepository(
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> =
         current().getSearchItems(query)
+
+    override suspend fun getSearchHints(query: String): List<SearchHint> =
+        current().getSearchHints(query)
 
     override suspend fun getSuggestions(): List<FindroidItem> = current().getSuggestions()
 

@@ -256,6 +256,32 @@ constructor(
                                                         ),
                                                 ),
                                                 PreferenceSliders(
+                                                    nameStringResource = R.string.grid_avatars,
+                                                    descriptionStringRes =
+                                                        R.string.grid_avatars_summary,
+                                                    sliders =
+                                                        listOf(
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.grid_avatar_portrait,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridAvatarColumnsPortrait,
+                                                            ),
+                                                            PreferenceSlider(
+                                                                nameStringResource =
+                                                                    R.string.grid_avatar_landscape,
+                                                                options = R.array.grid_columns,
+                                                                optionValues = R.array.grid_columns,
+                                                                backendPreference =
+                                                                    appPreferences
+                                                                        .gridAvatarColumnsLandscape,
+                                                            ),
+                                                        ),
+                                                ),
+                                                PreferenceSliders(
                                                     nameStringResource = R.string.grid_suggestions,
                                                     descriptionStringRes =
                                                         R.string.grid_suggestions_summary,

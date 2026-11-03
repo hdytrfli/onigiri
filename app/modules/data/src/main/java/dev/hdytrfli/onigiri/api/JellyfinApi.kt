@@ -20,6 +20,7 @@ import org.jellyfin.sdk.api.client.extensions.moviesApi
 import org.jellyfin.sdk.api.client.extensions.playStateApi
 import org.jellyfin.sdk.api.client.extensions.quickConnectApi
 import org.jellyfin.sdk.api.client.extensions.remoteImageApi
+import org.jellyfin.sdk.api.client.extensions.searchApi
 import org.jellyfin.sdk.api.client.extensions.sessionApi
 import org.jellyfin.sdk.api.client.extensions.subtitleApi
 import org.jellyfin.sdk.api.client.extensions.suggestionsApi
@@ -81,6 +82,7 @@ class JellyfinApi(
     val playStateApi = api.playStateApi
     val quickConnectApi = api.quickConnectApi
     val remoteImageApi = api.remoteImageApi
+    val searchApi = api.searchApi
     val sessionApi = api.sessionApi
     val showsApi = api.tvShowsApi
     val subtitleApi = api.subtitleApi

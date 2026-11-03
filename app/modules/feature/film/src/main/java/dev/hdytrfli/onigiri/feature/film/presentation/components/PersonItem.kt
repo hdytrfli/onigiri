@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
@@ -31,9 +32,14 @@ import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
 
 @Composable
-fun PersonItem(person: FindroidItemPerson, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun PersonItem(
+    person: FindroidItemPerson,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    width: Dp = 104.dp,
+) {
     Column(
-        modifier = modifier.width(104.dp).clickable(onClick = onClick),
+        modifier = modifier.width(width).clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val context = LocalContext.current

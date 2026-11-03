@@ -37,6 +37,7 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
+import org.jellyfin.sdk.model.api.SearchHint
 import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
@@ -229,6 +230,8 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> =
         downloadedItems().filter { it.name.contains(query, ignoreCase = true) }
+
+    override suspend fun getSearchHints(query: String): List<SearchHint> = emptyList()
 
     override suspend fun getSuggestions(): List<FindroidItem> {
         val downloaded = downloadedItems()

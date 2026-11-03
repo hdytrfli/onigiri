@@ -87,6 +87,11 @@ class AppPreferences(
         Preference("pref_grid_thumbnail_columns_portrait", responsive("2", "3"))
     val gridThumbnailColumnsLandscape =
         Preference("pref_grid_thumbnail_columns_landscape", responsive("3", "4"))
+    // Cast, crew and author avatars default to one more column than the primary grid.
+    val gridAvatarColumnsPortrait =
+        Preference("pref_grid_avatar_columns_portrait", responsive("4", "6"))
+    val gridAvatarColumnsLandscape =
+        Preference("pref_grid_avatar_columns_landscape", responsive("7", "8"))
     // How many suggestions the home screen carousel shows at once, per orientation.
     val gridSuggestionColumnsPortrait = Preference("pref_grid_suggestion_columns_portrait", "1")
     val gridSuggestionColumnsLandscape = Preference("pref_grid_suggestion_columns_landscape", "3")

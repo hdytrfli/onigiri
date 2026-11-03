@@ -17,12 +17,17 @@
     <string name="settings_group_mobile_data">Mobile data</string>
     <string name="settings_group_timeouts">Timeouts</string>
     <string name="settings_group_image_cache">Image cache</string>
-    <string name="grid_poster_portrait">Poster portrait</string>
-    <string name="grid_poster_landscape">Poster landscape</string>
-    <string name="grid_posters">Posters</string>
-    <string name="grid_posters_summary">Posters per row, portrait and landscape</string>
+    <string name="grid_poster_portrait">Primary portrait</string>
+    <string name="grid_poster_landscape">Primary landscape</string>
+    <string name="grid_posters">Primary</string>
+    <string name="grid_posters_summary">Primary cards per row, portrait and landscape</string>
     <string name="grid_thumbnails">Thumbnails</string>
     <string name="grid_thumbnails_summary">Thumbnails per row, portrait and landscape</string>
+    <string name="grid_avatars">Avatars</string>
+    <string name="grid_avatars_summary">Cast, crew and author cards per row, portrait and landscape</string>
+    <string name="grid_avatar_portrait">Avatars portrait</string>
+    <string name="grid_avatar_landscape">Avatars landscape</string>
+
     <string name="grid_suggestions">Suggestions</string>
     <string name="grid_suggestions_summary">Suggestions visible in the home screen carousel</string>
     <string name="grid_suggestion_portrait">Suggestions portrait</string>

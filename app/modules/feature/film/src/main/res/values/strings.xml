@@ -22,4 +22,14 @@
     <string name="book_info_publisher">Publisher</string>
     <string name="author_title">Author</string>
     <string name="book_unsupported">Not supported</string>
+    <string name="search_group_people">People</string>
+    <string name="search_group_episodes">Episodes</string>
+    <string name="search_group_seasons">Seasons</string>
+    <string name="search_group_songs">Songs</string>
+    <string name="search_group_albums">Albums</string>
+    <string name="search_group_artists">Artists</string>
+    <string name="search_group_playlists">Playlists</string>
+    <string name="search_group_videos">Videos</string>
+    <string name="search_home_prompt">Search across your Jellyfin library</string>
+    <string name="search_home_empty">No results for “%1$s”</string>
 </resources>

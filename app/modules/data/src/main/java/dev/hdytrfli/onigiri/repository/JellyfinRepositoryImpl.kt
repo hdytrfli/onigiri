@@ -56,6 +56,7 @@ import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
 import org.jellyfin.sdk.model.api.RepeatMode
+import org.jellyfin.sdk.model.api.SearchHint
 import org.jellyfin.sdk.model.api.SeriesInfo
 import org.jellyfin.sdk.model.api.SeriesInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.SessionInfoDto
@@ -65,6 +66,7 @@ import org.jellyfin.sdk.model.api.SubtitleProfile
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
 import org.jellyfin.sdk.model.api.request.GetGenresRequest
+import org.jellyfin.sdk.model.api.request.GetSearchHintsRequest
 import timber.log.Timber
 
 class JellyfinRepositoryImpl(
@@ -256,6 +258,23 @@ class JellyfinRepositoryImpl(
                 .content
                 .items
                 .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+        }
+
+    override suspend fun getSearchHints(query: String): List<SearchHint> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.searchApi
+                .getSearchHints(
+                    GetSearchHintsRequest(
+                        userId = jellyfinApi.userId,
+                        searchTerm = query,
+                        limit = 80,
+                        includePeople = true,
+                        includeMedia = true,
+                        includeArtists = true,
+                    )
+                )
+                .content
+                .searchHints
         }
 
     override suspend fun getSuggestions(): List<FindroidItem> =

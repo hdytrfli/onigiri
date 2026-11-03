@@ -22,6 +22,7 @@ import org.jellyfin.sdk.model.api.PublicSystemInfo
 import org.jellyfin.sdk.model.api.RemoteImageInfo
 import org.jellyfin.sdk.model.api.RemoteSearchResult
 import org.jellyfin.sdk.model.api.RemoteSubtitleInfo
+import org.jellyfin.sdk.model.api.SearchHint
 import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
@@ -68,6 +69,9 @@ interface JellyfinRepository {
     suspend fun getFavoriteItems(): List<FindroidItem>
 
     suspend fun getSearchItems(query: String): List<FindroidItem>
+
+    /** Jellyfin's broad server-side search, including people and audio results. */
+    suspend fun getSearchHints(query: String): List<SearchHint>
 
     suspend fun getSuggestions(): List<FindroidItem>
 

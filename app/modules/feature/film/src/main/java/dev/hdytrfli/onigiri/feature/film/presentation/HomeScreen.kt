@@ -1,5 +1,7 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -19,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -41,14 +45,19 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
 import dev.hdytrfli.onigiri.feature.film.presentation.downloads.DownloadsViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.favorites.FavoritesViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeAction
+import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchContent
+import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchResult
+import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeState
 import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.media.MediaSection
 import dev.hdytrfli.onigiri.models.FindroidCollection
 import dev.hdytrfli.onigiri.models.FindroidItem
+import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.RootPage
@@ -70,9 +79,12 @@ fun HomeScreen(
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onItemClick: (item: FindroidItem) -> Unit,
+    onSearchResultClick: (HomeSearchResult) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
+    searchViewModel: HomeSearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val searchState by searchViewModel.state.collectAsStateWithLifecycle()
     // Favorites and Downloads render inside this page but their display options are edited from
     // the shared toolbar, so their ViewModels are hoisted here and handed down.
     val favoritesViewModel: FavoritesViewModel = hiltViewModel()
@@ -85,7 +97,18 @@ fun HomeScreen(
 
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
+    var searchExpanded by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val safePadding = rememberSafePadding()
     val pullToRefreshState = rememberPullToRefreshState()
+    val closeSearch: () -> Unit = {
+        searchExpanded = false
+        searchQuery = ""
+        searchViewModel.search("")
+    }
+
+    BackHandler(enabled = searchExpanded) { closeSearch() }
+    LaunchedEffect(searchQuery) { searchViewModel.search(searchQuery) }
     val activeRefreshing =
         when (selectedTab) {
             0 -> state.isLoading
@@ -128,61 +151,96 @@ fun HomeScreen(
 
     RootPage(
         header = {
-            PageToolbar(
-                tabs =
-                    listOf(
-                        stringResource(CoreR.string.title_home),
-                        stringResource(CoreR.string.title_favorite),
-                        stringResource(CoreR.string.title_download),
-                    ),
-                tabIcons =
-                    listOf(
-                        CoreR.drawable.ic_home,
-                        CoreR.drawable.ic_heart,
-                        CoreR.drawable.ic_download,
-                    ),
-                selectedIndex = selectedTab,
-                onSelect = { selectedTab = it },
-                dropdownOnCompact = true,
-                actions = {
-                    PullToRefreshButton(
-                        state = pullToRefreshState,
-                        isRefreshing = activeRefreshing,
-                        onRefresh = activeRefresh,
+            AnimatedContent(targetState = searchExpanded, label = "home-search") { expanded ->
+                if (expanded) {
+                    PageSearchField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        onClose = closeSearch,
                     )
-                    ListOptionsMenu(
-                        onDisplayInfoClick = { showDisplayDialog = true },
-                        onSortClick = {},
-                        showSort = false,
+                } else {
+                    PageToolbar(
+                        tabs =
+                            listOf(
+                                stringResource(CoreR.string.title_home),
+                                stringResource(CoreR.string.title_favorite),
+                                stringResource(CoreR.string.title_download),
+                            ),
+                        tabIcons =
+                            listOf(
+                                CoreR.drawable.ic_home,
+                                CoreR.drawable.ic_heart,
+                                CoreR.drawable.ic_download,
+                            ),
+                        selectedIndex = selectedTab,
+                        onSelect = { selectedTab = it },
+                        dropdownOnCompact = true,
+                        actions = {
+                            PullToRefreshButton(
+                                state = pullToRefreshState,
+                                isRefreshing = activeRefreshing,
+                                onRefresh = activeRefresh,
+                            )
+                            AppIconButton(
+                                onClick = { searchExpanded = true },
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_search),
+                                        contentDescription = stringResource(CoreR.string.search),
+                                    )
+                                },
+                            )
+                            ListOptionsMenu(
+                                onDisplayInfoClick = { showDisplayDialog = true },
+                                onSortClick = {},
+                                showSort = false,
+                            )
+                        },
                     )
-                },
-            )
+                }
+            }
         }
     ) {
-        TabContent(selectedTab = selectedTab) { tab ->
-            when (tab) {
-                0 ->
-                    HomeScreenLayout(
-                        state = state,
-                        onAction = onAction,
-                        onBooksClick = onBooksClick,
-                        pullToRefreshState = pullToRefreshState,
-                    )
-                1 ->
-                    FavoritesScreen(
-                        onItemClick = onItemClick,
-                        viewModel = favoritesViewModel,
-                        pullToRefreshState = pullToRefreshState,
-                        showPullIndicator = false,
-                    )
-                else ->
-                    DownloadsScreen(
-                        onItemClick = onItemClick,
-                        embedded = true,
-                        viewModel = downloadsViewModel,
-                        pullToRefreshState = pullToRefreshState,
-                        showPullIndicator = false,
-                    )
+        if (searchExpanded) {
+            HomeSearchContent(
+                state = searchState,
+                contentPadding =
+                    PaddingValues(
+                        start = safePadding.start + MaterialTheme.spacings.gutter,
+                        top = LocalRootPageContentInset.current,
+                        end = safePadding.end + MaterialTheme.spacings.gutter,
+                        bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+                    ),
+                onResultClick = onSearchResultClick,
+                onRetry = searchViewModel::retry,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            TabContent(selectedTab = selectedTab) { tab ->
+                when (tab) {
+                    0 ->
+                        HomeScreenLayout(
+                            state = state,
+                            onAction = onAction,
+                            onBooksClick = onBooksClick,
+                            pullToRefreshState = pullToRefreshState,
+                        )
+                    1 ->
+                        FavoritesScreen(
+                            onItemClick = onItemClick,
+                            viewModel = favoritesViewModel,
+                            pullToRefreshState = pullToRefreshState,
+                            showPullIndicator = false,
+                        )
+                    else ->
+                        DownloadsScreen(
+                            onItemClick = onItemClick,
+                            embedded = true,
+                            viewModel = downloadsViewModel,
+                            pullToRefreshState = pullToRefreshState,
+                            showPullIndicator = false,
+                        )
+                }
             }
         }
     }

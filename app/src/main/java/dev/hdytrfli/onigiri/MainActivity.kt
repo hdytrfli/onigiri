@@ -123,6 +123,8 @@ class MainActivity : AppCompatActivity() {
                                     posterLandscape = state.gridPosterLandscape,
                                     thumbnailPortrait = state.gridThumbnailPortrait,
                                     thumbnailLandscape = state.gridThumbnailLandscape,
+                                    avatarPortrait = state.gridAvatarPortrait,
+                                    avatarLandscape = state.gridAvatarLandscape,
                                     suggestionPortrait = state.gridSuggestionPortrait,
                                     suggestionLandscape = state.gridSuggestionLandscape,
                                     profilePortrait = state.gridProfilePortrait,
