@@ -20,7 +20,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
@@ -60,7 +60,10 @@ fun AlbumDetailScreen(
     val id = remember(albumId) { UUID.fromString(albumId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(id) { viewModel.load(id) }
+    LifecycleResumeEffect(id) {
+        viewModel.load(id, force = true)
+        onPauseOrDispose {}
+    }
     OfflineModeReload { viewModel.load(id, force = true) }
 
     AlbumDetailLayout(
