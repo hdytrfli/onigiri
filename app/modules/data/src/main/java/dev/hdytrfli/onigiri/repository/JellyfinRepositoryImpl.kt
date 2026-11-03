@@ -8,6 +8,9 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidGenre
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.FindroidMusicArtist
+import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
@@ -21,6 +24,9 @@ import dev.hdytrfli.onigiri.models.toFindroidCollection
 import dev.hdytrfli.onigiri.models.toFindroidEpisode
 import dev.hdytrfli.onigiri.models.toFindroidItem
 import dev.hdytrfli.onigiri.models.toFindroidMovie
+import dev.hdytrfli.onigiri.models.toFindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.toFindroidMusicArtist
+import dev.hdytrfli.onigiri.models.toFindroidMusicSong
 import dev.hdytrfli.onigiri.models.toFindroidPerson
 import dev.hdytrfli.onigiri.models.toFindroidSeason
 import dev.hdytrfli.onigiri.models.toFindroidShow
@@ -146,6 +152,100 @@ class JellyfinRepositoryImpl(
                 .items
                 .firstOrNull()
                 ?.toFindroidItem(this@JellyfinRepositoryImpl, database)
+        }
+
+    override suspend fun getMusicArtists(): List<FindroidMusicArtist> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    includeItemTypes = listOf(BaseItemKind.MUSIC_ARTIST),
+                    recursive = true,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicArtist(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicAlbums(): List<FindroidMusicAlbum> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    includeItemTypes = listOf(BaseItemKind.MUSIC_ALBUM),
+                    recursive = true,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicAlbum(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicSongs(): List<FindroidMusicSong> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    includeItemTypes = listOf(BaseItemKind.AUDIO),
+                    recursive = true,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                    limit = 500,
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi
+                .getItem(itemId, jellyfinApi.userId!!)
+                .content
+                .toFindroidMusicArtist(this@JellyfinRepositoryImpl)
+        }
+
+    override suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum? =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi
+                .getItem(itemId, jellyfinApi.userId!!)
+                .content
+                .toFindroidMusicAlbum(this@JellyfinRepositoryImpl)
+        }
+
+    override suspend fun getMusicAlbums(artistId: UUID): List<FindroidMusicAlbum> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    parentId = artistId,
+                    includeItemTypes = listOf(BaseItemKind.MUSIC_ALBUM),
+                    recursive = false,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicAlbum(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    parentId = albumId,
+                    includeItemTypes = listOf(BaseItemKind.AUDIO),
+                    recursive = false,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
         }
 
     override suspend fun getItems(

@@ -10,6 +10,9 @@ import dev.hdytrfli.onigiri.models.FindroidGenre
 import dev.hdytrfli.onigiri.models.FindroidImages
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.FindroidMusicArtist
+import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
@@ -227,6 +230,20 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun getFavoriteItems(): List<FindroidItem> =
         downloadedItems().filter { it.favorite }
+
+    override suspend fun getMusicArtists(): List<FindroidMusicArtist> = emptyList()
+
+    override suspend fun getMusicAlbums(): List<FindroidMusicAlbum> = emptyList()
+
+    override suspend fun getMusicSongs(): List<FindroidMusicSong> = emptyList()
+
+    override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? = null
+
+    override suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum? = null
+
+    override suspend fun getMusicAlbums(artistId: UUID): List<FindroidMusicAlbum> = emptyList()
+
+    override suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong> = emptyList()
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> =
         downloadedItems().filter { it.name.contains(query, ignoreCase = true) }

@@ -5,6 +5,9 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidGenre
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.FindroidMusicArtist
+import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
@@ -55,6 +58,24 @@ class RoutingJellyfinRepository(
     override suspend fun getLibraries(): List<FindroidCollection> = current().getLibraries()
 
     override suspend fun getItem(itemId: UUID): FindroidItem? = current().getItem(itemId)
+
+    override suspend fun getMusicArtists(): List<FindroidMusicArtist> = current().getMusicArtists()
+
+    override suspend fun getMusicAlbums(): List<FindroidMusicAlbum> = current().getMusicAlbums()
+
+    override suspend fun getMusicSongs(): List<FindroidMusicSong> = current().getMusicSongs()
+
+    override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? =
+        current().getMusicArtist(itemId)
+
+    override suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum? =
+        current().getMusicAlbum(itemId)
+
+    override suspend fun getMusicAlbums(artistId: UUID): List<FindroidMusicAlbum> =
+        current().getMusicAlbums(artistId)
+
+    override suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong> =
+        current().getMusicSongs(albumId)
 
     override suspend fun getItems(
         parentId: UUID?,
