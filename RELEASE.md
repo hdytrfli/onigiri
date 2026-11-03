@@ -3,8 +3,8 @@
 The app version lives in [`gradle/libs.versions.toml`](gradle/libs.versions.toml):
 
 ```toml
-app-name = "1.0.0-beta.1"
-app-code = "1000001"
+app-name = "1.0.0-beta.2"
+app-code = "1000002"
 ```
 
 `app-name` is the human-readable version. `app-code` must increase with every
@@ -81,7 +81,7 @@ refactor: ...
 
 ```text
 1.0.0        stable release
-1.0.0-beta.1 staging / GitHub prerelease
+1.0.0-beta.2 staging / GitHub prerelease
 ```
 
 The tag must exactly match `v` plus `app-name`; the release workflow rejects
