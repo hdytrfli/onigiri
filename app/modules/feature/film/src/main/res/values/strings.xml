@@ -32,4 +32,13 @@
     <string name="search_group_videos">Videos</string>
     <string name="search_home_prompt">Search across your Jellyfin library</string>
     <string name="search_home_empty">No results for “%1$s”</string>
+    <string name="music_songs">Songs</string>
+    <string name="music_artists">Artists</string>
+    <string name="music_albums">Albums</string>
+    <string name="music_context_songs">songs</string>
+    <string name="music_context_artists">artists</string>
+    <string name="music_context_albums">albums</string>
+    <string name="music_album_count">%1$d albums</string>
+    <string name="music_song_count">%1$d songs</string>
+    <string name="music_unknown_artist">Unknown artist</string>
 </resources>

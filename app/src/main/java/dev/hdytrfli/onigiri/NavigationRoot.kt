@@ -59,6 +59,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.ShowScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.ShowsScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.SubtitleSearchScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchResult
+import dev.hdytrfli.onigiri.feature.film.presentation.music.MusicScreen
 import dev.hdytrfli.onigiri.models.CollectionType
 import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.models.FindroidBoxSet
@@ -100,7 +101,7 @@ import org.jellyfin.sdk.model.api.ImageType
 private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
 
 private val TOP_LEVEL_ROUTES =
-    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, SETTINGS_ROOT_ROUTE)
+    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, MusicRoute, SETTINGS_ROOT_ROUTE)
 
 data class TabBarItem(
     @param:StringRes val title: Int,
@@ -131,6 +132,13 @@ val booksTab =
         title = CoreR.string.books_label,
         icon = CoreR.drawable.ic_book_open,
         route = BooksRoute,
+    )
+
+val musicTab =
+    TabBarItem(
+        title = CoreR.string.title_music,
+        icon = CoreR.drawable.ic_music,
+        route = MusicRoute,
     )
 
 val settingsTab =
@@ -258,7 +266,8 @@ private fun MainNavigation(
         }
     }
 
-    val tabRoutes = listOf(homeTab, moviesTab, showsTab, booksTab, settingsTab).map { it.route }
+    val tabRoutes =
+        listOf(homeTab, moviesTab, showsTab, booksTab, musicTab, settingsTab).map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
 
@@ -492,6 +501,16 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<BooksRoute> {
         SuiteInsetBox {
             BooksScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
+        }
+    }
+    entry<MusicRoute> {
+        SuiteInsetBox {
+            MusicScreen(
+                onArtistClick =
+                    resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
+                onAlbumClick =
+                    resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
+            )
         }
     }
     entry<MediaRoute> {
