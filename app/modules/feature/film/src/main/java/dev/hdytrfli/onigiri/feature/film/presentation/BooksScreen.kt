@@ -218,7 +218,7 @@ fun BooksScreen(
                                                 viewModel.onItemOpened(item.id)
                                                 onItemClick(item)
                                             },
-                                            modifier = Modifier.animateItem(),
+                                            modifier = Modifier,
                                             fillWidth = true,
                                             showYear = ListDisplayField.Year in state.displayFields,
                                         )

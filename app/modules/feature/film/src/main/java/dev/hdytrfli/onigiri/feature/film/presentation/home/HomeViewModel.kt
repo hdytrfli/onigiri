@@ -121,7 +121,8 @@ constructor(
             _state.value =
                 if (entry.isRefreshing || entry.error != null) {
                     _state.value.copy(
-                        isLoading = entry.isRefreshing,
+                        isLoading =
+                            entry.isRefreshing || (entry.data == null && entry.error == null),
                         error = entry.error as? Exception,
                     )
                 } else {
@@ -132,7 +133,8 @@ constructor(
                         latestBooksSection = null,
                         latestAudiobooksSection = null,
                         views = emptyList(),
-                        isLoading = entry.isRefreshing,
+                        isLoading =
+                            entry.isRefreshing || (entry.data == null && entry.error == null),
                         error = null,
                     )
                 }
@@ -182,7 +184,7 @@ constructor(
                     } else {
                         emptyList()
                     },
-                isLoading = entry.isRefreshing,
+                isLoading = entry.isRefreshing || (entry.data == null && entry.error == null),
                 error = entry.error as? Exception,
             )
     }

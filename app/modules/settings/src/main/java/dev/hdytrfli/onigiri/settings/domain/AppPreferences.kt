@@ -35,6 +35,7 @@ class AppPreferences(
 
     // Server
     val currentServer = Preference<String?>("pref_current_server", null)
+    val currentUser = Preference<String?>("pref_current_user", null)
 
     /** Whether the new onboarding flow has been completed at least once. */
     val onboardingComplete = Preference("pref_onboarding_complete", false)
@@ -108,7 +109,6 @@ class AppPreferences(
     val playerTimeShowFinish = Preference("pref_player_time_show_finish", false)
 
     // Player - mpv
-    val playerMpv = Preference("pref_player_mpv", false)
     val playerMpvHwdec = Preference("pref_player_mpv_hwdec", "mediacodec")
     val playerMpvVo = Preference("pref_player_mpv_vo", "gpu-next")
     val playerMpvAo = Preference("pref_player_mpv_ao", "aaudio")
@@ -153,10 +153,8 @@ class AppPreferences(
     val playerGesturesVolume = Preference("pref_player_gestures_volume", true)
     val playerGesturesBrightness = Preference("pref_player_gestures_brightness", true)
     val playerGesturesZoom = Preference("pref_player_gestures_zoom", true)
-    val playerGesturesSeek = Preference("pref_player_gestures_seek", true)
     val playerGesturesDoubleTap = Preference("pref_player_gestures_double_tap", false)
     val playerGesturesSeekTrickplay = Preference("pref_player_gestures_seek_trickplay", true)
-    val playerGesturesChapterSkip = Preference("pref_player_gestures_chapter_skip", false)
     val playerGesturesStartMaximized = Preference("pref_player_start_maximized", false)
 
     /** Pinch to zoom the video freely, instead of the pinch filling the screen. */
@@ -165,33 +163,6 @@ class AppPreferences(
     // Player - seeking
     val playerSeekBackInc = Preference("pref_player_seek_back_inc", 5_000L)
     val playerSeekForwardInc = Preference("pref_player_seek_forward_inc", 5_000L)
-    val playerChapterMarkers = Preference("pref_player_chapter_markers", true)
-
-    // Player - Media Segments
-    val playerMediaSegmentsSkipButton
-        get() = Preference("pref_player_media_segments_skip_button", true)
-
-    val playerMediaSegmentsSkipButtonType
-        get() = Preference("pref_player_media_segments_skip_button_type", setOf("INTRO", "OUTRO"))
-
-    val playerMediaSegmentsSkipButtonDuration
-        get() = Preference("pref_player_media_segments_skip_button_duration", 5L)
-
-    val playerMediaSegmentsAutoSkip
-        get() = Preference("pref_player_media_segments_auto_skip", false)
-
-    val playerMediaSegmentsAutoSkipMode
-        get() =
-            Preference(
-                "pref_player_media_segments_auto_skip_mode",
-                Constants.PlayerMediaSegmentsAutoSkip.ALWAYS,
-            )
-
-    val playerMediaSegmentsAutoSkipType
-        get() = Preference("pref_player_media_segments_auto_skip_type", setOf("INTRO", "OUTRO"))
-
-    val playerMediaSegmentsNextEpisodeThreshold
-        get() = Preference("pref_player_media_segments_next_episode_threshold", 5_000L)
 
     // Player - trickplay
     val playerTrickplay = Preference("pref_player_trickplay", true)

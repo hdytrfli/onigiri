@@ -26,7 +26,6 @@ import dev.hdytrfli.onigiri.models.toFindroidEpisodeDto
 import dev.hdytrfli.onigiri.models.toFindroidMediaStreamDto
 import dev.hdytrfli.onigiri.models.toFindroidMovieDto
 import dev.hdytrfli.onigiri.models.toFindroidSeasonDto
-import dev.hdytrfli.onigiri.models.toFindroidSegmentsDto
 import dev.hdytrfli.onigiri.models.toFindroidShowDto
 import dev.hdytrfli.onigiri.models.toFindroidSource
 import dev.hdytrfli.onigiri.models.toFindroidSourceDto
@@ -67,7 +66,6 @@ class DownloaderImpl(
         try {
             val source =
                 jellyfinRepository.getMediaSources(item.id, true).first { it.id == sourceId }
-            val segments = jellyfinRepository.getSegments(item.id)
             val trickplayInfo =
                 if (item is FindroidSources) {
                     item.trickplayInfo?.get(sourceId)
@@ -155,8 +153,6 @@ class DownloaderImpl(
             database.insertUserData(item.toFindroidUserDataDto(jellyfinRepository.getUserId()))
 
             downloadExternalMediaStreams(item, source, storageIndex)
-
-            segments.forEach { database.insertSegment(it.toFindroidSegmentsDto(item.id)) }
 
             if (trickplayInfo != null) {
                 downloadTrickplayData(item.id, sourceId, trickplayInfo)

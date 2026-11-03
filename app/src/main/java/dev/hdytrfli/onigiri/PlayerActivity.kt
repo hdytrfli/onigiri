@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.Rect
 import android.media.AudioManager
 import android.os.Build
@@ -21,7 +20,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.PathInterpolator
 import android.widget.AbsListView
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -44,7 +42,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.ui.DefaultTimeBar
-import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import coil3.load
 import com.google.android.material.tabs.TabLayout
@@ -65,6 +62,7 @@ import dev.hdytrfli.onigiri.presentation.player.PlayerStatsPanel
 import dev.hdytrfli.onigiri.presentation.player.SubtitleOffsetControl
 import dev.hdytrfli.onigiri.presentation.player.formatSubtitleOffset
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
+import dev.hdytrfli.onigiri.ui.RoundedTimeBar
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.utils.BackdropRatios
 import dev.hdytrfli.onigiri.ui.utils.LocalBackdropRatios
@@ -109,7 +107,6 @@ class PlayerActivity : BasePlayerActivity() {
     private val detailViewModel: MediaDetailViewModel by viewModels()
     private var previewScrubListener: PreviewScrubListener? = null
     private var wasZoom: Boolean = false
-    private var skipButtonTimeoutExpired: Boolean = true
 
     /** Whether the stats overlay is switched on, and whether PiP is temporarily hiding it. */
     private val showStats = mutableStateOf(false)
@@ -118,7 +115,6 @@ class PlayerActivity : BasePlayerActivity() {
     /** Whether the controls overlay is showing; drives the stats panel's slide. */
     private val playerControlsVisible = mutableStateOf(true)
 
-    private lateinit var skipSegmentButton: Button
     private lateinit var playerTimeRight: TextView
 
     private val detailItemId = mutableStateOf<UUID?>(null)
@@ -149,12 +145,6 @@ class PlayerActivity : BasePlayerActivity() {
     private var overlayTimeoutMs = 5000L
 
     private val hidePlayerControlsAction = Runnable { hidePlayerControls() }
-    private val skipButtonTimeout = Runnable {
-        if (!binding.playerView.isControllerFullyVisible) {
-            skipSegmentButton.isVisible = false
-            skipButtonTimeoutExpired = true
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,6 +158,16 @@ class PlayerActivity : BasePlayerActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         binding.playerView.player = viewModel.player
+        binding.playerView.findViewById<ImageButton>(R.id.exo_rew).setOnClickListener {
+            viewModel.seekToPreviousChapter()?.let { chapter ->
+                chapter.name?.takeIf { it.isNotBlank() }?.let(::showPlayerOverlayMessage)
+            }
+        }
+        binding.playerView.findViewById<ImageButton>(R.id.exo_ffwd).setOnClickListener {
+            viewModel.seekToNextChapter()?.let { chapter ->
+                chapter.name?.takeIf { it.isNotBlank() }?.let(::showPlayerOverlayMessage)
+            }
+        }
         // How long the overlay stays up before hiding itself ("Never" is stored as -1). The fade
         // does the hiding, so media3's own timeout is off and this drives it instead.
         overlayTimeoutMs =
@@ -244,7 +244,6 @@ class PlayerActivity : BasePlayerActivity() {
         val btnEpisodes = binding.playerView.findViewById<ImageButton>(R.id.btn_episodes)
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
-        skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
@@ -336,53 +335,23 @@ class PlayerActivity : BasePlayerActivity() {
                             videoDescriptionTextView.isVisible =
                                 !currentItemOverview.isNullOrBlank()
 
-                            // Media segment
-                            currentSegment?.let { segment ->
-                                // Skip Button - text
-                                skipSegmentButton.text = getString(currentSkipButtonStringRes)
-                                // Skip Button - visibility
-                                skipSegmentButton.isVisible = !isInPictureInPictureMode
-                                if (skipSegmentButton.isVisible) {
-                                    skipButtonTimeoutExpired = false
-                                    handler.removeCallbacks(skipButtonTimeout)
-                                    handler.postDelayed(
-                                        skipButtonTimeout,
-                                        viewModel.segmentsSkipButtonDuration * 1000,
-                                    )
-                                }
-                                // Skip Button - onClick
-                                skipSegmentButton.setOnClickListener {
-                                    viewModel.skipSegment(segment)
-                                    skipSegmentButton.isVisible = false
-                                }
-                            } ?: run { skipSegmentButton.isVisible = false }
-
-                            binding.playerView.setControllerVisibilityListener(
-                                PlayerView.ControllerVisibilityListener { visibility ->
-                                    if (skipButtonTimeoutExpired && currentSegment != null) {
-                                        skipSegmentButton.visibility = visibility
-                                    }
-                                }
-                            )
-
                             // Trickplay
                             previewScrubListener?.let { it.currentTrickplay = currentTrickplay }
 
                             playerGestureHelper?.let { it.currentTrickplay = currentTrickplay }
 
                             // Chapters
-                            val playerControlView =
-                                findViewById<PlayerControlView>(R.id.exo_controller)
-                            if (currentChapters.isNotEmpty()) {
-                                val numOfChapters = currentChapters.size
-                                playerControlView.setExtraAdGroupMarkers(
-                                    LongArray(numOfChapters) { index ->
-                                        currentChapters[index].startPosition
-                                    },
-                                    BooleanArray(numOfChapters) { false },
+                            val timeBar = findViewById<DefaultTimeBar>(R.id.exo_progress)
+                            if (timeBar is RoundedTimeBar) {
+                                timeBar.setChapterMarkers(
+                                    if (currentChapters.isEmpty()) {
+                                        LongArray(0)
+                                    } else {
+                                        LongArray(currentChapters.size) { index ->
+                                            currentChapters[index].startPosition
+                                        }
+                                    }
                                 )
-                            } else {
-                                playerControlView.setExtraAdGroupMarkers(null, null)
                             }
 
                             // File Loaded
@@ -455,18 +424,6 @@ class PlayerActivity : BasePlayerActivity() {
                     while (true) {
                         updatePlayerTimeRight()
                         delay(1000L)
-                    }
-                }
-
-                if (
-                    appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButton) ||
-                        appPreferences.getValue(appPreferences.playerMediaSegmentsAutoSkip)
-                ) {
-                    launch {
-                        while (true) {
-                            viewModel.updateCurrentSegment()
-                            delay(1000L)
-                        }
                     }
                 }
             }
@@ -652,7 +609,6 @@ class PlayerActivity : BasePlayerActivity() {
 
         // Set marker color
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(R.id.exo_progress)
-        timeBar.setAdMarkerColor(Color.WHITE)
 
         if (appPreferences.getValue(appPreferences.playerTrickplay)) {
             val imagePreview = binding.playerView.findViewById<ImageView>(R.id.image_preview)
@@ -704,7 +660,6 @@ class PlayerActivity : BasePlayerActivity() {
         } catch (e: Exception) {
             Timber.e(e)
         }
-        handler.removeCallbacks(skipButtonTimeout)
         finish()
     }
 
@@ -1058,6 +1013,14 @@ class PlayerActivity : BasePlayerActivity() {
         binding.progressScrubberLayout.postDelayed(hidePlayerOverlayMessageAction, 1500L)
     }
 
+    /** Shows [message] until the caller hides it, used while a speed gesture is held. */
+    internal fun showPersistentPlayerOverlayMessage(message: String) {
+        binding.progressScrubberTrickplay.visibility = View.GONE
+        binding.progressScrubberText.text = message
+        binding.progressScrubberLayout.visibility = View.VISIBLE
+        binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
+    }
+
     private fun updatePlayerTimeRight() {
         val duration = viewModel.player.duration
         if (duration <= 0 || duration == C.TIME_UNSET) {
@@ -1119,7 +1082,6 @@ class PlayerActivity : BasePlayerActivity() {
         when (isInPictureInPictureMode) {
             true -> {
                 binding.playerView.useController = false
-                skipSegmentButton.isVisible = false
 
                 wasZoom = playerGestureHelper?.isZoomEnabled == true
                 playerGestureHelper?.updateZoomMode(false)

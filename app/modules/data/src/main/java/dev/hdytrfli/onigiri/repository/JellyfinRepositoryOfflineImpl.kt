@@ -12,7 +12,6 @@ import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
-import dev.hdytrfli.onigiri.models.FindroidSegment
 import dev.hdytrfli.onigiri.models.FindroidShow
 import dev.hdytrfli.onigiri.models.FindroidSource
 import dev.hdytrfli.onigiri.models.RecommendationCategory
@@ -22,7 +21,6 @@ import dev.hdytrfli.onigiri.models.toFindroidBook
 import dev.hdytrfli.onigiri.models.toFindroidEpisode
 import dev.hdytrfli.onigiri.models.toFindroidMovie
 import dev.hdytrfli.onigiri.models.toFindroidSeason
-import dev.hdytrfli.onigiri.models.toFindroidSegment
 import dev.hdytrfli.onigiri.models.toFindroidShow
 import dev.hdytrfli.onigiri.models.toFindroidSource
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
@@ -306,9 +304,6 @@ class JellyfinRepositoryOfflineImpl(
     }
 
     override suspend fun getDownload(itemId: UUID): ByteArray = ByteArray(0)
-
-    override suspend fun getSegments(itemId: UUID): List<FindroidSegment> =
-        withContext(Dispatchers.IO) { database.getSegments(itemId).map { it.toFindroidSegment() } }
 
     override suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray? =
         withContext(Dispatchers.IO) {

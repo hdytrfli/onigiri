@@ -24,6 +24,6 @@ fun Context.clearProfileCachesAndRestart() {
     cacheDir.resolve("books").deleteRecursively()
     EntryPointAccessors.fromApplication(applicationContext, SwrEntryPoint::class.java)
         .swrStore()
-        .clear()
+        .clearBlocking()
     (this as? Activity)?.restart()
 }

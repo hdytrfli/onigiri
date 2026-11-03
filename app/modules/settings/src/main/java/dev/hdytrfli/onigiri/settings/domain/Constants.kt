@@ -1,12 +1,6 @@
 package dev.hdytrfli.onigiri.settings.domain
 
 object Constants {
-    // Player - Media Segments
-    object PlayerMediaSegmentsAutoSkip {
-        const val ALWAYS = "always"
-        const val PIP = "pip"
-    }
-
     // Interface
     /**
      * Multiplier applied to content spacing in the detail screens. Fixed to the former

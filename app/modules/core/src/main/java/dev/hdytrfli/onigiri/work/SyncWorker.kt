@@ -9,10 +9,7 @@ import dagger.assisted.AssistedInject
 import dev.hdytrfli.onigiri.api.JellyfinApi
 import dev.hdytrfli.onigiri.api.JellyfinApiFactory
 import dev.hdytrfli.onigiri.database.ServerDatabaseDao
-import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.User
-import dev.hdytrfli.onigiri.models.toFindroidEpisode
-import dev.hdytrfli.onigiri.models.toFindroidMovie
 import org.jellyfin.sdk.model.api.UpdateUserItemDataDto
 
 @HiltWorker
@@ -42,34 +39,18 @@ constructor(
                     api.update(baseUrl = serverAddress.address, accessToken = user.accessToken)
                     userId = user.id
                 }
-                val movies =
-                    database.getMoviesByServerId(server.id).map {
-                        it.toFindroidMovie(database, user.id)
-                    }
-                val episodes =
-                    database.getEpisodesByServerId(server.id).map {
-                        it.toFindroidEpisode(database, user.id)
-                    }
-
-                syncUserData(jellyfinApi, user, movies)
-                syncUserData(jellyfinApi, user, episodes)
+                syncUserData(jellyfinApi, user)
             }
         }
 
         return Result.success()
     }
 
-    private suspend fun syncUserData(
-        jellyfinApi: JellyfinApi,
-        user: User,
-        items: List<FindroidItem>,
-    ) {
-        for (item in items) {
-            val userData = database.getUserDataToBeSynced(user.id, item.id) ?: continue
-
+    private suspend fun syncUserData(jellyfinApi: JellyfinApi, user: User) {
+        for (userData in database.getUserDataToBeSynced(user.id)) {
             try {
                 jellyfinApi.itemsApi.updateItemUserData(
-                    itemId = item.id,
+                    itemId = userData.itemId,
                     userId = user.id,
                     data =
                         UpdateUserItemDataDto(
@@ -79,7 +60,7 @@ constructor(
                         ),
                 )
 
-                database.setUserDataToBeSynced(user.id, item.id, false)
+                database.setUserDataToBeSynced(user.id, userData.itemId, false)
             } catch (_: Exception) {}
         }
     }

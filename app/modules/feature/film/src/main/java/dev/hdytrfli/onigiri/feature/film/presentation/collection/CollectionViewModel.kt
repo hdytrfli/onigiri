@@ -83,7 +83,8 @@ constructor(
             if (entry.isRefreshing || entry.error != null) {
                 _state.value =
                     _state.value.copy(
-                        isLoading = entry.isRefreshing,
+                        isLoading =
+                            entry.isRefreshing || (entry.data == null && entry.error == null),
                         error = entry.error as? Exception,
                     )
             } else {
@@ -92,7 +93,8 @@ constructor(
                         collection = null,
                         items = emptyList(),
                         sections = emptyList(),
-                        isLoading = entry.isRefreshing,
+                        isLoading =
+                            entry.isRefreshing || (entry.data == null && entry.error == null),
                         error = null,
                     )
             }
@@ -102,7 +104,7 @@ constructor(
             _state.value.copy(
                 collection = cache.collection,
                 items = cache.items,
-                isLoading = entry.isRefreshing,
+                isLoading = entry.isRefreshing || (entry.data == null && entry.error == null),
                 error = entry.error as? Exception,
             )
     }

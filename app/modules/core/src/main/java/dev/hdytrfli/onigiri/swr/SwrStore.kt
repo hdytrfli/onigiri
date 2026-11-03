@@ -19,9 +19,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
@@ -71,6 +73,7 @@ constructor(
 
     private val entries = ConcurrentHashMap<SwrKey, MutableStateFlow<SwrEntry<Any?>>>()
     private val logicalEntries = ConcurrentHashMap<SwrKey, MutableStateFlow<SwrEntry<Any?>>>()
+    private val observingKeys = ConcurrentHashMap.newKeySet<SwrKey>()
     private val loadedKeys = ConcurrentHashMap.newKeySet<SwrKey>()
     private val loadMutex = Mutex()
     private val inFlight = ConcurrentHashMap<SwrKey, Job>()
@@ -94,11 +97,20 @@ constructor(
     @Suppress("UNCHECKED_CAST")
     fun <T> observe(key: SwrKey, serializer: KSerializer<T>): StateFlow<SwrEntry<T>> {
         val logical = logicalEntries.computeIfAbsent(key) { MutableStateFlow(SwrEntry()) }
-        scope.launch {
-            appPreferences
-                .observe(appPreferences.offlineMode)
-                .flatMapLatest { offlineMode -> rawFlow(scoped(key, offlineMode)) }
-                .collect { logical.value = it }
+        if (observingKeys.add(key)) {
+            scope.launch {
+                combine(
+                        appPreferences.observe(appPreferences.offlineMode),
+                        appPreferences.observe(appPreferences.currentServer),
+                        appPreferences.observe(appPreferences.currentUser),
+                    ) { offlineMode, serverId, userId ->
+                        Triple(offlineMode, serverId, userId)
+                    }
+                    .flatMapLatest { (offlineMode, serverId, userId) ->
+                        rawFlow(scoped(key, offlineMode, serverId, userId))
+                    }
+                    .collect { logical.value = it }
+            }
         }
         scope.launch { ensureLoaded(key, serializer) }
         return logical as StateFlow<SwrEntry<T>>
@@ -122,9 +134,11 @@ constructor(
                 ensureLoaded(key, serializer)
                 val current = flow.value
                 if (!force && current.data != null && !current.isStale) {
+                    logicalEntries[key]?.value = current
                     return@launch
                 }
                 flow.value = current.copy(isRefreshing = true, error = null, isOffline = false)
+                logicalEntries[key]?.value = flow.value
 
                 val result = fetcher()
                 val fetchedAt = System.currentTimeMillis()
@@ -134,6 +148,7 @@ constructor(
                         updatedAt = fetchedAt,
                         isStale = false,
                     )
+                logicalEntries[key]?.value = flow.value
                 database.putQueryCache(
                     QueryCacheEntity(
                         cacheKey = storageKey.value,
@@ -154,6 +169,7 @@ constructor(
                         isOffline = offline,
                         isStale = if (current.data != null) current.isStale else true,
                     )
+                logicalEntries[key]?.value = flow.value
                 _failures.emit(
                     SwrFailure(
                         key = key,
@@ -188,6 +204,7 @@ constructor(
                     error = null,
                 ) as SwrEntry<Any?>
             flow.value = updated
+            logicalEntries[key]?.value = updated
             if (data != null) {
                 database.putQueryCache(
                     QueryCacheEntity(
@@ -204,20 +221,33 @@ constructor(
     fun invalidate(key: SwrKey) {
         scope.launch {
             MODES.forEach { mode ->
-                val storageKey = SwrKey("$mode|${key.value}")
+                val storageKey = SwrKey("${scopePrefix(mode)}${key.value}")
                 database.invalidateQueryCache(storageKey.value)
                 rawFlow(storageKey).value = rawFlow(storageKey).value.copy(isStale = true)
             }
+            logicalEntries[key]?.value =
+                logicalEntries[key]?.value?.copy(isStale = true) ?: SwrEntry()
         }
     }
 
     /** Marks every entry under [prefix] stale in both modes. */
     fun invalidatePrefix(prefix: String) {
         scope.launch {
-            MODES.forEach { mode -> database.invalidateQueryCachePrefix("$mode|$prefix") }
-            entries.keys
-                .filter { it.value.substringAfter('|').startsWith(prefix) }
-                .forEach { rawFlow(it).value = rawFlow(it).value.copy(isStale = true) }
+            MODES.forEach { mode ->
+                database.invalidateQueryCachePrefix("${scopePrefix(mode)}$prefix")
+                entries.keys
+                    .filter {
+                        it.value.startsWith(scopePrefix(mode)) &&
+                            it.value.removePrefix(scopePrefix(mode)).startsWith(prefix)
+                    }
+                    .forEach { rawFlow(it).value = rawFlow(it).value.copy(isStale = true) }
+            }
+            logicalEntries.keys
+                .filter { it.value.startsWith(prefix) }
+                .forEach { key ->
+                    logicalEntries[key]?.value =
+                        logicalEntries[key]?.value?.copy(isStale = true) ?: SwrEntry()
+                }
         }
     }
 
@@ -226,6 +256,7 @@ constructor(
         scope.launch {
             database.invalidateAllQueryCache()
             entries.values.forEach { it.value = it.value.copy(isStale = true) }
+            logicalEntries.values.forEach { it.value = it.value.copy(isStale = true) }
         }
     }
 
@@ -244,19 +275,49 @@ constructor(
     }
 
     fun clear() {
+        scope.launch { clearNow() }
+    }
+
+    /** Blocking clear for profile/server switches that restart the process immediately. */
+    fun clearBlocking() {
+        runBlocking { clearNow() }
+    }
+
+    suspend fun clearNow() {
         inFlight.values.forEach { it.cancel() }
         inFlight.clear()
         entries.values.forEach { it.value = SwrEntry() }
         logicalEntries.values.forEach { it.value = SwrEntry() }
         loadedKeys.clear()
-        scope.launch { database.clearQueryCache() }
+        database.clearQueryCache()
+    }
+
+    private fun scopePrefix(mode: String): String {
+        val serverId = appPreferences.getValue(appPreferences.currentServer) ?: "-"
+        val userId = appPreferences.getValue(appPreferences.currentUser) ?: "-"
+        return "$mode|$serverId|$userId|"
     }
 
     private fun scoped(key: SwrKey): SwrKey =
-        scoped(key, appPreferences.getValue(appPreferences.offlineMode))
+        scoped(
+            key,
+            appPreferences.getValue(appPreferences.offlineMode),
+            appPreferences.getValue(appPreferences.currentServer),
+            appPreferences.getValue(appPreferences.currentUser),
+        )
 
-    private fun scoped(key: SwrKey, offlineMode: Boolean): SwrKey =
-        SwrKey("${if (offlineMode) "offline" else "online"}|${key.value}")
+    private fun scoped(
+        key: SwrKey,
+        offlineMode: Boolean,
+        serverId: String?,
+        userId: String?,
+    ): SwrKey = SwrKey("${scopePrefix(offlineMode, serverId, userId)}${key.value}")
+
+    private fun scopePrefix(
+        offlineMode: Boolean,
+        serverId: String? = appPreferences.getValue(appPreferences.currentServer),
+        userId: String? = appPreferences.getValue(appPreferences.currentUser),
+    ): String = "${if (offlineMode) "offline" else "online"}|${serverId ?: "-"}|${userId ?: "-"}|"
 
     private fun rawFlow(key: SwrKey): MutableStateFlow<SwrEntry<Any?>> =
         entries.computeIfAbsent(key) { MutableStateFlow(SwrEntry()) }
@@ -283,6 +344,7 @@ constructor(
                                 entity.updatedAt == 0L ||
                                     now - entity.updatedAt >= DEFAULT_STALE_AFTER_MS,
                         )
+                    logicalEntries[key]?.value = flow.value
                 }
             }
             loadedKeys.add(storageKey)
@@ -291,6 +353,6 @@ constructor(
 
     private companion object {
         const val DEFAULT_STALE_AFTER_MS = 5 * 60 * 1000L
-        val MODES = listOf("online", "offline")
+        val MODES = listOf(false, true)
     }
 }

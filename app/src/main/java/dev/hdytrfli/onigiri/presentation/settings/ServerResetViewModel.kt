@@ -31,6 +31,7 @@ constructor(
             database.deleteAllUsers()
             database.deleteAllServers()
             appPreferences.setValue(appPreferences.currentServer, null)
+            appPreferences.setValue(appPreferences.currentUser, null)
             appPreferences.setValue(appPreferences.onboardingComplete, false)
             appPreferences.setValue(appPreferences.profileLoggedOut, false)
             // The data has already been cleared here; do not run the upgrade purge again when the

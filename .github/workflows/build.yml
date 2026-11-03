@@ -55,6 +55,9 @@ jobs:
       - name: Check Kotlin formatting
         run: ./gradlew ktfmtCheck ktfmtCheckScripts
 
+      - name: Verify release tag
+        run: ./gradlew :app:verifyReleaseTag -PexpectedTag=${{ github.ref_name }}
+
       - name: Decode signing key
         id: signing_key
         uses: timheuer/base64-to-file@v2

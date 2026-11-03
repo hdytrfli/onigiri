@@ -101,6 +101,19 @@ android {
     }
 }
 
+tasks.register("verifyReleaseTag") {
+    val expectedVersion = providers.provider { libs.versions.app.name.get() }
+    val actualTag = providers.gradleProperty("expectedTag")
+
+    doLast {
+        val tag = actualTag.orNull?.takeIf { it.isNotBlank() } ?: error("Missing -PexpectedTag")
+        val expected = "v${expectedVersion.get()}"
+        check(tag == expected) {
+            "Release tag $tag does not match app-name $expected in gradle/libs.versions.toml"
+        }
+    }
+}
+
 dependencies {
     implementation(projects.core)
     implementation(projects.data)
@@ -144,12 +157,10 @@ dependencies {
     implementation(libs.readium.shared)
     implementation(libs.readium.streamer)
     implementation(libs.readium.navigator)
-    implementation(libs.readium.adapter.pdfium)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     ksp(libs.kotlin.metadata.jvm)
     compileOnly(libs.libmpv)
     implementation(libs.material)
-    implementation(libs.media3.ffmpeg.decoder)
     implementation(libs.timber)
 
     implementation(libs.kotlinx.coroutines.android)

@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import dev.hdytrfli.onigiri.databinding.ActivityReaderBinding
@@ -48,9 +47,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
-import org.readium.adapter.pdfium.navigator.PdfiumEngineProvider
-import org.readium.adapter.pdfium.navigator.PdfiumPreferences
 import org.readium.r2.navigator.Navigator
 import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.VisualNavigator
@@ -58,17 +54,13 @@ import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.css.Length
 import org.readium.r2.navigator.epub.css.RsProperties
-import org.readium.r2.navigator.image.ImageNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
-import org.readium.r2.navigator.pdf.PdfNavigatorFactory
-import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.Theme
 import org.readium.r2.shared.DelicateReadiumApi
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
-import org.readium.r2.shared.publication.Layout
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.services.positions
@@ -79,9 +71,8 @@ import org.readium.r2.streamer.parser.DefaultPublicationParser
 import timber.log.Timber
 
 /**
- * Reads a Jellyfin book in the app. The publication is downloaded once, opened with Readium and
- * rendered by the navigator matching its format: EPUB (reflowable, with the reader's typography
- * settings), PDF or CBZ/Divina (fixed layout). The controls overlay matches the player's chrome.
+ * Reads an EPUB from Jellyfin. Other formats are rejected until the reader intentionally supports
+ * them.
  */
 @AndroidEntryPoint
 @OptIn(
@@ -274,16 +265,14 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun seekTo(page: Int) {
-        positions.getOrNull(page - 1)?.let { epubNavigator?.go(it) }
+        positions.getOrNull(page - 1)?.let { navigator?.go(it) }
     }
 
     private fun isPullEligible(settings: ReaderSettings): Boolean {
-        val layout = publication?.metadata?.layout
         return settings.scroll &&
             settings.pullDistance > 0f &&
             epubNavigator != null &&
-            publication?.conformsTo(Publication.Profile.EPUB) == true &&
-            layout != Layout.FIXED
+            publication?.conformsTo(Publication.Profile.EPUB) == true
     }
 
     private fun applyPullAppearance(settings: ReaderSettings) {
@@ -425,6 +414,10 @@ class ReaderActivity : AppCompatActivity() {
 
     private suspend fun openBook(id: UUID, title: String) {
         try {
+            val book = repository.getItem(id) as? FindroidBook
+            if (book != null && !book.isReadable) {
+                throw IOException("Only EPUB books are supported")
+            }
             val publication =
                 withContext(Dispatchers.IO) {
                     val file = downloadBook(id)
@@ -469,7 +462,7 @@ class ReaderActivity : AppCompatActivity() {
                 this,
                 httpClient,
                 assetRetriever,
-                pdfFactory = PdfiumDocumentFactory(this),
+                pdfFactory = null,
             )
         val opener = PublicationOpener(parser)
 
@@ -481,6 +474,10 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     private fun showPublication(publication: Publication, id: UUID, title: String) {
+        if (!publication.conformsTo(Publication.Profile.EPUB)) {
+            throw IOException("Only EPUB books are supported")
+        }
+
         this.publication = publication
         chapters.value = publication.tableOfContents.toReaderChapters()
         val initialLocator = if (startFromBeginning) null else storedLocator(id)
@@ -489,78 +486,51 @@ class ReaderActivity : AppCompatActivity() {
         applyPullAppearance(settings)
         maxWidthHref = null
 
-        val fragmentClass: Class<out Fragment>
-        val fragmentFactory: androidx.fragment.app.FragmentFactory
-
-        when {
-            publication.conformsTo(Publication.Profile.EPUB) -> {
-                fragmentClass = EpubNavigatorFragment::class.java
-                val configuration = EpubNavigatorFragment.Configuration {
-                    // Serve the bundled font files and declare them, so the same families as
-                    // the subtitle font setting can be selected for the book text.
-                    servedAssets += "subtitle-fonts/.*"
-                    // Scroll mode should never change chapters on a horizontal swipe.
-                    disablePageTurnsWhileScrolling = true
-                    // The reader is edge-to-edge with hidden system bars; do not reserve the
-                    // status bar area inside the publication.
-                    shouldApplyInsetsPadding = false
-                    readiumCssRsProperties =
-                        RsProperties(maxLineLength = Length.Rem(settings.maxLineLengthRem))
-                    SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset)
-                        ->
-                        addFontFamilyDeclaration(FontFamily(family)) {
-                            addFontFace {
-                                addSource("subtitle-fonts/$asset")
-                                setFontWeight(100..900)
-                            }
-                        }
+        val fragmentClass = EpubNavigatorFragment::class.java
+        val configuration = EpubNavigatorFragment.Configuration {
+            // Serve the bundled font files and declare them, so the same families as the
+            // subtitle font setting can be selected for the book text.
+            servedAssets += "subtitle-fonts/.*"
+            // Scroll mode should never change chapters on a horizontal swipe.
+            disablePageTurnsWhileScrolling = true
+            // The reader is edge-to-edge with hidden system bars; do not reserve the status bar
+            // area inside the publication.
+            shouldApplyInsetsPadding = false
+            readiumCssRsProperties =
+                RsProperties(maxLineLength = Length.Rem(settings.maxLineLengthRem))
+            SubtitleFonts.bundledFamilyAssets(this@ReaderActivity).forEach { (family, asset) ->
+                addFontFamilyDeclaration(FontFamily(family)) {
+                    addFontFace {
+                        addSource("subtitle-fonts/$asset")
+                        setFontWeight(100..900)
                     }
                 }
-                val paginationListener =
-                    object : EpubNavigatorFragment.PaginationListener {
-                        override fun onPageLoaded() {
-                            updateScrollModePadding()
-                            applyMaxWidthForPage()
-                        }
-
-                        override fun onPageChanged(
-                            pageIndex: Int,
-                            totalPages: Int,
-                            locator: Locator,
-                        ) {
-                            updateScrollModePadding(locator)
-                            applyMaxWidthForPage(locator)
-                        }
-                    }
-                fragmentFactory =
-                    EpubNavigatorFactory(publication)
-                        .createFragmentFactory(
-                            initialLocator = initialLocator,
-                            initialPreferences = epubPreferences,
-                            paginationListener = paginationListener,
-                            configuration = configuration,
-                        )
-            }
-
-            publication.conformsTo(Publication.Profile.PDF) -> {
-                fragmentClass = PdfNavigatorFragment::class.java
-                fragmentFactory =
-                    PdfNavigatorFactory(publication, PdfiumEngineProvider())
-                        .createFragmentFactory(
-                            initialLocator = initialLocator,
-                            initialPreferences = PdfiumPreferences(),
-                        )
-            }
-
-            else -> {
-                fragmentClass = ImageNavigatorFragment::class.java
-                fragmentFactory =
-                    ImageNavigatorFragment.createFactory(
-                        publication = publication,
-                        initialLocator = initialLocator,
-                    )
             }
         }
+        val paginationListener =
+            object : EpubNavigatorFragment.PaginationListener {
+                override fun onPageLoaded() {
+                    updateScrollModePadding()
+                    applyMaxWidthForPage()
+                }
+
+                override fun onPageChanged(
+                    pageIndex: Int,
+                    totalPages: Int,
+                    locator: Locator,
+                ) {
+                    updateScrollModePadding(locator)
+                    applyMaxWidthForPage(locator)
+                }
+            }
+        val fragmentFactory =
+            EpubNavigatorFactory(publication)
+                .createFragmentFactory(
+                    initialLocator = initialLocator,
+                    initialPreferences = epubPreferences,
+                    paginationListener = paginationListener,
+                    configuration = configuration,
+                )
 
         supportFragmentManager.fragmentFactory = fragmentFactory
         supportFragmentManager
@@ -623,14 +593,16 @@ class ReaderActivity : AppCompatActivity() {
                     (locator.locations.totalProgression ?: 0.0) >= 0.999 ||
                         (positions.isNotEmpty() && locator.locations.position == positions.size)
                 if (!markedPlayed && atEnd) {
-                    markedPlayed = true
                     lifecycleScope.launch {
-                        runCatching { repository.markAsPlayed(id) }
-                        appPreferences.sharedPreferences
-                            .edit()
-                            .remove(locatorKey(id))
-                            .remove("reader_page_count_$id")
-                            .apply()
+                        val result = runCatching { repository.markAsPlayed(id) }
+                        if (result.isSuccess) {
+                            markedPlayed = true
+                            appPreferences.sharedPreferences
+                                .edit()
+                                .remove(locatorKey(id))
+                                .remove("reader_page_count_$id")
+                                .apply()
+                        }
                     }
                 }
             }

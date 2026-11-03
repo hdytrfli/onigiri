@@ -17,8 +17,6 @@ import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.models.FindroidEpisode
-import dev.hdytrfli.onigiri.models.FindroidSegment
-import dev.hdytrfli.onigiri.models.FindroidSegmentType
 import dev.hdytrfli.onigiri.player.core.domain.models.PlayerChapter
 import dev.hdytrfli.onigiri.player.core.domain.models.PlayerItem
 import dev.hdytrfli.onigiri.player.core.domain.models.Trickplay
@@ -29,7 +27,6 @@ import dev.hdytrfli.onigiri.player.local.domain.TrackSelectionStore
 import dev.hdytrfli.onigiri.player.local.mpv.MPVPlayer
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
-import dev.hdytrfli.onigiri.settings.domain.Constants
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.ceil
@@ -68,8 +65,6 @@ constructor(
         MutableStateFlow(
             UiState(
                 currentItemTitle = "",
-                currentSegment = null,
-                currentSkipButtonStringRes = R.string.player_controls_skip_intro,
                 currentTrickplay = null,
                 currentChapters = emptyList(),
                 fileLoaded = false,
@@ -89,8 +84,6 @@ constructor(
 
     data class UiState(
         val currentItemTitle: String,
-        val currentSegment: FindroidSegment?,
-        val currentSkipButtonStringRes: Int,
         val currentTrickplay: Trickplay?,
         val currentChapters: List<PlayerChapter>,
         val fileLoaded: Boolean,
@@ -108,15 +101,6 @@ constructor(
     var playWhenReady = true
     private var currentMediaItemIndex = savedStateHandle["mediaItemIndex"] ?: 0
     private var playbackPosition: Long = savedStateHandle["position"] ?: 0
-    private var currentMediaItemSegments: List<FindroidSegment> = emptyList()
-
-    // Segments preferences
-    var segmentsSkipButton: Boolean = false
-    private var segmentsSkipButtonTypes: Set<String> = emptySet()
-    var segmentsSkipButtonDuration: Long = 0L
-    var segmentsAutoSkip: Boolean = false
-    private var segmentsAutoSkipTypes: Set<String> = emptySet()
-    private var segmentsAutoSkipMode: String = "always"
 
     var playbackSpeed: Float = 1f
 
@@ -154,17 +138,6 @@ constructor(
 
     init {
         alwaysPlaySubtitles = appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles)
-
-        segmentsSkipButton = appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButton)
-        segmentsSkipButtonTypes =
-            appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButtonType)
-        segmentsSkipButtonDuration =
-            appPreferences.getValue(appPreferences.playerMediaSegmentsSkipButtonDuration)
-        segmentsAutoSkip = appPreferences.getValue(appPreferences.playerMediaSegmentsAutoSkip)
-        segmentsAutoSkipTypes =
-            appPreferences.getValue(appPreferences.playerMediaSegmentsAutoSkipType)
-        segmentsAutoSkipMode =
-            appPreferences.getValue(appPreferences.playerMediaSegmentsAutoSkipMode)
 
         val audioAttributes =
             AudioAttributes.Builder()
@@ -383,53 +356,6 @@ constructor(
         }
     }
 
-    fun updateCurrentSegment() {
-        Timber.d("Updating current segment")
-        viewModelScope.launch(Dispatchers.Main) {
-            if (currentMediaItemSegments.isEmpty()) {
-                return@launch
-            }
-
-            val milliSeconds = player.currentPosition
-
-            // Get current segment, - 100 milliseconds to avoid showing button after segment ends
-            val currentSegment = currentMediaItemSegments.find { segment ->
-                milliSeconds in segment.startTicks..<(segment.endTicks - 100L)
-            }
-
-            if (currentSegment == null) {
-                // Remove button if not pressed and there is no current segment
-                if (_uiState.value.currentSegment != null) {
-                    _uiState.update { it.copy(currentSegment = null) }
-                }
-                return@launch
-            }
-
-            Timber.tag("SegmentInfo").d("currentSegment: %s", currentSegment)
-
-            if (
-                segmentsAutoSkip &&
-                    segmentsAutoSkipTypes.contains(currentSegment.type.toString()) &&
-                    (segmentsAutoSkipMode == Constants.PlayerMediaSegmentsAutoSkip.ALWAYS ||
-                        (segmentsAutoSkipMode == Constants.PlayerMediaSegmentsAutoSkip.PIP &&
-                            isInPictureInPictureMode))
-            ) {
-                // Auto Skip segment
-                skipSegment(currentSegment)
-            } else if (segmentsSkipButtonTypes.contains(currentSegment.type.toString())) {
-                // Skip Button segment
-                _uiState.update {
-                    it.copy(
-                        currentSegment = currentSegment,
-                        currentSkipButtonStringRes = getSkipButtonTextStringId(currentSegment),
-                    )
-                }
-            } else {
-                _uiState.update { it.copy(currentSegment = null) }
-            }
-        }
-    }
-
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         Timber.d("Playing MediaItem: ${mediaItem?.mediaId}")
         appliedSelectionItemId = null
@@ -480,7 +406,6 @@ constructor(
                                 currentEpisodeId =
                                     if (item.parentIndexNumber != null) it.currentEpisodeId
                                     else null,
-                                currentSegment = null,
                                 currentChapters = item.chapters,
                                 fileLoaded = false,
                             )
@@ -491,10 +416,6 @@ constructor(
                         }
 
                         repository.postPlaybackStart(item.itemId)
-
-                        if (segmentsSkipButton || segmentsAutoSkip) {
-                            getSegments(item.itemId)
-                        }
 
                         if (appPreferences.getValue(appPreferences.playerTrickplay)) {
                             getTrickplay(item)
@@ -761,15 +682,6 @@ constructor(
         }
     }
 
-    private suspend fun getSegments(itemId: UUID) {
-        try {
-            currentMediaItemSegments = repository.getSegments(itemId)
-        } catch (e: Exception) {
-            currentMediaItemSegments = emptyList()
-            Timber.e(e)
-        }
-    }
-
     private suspend fun getTrickplay(item: PlayerItem) {
         val trickplayInfo = item.trickplayInfo ?: return
         Timber.d("Trickplay Resolution: ${trickplayInfo.width}")
@@ -809,45 +721,6 @@ constructor(
             _uiState.update {
                 it.copy(currentTrickplay = Trickplay(trickplayInfo.interval, bitmaps))
             }
-        }
-    }
-
-    fun skipSegment(segment: FindroidSegment) {
-        if (shouldSkipToNextEpisode(segment)) {
-            player.seekToNextMediaItem()
-        } else {
-            player.seekTo(segment.endTicks)
-        }
-        _uiState.update { it.copy(currentSegment = null) }
-    }
-
-    // Check if the outro segment's end time is within n milliseconds of the player's total duration
-    private fun shouldSkipToNextEpisode(segment: FindroidSegment): Boolean {
-        return if (segment.type == FindroidSegmentType.OUTRO && player.hasNextMediaItem()) {
-            val segmentEndTimeMillis = segment.endTicks
-            val playerDurationMillis = player.duration
-            val thresholdMillis =
-                playerDurationMillis -
-                    appPreferences.getValue(appPreferences.playerMediaSegmentsNextEpisodeThreshold)
-
-            segmentEndTimeMillis > thresholdMillis
-        } else {
-            false
-        }
-    }
-
-    private fun getSkipButtonTextStringId(segment: FindroidSegment): Int {
-        return when (shouldSkipToNextEpisode(segment)) {
-            true -> R.string.player_controls_next_episode
-            false ->
-                when (segment.type) {
-                    FindroidSegmentType.INTRO -> R.string.player_controls_skip_intro
-                    FindroidSegmentType.OUTRO -> R.string.player_controls_skip_outro
-                    FindroidSegmentType.RECAP -> R.string.player_controls_skip_recap
-                    FindroidSegmentType.COMMERCIAL -> R.string.player_controls_skip_commercial
-                    FindroidSegmentType.PREVIEW -> R.string.player_controls_skip_preview
-                    else -> R.string.player_controls_skip_unknown
-                }
         }
     }
 

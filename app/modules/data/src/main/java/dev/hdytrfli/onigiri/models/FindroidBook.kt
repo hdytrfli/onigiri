@@ -10,8 +10,8 @@ import org.jellyfin.sdk.model.api.MediaType
 import org.jellyfin.sdk.model.api.PlayAccess
 
 /**
- * A Jellyfin book rendered in the in-app reader. Only publication formats Readium can open are
- * mapped (EPUB, PDF, CBZ); audiobooks are a different item kind and are never mapped here.
+ * A Jellyfin book rendered in the in-app reader. Only EPUB is supported by the reader; other
+ * publication formats are still listed so the detail page can explain that they cannot be opened.
  */
 @Serializable
 @SerialName("book")
@@ -38,6 +38,8 @@ data class FindroidBook(
     val genres: List<String> = emptyList(),
     val studios: List<String> = emptyList(),
     val people: List<FindroidItemPerson> = emptyList(),
+    /** Whether the in-app reader can open this book. */
+    val isReadable: Boolean = true,
 ) : FindroidItem
 
 suspend fun BaseItemDto.toFindroidBook(
@@ -74,11 +76,15 @@ suspend fun BaseItemDto.toFindroidBook(
         genres = genres ?: emptyList(),
         studios = studios?.mapNotNull { it.name } ?: emptyList(),
         people = people?.map { it.toFindroidPerson(jellyfinRepository) } ?: emptyList(),
+        isReadable = isReadableBook(),
     )
 }
 
-/** The publication formats the in-app reader supports. */
-private val READABLE_BOOK_CONTAINERS = setOf("epub", "pdf", "cbz", "zip")
+/** Publication formats that should still appear in the books list. */
+private val LISTABLE_BOOK_CONTAINERS = setOf("epub", "pdf", "cbz", "zip")
+
+/** The only publication format the in-app reader supports. */
+private val EPUB_BOOK_CONTAINERS = setOf("epub")
 
 /** Containers of audiobooks that a server might still report as a Book item. */
 private val AUDIOBOOK_CONTAINERS = setOf("m4b", "m4a", "mp3", "flac", "ogg", "opus", "wav", "aac")
@@ -96,15 +102,23 @@ fun BaseItemDto.isAudiobookItem(): Boolean =
     mediaType == MediaType.AUDIO || bookContainers().any { it in AUDIOBOOK_CONTAINERS }
 
 /**
- * Whether this book is in a format Readium can open. Jellyfin reports the container on the item and
- * on its media sources; the file extension is the last fallback. Some servers omit all of them for
- * books, in which case the item is kept and the reader reports an unsupported file.
+ * Whether this book is in a format the in-app reader can open. Jellyfin reports the container on
+ * the item and on its media sources; the file extension is the last fallback. Some servers omit all
+ * of them for books, in which case the item is kept and the detail page marks it unsupported.
  */
 fun BaseItemDto.isReadableBook(): Boolean {
     val candidates = bookContainers()
     if (isAudiobookItem()) return false
     if (candidates.isEmpty()) return true
-    return candidates.any { it in READABLE_BOOK_CONTAINERS }
+    return candidates.any { it in EPUB_BOOK_CONTAINERS }
+}
+
+/** Whether this is a book the app should list, even if the reader cannot open it. */
+fun BaseItemDto.isListableBook(): Boolean {
+    val candidates = bookContainers()
+    if (isAudiobookItem()) return false
+    if (candidates.isEmpty()) return true
+    return candidates.any { it in LISTABLE_BOOK_CONTAINERS }
 }
 
 suspend fun FindroidBookDto.toFindroidBook(
@@ -132,5 +146,6 @@ suspend fun FindroidBookDto.toFindroidBook(
         genres = emptyList(),
         studios = studios.split("\u0001").filter { it.isNotEmpty() },
         people = emptyList(),
+        isReadable = !isAudiobook,
     )
 }

@@ -10,7 +10,6 @@ import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
-import dev.hdytrfli.onigiri.models.FindroidSegment
 import dev.hdytrfli.onigiri.models.FindroidShow
 import dev.hdytrfli.onigiri.models.FindroidSource
 import dev.hdytrfli.onigiri.models.RecommendationCategory
@@ -24,7 +23,6 @@ import dev.hdytrfli.onigiri.models.toFindroidItem
 import dev.hdytrfli.onigiri.models.toFindroidMovie
 import dev.hdytrfli.onigiri.models.toFindroidPerson
 import dev.hdytrfli.onigiri.models.toFindroidSeason
-import dev.hdytrfli.onigiri.models.toFindroidSegment
 import dev.hdytrfli.onigiri.models.toFindroidShow
 import dev.hdytrfli.onigiri.models.toFindroidSource
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
@@ -443,27 +441,6 @@ class JellyfinRepositoryImpl(
 
     override suspend fun getDownload(itemId: UUID): ByteArray =
         withContext(Dispatchers.IO) { jellyfinApi.libraryApi.getDownload(itemId).content }
-
-    override suspend fun getSegments(itemId: UUID): List<FindroidSegment> =
-        withContext(Dispatchers.IO) {
-            val databaseSegments = database.getSegments(itemId).map { it.toFindroidSegment() }
-
-            if (databaseSegments.isNotEmpty()) {
-                return@withContext databaseSegments
-            }
-
-            try {
-                val apiSegments =
-                    jellyfinApi.mediaSegmentsApi.getItemSegments(itemId).content.items.map {
-                        it.toFindroidSegment()
-                    }
-
-                return@withContext apiSegments
-            } catch (e: Exception) {
-                Timber.e(e)
-                return@withContext emptyList()
-            }
-        }
 
     override suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray? =
         withContext(Dispatchers.IO) {

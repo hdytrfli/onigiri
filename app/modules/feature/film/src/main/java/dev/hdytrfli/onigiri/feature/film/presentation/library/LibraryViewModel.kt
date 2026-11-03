@@ -120,7 +120,7 @@ constructor(
         _state.value =
             _state.value.copy(
                 items = items,
-                isLoading = entry.isRefreshing,
+                isLoading = entry.isRefreshing || (entry.data == null && entry.error == null),
                 error = entry.error as? Exception,
             )
     }

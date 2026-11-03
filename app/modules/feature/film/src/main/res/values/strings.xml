@@ -21,4 +21,5 @@
     <string name="book_info_author">Author</string>
     <string name="book_info_publisher">Publisher</string>
     <string name="author_title">Author</string>
+    <string name="book_unsupported">Not supported</string>
 </resources>

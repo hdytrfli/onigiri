@@ -158,7 +158,7 @@ constructor(
                         } else {
                             emptyMap()
                         },
-                    isLoading = entry.isRefreshing,
+                    isLoading = entry.isRefreshing || (entry.data == null && entry.error == null),
                     error = entry.error as? Exception,
                 )
             return
@@ -172,7 +172,7 @@ constructor(
                     } else {
                         mapOf((cache.libraries.firstOrNull()?.id ?: UUID(0, 0)) to cache.books)
                     },
-                isLoading = entry.isRefreshing,
+                isLoading = entry.isRefreshing || (entry.data == null && entry.error == null),
                 error = entry.error as? Exception,
             )
     }

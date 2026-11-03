@@ -7,7 +7,6 @@ import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
-import dev.hdytrfli.onigiri.models.FindroidSegment
 import dev.hdytrfli.onigiri.models.FindroidShow
 import dev.hdytrfli.onigiri.models.FindroidSource
 import dev.hdytrfli.onigiri.models.RecommendationCategory
@@ -145,9 +144,6 @@ class RoutingJellyfinRepository(
         current().getStreamUrl(itemId, mediaSourceId)
 
     override suspend fun getDownload(itemId: UUID): ByteArray = current().getDownload(itemId)
-
-    override suspend fun getSegments(itemId: UUID): List<FindroidSegment> =
-        current().getSegments(itemId)
 
     override suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray? =
         current().getTrickplayData(itemId, width, index)

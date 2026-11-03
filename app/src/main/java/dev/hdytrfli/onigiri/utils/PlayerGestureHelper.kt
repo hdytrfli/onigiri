@@ -29,7 +29,6 @@ import dev.hdytrfli.onigiri.PlayerActivity
 import dev.hdytrfli.onigiri.core.Constants
 import dev.hdytrfli.onigiri.isControlsLocked
 import dev.hdytrfli.onigiri.isVolumeBrightnessLocked
-import dev.hdytrfli.onigiri.player.core.domain.models.PlayerChapter
 import dev.hdytrfli.onigiri.player.core.domain.models.Trickplay
 import dev.hdytrfli.onigiri.player.local.R
 import dev.hdytrfli.onigiri.player.local.mpv.MPVPlayer
@@ -110,13 +109,7 @@ class PlayerGestureHelper(
                     // Stop long press gesture when more than 1 pointer
                     if (currentNumberOfPointers > 1) return
 
-                    // This is a temporary solution for chapter skipping.
-                    // TODO: Remove this after implementing #636
-                    if (appPreferences.getValue(appPreferences.playerGesturesChapterSkip)) {
-                        handleChapterSkip(e)
-                    } else {
-                        enableSpeedIncrease()
-                    }
+                    enableSpeedIncrease()
                 }
 
                 override fun onDoubleTap(e: MotionEvent): Boolean {
@@ -158,10 +151,12 @@ class PlayerGestureHelper(
             if (it.isPlaying) {
                 lastPlaybackSpeed = rampingSpeed ?: it.playbackParameters.speed
                 rampPlaybackSpeed(playbackSpeedIncrease)
-                activity.binding.progressScrubberTrickplay.visibility = View.GONE
-                activity.binding.progressScrubberText.text =
+                activity.binding.progressScrubberLayout.removeCallbacks(
+                    hideGestureProgressOverlayAction
+                )
+                activity.showPersistentPlayerOverlayMessage(
                     playerView.context.getString(R.string.player_speed_up)
-                activity.binding.progressScrubberLayout.visibility = View.VISIBLE
+                )
             }
         }
     }
@@ -208,42 +203,6 @@ class PlayerGestureHelper(
     /** Applies [value] (0..1) to the player window's brightness (app-local, remembered). */
     private fun applyBrightness(value: Float) {
         activity.window.attributes = activity.window.attributes.apply { screenBrightness = value }
-    }
-
-    private fun handleChapterSkip(e: MotionEvent) {
-        if (isControlsLocked) {
-            return
-        }
-
-        val viewWidth = playerView.measuredWidth
-        val areaWidth = viewWidth / 5 // Divide the view into 5 parts: 2:1:2
-
-        // Define the areas and their boundaries
-        val leftmostAreaStart = 0
-        val middleAreaStart = areaWidth * 2
-        val rightmostAreaStart = middleAreaStart + areaWidth
-
-        when (e.x.toInt()) {
-            in leftmostAreaStart until middleAreaStart -> {
-                activity.viewModel.seekToPreviousChapter()?.let { chapter ->
-                    displayChapter(chapter)
-                }
-            }
-            in rightmostAreaStart until viewWidth -> {
-                if (activity.viewModel.isLastChapter()) {
-                    playerView.player?.seekToNextMediaItem()
-                    return
-                }
-                activity.viewModel.seekToNextChapter()?.let { chapter -> displayChapter(chapter) }
-            }
-            else -> return
-        }
-    }
-
-    private fun displayChapter(chapter: PlayerChapter) {
-        activity.binding.progressScrubberTrickplay.visibility = View.GONE
-        activity.binding.progressScrubberLayout.visibility = View.VISIBLE
-        activity.binding.progressScrubberText.text = chapter.name ?: ""
     }
 
     private fun fastForward() {
@@ -726,8 +685,7 @@ class PlayerGestureHelper(
                         ) {
                             vbGestureDetector.onTouchEvent(event)
                         }
-                        if (appPreferences.getValue(appPreferences.playerGesturesSeek))
-                            seekGestureDetector.onTouchEvent(event)
+                        seekGestureDetector.onTouchEvent(event)
                     }
                     2 -> {
                         if (appPreferences.getValue(appPreferences.playerGesturesDynamicZoom)) {

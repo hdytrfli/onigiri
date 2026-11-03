@@ -7,7 +7,6 @@ import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
-import dev.hdytrfli.onigiri.models.FindroidSegment
 import dev.hdytrfli.onigiri.models.FindroidShow
 import dev.hdytrfli.onigiri.models.FindroidSource
 import dev.hdytrfli.onigiri.models.RecommendationCategory
@@ -97,8 +96,6 @@ interface JellyfinRepository {
 
     /** Downloads the original file through Jellyfin's item download endpoint. */
     suspend fun getDownload(itemId: UUID): ByteArray
-
-    suspend fun getSegments(itemId: UUID): List<FindroidSegment>
 
     suspend fun getTrickplayData(itemId: UUID, width: Int, index: Int): ByteArray?
 

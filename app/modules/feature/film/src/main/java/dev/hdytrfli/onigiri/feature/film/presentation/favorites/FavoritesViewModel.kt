@@ -50,7 +50,8 @@ constructor(
                             ListDisplayField.fromKeys(
                                 appPreferences.getValue(appPreferences.listDisplayFields)
                             ),
-                        isLoading = entry.isRefreshing,
+                        isLoading =
+                            entry.isRefreshing || (entry.data == null && entry.error == null),
                         error = entry.error as? Exception,
                     )
             }

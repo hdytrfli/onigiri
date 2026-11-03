@@ -18,7 +18,7 @@ interface.
 ### Reading
 
 - A dedicated Books tab for books and audiobooks
-- In-app reading for EPUB, PDF, and CBZ files using Readium
+- In-app EPUB reading using Readium
 - Reading progress and current position
 - Hierarchical table of contents
 - Pull-to-chapter navigation in scroll mode
@@ -33,9 +33,9 @@ interface.
 - Password or Quick Connect sign-in
 - Optional four-digit profile PIN
 - Profile picker with saved sessions and persistent logout
-- Profile switching that clears app caches and reader state while keeping downloads
-- Add and remove profiles inside the app
-- Profile controls that respect Jellyfin administrator permissions
+- Profile switching that clears artwork/query caches and reader state while keeping downloads
+- Add and remove local profiles inside the app
+- Admin-aware profile controls
 
 ### Interface
 
@@ -44,29 +44,27 @@ interface.
 - Immersive detail pages and consistent page transitions
 - Search, sorting, and display controls for media and book lists
 - Shared dialogs, fields, buttons, and menus across screens
-- Configurable grids, artwork ratios, and content spacing
+- Configurable grids and artwork ratios
 
 ## Library and playback
 
 - Movies, series, books, and audiobooks from one Jellyfin server
 - Native playback for movies and episodes
-- Direct play only; media is not transcoded by the app
-- ExoPlayer with FFmpeg audio decoding
-- Optional mpv playback for additional formats
+- The app does not transcode media itself; playback uses the server-provided stream
+- mpv-based playback with bundled FFmpeg codecs
 - Picture-in-picture mode
 - Chapter markers and chapter navigation gestures
 - Trickplay thumbnails on supported servers
-- Media segment skipping and auto-skip
-- Embedded and external subtitles, including SRT, VTT, SSA/ASS, PGSSUB, and DVDSUB
+- Embedded subtitles plus external SRT/ASS subtitle delivery
 - Preferred audio and subtitle language selection
 
 ## Downloads and offline use
 
 - Download movies, episodes, and books
 - Select the storage location for downloads
-- Background download progress
+- Background download progress for video
 - Offline mode for browsing and playing downloaded content
-- Download state and progress on detail pages
+- Download state on detail pages and progress for video downloads
 
 ## Requirements
 
@@ -74,13 +72,12 @@ interface.
 - A Jellyfin server
 - Network access to the server unless offline mode is enabled
 - Jellyfin 10.9 or newer for trickplay
-- Jellyfin 10.10 or newer for media segments
 
 ## Current limitations
 
 - Audiobooks are listed in the library, but audiobook playback is not yet available.
 - The app connects to one Jellyfin server at a time.
-- Video playback is direct play only.
+- The app does not transcode media itself; playback uses the server-provided stream.
 
 ## Links
 
@@ -96,5 +93,5 @@ Findroid+ is an independent fork and is not affiliated with the Jellyfin project
 project. The original Findroid project and its contributors remain the foundation of this work.
 Playback, library browsing, and much of the application architecture originate there.
 
-This project also depends on the Jellyfin Kotlin SDK, Readium, AndroidX Media3, mpv, and other
-open-source libraries.
+This project also depends on the Jellyfin Kotlin SDK, Readium, AndroidX Media3
+(player UI and session), mpv, and other open-source libraries.

@@ -1,5 +1,9 @@
 package dev.hdytrfli.onigiri.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -23,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.ui.theme.spacings
+import kotlinx.coroutines.launch
 
 /**
  * A page's toolbar: a segmented set of pill tabs (shadcn's default tabs style) with optional
@@ -171,6 +177,26 @@ private fun PillTabs(
     // is drawn in that same space, so it follows the tabs while the row is scrolled.
     val tabBounds = remember { mutableStateMapOf<Int, Rect>() }
     val selectedBounds = tabBounds[selectedIndex]
+
+    val pillLeft = remember { Animatable(0f) }
+    val pillWidth = remember { Animatable(0f) }
+    var hasPositionedPill by remember { mutableStateOf(false) }
+
+    LaunchedEffect(selectedBounds) {
+        val bounds = selectedBounds ?: return@LaunchedEffect
+        val animationSpec = tween<Float>(durationMillis = 220, easing = FastOutSlowInEasing)
+        if (hasPositionedPill) {
+            launch { pillLeft.animateTo(bounds.left, animationSpec) }
+            launch { pillWidth.animateTo(bounds.width, animationSpec) }
+        } else {
+            // Tab bounds are only known after the first layout pass: snap to the selection instead
+            // of sliding in from the left edge on first composition.
+            pillLeft.snapTo(bounds.left)
+            pillWidth.snapTo(bounds.width)
+            hasPositionedPill = true
+        }
+    }
+
     val density = LocalDensity.current
 
     Box(
@@ -182,11 +208,12 @@ private fun PillTabs(
                 .padding(4.dp)
                 .horizontalScroll(rememberScrollState())
     ) {
-        // Drawn first so it sits behind the labels. The selection updates instantly with the tab.
+        // Drawn first so it sits behind the labels. Its offset and width are animated between the
+        // previously selected tab and the new one, measured from the tab bounds above.
         Box(
             modifier =
-                Modifier.offset(x = with(density) { (selectedBounds?.left ?: 0f).toDp() })
-                    .width(with(density) { (selectedBounds?.width ?: 0f).toDp() })
+                Modifier.offset(x = with(density) { pillLeft.value.toDp() })
+                    .width(with(density) { pillWidth.value.toDp() })
                     .fillMaxHeight()
                     .shadow(elevation = 1.dp, shape = CircleShape)
                     .background(
@@ -202,12 +229,16 @@ private fun PillTabs(
         ) {
             tabs.forEachIndexed { index, title ->
                 val selected = index == selectedIndex
-                val contentColor =
-                    if (selected) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+                val contentColor by
+                    animateColorAsState(
+                        targetValue =
+                            if (selected) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        label = "tab-content",
+                    )
 
                 Box(
                     modifier =

@@ -243,6 +243,9 @@ interface ServerDatabaseDao {
     @Query("SELECT * FROM userdata WHERE userId = :userId AND itemId = :itemId AND toBeSynced = 1")
     suspend fun getUserDataToBeSynced(userId: UUID, itemId: UUID): FindroidUserDataDto?
 
+    @Query("SELECT * FROM userdata WHERE userId = :userId AND toBeSynced = 1")
+    suspend fun getUserDataToBeSynced(userId: UUID): List<FindroidUserDataDto>
+
     @Query(
         "UPDATE userdata SET toBeSynced = :toBeSynced WHERE itemId = :itemId AND userId = :userId"
     )

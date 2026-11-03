@@ -85,8 +85,10 @@ fun BookDetailScreen(
             else -> {
                 val item = state.item!!
                 val progress = state.readingProgress
+                val readable = item.isReadable
                 val readLabel =
                     when {
+                        !readable -> stringResource(R.string.book_unsupported)
                         item.played -> "Read"
                         state.pagesLeft > 0 -> "${state.pagesLeft} pages left"
                         else -> "Read"
@@ -115,17 +117,18 @@ fun BookDetailScreen(
                         ItemButtonsBar(
                             item = item,
                             onPlayClick = { startFromBeginning ->
-                                onRead(item, startFromBeginning)
+                                if (readable) onRead(item, startFromBeginning)
                             },
                             onMarkAsPlayedClick = { viewModel.setPlayed(item.id, !item.played) },
                             onMarkAsFavoriteClick = {
                                 viewModel.setFavorite(item.id, !item.favorite)
                             },
+                            canPlay = readable,
                             playLabel = readLabel,
                             playIconRes = CoreR.drawable.ic_book_open,
-                            showRestartButton = true,
-                            hasProgress = progress > 0f && !item.played,
-                            forcePlayEnabled = true,
+                            showRestartButton = readable,
+                            hasProgress = readable && progress > 0f && !item.played,
+                            forcePlayEnabled = readable,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))

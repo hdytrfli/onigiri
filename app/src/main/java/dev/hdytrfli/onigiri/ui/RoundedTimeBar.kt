@@ -23,6 +23,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private var currentPosition: Long = 0L
     private var currentDuration: Long = 0L
     private var currentBuffered: Long = 0L
+    private var chapterPositions: LongArray = LongArray(0)
+
+    fun setChapterMarkers(positions: LongArray) {
+        if (chapterPositions.contentEquals(positions)) return
+        chapterPositions = positions
+        invalidate()
+    }
 
     // While the user drags the scrubber, draw from the finger position instead of the playback
     // position (which only updates after the interaction ends).
@@ -167,6 +174,27 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         }
 
         paint.style = Paint.Style.FILL
+        paint.color = scrubberColor
+        // Chapter ticks sit above the track but below the handle.
+        if (currentDuration > 0L && chapterPositions.isNotEmpty()) {
+            paint.color =
+                Color.argb(
+                    220,
+                    Color.red(scrubberColor),
+                    Color.green(scrubberColor),
+                    Color.blue(scrubberColor),
+                )
+            val markerRadius = 2f * density
+            chapterPositions.forEach { chapterPosition ->
+                val chapterX =
+                    trackStart +
+                        trackWidth * (chapterPosition.toFloat() / currentDuration).coerceIn(0f, 1f)
+                if (chapterX > trackStart + markerRadius && chapterX < trackEnd - markerRadius) {
+                    canvas.drawCircle(chapterX, centerY, markerRadius, paint)
+                }
+            }
+        }
+
         paint.color = scrubberColor
         // An explicit pill-shaped rect: a round-capped line gets its caps clipped by the View.
         val handleHalfWidth = HANDLE_WIDTH_DP / 2f * density

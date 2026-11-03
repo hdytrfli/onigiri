@@ -910,23 +910,6 @@ constructor(
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
-                                                        R.string.player_gestures_seek,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_seek_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesSeek,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_chapter_skip,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .player_gestures_chapter_skip_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesChapterSkip,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
                                                         R.string.player_start_maximized,
                                                     descriptionStringRes =
                                                         R.string.player_start_maximized_summary,
@@ -967,150 +950,7 @@ constructor(
                                                         R.array.player_controls_timeout_options,
                                                     optionValues =
                                                         R.array.player_controls_timeout_values,
-                                                ),
-                                                PreferenceLongInput(
-                                                    nameStringResource =
-                                                        R.string.seek_back_increment,
-                                                    descriptionStringRes =
-                                                        R.string.seek_back_increment_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerSeekBackInc,
-                                                    suffixRes = R.string.ms,
-                                                ),
-                                                PreferenceLongInput(
-                                                    nameStringResource =
-                                                        R.string.seek_forward_increment,
-                                                    descriptionStringRes =
-                                                        R.string.seek_forward_increment_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerSeekForwardInc,
-                                                    suffixRes = R.string.ms,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.pref_player_chapter_markers,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_chapter_markers_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerChapterMarkers,
-                                                ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.media_segments,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_skip_button,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_skip_button_summary,
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerMediaSegmentsSkipButton,
-                                                ),
-                                                PreferenceMultiSelect(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_skip_button_type,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_skip_button_type_summary,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences
-                                                                .playerMediaSegmentsSkipButton
-                                                        ),
-                                                    optionIcon = OptionIcon.Segment,
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerMediaSegmentsSkipButtonType,
-                                                    options = R.array.media_segments_type,
-                                                    optionValues =
-                                                        R.array.media_segments_type_values,
-                                                ),
-                                                PreferenceLongInput(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_skip_button_duration,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_skip_button_duration_summary,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences
-                                                                .playerMediaSegmentsSkipButton
-                                                        ),
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerMediaSegmentsSkipButtonDuration,
-                                                    suffixRes = R.string.seconds,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_auto_skip,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_auto_skip_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerMediaSegmentsAutoSkip,
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_auto_skip_mode,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_auto_skip_mode_summary,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences
-                                                                .playerMediaSegmentsAutoSkip
-                                                        ),
-                                                    optionIcon = OptionIcon.Segment,
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerMediaSegmentsAutoSkipMode,
-                                                    options = R.array.media_segments_auto_skip,
-                                                    optionValues =
-                                                        R.array.media_segments_auto_skip_values,
-                                                ),
-                                                PreferenceMultiSelect(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_auto_skip_type,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_auto_skip_type_summary,
-                                                    dependencies =
-                                                        listOf(
-                                                            appPreferences
-                                                                .playerMediaSegmentsAutoSkip
-                                                        ),
-                                                    optionIcon = OptionIcon.Segment,
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerMediaSegmentsAutoSkipType,
-                                                    options = R.array.media_segments_type,
-                                                    optionValues =
-                                                        R.array.media_segments_type_values,
-                                                ),
-                                                PreferenceLongInput(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_media_segments_next_episode_threshold,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_media_segments_next_episode_threshold_summary,
-                                                    backendPreference =
-                                                        appPreferences
-                                                            .playerMediaSegmentsNextEpisodeThreshold,
-                                                    suffixRes = R.string.ms,
-                                                ),
+                                                )
                                             ),
                                     ),
                                     PreferenceGroup(
@@ -1554,17 +1394,6 @@ constructor(
     fun loadPreferences(indexes: List<Int> = emptyList()) {
         lastIndexes = indexes
         viewModelScope.launch {
-            val isMpvBackend = true
-
-            // Hide the whole mpv section (and its subtitle page) unless mpv is
-            // the active player backend.
-            val isHiddenMpvDestination =
-                indexes.contains(R.string.mpv_options) || indexes.contains(R.string.mpv_subtitles)
-            if (!isMpvBackend && isHiddenMpvDestination) {
-                _state.emit(_state.value.copy(preferenceGroups = emptyList()))
-                return@launch
-            }
-
             val isRootLevel = indexes.isEmpty()
 
             var preferences = topLevelPreferences()
@@ -1589,14 +1418,6 @@ constructor(
                         preferenceGroup.copy(
                             preferences =
                                 preferenceGroup.preferences
-                                    .filter {
-                                        if (!isMpvBackend && it is PreferenceCategory) {
-                                            it.nameStringResource != R.string.mpv_options &&
-                                                it.nameStringResource != R.string.mpv_subtitles
-                                        } else {
-                                            true
-                                        }
-                                    }
                                     .filter { preference ->
                                         !preference.hideWhenDisabled ||
                                             preference.dependencies.all {

@@ -162,7 +162,7 @@
             android:background="@drawable/transparent_circle_background"
             android:padding="16dp"
             android:src="@drawable/ic_rewind"
-            android:contentDescription="@string/player_controls_rewind"
+            android:contentDescription="@string/player_controls_previous_chapter"
             app:tint="@android:color/white" />
 
         <ImageButton
@@ -184,7 +184,7 @@
             android:background="@drawable/transparent_circle_background"
             android:padding="16dp"
             android:src="@drawable/ic_fast_forward"
-            android:contentDescription="@string/player_controls_fast_forward"
+            android:contentDescription="@string/player_controls_next_chapter"
             app:tint="@android:color/white" />
 
         <ImageButton

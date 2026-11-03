@@ -216,6 +216,7 @@ class SetupRepositoryImpl(
 
         database.insertUser(user)
         database.updateServerCurrentUser(authenticationResult.serverId!!, user.id)
+        appPreferences.setValue(appPreferences.currentUser, user.id.toString())
         appPreferences.setProfileAdmin(
             serverId = authenticationResult.serverId!!,
             userId = user.id,
@@ -252,6 +253,7 @@ class SetupRepositoryImpl(
         val user = database.getUser(userId) ?: return
         server.currentUserId = user.id
         database.updateServer(server)
+        appPreferences.setValue(appPreferences.currentUser, user.id.toString())
 
         jellyfinApi.apply {
             api.update(accessToken = user.accessToken)
@@ -263,6 +265,7 @@ class SetupRepositoryImpl(
         val server = getCurrentServer() ?: return
         server.currentUserId = null
         database.updateServer(server)
+        appPreferences.setValue(appPreferences.currentUser, null)
         jellyfinApi.apply {
             api.update(accessToken = null)
             userId = null
