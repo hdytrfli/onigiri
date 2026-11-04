@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -21,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +35,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.Direction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverlay
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCard
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SortByDialog
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
@@ -205,7 +208,15 @@ fun BooksScreen(
                             verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         ) {
                             if (items.isNotEmpty()) {
-                                section(title = sectionTitle) {
+                                section(
+                                    title = sectionTitle,
+                                    trailingContent = {
+                                        ItemCountBadge(
+                                            count = items.size,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                    },
+                                ) {
                                     items(items = items, key = { it.id }) { item ->
                                         ItemCard(
                                             item = item,

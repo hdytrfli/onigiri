@@ -522,7 +522,9 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             onAlbumClick =
                 resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
             navigateToEditImages =
-                resumedAction { itemId -> navigator.navigate(EditImagesRoute(itemId = itemId)) },
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId, music = true))
+                },
             navigateToIdentify =
                 resumedAction { itemId ->
                     navigator.navigate(IdentifyRoute(itemId = itemId, musicKind = "artist"))
@@ -536,7 +538,9 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             onArtistClick =
                 resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
             navigateToEditImages =
-                resumedAction { itemId -> navigator.navigate(EditImagesRoute(itemId = itemId)) },
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId, music = true))
+                },
             navigateToIdentify =
                 resumedAction { itemId ->
                     navigator.navigate(IdentifyRoute(itemId = itemId, musicKind = "album"))
@@ -716,7 +720,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         IdentifyScreen(
             itemId = UUID.fromString(key.itemId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
-            onSearch = { query, year, imdbId, tmdbId, tvdbId ->
+            musicKind = key.musicKind,
+            onSearch = { query, year, imdbId, tmdbId, tvdbId, musicBrainzId, discogsId ->
                 navigator.navigate(
                     IdentifyResultsRoute(
                         itemId = key.itemId,
@@ -725,6 +730,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         imdbId = imdbId,
                         tmdbId = tmdbId,
                         tvdbId = tvdbId,
+                        musicBrainzId = musicBrainzId,
+                        discogsId = discogsId,
                         series = key.series,
                         musicKind = key.musicKind,
                     )
@@ -740,6 +747,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             imdbId = key.imdbId,
             tmdbId = key.tmdbId,
             tvdbId = key.tvdbId,
+            musicBrainzId = key.musicBrainzId,
+            discogsId = key.discogsId,
             series = key.series,
             musicKind = key.musicKind,
             navigateBack = dropUnlessResumed { navigator.goBack() },
@@ -753,6 +762,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<EditImagesRoute> { key ->
         EditImagesScreen(
             itemId = UUID.fromString(key.itemId),
+            music = key.music,
             navigateBack = dropUnlessResumed { navigator.goBack() },
             navigateToImageSearch =
                 resumedAction { type, isEpisode ->
@@ -761,6 +771,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                             itemId = key.itemId,
                             type = type.name,
                             isEpisode = isEpisode,
+                            music = key.music,
                         )
                     )
                 },
@@ -771,6 +782,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             itemId = UUID.fromString(key.itemId),
             type = ImageType.valueOf(key.type),
             isEpisode = key.isEpisode,
+            music = key.music,
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }

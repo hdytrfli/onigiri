@@ -30,9 +30,17 @@ fun imageBusyKey(type: ImageType, index: Int?): String = "${type.name}:${index ?
  * square (Disc, Box) shapes are kept; everything else is shown at 16:9. An episode's Primary image
  * is a 16:9 still rather than a poster, so [isEpisode] flips that one case.
  */
-fun imageTypeAspectRatio(type: ImageType, isEpisode: Boolean = false): Float =
+fun imageTypeAspectRatio(
+    type: ImageType,
+    isEpisode: Boolean = false,
+    isMusic: Boolean = false,
+): Float =
     if (type == ImageType.PRIMARY) {
-        if (isEpisode) 16f / 9f else 2f / 3f
+        when {
+            isMusic -> 1f
+            isEpisode -> 16f / 9f
+            else -> 2f / 3f
+        }
     } else {
         when (type) {
             ImageType.DISC,

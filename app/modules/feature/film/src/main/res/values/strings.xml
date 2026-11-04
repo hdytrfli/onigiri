@@ -35,6 +35,13 @@
     <string name="music_songs">Songs</string>
     <string name="music_artists">Artists</string>
     <string name="music_albums">Albums</string>
+    <string name="music_all_songs">All songs</string>
+    <string name="music_all_artists">All artists</string>
+    <string name="music_all_albums">All albums</string>
+    <string name="music_artist_label">Artist</string>
+    <string name="music_year_label">Year</string>
+    <string name="music_songs_label">Songs</string>
+    <string name="music_runtime_label">Runtime</string>
     <string name="music_context_songs">songs</string>
     <string name="music_context_artists">artists</string>
     <string name="music_context_albums">albums</string>

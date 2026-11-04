@@ -7,6 +7,7 @@ import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import org.jellyfin.sdk.api.client.HttpClientOptions
+import org.jellyfin.sdk.api.client.extensions.artistsApi
 import org.jellyfin.sdk.api.client.extensions.brandingApi
 import org.jellyfin.sdk.api.client.extensions.devicesApi
 import org.jellyfin.sdk.api.client.extensions.genresApi
@@ -69,6 +70,7 @@ class JellyfinApi(
         )
     var userId: UUID? = null
 
+    val artistsApi = api.artistsApi
     val brandingApi = api.brandingApi
     val devicesApi = api.devicesApi
     val genresApi = api.genresApi

@@ -63,13 +63,14 @@ data class IdentifyRoute(
     val musicKind: String? = null,
 ) : NavKey
 
-@Serializable data class EditImagesRoute(val itemId: String) : NavKey
+@Serializable data class EditImagesRoute(val itemId: String, val music: Boolean = false) : NavKey
 
 @Serializable
 data class EditImageSearchRoute(
     val itemId: String,
     val type: String,
     val isEpisode: Boolean = false,
+    val music: Boolean = false,
 ) : NavKey
 
 @Serializable
@@ -80,6 +81,8 @@ data class IdentifyResultsRoute(
     val imdbId: String,
     val tmdbId: String,
     val tvdbId: String,
+    val musicBrainzId: String = "",
+    val discogsId: String = "",
     val series: Boolean = false,
     val musicKind: String? = null,
 ) : NavKey

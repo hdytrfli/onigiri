@@ -1,6 +1,5 @@
 package dev.hdytrfli.onigiri.feature.film.presentation.music
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,13 +7,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -24,23 +23,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailActionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
+import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTitle
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
+import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
-import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
@@ -88,7 +85,10 @@ private fun AlbumDetailLayout(
     onIdentifyApplied: () -> Unit,
 ) {
     val safePadding = rememberSafePadding()
-    val gutter = MaterialTheme.spacings.gutter
+    val paddingStart = safePadding.start + MaterialTheme.spacings.gutter
+    val paddingEnd = safePadding.end + MaterialTheme.spacings.gutter
+    val paddingBottom = safePadding.bottom + MaterialTheme.spacings.gutter
+    val listState = rememberLazyListState()
     val album = state.album
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -103,36 +103,106 @@ private fun AlbumDetailLayout(
                 )
             album != null ->
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = safePadding.bottom + gutter),
+                    contentPadding = PaddingValues(bottom = paddingBottom),
                 ) {
                     item {
-                        AlbumHero(
-                            album = album,
-                            onArtistClick = onArtistClick,
-                        )
+                        MusicDetailHeader(
+                            images = album.images,
+                            lazyListState = listState,
+                        ) {
+                            ItemTitle(
+                                title = album.name,
+                                logoUri = album.images.logo,
+                                modifier =
+                                    Modifier.align(Alignment.BottomStart)
+                                        .padding(start = paddingStart, end = paddingEnd),
+                            )
+                        }
+                    }
+
+                    item {
+                        Column(
+                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd)
+                        ) {
+                            Spacer(Modifier.height(MaterialTheme.spacings.small))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement =
+                                    Arrangement.spacedBy(MaterialTheme.spacings.small),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                album.artistName?.let { artistName ->
+                                    Text(
+                                        text = artistName,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier =
+                                            if (album.artistId != null) {
+                                                Modifier.clickable {
+                                                    onArtistClick(album.artistId.toString())
+                                                }
+                                            } else {
+                                                Modifier
+                                            },
+                                    )
+                                }
+                                album.productionYear?.let {
+                                    Text(
+                                        text = it.toString(),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                }
+                                Text(
+                                    text =
+                                        stringResource(
+                                            FilmR.string.music_song_count,
+                                            album.songCount ?: state.songs.size,
+                                        ),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                            if (album.overview.isNotBlank()) {
+                                OverviewText(text = album.overview, maxCollapsedLines = 3)
+                                Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                            }
+                        }
                     }
 
                     item {
                         Section(
                             title = stringResource(FilmR.string.music_songs),
-                            titleModifier = Modifier.padding(horizontal = gutter),
+                            titleModifier = Modifier.padding(horizontal = paddingStart),
+                            trailingContent = {
+                                ItemCountBadge(
+                                    count = state.songs.size,
+                                    modifier = Modifier.padding(start = 8.dp),
+                                )
+                            },
                         ) {
                             if (state.songs.isEmpty()) {
                                 Text(
                                     text = stringResource(FilmR.string.music_no_songs),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(horizontal = gutter),
+                                    modifier = Modifier.padding(horizontal = paddingStart),
                                 )
                             } else {
                                 Column {
                                     state.songs.forEachIndexed { index, song ->
-                                        SongRow(index = index, song = song)
+                                        SongRow(
+                                            index = index,
+                                            song = song,
+                                            horizontalPadding = paddingStart,
+                                        )
                                         if (index < state.songs.lastIndex) {
                                             HorizontalDivider(
                                                 color = DividerDefaults.color.copy(alpha = 0.2f),
-                                                modifier = Modifier.padding(horizontal = gutter),
+                                                modifier =
+                                                    Modifier.padding(horizontal = paddingStart),
                                             )
                                         }
                                     }
@@ -141,7 +211,7 @@ private fun AlbumDetailLayout(
                         }
                     }
 
-                    item { Spacer(Modifier.height(gutter)) }
+                    item { Spacer(Modifier.height(MaterialTheme.spacings.medium)) }
                 }
         }
 
@@ -164,99 +234,14 @@ private fun AlbumDetailLayout(
 }
 
 @Composable
-private fun AlbumHero(
-    album: FindroidMusicAlbum,
-    onArtistClick: (artistId: String) -> Unit,
+private fun SongRow(
+    index: Int,
+    song: FindroidMusicSong,
+    horizontalPadding: androidx.compose.ui.unit.Dp,
 ) {
-    val gutter = MaterialTheme.spacings.gutter
-    val image = album.images.backdrop ?: album.images.primary
-
-    Box(modifier = Modifier.fillMaxWidth()) {
-        if (image != null) {
-            AsyncImage(
-                model = image,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
-            )
-        } else {
-            Box(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-            )
-        }
-
-        Box(
-            modifier =
-                Modifier.matchParentSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.85f),
-                            )
-                        )
-                    )
-        )
-
-        Column(
-            modifier = Modifier.align(Alignment.BottomStart).padding(gutter),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-        ) {
-            Text(
-                text = album.name,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            ) {
-                album.artistName?.let { artistName ->
-                    Text(
-                        text = artistName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier =
-                            if (album.artistId != null) {
-                                Modifier.clickable { onArtistClick(album.artistId.toString()) }
-                            } else {
-                                Modifier
-                            },
-                    )
-                }
-                album.productionYear?.let {
-                    Text(
-                        text = it.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            album.songCount?.let {
-                Text(
-                    text = stringResource(FilmR.string.music_song_count, it),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SongRow(index: Int, song: FindroidMusicSong) {
-    val gutter = MaterialTheme.spacings.gutter
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = gutter, vertical = 12.dp),
+        modifier =
+            Modifier.fillMaxWidth().padding(horizontal = horizontalPadding, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
     ) {

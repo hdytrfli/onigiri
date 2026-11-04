@@ -61,6 +61,9 @@ import org.jellyfin.sdk.model.api.ImageType
 /** The types shown together in the editor's "Misc..." section, left to right. */
 private val MiscImageTypes = listOf(ImageType.THUMB, ImageType.LOGO, ImageType.ART)
 
+/** Music items only expose the artwork Jellyfin's music providers populate. */
+private val MusicImageTypes = listOf(ImageType.LOGO)
+
 /** One cell in the editor: an existing image, an "add" placeholder, or a busy placeholder. */
 private sealed interface ImageSlot {
     val type: ImageType
@@ -83,6 +86,7 @@ fun EditImagesScreen(
     itemId: UUID,
     navigateBack: () -> Unit,
     navigateToImageSearch: (ImageType, Boolean) -> Unit,
+    music: Boolean = false,
     viewModel: EditImagesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -92,6 +96,7 @@ fun EditImagesScreen(
     EditImagesScreenLayout(
         itemId = itemId,
         state = state,
+        music = music,
         onEditImage = { type -> navigateToImageSearch(type, state.kind == BaseItemKind.EPISODE) },
         onDelete = { type, index -> viewModel.delete(itemId, type, index) },
         onMakePrimary = { type, index -> viewModel.makePrimary(itemId, type, index) },
@@ -105,6 +110,7 @@ fun EditImagesScreen(
 private fun EditImagesScreenLayout(
     itemId: UUID,
     state: EditImagesState,
+    music: Boolean,
     onEditImage: (ImageType) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
     onMakePrimary: (ImageType, Int) -> Unit,
@@ -161,6 +167,7 @@ private fun EditImagesScreenLayout(
                         itemId = itemId,
                         state = state,
                         isEpisode = isEpisode,
+                        isMusic = music,
                         onEditImage = onEditImage,
                         onDelete = onDelete,
                         onMakePrimary = onMakePrimary,
@@ -188,7 +195,7 @@ private fun EditImagesScreenLayout(
                 // No section label here: the Thumb/Logo/Art tiles already carry their own
                 // names.
                 GridRows(
-                    items = MiscImageTypes,
+                    items = if (music) MusicImageTypes else MiscImageTypes,
                     columns = gridColumns(GridSize.THUMBNAIL),
                 ) { type ->
                     SingleTypeTile(
@@ -215,6 +222,7 @@ private fun SingleTypeTile(
     itemId: UUID,
     state: EditImagesState,
     isEpisode: Boolean = false,
+    isMusic: Boolean = false,
     showLabel: Boolean = true,
     onEditImage: (ImageType) -> Unit,
     onDelete: (ImageType, Int?) -> Unit,
@@ -231,7 +239,7 @@ private fun SingleTypeTile(
                 slot = slot,
                 itemId = itemId,
                 baseUrl = state.baseUrl,
-                ratio = imageTypeAspectRatio(type, isEpisode),
+                ratio = imageTypeAspectRatio(type, isEpisode = isEpisode, isMusic = isMusic),
                 enabled = !busy,
                 showLabel = showLabel,
                 onEditImage = onEditImage,

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,26 +56,47 @@ import java.util.UUID
 fun IdentifyScreen(
     itemId: UUID,
     navigateBack: () -> Unit,
-    onSearch: (query: String, year: String, imdbId: String, tmdbId: String, tvdbId: String) -> Unit,
+    musicKind: String? = null,
+    onSearch:
+        (
+            query: String,
+            year: String,
+            imdbId: String,
+            tmdbId: String,
+            tvdbId: String,
+            musicBrainzId: String,
+            discogsId: String,
+        ) -> Unit,
     viewModel: IdentifyViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     IdentifyScreenLayout(
         state = state,
+        musicKind = musicKind,
         onQueryChange = viewModel::setQuery,
         onYearChange = viewModel::setYear,
         onImdbChange = viewModel::setImdbId,
         onTmdbChange = viewModel::setTmdbId,
         onTvdbChange = viewModel::setTvdbId,
+        onMusicBrainzChange = viewModel::setMusicBrainzId,
+        onDiscogsChange = viewModel::setDiscogsId,
         onAdvancedChange = viewModel::setAdvanced,
         onSearch = {
             // Ignore the advanced fields when the switch is off, so a stale value cannot
             // silently narrow the search.
             if (state.advanced) {
-                onSearch(state.query, state.year, state.imdbId, state.tmdbId, state.tvdbId)
+                onSearch(
+                    state.query,
+                    state.year,
+                    state.imdbId,
+                    state.tmdbId,
+                    state.tvdbId,
+                    state.musicBrainzId,
+                    state.discogsId,
+                )
             } else {
-                onSearch(state.query, "", "", "", "")
+                onSearch(state.query, "", "", "", "", "", "")
             }
         },
         navigateBack = navigateBack,
@@ -87,11 +107,14 @@ fun IdentifyScreen(
 @Composable
 private fun IdentifyScreenLayout(
     state: IdentifyState,
+    musicKind: String?,
     onQueryChange: (String) -> Unit,
     onYearChange: (String) -> Unit,
     onImdbChange: (String) -> Unit,
     onTmdbChange: (String) -> Unit,
     onTvdbChange: (String) -> Unit,
+    onMusicBrainzChange: (String) -> Unit,
+    onDiscogsChange: (String) -> Unit,
     onAdvancedChange: (Boolean) -> Unit,
     onSearch: () -> Unit,
     navigateBack: () -> Unit,
@@ -119,41 +142,47 @@ private fun IdentifyScreenLayout(
                     IdentifyCard {
                         IdentifyField(
                             label = stringResource(CoreR.string.identify_name),
-                            hint = stringResource(CoreR.string.identify_name_hint),
-                            icon = CoreR.drawable.ic_film,
+                            hint =
+                                when (musicKind) {
+                                    "artist" ->
+                                        stringResource(CoreR.string.identify_music_artist_hint)
+                                    "album" ->
+                                        stringResource(CoreR.string.identify_music_album_hint)
+                                    else -> stringResource(CoreR.string.identify_name_hint)
+                                },
+                            icon =
+                                if (musicKind == null) CoreR.drawable.ic_film
+                                else CoreR.drawable.ic_music,
                             value = state.query,
                             onValueChange = onQueryChange,
                             modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
                         )
-                        // The advanced fields stay in the same group, right below the title, two
-                        // per
-                        // row.
+                        // Advanced fields use one column on every detail type. Music providers do
+                        // not use IMDb/TMDb/TVDb, so those identifiers are replaced by the music
+                        // metadata provider IDs.
                         AnimatedVisibility(visible = state.advanced) {
                             Column(
+                                modifier =
+                                    Modifier.padding(horizontal = MaterialTheme.spacings.medium),
                                 verticalArrangement =
-                                    Arrangement.spacedBy(MaterialTheme.spacings.medium)
+                                    Arrangement.spacedBy(MaterialTheme.spacings.medium),
                             ) {
-                                AdvancedFieldRow {
-                                    IdentifyField(
-                                        label = stringResource(CoreR.string.identify_year),
-                                        hint =
-                                            stringResource(CoreR.string.identify_year_field_hint),
-                                        icon = CoreR.drawable.ic_calendar,
-                                        value = state.year,
-                                        onValueChange = onYearChange,
-                                        keyboardType = KeyboardType.Number,
-                                        modifier = Modifier.weight(1f),
-                                    )
+                                IdentifyField(
+                                    label = stringResource(CoreR.string.identify_year),
+                                    hint = stringResource(CoreR.string.identify_year_field_hint),
+                                    icon = CoreR.drawable.ic_calendar,
+                                    value = state.year,
+                                    onValueChange = onYearChange,
+                                    keyboardType = KeyboardType.Number,
+                                )
+                                if (musicKind == null) {
                                     IdentifyField(
                                         label = stringResource(CoreR.string.identify_imdb),
                                         hint = stringResource(CoreR.string.identify_imdb_hint),
                                         icon = CoreR.drawable.ic_video,
                                         value = state.imdbId,
                                         onValueChange = onImdbChange,
-                                        modifier = Modifier.weight(1f),
                                     )
-                                }
-                                AdvancedFieldRow {
                                     IdentifyField(
                                         label = stringResource(CoreR.string.identify_tmdb),
                                         hint = stringResource(CoreR.string.identify_tmdb_hint),
@@ -161,7 +190,6 @@ private fun IdentifyScreenLayout(
                                         value = state.tmdbId,
                                         onValueChange = onTmdbChange,
                                         keyboardType = KeyboardType.Number,
-                                        modifier = Modifier.weight(1f),
                                     )
                                     IdentifyField(
                                         label = stringResource(CoreR.string.identify_tvdb),
@@ -170,7 +198,23 @@ private fun IdentifyScreenLayout(
                                         value = state.tvdbId,
                                         onValueChange = onTvdbChange,
                                         keyboardType = KeyboardType.Number,
-                                        modifier = Modifier.weight(1f),
+                                    )
+                                } else {
+                                    IdentifyField(
+                                        label = stringResource(CoreR.string.identify_musicbrainz),
+                                        hint =
+                                            stringResource(CoreR.string.identify_musicbrainz_hint),
+                                        icon = CoreR.drawable.ic_music,
+                                        value = state.musicBrainzId,
+                                        onValueChange = onMusicBrainzChange,
+                                    )
+                                    IdentifyField(
+                                        label = stringResource(CoreR.string.identify_discogs),
+                                        hint = stringResource(CoreR.string.identify_discogs_hint),
+                                        icon = CoreR.drawable.ic_music,
+                                        value = state.discogsId,
+                                        onValueChange = onDiscogsChange,
+                                        keyboardType = KeyboardType.Number,
                                     )
                                 }
                             }
@@ -223,16 +267,6 @@ private fun IdentifyCard(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 private fun IdentifyDivider() {
     HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
-}
-
-/** A row holding two advanced fields, inset to line up with the title field. */
-@Composable
-private fun AdvancedFieldRow(content: @Composable RowScope.() -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacings.medium),
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-        content = content,
-    )
 }
 
 /** The "Advanced search" switch row, shown in the same group as the title field. */

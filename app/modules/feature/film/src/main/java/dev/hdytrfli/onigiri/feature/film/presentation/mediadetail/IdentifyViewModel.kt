@@ -80,6 +80,14 @@ constructor(
         _state.update { it.copy(tvdbId = value) }
     }
 
+    fun setMusicBrainzId(value: String) {
+        _state.update { it.copy(musicBrainzId = value) }
+    }
+
+    fun setDiscogsId(value: String) {
+        _state.update { it.copy(discogsId = value) }
+    }
+
     /** Runs a search with explicit criteria (used by the results screen). */
     fun search(
         itemId: UUID,

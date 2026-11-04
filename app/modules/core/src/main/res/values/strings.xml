@@ -187,6 +187,12 @@
     <string name="identify_tmdb_hint">TMDb ID</string>
     <string name="identify_tvdb">TVDb ID</string>
     <string name="identify_tvdb_hint">TVDb ID</string>
+    <string name="identify_musicbrainz">MusicBrainz ID</string>
+    <string name="identify_musicbrainz_hint">MusicBrainz ID</string>
+    <string name="identify_discogs">Discogs ID</string>
+    <string name="identify_discogs_hint">Discogs ID</string>
+    <string name="identify_music_artist_hint">Artist name</string>
+    <string name="identify_music_album_hint">Album name</string>
     <string name="identify_year">Year</string>
     <string name="identify_source">Source</string>
     <string name="identify_providers">Provider IDs</string>
