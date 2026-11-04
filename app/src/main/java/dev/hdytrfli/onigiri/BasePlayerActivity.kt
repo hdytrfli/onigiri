@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.media3.session.MediaSession
 import dev.hdytrfli.onigiri.player.local.presentation.PlayerViewModel
+import java.util.UUID
 
 abstract class BasePlayerActivity : AppCompatActivity() {
 
@@ -26,7 +27,10 @@ abstract class BasePlayerActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        mediaSession = MediaSession.Builder(this, viewModel.player).build()
+        // Media3 requires every live session to have a unique ID. The app can now have the music
+        // service's session and the video player's session alive at the same time.
+        mediaSession =
+            MediaSession.Builder(this, viewModel.player).setId("video-${UUID.randomUUID()}").build()
     }
 
     override fun onResume() {

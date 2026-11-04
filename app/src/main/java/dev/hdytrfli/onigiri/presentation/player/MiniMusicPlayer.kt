@@ -1,14 +1,16 @@
 package dev.hdytrfli.onigiri.presentation.player
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,12 +29,14 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
-import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.theme.spacings
 
-/** Compact now-playing bar that sits above the navigation suite. */
+/**
+ * Compact now-playing bar: one wide, snackbar-style player pill plus separate transport buttons.
+ * Tap the pill to open the full player; the buttons stay independent targets.
+ */
 @Composable
 fun MiniMusicPlayer(
     state: MusicPlaybackState,
@@ -42,30 +46,30 @@ fun MiniMusicPlayer(
     modifier: Modifier = Modifier,
 ) {
     val item = state.current ?: return
-    val progress =
-        if (state.durationMs > 0L) {
-            (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
-        } else {
-            0f
-        }
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 3.dp,
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.spacings.gutter)
+                .padding(vertical = MaterialTheme.spacings.extraSmall),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.fillMaxWidth().clickable(onClick = onOpen)) {
+        Surface(
+            onClick = onOpen,
+            modifier = Modifier.weight(1f).height(52.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 3.dp,
+            shadowElevation = 6.dp,
+        ) {
             Row(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .height(68.dp)
-                        .padding(horizontal = MaterialTheme.spacings.medium),
+                modifier = Modifier.fillMaxSize().padding(start = 6.dp, end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 MusicThumbnail(item = item)
-                Column(
-                    modifier = Modifier.weight(1f).padding(start = MaterialTheme.spacings.small)
-                ) {
+                Column(modifier = Modifier.padding(start = MaterialTheme.spacings.small)) {
                     Text(
                         text = item.title,
                         style = MaterialTheme.typography.labelLarge,
@@ -80,46 +84,36 @@ fun MiniMusicPlayer(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                AppIconButton(
-                    onClick = onPlayPause,
-                    size = AppButtonSize.Decorator,
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter =
-                                painterResource(
-                                    if (state.isPlaying) CoreR.drawable.ic_pause
-                                    else CoreR.drawable.ic_play
-                                ),
-                            contentDescription =
-                                stringResource(
-                                    if (state.isPlaying) FilmR.string.music_pause
-                                    else CoreR.string.play
-                                ),
-                        )
-                    },
-                )
-                AppIconButton(
-                    onClick = onNext,
-                    size = AppButtonSize.Decorator,
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_skip_forward),
-                            contentDescription = stringResource(FilmR.string.music_next),
-                        )
-                    },
-                )
             }
-
-            Box(
-                modifier =
-                    Modifier.align(Alignment.BottomStart)
-                        .fillMaxWidth(progress)
-                        .height(2.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-            )
         }
+
+        AppIconButton(
+            onClick = onPlayPause,
+            variant = AppButtonVariant.Secondary,
+            content = {
+                Icon(
+                    painter =
+                        painterResource(
+                            if (state.isPlaying) CoreR.drawable.ic_diamond
+                            else CoreR.drawable.ic_play
+                        ),
+                    contentDescription =
+                        stringResource(
+                            if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
+                        ),
+                )
+            },
+        )
+        AppIconButton(
+            onClick = onNext,
+            variant = AppButtonVariant.Secondary,
+            content = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_skip_forward),
+                    contentDescription = stringResource(FilmR.string.music_next),
+                )
+            },
+        )
     }
 }
 
@@ -127,8 +121,8 @@ fun MiniMusicPlayer(
 private fun MusicThumbnail(item: MusicPlaybackItem) {
     Box(
         modifier =
-            Modifier.size(48.dp)
-                .clip(MaterialTheme.shapes.small)
+            Modifier.size(40.dp)
+                .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center,
     ) {
@@ -137,7 +131,7 @@ private fun MusicThumbnail(item: MusicPlaybackItem) {
                 model = item.imageUri,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
             )
         } else {
             Icon(

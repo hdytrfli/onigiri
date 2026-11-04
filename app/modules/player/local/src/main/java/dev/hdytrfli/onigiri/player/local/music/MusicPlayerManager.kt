@@ -180,6 +180,18 @@ constructor(
         }
     }
 
+    fun moveQueueItem(fromIndex: Int, toIndex: Int) {
+        runOnController { player ->
+            if (
+                fromIndex in 0 until player.mediaItemCount &&
+                    toIndex in 0 until player.mediaItemCount &&
+                    fromIndex != toIndex
+            ) {
+                player.moveMediaItem(fromIndex, toIndex)
+            }
+        }
+    }
+
     fun togglePlayPause() {
         runOnController { player ->
             if (player.isPlaying) {

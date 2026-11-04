@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,8 +35,11 @@ class MusicPlayerActivity : ComponentActivity() {
                     onToggleShuffle = viewModel::toggleShuffle,
                     onCycleRepeat = viewModel::cycleRepeatMode,
                     onToggleFavorite = viewModel::toggleFavorite,
-                    onPlayQueueItem = viewModel::playQueueItem,
-                    onRemoveQueueItem = viewModel::removeQueueItem,
+                    onOpenQueue = {
+                        startActivity(
+                            Intent(this@MusicPlayerActivity, MusicQueueActivity::class.java)
+                        )
+                    },
                     onClearError = viewModel::clearError,
                 )
             }

@@ -42,6 +42,11 @@
             android:theme="@style/Theme.Findroid" />
 
         <activity
+            android:name=".MusicQueueActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|uiMode|keyboard|keyboardHidden|navigation"
+            android:theme="@style/Theme.Findroid" />
+
+        <activity
             android:name=".ReaderActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|uiMode|keyboard|keyboardHidden|navigation"
             android:theme="@style/Theme.Findroid" />

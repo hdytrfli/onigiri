@@ -47,5 +47,7 @@ class MusicPlayerViewModel @Inject constructor(private val manager: MusicPlayerM
 
     fun removeQueueItem(index: Int) = manager.removeQueueItem(index)
 
+    fun moveQueueItem(fromIndex: Int, toIndex: Int) = manager.moveQueueItem(fromIndex, toIndex)
+
     fun clearError() = manager.clearError()
 }

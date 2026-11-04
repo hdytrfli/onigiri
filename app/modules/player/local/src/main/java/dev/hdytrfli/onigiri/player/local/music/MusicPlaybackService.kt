@@ -8,6 +8,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.UUID
 
 /**
  * Owns music playback while the app is in the background. Media3's service keeps the ExoPlayer,
@@ -44,7 +45,10 @@ class MusicPlaybackService : MediaSessionService() {
             )
 
         mediaSession =
-            MediaSession.Builder(this, player).setSessionActivity(sessionActivity).build()
+            MediaSession.Builder(this, player)
+                .setId("music-${UUID.randomUUID()}")
+                .setSessionActivity(sessionActivity)
+                .build()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =

@@ -62,4 +62,10 @@
     <string name="music_previous">Previous</string>
     <string name="music_next">Next</string>
     <string name="music_pause">Pause</string>
+    <string name="music_shuffle_on">Shuffle on</string>
+    <string name="music_shuffle_off">Shuffle off</string>
+    <string name="music_repeat_off">Repeat off</string>
+    <string name="music_repeat_all">Repeat all</string>
+    <string name="music_play_now">Play now</string>
+    <string name="music_play_end">Play at the end</string>
 </resources>
