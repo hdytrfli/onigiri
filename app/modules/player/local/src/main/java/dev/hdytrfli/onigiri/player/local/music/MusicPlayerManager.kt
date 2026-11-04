@@ -56,6 +56,8 @@ constructor(
 
     private var controller: MediaController? = null
     private var connecting = false
+    private var shuffleEnabled = false
+    private var preShuffleOrder: List<String>? = null
 
     init {
         connect()
@@ -120,9 +122,20 @@ constructor(
                 return@launch
             }
             val safeIndex = startIndex.coerceIn(0, items.lastIndex)
+            val orderedItems =
+                if (shuffle) {
+                    listOf(items[safeIndex]) +
+                        items.filterIndexed { index, _ -> index != safeIndex }.shuffled()
+                } else {
+                    items
+                }
+            preShuffleOrder = if (shuffle) items.mapNotNull { it.mediaId } else null
+            shuffleEnabled = shuffle
             runOnController { player ->
-                player.shuffleModeEnabled = shuffle
-                player.setMediaItems(items, safeIndex, 0L)
+                // The queue itself is shuffled once; ExoPlayer's continuous shuffle order is not
+                // used because it would keep changing the visible queue for every track.
+                player.shuffleModeEnabled = false
+                player.setMediaItems(orderedItems, if (shuffle) 0 else safeIndex, 0L)
                 player.prepare()
                 player.play()
             }
@@ -241,7 +254,64 @@ constructor(
     }
 
     fun toggleShuffle() {
-        runOnController { it.shuffleModeEnabled = !it.shuffleModeEnabled }
+        runOnController { player ->
+            if (shuffleEnabled) {
+                shuffleEnabled = false
+                val original = preShuffleOrder
+                preShuffleOrder = null
+                if (original != null) {
+                    restoreTailOrder(player, original)
+                }
+            } else {
+                shuffleEnabled = true
+                preShuffleOrder = allMediaIds(player)
+                shuffleTail(player)
+            }
+            player.shuffleModeEnabled = false
+            sync()
+        }
+    }
+
+    private fun allMediaIds(player: Player): List<String> =
+        (0 until player.mediaItemCount).mapNotNull { player.getMediaItemAt(it).mediaId }
+
+    private fun shuffleTail(player: Player) {
+        val current = player.currentMediaItemIndex
+        if (current < 0 || current >= player.mediaItemCount - 1) return
+        val tailIds =
+            (current + 1 until player.mediaItemCount).mapNotNull {
+                player.getMediaItemAt(it).mediaId
+            }
+        reorderTail(player, tailIds.shuffled())
+    }
+
+    private fun restoreTailOrder(player: Player, originalIds: List<String>) {
+        val current = player.currentMediaItemIndex
+        if (current < 0) return
+        val remainingIds =
+            (current + 1 until player.mediaItemCount).mapNotNull {
+                player.getMediaItemAt(it).mediaId
+            }
+        val remainingSet = remainingIds.toSet()
+        val restored =
+            originalIds.filter { it in remainingSet } + remainingIds.filter { it !in originalIds }
+        reorderTail(player, restored)
+    }
+
+    private fun reorderTail(player: Player, desiredIds: List<String>) {
+        val current = player.currentMediaItemIndex
+        if (current < 0) return
+        for ((offset, id) in desiredIds.withIndex()) {
+            val target = current + 1 + offset
+            if (target >= player.mediaItemCount) break
+            val from =
+                (current + 1 until player.mediaItemCount).firstOrNull {
+                    player.getMediaItemAt(it).mediaId == id
+                } ?: continue
+            if (from != target) {
+                player.moveMediaItem(from, target)
+            }
+        }
     }
 
     fun cycleRepeatMode() {
@@ -362,7 +432,7 @@ constructor(
                 isBuffering = player.playbackState == Player.STATE_BUFFERING,
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 durationMs = duration,
-                shuffleEnabled = player.shuffleModeEnabled,
+                shuffleEnabled = shuffleEnabled,
                 repeatMode =
                     when (player.repeatMode) {
                         Player.REPEAT_MODE_ALL -> MusicRepeatMode.ALL

@@ -120,6 +120,7 @@ fun MusicPlayerScreen(
                 favorite = state.current?.favorite == true,
                 onToggleFavorite = onToggleFavorite,
                 onOpenQueue = onOpenQueue,
+                showQueueButton = !isLandscape,
             )
             AnimatedVisibility(visible = overlayMessage != null) {
                 Box(
@@ -146,21 +147,30 @@ fun MusicPlayerScreen(
                 EmptyPlayer()
             } else if (isLandscape) {
                 Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    Column(modifier = Modifier.weight(0.58f).fillMaxHeight()) {
-                        BoxWithConstraints(
-                            modifier = Modifier.weight(1f).fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            val gutter = MaterialTheme.spacings.gutter
-                            val artSize =
-                                minOf(maxWidth - gutter * 2, Dimens.contentMaxWidth, maxHeight)
-                            AlbumArtwork(
-                                item = current,
-                                artworkType = artworkType,
-                                isPlaying = state.isPlaying,
-                                modifier = Modifier.size(artSize),
+                    BoxWithConstraints(
+                        modifier = Modifier.weight(0.5f).fillMaxHeight(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val gutter = MaterialTheme.spacings.gutter
+                        val artSize =
+                            minOf(
+                                maxWidth - gutter * 2,
+                                maxHeight - gutter * 2,
+                                Dimens.contentMaxWidth,
                             )
-                        }
+                        AlbumArtwork(
+                            item = current,
+                            artworkType = artworkType,
+                            isPlaying = state.isPlaying,
+                            modifier = Modifier.size(artSize),
+                        )
+                    }
+                    Column(
+                        modifier =
+                            Modifier.weight(0.5f)
+                                .fillMaxHeight()
+                                .padding(end = MaterialTheme.spacings.gutter)
+                    ) {
                         BottomControls(
                             state = state,
                             item = current,
@@ -185,22 +195,21 @@ fun MusicPlayerScreen(
                             onAlbumClick = onAlbumClick,
                             onClearError = onClearError,
                         )
+                        MusicQueueContent(
+                            queue = state.queue,
+                            currentIndex = state.currentIndex,
+                            onPlayNow = onPlayQueueItem,
+                            onRemove = onRemoveQueueItem,
+                            onMove = onMoveQueueItem,
+                            modifier =
+                                Modifier.weight(1f)
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = MaterialTheme.spacings.gutter,
+                                        bottom = MaterialTheme.spacings.medium,
+                                    ),
+                        )
                     }
-                    MusicQueueContent(
-                        queue = state.queue,
-                        currentIndex = state.currentIndex,
-                        onPlayNow = onPlayQueueItem,
-                        onRemove = onRemoveQueueItem,
-                        onMove = onMoveQueueItem,
-                        modifier =
-                            Modifier.weight(0.42f)
-                                .fillMaxHeight()
-                                .padding(
-                                    start = MaterialTheme.spacings.small,
-                                    end = MaterialTheme.spacings.gutter,
-                                    bottom = MaterialTheme.spacings.medium,
-                                ),
-                    )
                 }
             } else {
                 BoxWithConstraints(
@@ -251,6 +260,7 @@ private fun PlayerTopBar(
     favorite: Boolean,
     onToggleFavorite: () -> Unit,
     onOpenQueue: () -> Unit,
+    showQueueButton: Boolean,
 ) {
     Row(
         modifier =
@@ -290,16 +300,18 @@ private fun PlayerTopBar(
                 )
             },
         )
-        AppIconButton(
-            onClick = onOpenQueue,
-            variant = AppButtonVariant.Secondary,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_list),
-                    contentDescription = stringResource(FilmR.string.music_queue),
-                )
-            },
-        )
+        if (showQueueButton) {
+            AppIconButton(
+                onClick = onOpenQueue,
+                variant = AppButtonVariant.Secondary,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_list),
+                        contentDescription = stringResource(FilmR.string.music_queue),
+                    )
+                },
+            )
+        }
     }
 }
 
@@ -476,6 +488,7 @@ private fun BottomControls(
                 .padding(
                     start = MaterialTheme.spacings.gutter,
                     end = MaterialTheme.spacings.gutter,
+                    top = MaterialTheme.spacings.medium,
                     bottom = MaterialTheme.spacings.medium,
                 ),
         horizontalAlignment = Alignment.CenterHorizontally,

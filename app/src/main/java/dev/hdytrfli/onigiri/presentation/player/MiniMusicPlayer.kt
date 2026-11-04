@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -42,7 +44,6 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
-import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.theme.Dimens
@@ -52,8 +53,8 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /**
- * Compact now-playing bar: one snackbar-style pill with the transport controls inside. Swipe the
- * pill right for the next track, left for the previous track, or down to close the queue.
+ * Compact now-playing bar: a snackbar-style pill plus a separate pause/resume button. Swipe right
+ * for the next track, left for the previous track, or up to dismiss it.
  */
 @Composable
 fun MiniMusicPlayer(
@@ -69,13 +70,16 @@ fun MiniMusicPlayer(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipeThreshold = with(density) { 40.dp.toPx() }
+    val fadeDistance = with(density) { 140.dp.toPx() }
     var dragging by remember { mutableStateOf(false) }
     var dragX by remember { mutableFloatStateOf(0f) }
     var dragY by remember { mutableFloatStateOf(0f) }
     var animatedX by remember { mutableFloatStateOf(0f) }
     var animatedY by remember { mutableFloatStateOf(0f) }
     val contentOffsetX = if (dragging) dragX else animatedX
-    val containerOffsetY = if (dragging) dragY.coerceAtLeast(0f) else animatedY
+    val containerOffsetY = if (dragging) dragY else animatedY
+    val containerAlpha =
+        (1f - ((-containerOffsetY).coerceAtLeast(0f) / fadeDistance)).coerceIn(0f, 1f)
 
     Box(
         modifier =
@@ -89,14 +93,22 @@ fun MiniMusicPlayer(
                 ),
         contentAlignment = Alignment.Center,
     ) {
-        Surface(
-            onClick = onOpen,
+        Row(
             modifier =
-                Modifier.widthIn(max = Dimens.contentMaxWidth)
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .offset { IntOffset(0, containerOffsetY.roundToInt()) }
-                    .pointerInput(state.hasNext, state.hasPrevious) {
+                Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth().graphicsLayer {
+                    translationY = containerOffsetY
+                    alpha = containerAlpha
+                },
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                onClick = onOpen,
+                modifier =
+                    Modifier.weight(1f).height(52.dp).pointerInput(
+                        state.hasNext,
+                        state.hasPrevious,
+                    ) {
                         detectDragGestures(
                             onDragStart = {
                                 dragging = true
@@ -110,7 +122,7 @@ fun MiniMusicPlayer(
                             },
                             onDragEnd = {
                                 val startX = dragX
-                                val startY = dragY.coerceAtLeast(0f)
+                                val startY = dragY
                                 val horizontal = abs(startX) > abs(startY)
                                 dragging = false
                                 animatedX = startX
@@ -133,12 +145,21 @@ fun MiniMusicPlayer(
                                             animatedX = value
                                         }
                                     }
-                                } else if (!horizontal && startY >= swipeThreshold) {
+                                    scope.launch {
+                                        animate(
+                                            startY,
+                                            0f,
+                                            animationSpec = tween(durationMillis = 180),
+                                        ) { value, _ ->
+                                            animatedY = value
+                                        }
+                                    }
+                                } else if (!horizontal && startY <= -swipeThreshold) {
                                     scope.launch {
                                         animate(
                                             initialValue = startY,
-                                            targetValue = 180f,
-                                            animationSpec = tween(durationMillis = 160),
+                                            targetValue = -fadeDistance * 1.3f,
+                                            animationSpec = tween(durationMillis = 180),
                                         ) { value, _ ->
                                             animatedY = value
                                         }
@@ -167,7 +188,7 @@ fun MiniMusicPlayer(
                             },
                             onDragCancel = {
                                 val startX = dragX
-                                val startY = dragY.coerceAtLeast(0f)
+                                val startY = dragY
                                 dragging = false
                                 animatedX = startX
                                 animatedY = startY
@@ -194,68 +215,54 @@ fun MiniMusicPlayer(
                             },
                         )
                     },
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 3.dp,
-            shadowElevation = 6.dp,
-        ) {
-            Row(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .offset { IntOffset(contentOffsetX.roundToInt(), 0) }
-                        .padding(start = 6.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 3.dp,
+                shadowElevation = 6.dp,
             ) {
-                MusicThumbnail(item = item)
-                Column(
+                Row(
                     modifier =
-                        Modifier.weight(1f).padding(horizontal = MaterialTheme.spacings.small)
+                        Modifier.fillMaxSize()
+                            .offset { IntOffset(contentOffsetX.roundToInt(), 0) }
+                            .padding(start = 6.dp, end = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = listOfNotNull(item.artist, item.album).joinToString(" · "),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    MusicThumbnail(item = item)
+                    Column(modifier = Modifier.padding(start = MaterialTheme.spacings.small)) {
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.labelLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = listOfNotNull(item.artist, item.album).joinToString(" · "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
-                AppIconButton(
-                    onClick = onPlayPause,
-                    size = AppButtonSize.Decorator,
-                    variant = AppButtonVariant.Secondary,
-                    content = {
-                        Icon(
-                            painter =
-                                painterResource(
-                                    if (state.isPlaying) CoreR.drawable.ic_pause
-                                    else CoreR.drawable.ic_play
-                                ),
-                            contentDescription =
-                                stringResource(
-                                    if (state.isPlaying) FilmR.string.music_pause
-                                    else CoreR.string.play
-                                ),
-                        )
-                    },
-                )
-                AppIconButton(
-                    onClick = onClose,
-                    size = AppButtonSize.Decorator,
-                    variant = AppButtonVariant.Secondary,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_x),
-                            contentDescription = stringResource(CoreR.string.close),
-                        )
-                    },
-                )
             }
+
+            AppIconButton(
+                onClick = onPlayPause,
+                variant = AppButtonVariant.Secondary,
+                content = {
+                    Icon(
+                        painter =
+                            painterResource(
+                                if (state.isPlaying) CoreR.drawable.ic_pause
+                                else CoreR.drawable.ic_play
+                            ),
+                        contentDescription =
+                            stringResource(
+                                if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
+                            ),
+                    )
+                },
+            )
         }
     }
 }
