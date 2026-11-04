@@ -49,7 +49,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -60,8 +59,11 @@ import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
 import dev.hdytrfli.onigiri.player.local.music.MusicRepeatMode
 import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.theme.Dimens
+import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import kotlinx.coroutines.delay
@@ -82,6 +84,8 @@ fun MusicPlayerScreen(
     onSeek: (Long) -> Unit,
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    onToggleFavoriteItem: (java.util.UUID) -> Unit,
     onOpenQueue: () -> Unit,
     onArtistClick: (java.util.UUID) -> Unit,
     onAlbumClick: (java.util.UUID) -> Unit,
@@ -129,18 +133,16 @@ fun MusicPlayerScreen(
                 .background(Brush.verticalGradient(listOf(PlayerBackgroundTop, Color.Black)))
                 .padding(top = safePadding.top, bottom = safePadding.bottom)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            PlayerTopBar(
-                navigateBack = navigateBack,
-                onOpenQueue = onOpenQueue,
-                showQueueButton = !isLandscape,
-            )
-            if (current == null) {
-                EmptyPlayer()
-            } else if (isLandscape) {
-                Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        if (current != null && isLandscape) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.weight(0.5f).fillMaxHeight()) {
+                    PlayerTopBar(
+                        navigateBack = navigateBack,
+                        onOpenQueue = onOpenQueue,
+                        showQueueButton = false,
+                    )
                     BoxWithConstraints(
-                        modifier = Modifier.weight(0.5f).fillMaxHeight(),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
                         val artSize =
@@ -156,100 +158,106 @@ fun MusicPlayerScreen(
                             modifier = Modifier.size(artSize),
                         )
                     }
-                    MusicQueueContent(
-                        queue = state.queue,
-                        currentIndex = state.currentIndex,
-                        onPlayNow = onPlayQueueItem,
-                        onRemove = onRemoveQueueItem,
-                        onMove = onMoveQueueItem,
-                        modifier =
-                            Modifier.weight(0.5f)
-                                .fillMaxHeight()
-                                .padding(end = gutter, bottom = MaterialTheme.spacings.medium),
-                        header = {
-                            Column(
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .padding(
-                                            horizontal = MaterialTheme.spacings.medium,
-                                            vertical = MaterialTheme.spacings.small,
-                                        )
-                            ) {
-                                PlayerDetails(
-                                    item = current,
-                                    onArtistClick = onArtistClick,
-                                    onAlbumClick = onAlbumClick,
-                                )
-                                Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                                TransportControls(
-                                    state = state,
-                                    onPlayPause = onPlayPause,
-                                    onPrevious = onPrevious,
-                                    onNext = onNext,
-                                    onToggleShuffle = toggleShuffle,
-                                    onCycleRepeat = cycleRepeat,
-                                )
-                                Spacer(Modifier.height(MaterialTheme.spacings.small))
-                                PlayerSeekBar(
-                                    state = state,
-                                    onSeek = onSeek,
-                                    onClearError = onClearError,
-                                )
-                            }
-                        },
-                    )
                 }
-            } else {
-                PlayerDetails(
-                    item = current,
-                    onArtistClick = onArtistClick,
-                    onAlbumClick = onAlbumClick,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(
+                MusicQueueContent(
+                    queue = state.queue,
+                    currentIndex = state.currentIndex,
+                    onPlayNow = onPlayQueueItem,
+                    onRemove = onRemoveQueueItem,
+                    onMove = onMoveQueueItem,
+                    onToggleFavorite = onToggleFavoriteItem,
+                    modifier = Modifier.weight(0.5f).fillMaxHeight().padding(end = gutter),
+                    contentBottomPadding = MaterialTheme.spacings.gutter,
+                    header = {
+                        Column(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(
+                                        horizontal = MaterialTheme.spacings.medium,
+                                        vertical = MaterialTheme.spacings.small,
+                                    )
+                        ) {
+                            PlayerDetails(item = current)
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                            TransportControls(
+                                state = state,
+                                onPlayPause = onPlayPause,
+                                onPrevious = onPrevious,
+                                onNext = onNext,
+                                onToggleShuffle = toggleShuffle,
+                                onCycleRepeat = cycleRepeat,
+                                onToggleFavorite = onToggleFavorite,
+                                onArtistClick = onArtistClick,
+                                onAlbumClick = onAlbumClick,
+                            )
+                            Spacer(Modifier.height(MaterialTheme.spacings.small))
+                            PlayerSeekBar(
+                                state = state,
+                                onSeek = onSeek,
+                                onClearError = onClearError,
+                            )
+                        }
+                    },
+                )
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                PlayerTopBar(
+                    navigateBack = navigateBack,
+                    onOpenQueue = onOpenQueue,
+                    showQueueButton = !isLandscape,
+                )
+                if (current == null) {
+                    EmptyPlayer()
+                } else {
+                    PlayerDetails(
+                        item = current,
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(
+                                    start = gutter,
+                                    end = gutter,
+                                    top = MaterialTheme.spacings.extraSmall,
+                                ),
+                    )
+                    BoxWithConstraints(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val artSize =
+                            minOf(maxWidth - gutter * 2, Dimens.contentMaxWidth, maxHeight)
+                        AlbumArtwork(
+                            item = current,
+                            artworkType = artworkType,
+                            isPlaying = state.isPlaying,
+                            modifier = Modifier.size(artSize),
+                        )
+                    }
+                    TransportControls(
+                        state = state,
+                        onPlayPause = onPlayPause,
+                        onPrevious = onPrevious,
+                        onNext = onNext,
+                        onToggleShuffle = toggleShuffle,
+                        onCycleRepeat = cycleRepeat,
+                        onToggleFavorite = onToggleFavorite,
+                        onArtistClick = onArtistClick,
+                        onAlbumClick = onAlbumClick,
+                        modifier = Modifier.padding(top = MaterialTheme.spacings.small),
+                    )
+                    PlayerSeekBar(
+                        state = state,
+                        onSeek = onSeek,
+                        onClearError = onClearError,
+                        modifier =
+                            Modifier.padding(
                                 start = gutter,
                                 end = gutter,
-                                top = MaterialTheme.spacings.extraSmall,
+                                top = MaterialTheme.spacings.small,
+                                bottom = MaterialTheme.spacings.medium,
                             ),
-                )
-                BoxWithConstraints(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val artSize = minOf(maxWidth - gutter * 2, Dimens.contentMaxWidth, maxHeight)
-                    AlbumArtwork(
-                        item = current,
-                        artworkType = artworkType,
-                        isPlaying = state.isPlaying,
-                        modifier = Modifier.size(artSize),
                     )
                 }
-                TransportControls(
-                    state = state,
-                    onPlayPause = onPlayPause,
-                    onPrevious = onPrevious,
-                    onNext = onNext,
-                    onToggleShuffle = toggleShuffle,
-                    onCycleRepeat = cycleRepeat,
-                    modifier =
-                        Modifier.padding(
-                            start = gutter,
-                            end = gutter,
-                            top = MaterialTheme.spacings.small,
-                        ),
-                )
-                PlayerSeekBar(
-                    state = state,
-                    onSeek = onSeek,
-                    onClearError = onClearError,
-                    modifier =
-                        Modifier.padding(
-                            start = gutter,
-                            end = gutter,
-                            top = MaterialTheme.spacings.small,
-                            bottom = MaterialTheme.spacings.medium,
-                        ),
-                )
             }
         }
         AnimatedVisibility(
@@ -319,13 +327,10 @@ private fun MusicEntityLink(
     label: String,
     imageUri: String?,
     placeholder: Int,
-    onClick: () -> Unit,
 ) {
     if (label.isBlank()) return
     Row(
-        modifier =
-            Modifier.clickable(onClick = onClick)
-                .padding(vertical = MaterialTheme.spacings.extraSmall),
+        modifier = Modifier.padding(vertical = MaterialTheme.spacings.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -451,29 +456,14 @@ private fun AlbumArtwork(
 @Composable
 private fun PlayerDetails(
     item: MusicPlaybackItem,
-    onArtistClick: (java.util.UUID) -> Unit,
-    onAlbumClick: (java.util.UUID) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        item.artistId?.let { artistId ->
-            MusicEntityLink(
-                label = item.artist.orEmpty(),
-                imageUri = item.artistImageUri,
-                placeholder = CoreR.drawable.ic_user,
-                onClick = { onArtistClick(artistId) },
-            )
-        }
-            ?: item.artist?.let { artist ->
-                Text(
-                    text = artist,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = PlayerOnBackgroundMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                )
-            }
+    Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
+        MusicEntityLink(
+            label = item.artist.orEmpty(),
+            imageUri = item.artistImageUri,
+            placeholder = CoreR.drawable.ic_user,
+        )
         Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
         Text(
             text = item.title,
@@ -481,7 +471,6 @@ private fun PlayerDetails(
             color = PlayerOnBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
         item.album?.let { album ->
@@ -492,14 +481,7 @@ private fun PlayerDetails(
                 color = PlayerOnBackgroundMuted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .then(
-                            item.albumId?.let { albumId ->
-                                Modifier.clickable { onAlbumClick(albumId) }
-                            } ?: Modifier
-                        ),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
@@ -513,14 +495,35 @@ private fun TransportControls(
     onNext: () -> Unit,
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    onArtistClick: (java.util.UUID) -> Unit,
+    onAlbumClick: (java.util.UUID) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val item = state.current
+    val favorite = item?.favorite == true
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement =
-            Arrangement.spacedBy(MaterialTheme.spacings.small, Alignment.CenterHorizontally),
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        AppIconButton(
+            onClick = onToggleFavorite,
+            variant = AppButtonVariant.Ghost,
+            content = {
+                Icon(
+                    painter =
+                        painterResource(
+                            if (favorite) CoreR.drawable.ic_heart_filled
+                            else CoreR.drawable.ic_heart
+                        ),
+                    contentDescription = stringResource(CoreR.string.favorite_button_description),
+                    tint = if (favorite) Red else PlayerOnBackgroundMuted,
+                )
+            },
+        )
         AppIconButton(
             onClick = onToggleShuffle,
             variant = AppButtonVariant.Ghost,
@@ -603,6 +606,43 @@ private fun TransportControls(
                 )
             },
         )
+        Box {
+            AppIconButton(
+                onClick = { menuExpanded = true },
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_ellipsis),
+                        contentDescription = stringResource(CoreR.string.more_options),
+                        tint = PlayerOnBackgroundMuted,
+                    )
+                },
+            )
+            AppDropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                alignEnd = true,
+            ) {
+                MenuActionItem(
+                    label = stringResource(FilmR.string.music_artist_label),
+                    icon = CoreR.drawable.ic_user,
+                    enabled = item?.artistId != null,
+                    onClick = {
+                        menuExpanded = false
+                        item?.artistId?.let(onArtistClick)
+                    },
+                )
+                MenuActionItem(
+                    label = stringResource(FilmR.string.music_album_label),
+                    icon = CoreR.drawable.ic_music,
+                    enabled = item?.albumId != null,
+                    onClick = {
+                        menuExpanded = false
+                        item?.albumId?.let(onAlbumClick)
+                    },
+                )
+            }
+        }
     }
 }
 

@@ -2,15 +2,10 @@ package dev.hdytrfli.onigiri.feature.film.presentation.music
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,31 +13,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.LocalTabReselect
 import dev.hdytrfli.onigiri.MusicRoute
 import dev.hdytrfli.onigiri.core.R as CoreR
@@ -52,24 +38,23 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverl
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
+import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicRowAction
+import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SectionHeader
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SortByDialog
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
-import dev.hdytrfli.onigiri.ui.components.AppButtonSize
-import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
-import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
-import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
+import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -89,6 +74,7 @@ fun MusicScreen(
     viewModel: MusicViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentSongId by viewModel.currentSongId.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(MusicTab.SONGS) }
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -192,6 +178,7 @@ fun MusicScreen(
                         MusicTab.SONGS ->
                             SongsGrid(
                                 songs = songs,
+                                currentSongId = currentSongId,
                                 displayFields = state.displayFields,
                                 loading = state.isLoading,
                                 error = state.error,
@@ -256,6 +243,7 @@ fun MusicScreen(
 @Composable
 private fun SongsGrid(
     songs: List<dev.hdytrfli.onigiri.models.FindroidMusicSong>,
+    currentSongId: java.util.UUID?,
     displayFields: Set<ListDisplayField>,
     loading: Boolean,
     error: Exception?,
@@ -300,6 +288,7 @@ private fun SongsGrid(
             itemsIndexed(items = songs, key = { _, song -> song.id }) { _, song ->
                 SongListRow(
                     song = song,
+                    isCurrent = song.id == currentSongId,
                     showYear = ListDisplayField.Year in displayFields,
                     onPlay = { onSongClick(song.id) },
                     onPlayNext = { onPlayNext(song.id) },
@@ -308,7 +297,6 @@ private fun SongsGrid(
                     onViewArtist = song.artistId?.let { { onArtistClick(it.toString()) } },
                     onViewAlbum = song.albumId?.let { { onAlbumClick(it.toString()) } },
                 )
-                HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
             }
         }
     }
@@ -317,6 +305,7 @@ private fun SongsGrid(
 @Composable
 private fun SongListRow(
     song: dev.hdytrfli.onigiri.models.FindroidMusicSong,
+    isCurrent: Boolean,
     showYear: Boolean,
     onPlay: () -> Unit,
     onPlayNext: () -> Unit,
@@ -325,107 +314,37 @@ private fun SongListRow(
     onViewArtist: (() -> Unit)?,
     onViewAlbum: (() -> Unit)?,
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .clickable(onClick = onPlay)
-                .padding(horizontal = MaterialTheme.spacings.gutter, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-    ) {
-        Box(
-            modifier =
-                Modifier.size(44.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (song.images.primary != null) {
-                AsyncImage(
-                    model = song.images.primary,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
+    MusicTrackRow(
+        title = song.name,
+        subtitle =
+            listOfNotNull(
+                    song.artistName,
+                    song.albumName,
+                    song.productionYear.takeIf { showYear }?.toString(),
                 )
-            } else {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_music),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = song.name,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text =
-                    listOfNotNull(
-                            song.artistName,
-                            song.albumName,
-                            song.productionYear.takeIf { showYear }?.toString(),
-                        )
-                        .joinToString(" · "),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        Text(
-            text = formatDuration(song.runtimeTicks),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Box {
-            AppIconButton(
-                onClick = { menuExpanded = true },
-                variant = AppButtonVariant.Ghost,
-                size = AppButtonSize.Decorator,
-                content = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_ellipsis),
-                        contentDescription = stringResource(CoreR.string.more_options),
-                    )
-                },
-            )
-            AppDropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false },
-                alignEnd = true,
-                anchorWidth = AppButtonSize.Decorator.value,
-            ) {
-                MenuActionItem(
+                .joinToString(" · "),
+        imageUri = song.images.primary,
+        isCurrent = isCurrent,
+        onClick = onPlay,
+        trailingText = formatDuration(song.runtimeTicks),
+        actions =
+            listOf(
+                MusicRowAction(
                     label = stringResource(CoreR.string.play),
                     icon = CoreR.drawable.ic_play,
-                    onClick = {
-                        menuExpanded = false
-                        onPlay()
-                    },
-                )
-                MenuActionItem(
+                    onClick = onPlay,
+                ),
+                MusicRowAction(
                     label = stringResource(FilmR.string.music_play_next),
                     icon = CoreR.drawable.ic_skip_forward,
-                    onClick = {
-                        menuExpanded = false
-                        onPlayNext()
-                    },
-                )
-                MenuActionItem(
+                    onClick = onPlayNext,
+                ),
+                MusicRowAction(
                     label = stringResource(FilmR.string.music_add_to_queue),
                     icon = CoreR.drawable.ic_plus,
-                    onClick = {
-                        menuExpanded = false
-                        onAddToQueue()
-                    },
-                )
-                MenuActionItem(
+                    onClick = onAddToQueue,
+                ),
+                MusicRowAction(
                     label =
                         stringResource(
                             if (song.favorite) CoreR.string.remove_from_favorites
@@ -434,32 +353,25 @@ private fun SongListRow(
                     icon =
                         if (song.favorite) CoreR.drawable.ic_heart_filled
                         else CoreR.drawable.ic_heart,
-                    onClick = {
-                        menuExpanded = false
-                        onToggleFavorite()
-                    },
-                )
-                MenuActionItem(
+                    iconTint = if (song.favorite) Red else null,
+                    dismissOnClick = false,
+                    onClick = onToggleFavorite,
+                ),
+                MusicRowAction(
                     label = stringResource(FilmR.string.music_artist_label),
                     icon = CoreR.drawable.ic_user,
                     enabled = onViewArtist != null,
-                    onClick = {
-                        menuExpanded = false
-                        onViewArtist?.invoke()
-                    },
-                )
-                MenuActionItem(
+                    onClick = { onViewArtist?.invoke() },
+                ),
+                MusicRowAction(
                     label = stringResource(FilmR.string.music_album_label),
                     icon = CoreR.drawable.ic_music,
                     enabled = onViewAlbum != null,
-                    onClick = {
-                        menuExpanded = false
-                        onViewAlbum?.invoke()
-                    },
-                )
-            }
-        }
-    }
+                    onClick = { onViewAlbum?.invoke() },
+                ),
+            ),
+        trailingDivider = true,
+    )
 }
 
 private fun formatDuration(ticks: Long): String {

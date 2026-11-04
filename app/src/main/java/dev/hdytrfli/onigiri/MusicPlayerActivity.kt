@@ -55,6 +55,8 @@ class MusicPlayerActivity : ComponentActivity() {
                         onSeek = viewModel::seekTo,
                         onToggleShuffle = viewModel::toggleShuffle,
                         onCycleRepeat = viewModel::cycleRepeatMode,
+                        onToggleFavorite = viewModel::toggleFavorite,
+                        onToggleFavoriteItem = viewModel::toggleFavoriteItem,
                         onOpenQueue = {
                             startActivity(
                                 Intent(this@MusicPlayerActivity, MusicQueueActivity::class.java)

@@ -50,6 +50,7 @@ class MusicQueueActivity : ComponentActivity() {
                         onPlayNow = viewModel::playQueueItem,
                         onRemove = viewModel::removeQueueItem,
                         onMove = viewModel::moveQueueItem,
+                        onToggleFavorite = viewModel::toggleFavoriteItem,
                     )
                 }
             }

@@ -58,6 +58,7 @@ constructor(
     private var connecting = false
     private var shuffleEnabled = false
     private var preShuffleOrder: List<String>? = null
+    private var batchDepth = 0
 
     init {
         connect()
@@ -107,6 +108,21 @@ constructor(
         } else {
             pendingActions += action
             connect()
+        }
+    }
+
+    /**
+     * Queue-wide edits (notably shuffling) fire one player event per move. Rebuilding and
+     * publishing the whole UI state for every event makes large queues stutter, so keep the
+     * intermediate events internal and sync only once when the batch is complete.
+     */
+    private inline fun batchPlayerUpdate(block: () -> Unit) {
+        batchDepth++
+        try {
+            block()
+        } finally {
+            batchDepth--
+            if (batchDepth == 0) sync()
         }
     }
 
@@ -255,20 +271,21 @@ constructor(
 
     fun toggleShuffle() {
         runOnController { player ->
-            if (shuffleEnabled) {
-                shuffleEnabled = false
-                val original = preShuffleOrder
-                preShuffleOrder = null
-                if (original != null) {
-                    restoreTailOrder(player, original)
+            batchPlayerUpdate {
+                if (shuffleEnabled) {
+                    shuffleEnabled = false
+                    val original = preShuffleOrder
+                    preShuffleOrder = null
+                    if (original != null) {
+                        restoreTailOrder(player, original)
+                    }
+                } else {
+                    shuffleEnabled = true
+                    preShuffleOrder = allMediaIds(player)
+                    shuffleTail(player)
                 }
-            } else {
-                shuffleEnabled = true
-                preShuffleOrder = allMediaIds(player)
-                shuffleTail(player)
+                player.shuffleModeEnabled = false
             }
-            player.shuffleModeEnabled = false
-            sync()
         }
     }
 
@@ -327,18 +344,26 @@ constructor(
 
     fun toggleFavorite() {
         val item = _state.value.current ?: return
+        toggleFavorite(item.id)
+    }
+
+    fun toggleFavorite(itemId: UUID) {
+        val item =
+            _state.value.queue.firstOrNull { it.id == itemId }
+                ?: _state.value.current?.takeIf { it.id == itemId }
+                ?: return
         scope.launch {
             val favorite = !item.favorite
             try {
                 if (favorite) {
-                    repository.markAsFavorite(item.id)
+                    repository.markAsFavorite(itemId)
                 } else {
-                    repository.unmarkAsFavorite(item.id)
+                    repository.unmarkAsFavorite(itemId)
                 }
-                favoriteOverrides[item.id] = favorite
+                favoriteOverrides[itemId] = favorite
                 sync()
             } catch (e: Exception) {
-                Timber.e(e, "Unable to update favorite state for ${item.id}")
+                Timber.e(e, "Unable to update favorite state for $itemId")
             }
         }
     }
@@ -429,6 +454,8 @@ constructor(
                 hasPrevious = player.hasPreviousMediaItem(),
                 hasNext = player.hasNextMediaItem(),
                 isPlaying = player.isPlaying,
+                playWhenReady = player.playWhenReady,
+                hasEnded = player.playbackState == Player.STATE_ENDED,
                 isBuffering = player.playbackState == Player.STATE_BUFFERING,
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 durationMs = duration,
@@ -460,7 +487,7 @@ constructor(
     }
 
     override fun onEvents(player: Player, events: Player.Events) {
-        sync()
+        if (batchDepth == 0) sync()
     }
 
     override fun onPlayerError(error: PlaybackException) {

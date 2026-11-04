@@ -1,23 +1,13 @@
 package dev.hdytrfli.onigiri.presentation.player
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,26 +19,19 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
+import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicRowAction
+import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SectionHeader
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
-import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
-import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
-import dev.hdytrfli.onigiri.ui.components.AppIconButton
-import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.theme.Dimens
+import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import java.util.UUID
 import sh.calvin.reorderable.ReorderableItem
@@ -63,6 +46,7 @@ fun MusicQueueScreen(
     onPlayNow: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
+    onToggleFavorite: (UUID) -> Unit,
 ) {
     PageScaffold(
         topBar = {
@@ -78,6 +62,7 @@ fun MusicQueueScreen(
             onPlayNow = onPlayNow,
             onRemove = onRemove,
             onMove = onMove,
+            onToggleFavorite = onToggleFavorite,
             modifier =
                 Modifier.fillMaxSize()
                     .padding(innerPadding)
@@ -94,7 +79,9 @@ fun MusicQueueContent(
     onPlayNow: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
+    onToggleFavorite: (UUID) -> Unit,
     modifier: Modifier = Modifier,
+    contentBottomPadding: androidx.compose.ui.unit.Dp = 0.dp,
     header: (@Composable () -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
@@ -106,6 +93,9 @@ fun MusicQueueContent(
     LaunchedEffect(queue) {
         if (displayQueue.map { it.id } != queue.map { it.id }) {
             displayQueue = queue
+        } else if (displayQueue != queue) {
+            val updatedById = queue.associateBy { it.id }
+            displayQueue = displayQueue.map { updatedById[it.id] ?: it }
         }
     }
 
@@ -150,6 +140,8 @@ fun MusicQueueContent(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth().weight(1f),
+                contentPadding =
+                    androidx.compose.foundation.layout.PaddingValues(bottom = contentBottomPadding),
             ) {
                 if (header != null) {
                     item(key = "player-header") { header() }
@@ -180,6 +172,7 @@ fun MusicQueueContent(
                             }
                         },
                         onRemove = { onRemove(index) },
+                        onToggleFavorite = { onToggleFavorite(item.id) },
                         trailingDivider = index > 0,
                     )
                 }
@@ -230,6 +223,7 @@ fun MusicQueueContent(
                                     }
                                 },
                                 onRemove = { onRemove(index) },
+                                onToggleFavorite = { onToggleFavorite(item.id) },
                                 modifier = Modifier.longPressDraggableHandle(),
                                 trailingDivider = index < displayQueue.lastIndex,
                             )
@@ -251,156 +245,56 @@ private fun QueueRow(
     onPlayNext: () -> Unit,
     onPlayEnd: () -> Unit,
     onRemove: () -> Unit,
+    onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     trailingDivider: Boolean,
 ) {
     val isCurrent = index == currentIndex
-
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.small)
-                .background(
-                    if (dragging) MaterialTheme.colorScheme.surfaceContainerHigh
-                    else Color.Transparent
-                )
-    ) {
-        Row(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(72.dp)
-                    .clickable(onClick = onPlayNow)
-                    .padding(horizontal = MaterialTheme.spacings.small),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier =
-                    Modifier.size(44.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (item.imageUri != null) {
-                    AsyncImage(
-                        model = item.imageUri,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_music),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                if (isCurrent) {
-                    Box(
-                        modifier =
-                            Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.45f))
-                    )
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_play),
-                        contentDescription = stringResource(FilmR.string.music_now_playing),
-                        modifier = Modifier.size(18.dp),
-                        tint = Color.White,
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.weight(1f).padding(horizontal = MaterialTheme.spacings.small)
-            ) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = listOfNotNull(item.artist, item.album).joinToString(" · "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-
-            QueueMenu(
-                isCurrent = isCurrent,
-                onPlayNow = onPlayNow,
-                onPlayNext = onPlayNext,
-                onPlayEnd = onPlayEnd,
-                onRemove = onRemove,
-            )
-        }
-
-        if (trailingDivider) {
-            HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.05f))
-        }
-    }
-}
-
-@Composable
-private fun QueueMenu(
-    isCurrent: Boolean,
-    onPlayNow: () -> Unit,
-    onPlayNext: () -> Unit,
-    onPlayEnd: () -> Unit,
-    onRemove: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        AppIconButton(
-            onClick = { expanded = true },
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_ellipsis),
-                    contentDescription = stringResource(CoreR.string.more_options),
-                )
-            },
-        )
-        AppDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            alignEnd = true,
-        ) {
-            MenuActionItem(
-                label = stringResource(FilmR.string.music_play_now),
-                icon = CoreR.drawable.ic_play,
-                enabled = !isCurrent,
-                onClick = {
-                    expanded = false
-                    onPlayNow()
-                },
-            )
-            MenuActionItem(
-                label = stringResource(FilmR.string.music_play_next),
-                icon = CoreR.drawable.ic_skip_forward,
-                onClick = {
-                    expanded = false
-                    onPlayNext()
-                },
-            )
-            MenuActionItem(
-                label = stringResource(FilmR.string.music_play_end),
-                icon = CoreR.drawable.ic_arrow_down_to_line,
-                onClick = {
-                    expanded = false
-                    onPlayEnd()
-                },
-            )
-            MenuActionItem(
-                label = stringResource(FilmR.string.music_remove_from_queue),
-                icon = CoreR.drawable.ic_x,
-                onClick = {
-                    expanded = false
-                    onRemove()
-                },
-            )
-        }
-    }
+    MusicTrackRow(
+        title = item.title,
+        subtitle = listOfNotNull(item.artist, item.album).joinToString(" · "),
+        imageUri = item.imageUri,
+        isCurrent = isCurrent,
+        actions =
+            listOf(
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_play_now),
+                    icon = CoreR.drawable.ic_play,
+                    enabled = !isCurrent,
+                    onClick = onPlayNow,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_play_next),
+                    icon = CoreR.drawable.ic_skip_forward,
+                    onClick = onPlayNext,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_play_end),
+                    icon = CoreR.drawable.ic_arrow_down_to_line,
+                    onClick = onPlayEnd,
+                ),
+                MusicRowAction(
+                    label =
+                        stringResource(
+                            if (item.favorite) CoreR.string.remove_from_favorites
+                            else CoreR.string.add_to_favorites
+                        ),
+                    icon =
+                        if (item.favorite) CoreR.drawable.ic_heart_filled
+                        else CoreR.drawable.ic_heart,
+                    iconTint = if (item.favorite) Red else null,
+                    dismissOnClick = false,
+                    onClick = onToggleFavorite,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_remove_from_queue),
+                    icon = CoreR.drawable.ic_x,
+                    onClick = onRemove,
+                ),
+            ),
+        onClick = onPlayNow,
+        modifier = modifier,
+        dragging = dragging,
+        trailingDivider = trailingDivider,
+    )
 }

@@ -41,15 +41,22 @@ constructor(
                 initialValue = manager.state.value.current,
             )
 
-    /** The mini player only exists while audio is actually playing. */
+    /**
+     * Follow the intent to play rather than the transient isPlaying flag. A track change briefly
+     * reports isPlaying=false while the next source is prepared, which must not hide the mini
+     * player. Pausing or finishing playback still hides it.
+     */
     val miniPlayerVisible: kotlinx.coroutines.flow.StateFlow<Boolean> =
         manager.state
-            .map { it.current != null && it.isPlaying }
+            .map { it.current != null && it.playWhenReady && !it.hasEnded }
             .distinctUntilChanged()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = manager.state.value.current != null && manager.state.value.isPlaying,
+                initialValue =
+                    manager.state.value.let {
+                        it.current != null && it.playWhenReady && !it.hasEnded
+                    },
             )
 
     fun togglePlayPause() = manager.togglePlayPause()
@@ -69,6 +76,8 @@ constructor(
     fun cycleRepeatMode() = manager.cycleRepeatMode()
 
     fun toggleFavorite() = manager.toggleFavorite()
+
+    fun toggleFavoriteItem(itemId: java.util.UUID) = manager.toggleFavorite(itemId)
 
     fun playQueueItem(index: Int) = manager.playQueueItem(index)
 

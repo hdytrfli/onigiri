@@ -18,7 +18,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -45,6 +49,17 @@ constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(MusicState())
     val state = _state.asStateFlow()
+
+    /** Changes only when the playing track changes, not on every progress tick. */
+    val currentSongId =
+        playerManager.state
+            .map { it.current?.id }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = playerManager.state.value.current?.id,
+            )
 
     private var loadJob: Job? = null
     private var loaded = false
