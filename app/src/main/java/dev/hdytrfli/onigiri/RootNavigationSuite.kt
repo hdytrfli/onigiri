@@ -50,6 +50,9 @@ val LocalSuiteStartInset = compositionLocalOf { 0.dp }
 /** Bottom space a screen must leave for the bar-shaped suite. */
 val LocalSuiteBottomInset = compositionLocalOf { 0.dp }
 
+/** Extra bottom space for the music mini player when it is visible. */
+val LocalMiniPlayerInset = compositionLocalOf { 0.dp }
+
 /**
  * Where the navigation suite is drawn. [TabletUiMode] drives it: AUTOMATIC follows the adaptive
  * width rule (rail on expanded widths), ALWAYS and NEVER force the rail and the bottom bar, and
@@ -203,7 +206,7 @@ fun SuiteInsetBox(content: @Composable () -> Unit) {
             Modifier.fillMaxSize()
                 .padding(
                     start = LocalSuiteStartInset.current,
-                    bottom = LocalSuiteBottomInset.current,
+                    bottom = LocalSuiteBottomInset.current + LocalMiniPlayerInset.current,
                 )
     ) {
         content()

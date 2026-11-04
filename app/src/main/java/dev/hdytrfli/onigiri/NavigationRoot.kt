@@ -328,6 +328,7 @@ private fun MainNavigation(
     CompositionLocalProvider(
         LocalSuiteStartInset provides suiteType.suiteStartInset(),
         LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
+        LocalMiniPlayerInset provides if (currentMusic != null) 68.dp else 0.dp,
         LocalTabReselect provides tabReselect,
         LocalOpenDownloads provides
             {
