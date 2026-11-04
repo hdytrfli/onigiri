@@ -149,35 +149,37 @@ fun MusicTrackRow(
                 )
             }
 
-            Box {
-                AppIconButton(
-                    onClick = { menuExpanded = true },
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_ellipsis),
-                            contentDescription = stringResource(CoreR.string.more_options),
-                        )
-                    },
-                )
-                AppDropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false },
-                    alignEnd = true,
-                ) {
-                    actions.forEach { action ->
-                        MenuActionItem(
-                            label = action.label,
-                            icon = action.icon,
-                            enabled = action.enabled,
-                            iconTint = action.iconTint,
-                            onClick = {
-                                if (action.dismissOnClick) {
-                                    menuExpanded = false
-                                }
-                                action.onClick()
-                            },
-                        )
+            if (actions.isNotEmpty()) {
+                Box {
+                    AppIconButton(
+                        onClick = { menuExpanded = true },
+                        variant = AppButtonVariant.Ghost,
+                        content = {
+                            Icon(
+                                painter = painterResource(CoreR.drawable.ic_ellipsis),
+                                contentDescription = stringResource(CoreR.string.more_options),
+                            )
+                        },
+                    )
+                    AppDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                        alignEnd = true,
+                    ) {
+                        actions.forEach { action ->
+                            MenuActionItem(
+                                label = action.label,
+                                icon = action.icon,
+                                enabled = action.enabled,
+                                iconTint = action.iconTint,
+                                onClick = {
+                                    if (action.dismissOnClick) {
+                                        menuExpanded = false
+                                    }
+                                    action.onClick()
+                                },
+                            )
+                        }
                     }
                 }
             }

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import androidx.media3.session.MediaSession
@@ -71,10 +73,32 @@ class MusicPlaybackService : MediaSessionService() {
                         MusicSessionCommands.EXTRA_SHUFFLE_SEED,
                         System.currentTimeMillis(),
                     )
-                (session.player as? ExoPlayer)?.setShuffleOrder(DefaultShuffleOrder(order, seed))
+                (session.player as? ExoPlayer)?.let { player ->
+                    applyShuffleOrderWhenReady(player, order, seed)
+                }
                 return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
             }
         }
+
+    private fun applyShuffleOrderWhenReady(
+        player: ExoPlayer,
+        order: IntArray,
+        seed: Long,
+    ) {
+        if (player.mediaItemCount == order.size) {
+            player.setShuffleOrder(DefaultShuffleOrder(order, seed))
+            return
+        }
+        val listener =
+            object : Player.Listener {
+                override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                    if (player.mediaItemCount != order.size) return
+                    player.removeListener(this)
+                    player.setShuffleOrder(DefaultShuffleOrder(order, seed))
+                }
+            }
+        player.addListener(listener)
+    }
 
     override fun onCreate() {
         super.onCreate()

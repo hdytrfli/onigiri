@@ -65,6 +65,9 @@ class RoutingJellyfinRepository(
 
     override suspend fun getMusicSongs(): List<FindroidMusicSong> = current().getMusicSongs()
 
+    override suspend fun getMusicSong(itemId: UUID): FindroidMusicSong? =
+        current().getMusicSong(itemId)
+
     override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? =
         current().getMusicArtist(itemId)
 

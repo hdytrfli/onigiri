@@ -211,9 +211,6 @@ class AppPreferences(
     val musicArtworkType = Preference("pref_music_artwork_type", "album")
     val musicSkipSilence = Preference("pref_music_skip_silence", false)
     val musicGapless = Preference("pref_music_gapless", true)
-    val musicRememberShuffleRepeat = Preference("pref_music_remember_shuffle_repeat", true)
-    val musicShuffleMode = Preference("pref_music_shuffle_mode", false)
-    val musicRepeatMode = Preference("pref_music_repeat_mode", "OFF")
 
     // Offline mode
     val offlineMode = Preference("pref_offline_mode", false)

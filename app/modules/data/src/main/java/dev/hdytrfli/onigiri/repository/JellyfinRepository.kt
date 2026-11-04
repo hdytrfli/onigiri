@@ -53,6 +53,8 @@ interface JellyfinRepository {
 
     suspend fun getMusicSongs(): List<FindroidMusicSong>
 
+    suspend fun getMusicSong(itemId: UUID): FindroidMusicSong?
+
     suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist?
 
     suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum?

@@ -339,6 +339,7 @@ private fun MainNavigation(
                 navigator.navigate(MediaRoute)
             },
             searchExpanded = searchExpanded,
+            onPlaySong = musicPlayerViewModel::playSongById,
         )
     }
 
@@ -478,6 +479,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     tabReselect: TabReselect,
     onSearchClick: () -> Unit,
     searchExpanded: MutableState<Boolean>,
+    onPlaySong: (java.util.UUID) -> Unit,
 ) {
     entry<HomeRoute> {
         SuiteInsetBox {
@@ -511,7 +513,13 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     dropUnlessResumed { navigator.navigate(SettingsRoute(indexes = emptyList())) },
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
                 onSearchResultClick =
-                    resumedAction { result -> navigateToSearchResult(navigator, result) },
+                    resumedAction { result ->
+                        navigateToSearchResult(
+                            navigator = navigator,
+                            result = result,
+                            onPlaySong = onPlaySong,
+                        )
+                    },
             )
         }
     }
@@ -917,8 +925,13 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     }
 }
 
-private fun navigateToSearchResult(navigator: Navigator, result: HomeSearchResult) {
+private fun navigateToSearchResult(
+    navigator: Navigator,
+    result: HomeSearchResult,
+    onPlaySong: (java.util.UUID) -> Unit,
+) {
     when (result.kind) {
+        BaseItemKind.AUDIO -> onPlaySong(result.id)
         BaseItemKind.MOVIE -> navigator.navigate(MovieRoute(result.id.toString()))
         BaseItemKind.SERIES -> navigator.navigate(ShowRoute(result.id.toString()))
         BaseItemKind.EPISODE -> navigator.navigate(EpisodeRoute(result.id.toString()))

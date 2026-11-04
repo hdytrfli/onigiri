@@ -23,6 +23,7 @@ data class FindroidMusicFavorite(
     @Serializable(with = UuidSerializer::class) override val id: UUID,
     override val name: String,
     val kind: MusicFavoriteKind,
+    val subtitle: String? = null,
     @Serializable(with = UuidSerializer::class) val albumId: UUID? = null,
     @Serializable(with = UuidSerializer::class) val artistId: UUID? = null,
     override val originalTitle: String? = null,
@@ -49,6 +50,7 @@ fun BaseItemDto.toFindroidMusicFavorite(
                 id = song.id,
                 name = song.name,
                 kind = MusicFavoriteKind.Song,
+                subtitle = listOfNotNull(song.artistName, song.albumName).joinToString(" · "),
                 albumId = song.albumId,
                 artistId = song.artistId,
                 overview = "",
@@ -62,6 +64,10 @@ fun BaseItemDto.toFindroidMusicFavorite(
                 id = album.id,
                 name = album.name,
                 kind = MusicFavoriteKind.Album,
+                subtitle =
+                    listOfNotNull(album.artistName, album.productionYear?.toString())
+                        .joinToString(" · ")
+                        .ifBlank { null },
                 albumId = album.id,
                 artistId = album.artistId,
                 overview = album.overview,

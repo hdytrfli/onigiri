@@ -5,18 +5,21 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
+import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MusicPlayerViewModel
 @Inject
 constructor(
     private val manager: MusicPlayerManager,
+    private val repository: JellyfinRepository,
     appPreferences: AppPreferences,
 ) : ViewModel() {
     val state = manager.state
@@ -78,6 +81,12 @@ constructor(
     fun toggleFavorite() = manager.toggleFavorite()
 
     fun toggleFavoriteItem(itemId: java.util.UUID) = manager.toggleFavorite(itemId)
+
+    fun playSongById(itemId: java.util.UUID) {
+        viewModelScope.launch {
+            repository.getMusicSong(itemId)?.let { manager.playSongs(listOf(it)) }
+        }
+    }
 
     fun playQueueItem(index: Int) = manager.playQueueItem(index)
 

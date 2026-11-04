@@ -14,6 +14,8 @@ import dev.hdytrfli.onigiri.feature.film.presentation.collection.CollectionActio
 import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
 import dev.hdytrfli.onigiri.models.CollectionSection
 import dev.hdytrfli.onigiri.models.FindroidEpisode
+import dev.hdytrfli.onigiri.models.FindroidMusicFavorite
+import dev.hdytrfli.onigiri.models.MusicFavoriteKind
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
 import dev.hdytrfli.onigiri.ui.utils.gridColumns
@@ -31,6 +33,7 @@ fun CollectionGrid(
     contentPadding: PaddingValues,
     onAction: (CollectionAction) -> Unit,
     displayFields: Set<ListDisplayField> = emptySet(),
+    musicFavoriteContent: (@Composable (FindroidMusicFavorite) -> Unit)? = null,
 ) {
     // asString() is composable but the grid's content lambda is not, so every title
     // is resolved before the grid starts.
@@ -58,28 +61,33 @@ fun CollectionGrid(
                     items = section.items,
                     key = { it.id },
                     span = {
-                        if (it is FindroidEpisode) {
-                            GridItemSpan(episodeSpan)
-                        } else {
-                            GridItemSpan(posterSpan)
+                        when {
+                            it is FindroidMusicFavorite && it.kind == MusicFavoriteKind.Song ->
+                                GridItemSpan(columns)
+                            it is FindroidEpisode -> GridItemSpan(episodeSpan)
+                            else -> GridItemSpan(posterSpan)
                         }
                     },
                 ) { item ->
-                    ItemCard(
-                        item = item,
-                        direction =
-                            if (item is FindroidEpisode) {
-                                Direction.HORIZONTAL
-                            } else {
-                                Direction.VERTICAL
-                            },
-                        onClick = { onAction(CollectionAction.OnItemClick(item)) },
-                        modifier = Modifier.animateItem(),
-                        fillWidth = true,
-                        showYear = ListDisplayField.Year in displayFields,
-                        showCommunityRating = ListDisplayField.CommunityRating in displayFields,
-                        showAgeRating = ListDisplayField.AgeRating in displayFields,
-                    )
+                    if (item is FindroidMusicFavorite && musicFavoriteContent != null) {
+                        musicFavoriteContent(item)
+                    } else {
+                        ItemCard(
+                            item = item,
+                            direction =
+                                if (item is FindroidEpisode) {
+                                    Direction.HORIZONTAL
+                                } else {
+                                    Direction.VERTICAL
+                                },
+                            onClick = { onAction(CollectionAction.OnItemClick(item)) },
+                            modifier = Modifier.animateItem(),
+                            fillWidth = true,
+                            showYear = ListDisplayField.Year in displayFields,
+                            showCommunityRating = ListDisplayField.CommunityRating in displayFields,
+                            showAgeRating = ListDisplayField.AgeRating in displayFields,
+                        )
+                    }
                 }
             }
         }

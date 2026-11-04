@@ -276,6 +276,14 @@ class JellyfinRepositoryImpl(
             .content
             .items
 
+    override suspend fun getMusicSong(itemId: UUID): FindroidMusicSong? =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi
+                .getItem(itemId, jellyfinApi.userId!!)
+                .content
+                .toFindroidMusicSong(this@JellyfinRepositoryImpl)
+        }
+
     override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? =
         withContext(Dispatchers.IO) {
             jellyfinApi.userLibraryApi

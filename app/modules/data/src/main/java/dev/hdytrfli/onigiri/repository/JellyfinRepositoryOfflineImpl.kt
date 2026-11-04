@@ -237,6 +237,8 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun getMusicSongs(): List<FindroidMusicSong> = emptyList()
 
+    override suspend fun getMusicSong(itemId: UUID): FindroidMusicSong? = null
+
     override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? = null
 
     override suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum? = null

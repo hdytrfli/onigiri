@@ -1260,16 +1260,6 @@ constructor(
                                                         R.string.settings_music_gapless_summary,
                                                     backendPreference = appPreferences.musicGapless,
                                                 ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .settings_music_remember_shuffle_repeat,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_music_remember_shuffle_repeat_summary,
-                                                    backendPreference =
-                                                        appPreferences.musicRememberShuffleRepeat,
-                                                ),
                                             )
                                     )
                                 ),
