@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import timber.log.Timber
 
 /**
@@ -57,8 +56,6 @@ constructor(
 
     private var controller: MediaController? = null
     private var connecting = false
-    private var shuffleEnabled = false
-    private var preShuffleOrder: List<String>? = null
     private var batchDepth = 0
 
     init {
@@ -141,21 +138,17 @@ constructor(
                 return@launch
             }
             val safeIndex = startIndex.coerceIn(0, items.lastIndex)
-            val orderedItems =
-                if (shuffle) {
-                    listOf(items[safeIndex]) +
-                        items.filterIndexed { index, _ -> index != safeIndex }.shuffled()
-                } else {
-                    items
-                }
-            preShuffleOrder = if (shuffle) items.mapNotNull { it.mediaId } else null
-            shuffleEnabled = shuffle
             runOnController { player ->
-                // The queue itself is shuffled once; ExoPlayer's continuous shuffle order is not
-                // used because it would keep changing the visible queue for every track.
                 player.shuffleModeEnabled = false
-                player.setMediaItems(orderedItems, if (shuffle) 0 else safeIndex, 0L)
+                player.setMediaItems(items, safeIndex, 0L)
                 player.prepare()
+                if (shuffle) {
+                    val order =
+                        intArrayOf(safeIndex) +
+                            (items.indices.filter { it != safeIndex }).shuffled()
+                    setShuffleOrder(order)
+                    player.shuffleModeEnabled = true
+                }
                 player.play()
             }
         }
@@ -196,35 +189,50 @@ constructor(
     }
 
     fun playQueueItem(index: Int) {
+        val state = _state.value
+        val item = state.queue.getOrNull(index) ?: return
         runOnController { player ->
-            if (index !in 0 until player.mediaItemCount) return@runOnController
+            if (item.timelineIndex !in 0 until player.mediaItemCount) return@runOnController
             batchPlayerUpdate {
-                val current = player.currentMediaItemIndex
+                val current = state.currentIndex
+                var seekIndex = item.timelineIndex
                 if (index > current) {
-                    // Jumping forward moves the old current track into Played. Skipped tracks stay
-                    // in the current queue below the clicked track, not marked as played.
-                    val target = (current + 1).coerceAtMost(player.mediaItemCount - 1)
-                    player.moveMediaItem(index, target)
-                    player.seekTo(target, 0L)
-                } else {
-                    player.seekTo(index, 0L)
+                    if (player.shuffleModeEnabled) {
+                        val order = state.queue.map { it.timelineIndex }.toMutableList()
+                        val target = (current + 1).coerceAtMost(order.lastIndex)
+                        if (index != target) {
+                            order.add(target, order.removeAt(index))
+                            setShuffleOrder(order.toIntArray())
+                        }
+                    } else {
+                        // Jumping forward moves the old current track into Played. Skipped tracks
+                        // stay below the clicked track instead of being marked as played.
+                        val physicalCurrent = player.currentMediaItemIndex
+                        val target = (physicalCurrent + 1).coerceAtMost(player.mediaItemCount - 1)
+                        player.moveMediaItem(item.timelineIndex, target)
+                        seekIndex = target
+                    }
                 }
+                player.seekTo(seekIndex, 0L)
                 player.play()
             }
         }
     }
 
     fun removeQueueItem(index: Int) {
+        val item = _state.value.queue.getOrNull(index) ?: return
         runOnController { player ->
-            if (index in 0 until player.mediaItemCount) {
-                player.removeMediaItem(index)
+            if (item.timelineIndex in 0 until player.mediaItemCount) {
+                player.removeMediaItem(item.timelineIndex)
             }
         }
     }
 
     fun moveQueueItem(fromIndex: Int, toIndex: Int) {
         runOnController { player ->
-            if (
+            if (player.shuffleModeEnabled) {
+                reorderShuffle(fromIndex, toIndex)
+            } else if (
                 fromIndex in 0 until player.mediaItemCount &&
                     toIndex in 0 until player.mediaItemCount &&
                     fromIndex != toIndex
@@ -283,73 +291,42 @@ constructor(
     }
 
     fun toggleShuffle() {
-        if (_state.value.isShuffling) return
-        scope.launch {
-            _state.update { it.copy(isShuffling = true) }
-            // Let the UI render the loading state before the queue-wide reorder blocks the main
-            // thread. This also keeps lazy-list placement animations from running for every item.
-            yield()
-            runOnController { player ->
-                batchPlayerUpdate {
-                    if (shuffleEnabled) {
-                        shuffleEnabled = false
-                        val original = preShuffleOrder
-                        preShuffleOrder = null
-                        if (original != null) {
-                            restoreTailOrder(player, original)
-                        }
-                    } else {
-                        shuffleEnabled = true
-                        preShuffleOrder = allMediaIds(player)
-                        shuffleTail(player)
-                    }
-                    player.shuffleModeEnabled = false
-                }
-                _state.update { it.copy(isShuffling = false) }
+        runOnController { player ->
+            if (player.mediaItemCount <= 1) {
+                player.shuffleModeEnabled = false
+                sync()
+                return@runOnController
             }
+            if (player.shuffleModeEnabled) {
+                player.shuffleModeEnabled = false
+            } else {
+                val current = player.currentMediaItemIndex
+                val order =
+                    (0 until player.mediaItemCount)
+                        .filter { it != current }
+                        .shuffled()
+                        .let { intArrayOf(current) + it }
+                setShuffleOrder(order)
+                player.shuffleModeEnabled = true
+            }
+            sync()
         }
     }
 
-    private fun allMediaIds(player: Player): List<String> =
-        (0 until player.mediaItemCount).mapNotNull { player.getMediaItemAt(it).mediaId }
-
-    private fun shuffleTail(player: Player) {
-        val current = player.currentMediaItemIndex
-        if (current < 0 || current >= player.mediaItemCount - 1) return
-        val tailIds =
-            (current + 1 until player.mediaItemCount).mapNotNull {
-                player.getMediaItemAt(it).mediaId
+    private fun setShuffleOrder(order: IntArray) {
+        val args =
+            Bundle().apply {
+                putIntArray(MusicSessionCommands.EXTRA_SHUFFLE_ORDER, order)
+                putLong(MusicSessionCommands.EXTRA_SHUFFLE_SEED, System.currentTimeMillis())
             }
-        reorderTail(player, tailIds.shuffled())
+        controller?.sendCustomCommand(MusicSessionCommands.SetShuffleOrder, args)
     }
 
-    private fun restoreTailOrder(player: Player, originalIds: List<String>) {
-        val current = player.currentMediaItemIndex
-        if (current < 0) return
-        val remainingIds =
-            (current + 1 until player.mediaItemCount).mapNotNull {
-                player.getMediaItemAt(it).mediaId
-            }
-        val remainingSet = remainingIds.toSet()
-        val restored =
-            originalIds.filter { it in remainingSet } + remainingIds.filter { it !in originalIds }
-        reorderTail(player, restored)
-    }
-
-    private fun reorderTail(player: Player, desiredIds: List<String>) {
-        val current = player.currentMediaItemIndex
-        if (current < 0) return
-        for ((offset, id) in desiredIds.withIndex()) {
-            val target = current + 1 + offset
-            if (target >= player.mediaItemCount) break
-            val from =
-                (current + 1 until player.mediaItemCount).firstOrNull {
-                    player.getMediaItemAt(it).mediaId == id
-                } ?: continue
-            if (from != target) {
-                player.moveMediaItem(from, target)
-            }
-        }
+    private fun reorderShuffle(fromIndex: Int, toIndex: Int) {
+        val order = _state.value.queue.map { it.timelineIndex }.toMutableList()
+        if (fromIndex !in order.indices || toIndex !in order.indices || fromIndex == toIndex) return
+        order.add(toIndex, order.removeAt(fromIndex))
+        setShuffleOrder(order.toIntArray())
     }
 
     fun cycleRepeatMode() {
@@ -440,7 +417,7 @@ constructor(
             .build()
     }
 
-    private fun MediaItem.toPlaybackItem(): MusicPlaybackItem? {
+    private fun MediaItem.toPlaybackItem(timelineIndex: Int): MusicPlaybackItem? {
         val id =
             mediaId?.let { value -> runCatching { UUID.fromString(value) }.getOrNull() }
                 ?: return null
@@ -466,16 +443,24 @@ constructor(
             favorite = favoriteOverrides[id] ?: extras?.getBoolean(EXTRA_FAVORITE) ?: false,
             isAudiobook = extras?.getBoolean(EXTRA_IS_AUDIOBOOK) ?: false,
             overview = extras?.getString(EXTRA_OVERVIEW),
+            timelineIndex = timelineIndex,
         )
     }
 
     private fun sync() {
         val player = controller ?: return
-        val queue =
-            (0 until player.mediaItemCount).mapNotNull {
-                player.getMediaItemAt(it).toPlaybackItem()
+        val physicalQueue =
+            (0 until player.mediaItemCount).mapNotNull { index ->
+                player.getMediaItemAt(index).toPlaybackItem(index)
             }
-        val current = player.currentMediaItem?.toPlaybackItem()
+        val physicalCurrent = player.currentMediaItemIndex.coerceAtLeast(0)
+        val (queue, currentIndex) =
+            if (player.shuffleModeEnabled) {
+                playbackOrder(player, physicalQueue)
+            } else {
+                physicalQueue to physicalCurrent
+            }
+        val current = queue.getOrNull(currentIndex)
         val duration =
             when (val value = player.duration) {
                 C.TIME_UNSET,
@@ -486,7 +471,7 @@ constructor(
             MusicPlaybackState(
                 current = current,
                 queue = queue,
-                currentIndex = player.currentMediaItemIndex.coerceAtLeast(0),
+                currentIndex = currentIndex,
                 hasPrevious = player.hasPreviousMediaItem(),
                 hasNext = player.hasNextMediaItem(),
                 isPlaying = player.isPlaying,
@@ -495,7 +480,7 @@ constructor(
                 isBuffering = player.playbackState == Player.STATE_BUFFERING,
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 durationMs = duration,
-                shuffleEnabled = shuffleEnabled,
+                shuffleEnabled = player.shuffleModeEnabled,
                 isShuffling = _state.value.isShuffling,
                 repeatMode =
                     when (player.repeatMode) {
@@ -505,6 +490,39 @@ constructor(
                     },
                 isConnected = true,
             )
+    }
+
+    private fun playbackOrder(
+        player: Player,
+        physicalQueue: List<MusicPlaybackItem>,
+    ): Pair<List<MusicPlaybackItem>, Int> {
+        val current = player.currentMediaItemIndex
+        val timeline = player.currentTimeline
+        if (current < 0 || timeline.isEmpty || physicalQueue.isEmpty()) {
+            return physicalQueue to current.coerceAtLeast(0)
+        }
+
+        val before = mutableListOf<Int>()
+        var previous = timeline.getPreviousWindowIndex(current, Player.REPEAT_MODE_OFF, true)
+        while (previous != C.INDEX_UNSET) {
+            before.add(previous)
+            previous = timeline.getPreviousWindowIndex(previous, Player.REPEAT_MODE_OFF, true)
+        }
+        before.reverse()
+
+        val after = mutableListOf<Int>()
+        var next = timeline.getNextWindowIndex(current, Player.REPEAT_MODE_OFF, true)
+        while (next != C.INDEX_UNSET) {
+            after.add(next)
+            next = timeline.getNextWindowIndex(next, Player.REPEAT_MODE_OFF, true)
+        }
+
+        val byIndex = physicalQueue.associateBy { it.timelineIndex }
+        val ordered = (before + current + after).mapNotNull { byIndex[it] }
+        if (ordered.size != physicalQueue.size) {
+            return physicalQueue to current.coerceAtLeast(0)
+        }
+        return ordered to before.size
     }
 
     private fun updateProgress() {

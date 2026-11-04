@@ -74,6 +74,7 @@ import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.SortOrder as ItemSortOrder
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
+import org.jellyfin.sdk.model.api.UpdateUserItemDataDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
 import org.jellyfin.sdk.model.api.request.GetGenresRequest
@@ -838,7 +839,11 @@ class JellyfinRepositoryImpl(
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
-            jellyfinApi.userLibraryApi.markFavoriteItem(itemId, userId)
+            jellyfinApi.itemsApi.updateItemUserData(
+                itemId = itemId,
+                userId = userId,
+                data = UpdateUserItemDataDto(isFavorite = true),
+            )
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, true)
         }
@@ -847,7 +852,11 @@ class JellyfinRepositoryImpl(
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
-            jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId, userId)
+            jellyfinApi.itemsApi.updateItemUserData(
+                itemId = itemId,
+                userId = userId,
+                data = UpdateUserItemDataDto(isFavorite = false),
+            )
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, false)
         }

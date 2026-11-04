@@ -16,6 +16,7 @@ data class MusicPlaybackItem(
     val favorite: Boolean,
     val isAudiobook: Boolean = false,
     val overview: String? = null,
+    val timelineIndex: Int = 0,
 )
 
 enum class MusicRepeatMode {

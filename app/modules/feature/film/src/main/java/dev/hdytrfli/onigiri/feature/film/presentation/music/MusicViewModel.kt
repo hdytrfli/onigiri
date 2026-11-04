@@ -262,7 +262,8 @@ constructor(
 
     private fun sortField(value: String): MusicSortField = runCatching {
         MusicSortField.valueOf(value)
-    }.getOrDefault(MusicSortField.Title)
+    }
+        .getOrDefault(MusicSortField.Title)
 
     private fun Set<MusicDisplayField>.toggled(field: MusicDisplayField): Set<MusicDisplayField> =
         toMutableSet().apply { if (!add(field)) remove(field) }
