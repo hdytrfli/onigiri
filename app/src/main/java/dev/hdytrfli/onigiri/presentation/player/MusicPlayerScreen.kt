@@ -1,6 +1,10 @@
 package dev.hdytrfli.onigiri.presentation.player
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,6 +60,7 @@ import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 private val PlayerBackgroundTop = Color(0xFF181818)
 private val PlayerOnBackground = Color.White
@@ -63,6 +69,7 @@ private val PlayerOnBackgroundMuted = Color(0xB3FFFFFF)
 @Composable
 fun MusicPlayerScreen(
     state: MusicPlaybackState,
+    artworkType: String,
     navigateBack: () -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
@@ -117,7 +124,12 @@ fun MusicPlayerScreen(
                 ) {
                     val gutter = MaterialTheme.spacings.gutter
                     val artSize = minOf(maxWidth - gutter * 2, Dimens.contentMaxWidth, maxHeight)
-                    AlbumArtwork(item = current, modifier = Modifier.size(artSize))
+                    AlbumArtwork(
+                        item = current,
+                        artworkType = artworkType,
+                        isPlaying = state.isPlaying,
+                        modifier = Modifier.size(artSize),
+                    )
                 }
                 BottomControls(
                     state = state,
@@ -279,25 +291,82 @@ private fun MusicEntityLink(
 }
 
 @Composable
-private fun AlbumArtwork(item: MusicPlaybackItem, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.clip(MaterialTheme.shapes.large).background(Color(0xFF242424)),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (item.imageUri != null) {
-            AsyncImage(
-                model = item.imageUri,
-                contentDescription = item.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+private fun AlbumArtwork(
+    item: MusicPlaybackItem,
+    artworkType: String,
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    if (artworkType == "disc") {
+        val rotation = remember { Animatable(0f) }
+        LaunchedEffect(isPlaying) {
+            if (isPlaying) {
+                while (isActive) {
+                    rotation.animateTo(
+                        targetValue = rotation.value + 360f,
+                        animationSpec = tween(durationMillis = 12_000, easing = LinearEasing),
+                    )
+                }
+            }
+        }
+
+        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .graphicsLayer { rotationZ = rotation.value }
+                        .clip(CircleShape)
+                        .background(Color(0xFF242424))
+                        .border(
+                            width = 8.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = CircleShape,
+                        ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (item.imageUri != null) {
+                    AsyncImage(
+                        model = item.imageUri,
+                        contentDescription = item.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_music),
+                        contentDescription = null,
+                        modifier = Modifier.size(72.dp),
+                        tint = PlayerOnBackgroundMuted,
+                    )
+                }
+            }
+            Box(
+                modifier =
+                    Modifier.size(24.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.background)
             )
-        } else {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_music),
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = PlayerOnBackgroundMuted,
-            )
+        }
+    } else {
+        Box(
+            modifier = modifier.clip(MaterialTheme.shapes.large).background(Color(0xFF242424)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (item.imageUri != null) {
+                AsyncImage(
+                    model = item.imageUri,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_music),
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp),
+                    tint = PlayerOnBackgroundMuted,
+                )
+            }
         }
     }
 }
@@ -372,32 +441,36 @@ private fun BottomControls(
                         )
                     },
                 )
-                AppIconButton(
-                    onClick = onPlayPause,
-                    size = AppButtonSize.Player,
-                    content = {
-                        if (state.isBuffering) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                            )
-                        } else {
-                            Icon(
-                                painter =
-                                    painterResource(
-                                        if (state.isPlaying) CoreR.drawable.ic_pause
-                                        else CoreR.drawable.ic_play
-                                    ),
-                                contentDescription =
-                                    stringResource(
-                                        if (state.isPlaying) FilmR.string.music_pause
-                                        else CoreR.string.play
-                                    ),
-                            )
-                        }
-                    },
-                )
+                Box(
+                    modifier =
+                        Modifier.size(AppButtonSize.Player.value)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .clickable(onClick = onPlayPause),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (state.isBuffering) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = Color.Black,
+                        )
+                    } else {
+                        Icon(
+                            painter =
+                                painterResource(
+                                    if (state.isPlaying) CoreR.drawable.ic_pause
+                                    else CoreR.drawable.ic_play
+                                ),
+                            contentDescription =
+                                stringResource(
+                                    if (state.isPlaying) FilmR.string.music_pause
+                                    else CoreR.string.play
+                                ),
+                            tint = Color.Black,
+                        )
+                    }
+                }
                 AppIconButton(
                     onClick = onNext,
                     variant = AppButtonVariant.Ghost,
@@ -463,7 +536,7 @@ private fun BottomControls(
                 Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
                 Text(
                     text = album,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = PlayerOnBackgroundMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

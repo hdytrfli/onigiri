@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
+import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -12,9 +13,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
-class MusicPlayerViewModel @Inject constructor(private val manager: MusicPlayerManager) :
-    ViewModel() {
+class MusicPlayerViewModel
+@Inject
+constructor(
+    private val manager: MusicPlayerManager,
+    appPreferences: AppPreferences,
+) : ViewModel() {
     val state = manager.state
+
+    val artworkType: kotlinx.coroutines.flow.StateFlow<String> =
+        appPreferences
+            .observe(appPreferences.musicArtworkType)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = appPreferences.getValue(appPreferences.musicArtworkType),
+            )
 
     /** Changes only when the track changes, so the navigation shell does not tick with progress. */
     val current: kotlinx.coroutines.flow.StateFlow<MusicPlaybackItem?> =

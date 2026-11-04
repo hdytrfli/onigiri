@@ -41,11 +41,13 @@ class MusicPlayerActivity : ComponentActivity() {
 
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
+            val artworkType by viewModel.artworkType.collectAsStateWithLifecycle()
 
             CompositionLocalProvider(LocalHideStatusBar provides hideStatusBar) {
                 FindroidTheme {
                     MusicPlayerScreen(
                         state = state,
+                        artworkType = artworkType,
                         navigateBack = ::finish,
                         onPlayPause = viewModel::togglePlayPause,
                         onPrevious = viewModel::previous,

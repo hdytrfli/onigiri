@@ -1213,6 +1213,46 @@ constructor(
             PreferenceGroup(
                 preferences =
                     listOf(
+                        PreferenceCategory(
+                            nameStringResource = R.string.settings_category_music,
+                            descriptionStringRes = R.string.settings_category_music_summary,
+                            iconDrawableId = R.drawable.ic_music,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(
+                                        SettingsEvent.NavigateToSettings(
+                                            listOf(it.nameStringResource)
+                                        )
+                                    )
+                                }
+                            },
+                            nestedPreferenceGroups =
+                                listOf(
+                                    PreferenceGroup(
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_music_artwork_type,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_artwork_type_summary,
+                                                    optionIcon = OptionIcon.Portrait,
+                                                    backendPreference =
+                                                        appPreferences.musicArtworkType,
+                                                    options = R.array.music_artwork_type_options,
+                                                    optionValues =
+                                                        R.array.music_artwork_type_values,
+                                                )
+                                            )
+                                    )
+                                ),
+                        )
+                    )
+            ),
+            PreferenceGroup(
+                preferences =
+                    listOf(
                         PreferenceSwitch(
                             nameStringResource = R.string.offline_mode,
                             descriptionStringRes = R.string.offline_mode_summary,
@@ -1605,7 +1645,8 @@ constructor(
                 preference.nameStringResource == R.string.settings_category_language ||
                     preference.nameStringResource == R.string.settings_category_interface ||
                     preference.nameStringResource == R.string.settings_category_reader ||
-                    preference.nameStringResource == R.string.settings_category_player ->
+                    preference.nameStringResource == R.string.settings_category_player ||
+                    preference.nameStringResource == R.string.settings_category_music ->
                     R.string.settings_group_app
                 preference.nameStringResource == R.string.settings_category_network ->
                     R.string.settings_group_server

@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -235,17 +236,11 @@ private fun QueueRow(
 ) {
     val isCurrent = index == currentIndex
 
-    Column(
-        modifier = modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier =
                 Modifier.fillMaxWidth()
                     .height(72.dp)
-                    .background(
-                        if (isCurrent) MaterialTheme.colorScheme.surfaceContainerHigh
-                        else MaterialTheme.colorScheme.surfaceContainer
-                    )
                     .clickable(onClick = onPlayNow)
                     .padding(start = MaterialTheme.spacings.small),
             verticalAlignment = Alignment.CenterVertically,
@@ -271,31 +266,29 @@ private fun QueueRow(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                if (isCurrent) {
+                    Box(
+                        modifier =
+                            Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.45f))
+                    )
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_play),
+                        contentDescription = stringResource(FilmR.string.music_now_playing),
+                        modifier = Modifier.size(18.dp),
+                        tint = Color.White,
+                    )
+                }
             }
 
             Column(
                 modifier = Modifier.weight(1f).padding(horizontal = MaterialTheme.spacings.small)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isCurrent) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_play),
-                            contentDescription = stringResource(FilmR.string.music_now_playing),
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(6.dp))
-                    }
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color =
-                            if (isCurrent) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Text(
                     text = listOfNotNull(item.artist, item.album).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
@@ -315,7 +308,7 @@ private fun QueueRow(
         }
 
         if (trailingDivider) {
-            HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
+            HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.05f))
         }
     }
 }

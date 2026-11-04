@@ -49,11 +49,6 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
-private enum class SwipeAxis {
-    HORIZONTAL,
-    VERTICAL,
-}
-
 /**
  * Compact now-playing bar: one wide, snackbar-style player pill plus a pause/resume button. Swipe
  * the pill right for the next track, left for the previous track, or down to close the queue.
@@ -73,7 +68,6 @@ fun MiniMusicPlayer(
     val scope = rememberCoroutineScope()
     val swipeThreshold = with(density) { 56.dp.toPx() }
     var dragging by remember { mutableStateOf(false) }
-    var gestureAxis by remember { mutableStateOf<SwipeAxis?>(null) }
     var dragX by remember { mutableFloatStateOf(0f) }
     var dragY by remember { mutableFloatStateOf(0f) }
     var animatedX by remember { mutableFloatStateOf(0f) }
@@ -102,34 +96,19 @@ fun MiniMusicPlayer(
                     detectDragGestures(
                         onDragStart = {
                             dragging = true
-                            gestureAxis = null
                             dragX = 0f
                             dragY = 0f
                         },
                         onDrag = { change, amount ->
                             change.consume()
-                            if (gestureAxis == null) {
-                                val threshold = viewConfiguration.touchSlop
-                                if (abs(amount.x) > threshold && abs(amount.x) > abs(amount.y)) {
-                                    gestureAxis = SwipeAxis.HORIZONTAL
-                                } else if (
-                                    abs(amount.y) > threshold && abs(amount.y) > abs(amount.x)
-                                ) {
-                                    gestureAxis = SwipeAxis.VERTICAL
-                                }
-                            }
-                            when (gestureAxis) {
-                                SwipeAxis.HORIZONTAL -> dragX += amount.x
-                                SwipeAxis.VERTICAL -> dragY += amount.y
-                                null -> Unit
-                            }
+                            dragX += amount.x
+                            dragY += amount.y
                         },
                         onDragEnd = {
                             val startX = dragX
                             val startY = dragY.coerceAtLeast(0f)
-                            val horizontal = gestureAxis == SwipeAxis.HORIZONTAL
+                            val horizontal = abs(startX) > abs(startY)
                             dragging = false
-                            gestureAxis = null
                             animatedX = startX
                             animatedY = startY
                             dragX = 0f
@@ -186,7 +165,6 @@ fun MiniMusicPlayer(
                             val startX = dragX
                             val startY = dragY.coerceAtLeast(0f)
                             dragging = false
-                            gestureAxis = null
                             animatedX = startX
                             animatedY = startY
                             dragX = 0f

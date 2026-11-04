@@ -198,6 +198,7 @@ class AppPreferences(
     val bookSortOrder = Preference("pref_book_sort_order", "Ascending")
     val musicSortBy = Preference("pref_music_sort_by", "SortName")
     val musicSortOrder = Preference("pref_music_sort_order", "Ascending")
+    val musicArtworkType = Preference("pref_music_artwork_type", "album")
 
     // Offline mode
     val offlineMode = Preference("pref_offline_mode", false)

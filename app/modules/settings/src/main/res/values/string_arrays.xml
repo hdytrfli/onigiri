@@ -334,7 +334,17 @@
         <item>600</item>
         <item>700</item>
     </string-array>
-    <string-array name="tablet_ui_modes_options">
+    <string-array name="music_artwork_type_options">
+    <item>Album artwork</item>
+    <item>Disk animation</item>
+</string-array>
+
+<string-array name="music_artwork_type_values">
+    <item>album</item>
+    <item>disc</item>
+</string-array>
+
+<string-array name="tablet_ui_modes_options">
         <item>@string/tablet_ui_option_automatic</item>
         <item>@string/tablet_ui_option_always</item>
         <item>@string/tablet_ui_option_landscape</item>
