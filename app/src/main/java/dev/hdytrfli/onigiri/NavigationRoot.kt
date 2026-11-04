@@ -164,6 +164,7 @@ fun NavigationRoot(
     profileLoggedOut: Boolean,
     swrStore: SwrStore,
     confirmExit: Boolean = false,
+    musicDestination: MutableState<MusicLaunchDestination?>? = null,
 ) {
     val setupComplete = onboardingComplete && hasServers && hasCurrentServer && hasCurrentUser
     val loggedOutProfileSelection =
@@ -228,6 +229,7 @@ fun NavigationRoot(
             searchExpanded = searchExpanded,
             confirmExit = confirmExit,
             swrStore = swrStore,
+            musicDestination = musicDestination,
         )
     } else {
         SetupNavigation(
@@ -246,6 +248,7 @@ private fun MainNavigation(
     searchExpanded: MutableState<Boolean>,
     confirmExit: Boolean,
     swrStore: SwrStore,
+    musicDestination: MutableState<MusicLaunchDestination?>? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -253,6 +256,20 @@ private fun MainNavigation(
     val musicPlayerViewModel: MusicPlayerViewModel = hiltViewModel()
     val currentMusic by musicPlayerViewModel.current.collectAsStateWithLifecycle()
     var exitPending by remember { mutableStateOf(false) }
+
+    LaunchedEffect(musicDestination?.value) {
+        when (val destination = musicDestination?.value) {
+            is MusicLaunchDestination.Artist -> {
+                navigator.navigate(ArtistDetailRoute(destination.id))
+                musicDestination.value = null
+            }
+            is MusicLaunchDestination.Album -> {
+                navigator.navigate(AlbumDetailRoute(destination.id))
+                musicDestination.value = null
+            }
+            null -> Unit
+        }
+    }
 
     LaunchedEffect(swrStore) {
         swrStore.failures.collect { failure ->
@@ -328,7 +345,7 @@ private fun MainNavigation(
     CompositionLocalProvider(
         LocalSuiteStartInset provides suiteType.suiteStartInset(),
         LocalSuiteBottomInset provides suiteType.suiteBottomInset(),
-        LocalMiniPlayerInset provides if (currentMusic != null) 60.dp else 0.dp,
+        LocalMiniPlayerInset provides if (currentMusic != null) 68.dp else 0.dp,
         LocalTabReselect provides tabReselect,
         LocalOpenDownloads provides
             {
@@ -421,7 +438,7 @@ private fun MainNavigation(
                             bottom =
                                 MaterialTheme.spacings.medium +
                                     LocalSuiteBottomInset.current +
-                                    if (showMiniPlayer) 60.dp else 0.dp,
+                                    if (showMiniPlayer) 68.dp else 0.dp,
                         ),
             )
         }

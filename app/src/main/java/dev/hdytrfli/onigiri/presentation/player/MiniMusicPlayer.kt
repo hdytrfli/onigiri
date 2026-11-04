@@ -1,6 +1,7 @@
 package dev.hdytrfli.onigiri.presentation.player
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +17,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,10 +39,11 @@ import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.theme.spacings
+import kotlin.math.abs
 
 /**
- * Compact now-playing bar: one wide, snackbar-style player pill plus separate transport buttons.
- * Tap the pill to open the full player; the buttons stay independent targets.
+ * Compact now-playing bar: one wide, snackbar-style player pill plus a pause/resume button. Swipe
+ * the pill right for the next track, left for the previous track, or down to close the queue.
  */
 @Composable
 fun MiniMusicPlayer(
@@ -43,22 +51,63 @@ fun MiniMusicPlayer(
     onOpen: () -> Unit,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
+    onPrevious: () -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val item = state.current ?: return
+    val density = LocalDensity.current
+    val swipeThreshold = with(density) { 56.dp.toPx() }
+    var dragX by remember { mutableFloatStateOf(0f) }
+    var dragY by remember { mutableFloatStateOf(0f) }
 
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = MaterialTheme.spacings.gutter)
-                .padding(vertical = MaterialTheme.spacings.extraSmall),
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                .padding(
+                    start = MaterialTheme.spacings.gutter,
+                    end = MaterialTheme.spacings.gutter,
+                    top = MaterialTheme.spacings.extraSmall,
+                    bottom = MaterialTheme.spacings.medium,
+                ),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
             onClick = onOpen,
-            modifier = Modifier.weight(1f).height(52.dp),
+            modifier =
+                Modifier.weight(1f).height(52.dp).pointerInput(state.hasNext, state.hasPrevious) {
+                    detectDragGestures(
+                        onDragStart = {
+                            dragX = 0f
+                            dragY = 0f
+                        },
+                        onDrag = { change, amount ->
+                            change.consume()
+                            dragX += amount.x
+                            dragY += amount.y
+                        },
+                        onDragEnd = {
+                            val horizontal = abs(dragX) > abs(dragY)
+                            if (horizontal && abs(dragX) >= swipeThreshold) {
+                                if (dragX > 0f) {
+                                    if (state.hasNext) onNext()
+                                } else if (state.hasPrevious) {
+                                    onPrevious()
+                                }
+                            } else if (!horizontal && dragY >= swipeThreshold) {
+                                onClose()
+                            }
+                            dragX = 0f
+                            dragY = 0f
+                        },
+                        onDragCancel = {
+                            dragX = 0f
+                            dragY = 0f
+                        },
+                    )
+                },
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 3.dp,
@@ -94,23 +143,12 @@ fun MiniMusicPlayer(
                 Icon(
                     painter =
                         painterResource(
-                            if (state.isPlaying) CoreR.drawable.ic_diamond
-                            else CoreR.drawable.ic_play
+                            if (state.isPlaying) CoreR.drawable.ic_pause else CoreR.drawable.ic_play
                         ),
                     contentDescription =
                         stringResource(
                             if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
                         ),
-                )
-            },
-        )
-        AppIconButton(
-            onClick = onNext,
-            variant = AppButtonVariant.Secondary,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_skip_forward),
-                    contentDescription = stringResource(FilmR.string.music_next),
                 )
             },
         )

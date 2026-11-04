@@ -207,6 +207,13 @@ constructor(
         runOnController { player -> if (player.isPlaying) player.pause() }
     }
 
+    fun stop() {
+        runOnController { player ->
+            player.stop()
+            player.clearMediaItems()
+        }
+    }
+
     fun previous() {
         runOnController { player ->
             if (player.currentPosition >= 5_000L) {
@@ -283,6 +290,9 @@ constructor(
             Bundle().apply {
                 putLong(EXTRA_DURATION_MS, runtimeTicks / 10_000L)
                 putBoolean(EXTRA_FAVORITE, favorite)
+                putString(EXTRA_ARTIST_ID, artistId?.toString())
+                putString(EXTRA_ARTIST_IMAGE, artistImage?.toString())
+                putString(EXTRA_ALBUM_ID, albumId?.toString())
             }
         val metadata =
             MediaMetadata.Builder()
@@ -290,6 +300,7 @@ constructor(
                 .setArtist(artistName)
                 .setAlbumTitle(albumName)
                 .setArtworkUri(images.primary)
+                .setDurationMs(runtimeTicks / 10_000L)
                 .setExtras(extras)
                 .build()
 
@@ -310,9 +321,19 @@ constructor(
             id = id,
             title = metadata.title?.toString().orEmpty(),
             artist = metadata.artist?.toString(),
+            artistId =
+                extras?.getString(EXTRA_ARTIST_ID)?.let {
+                    runCatching { UUID.fromString(it) }.getOrNull()
+                },
+            artistImageUri = extras?.getString(EXTRA_ARTIST_IMAGE),
             album = metadata.albumTitle?.toString(),
+            albumId =
+                extras?.getString(EXTRA_ALBUM_ID)?.let {
+                    runCatching { UUID.fromString(it) }.getOrNull()
+                },
             imageUri = metadata.artworkUri?.toString(),
-            durationMs = extras?.getLong(EXTRA_DURATION_MS) ?: 0L,
+            durationMs =
+                metadata.durationMs?.takeIf { it > 0L } ?: extras?.getLong(EXTRA_DURATION_MS) ?: 0L,
             favorite = favoriteOverrides[id] ?: extras?.getBoolean(EXTRA_FAVORITE) ?: false,
         )
     }
@@ -335,6 +356,8 @@ constructor(
                 current = current,
                 queue = queue,
                 currentIndex = player.currentMediaItemIndex.coerceAtLeast(0),
+                hasPrevious = player.hasPreviousMediaItem(),
+                hasNext = player.hasNextMediaItem(),
                 isPlaying = player.isPlaying,
                 isBuffering = player.playbackState == Player.STATE_BUFFERING,
                 positionMs = player.currentPosition.coerceAtLeast(0L),
@@ -378,5 +401,8 @@ constructor(
     private companion object {
         const val EXTRA_DURATION_MS = "music_duration_ms"
         const val EXTRA_FAVORITE = "music_favorite"
+        const val EXTRA_ARTIST_ID = "music_artist_id"
+        const val EXTRA_ARTIST_IMAGE = "music_artist_image"
+        const val EXTRA_ALBUM_ID = "music_album_id"
     }
 }

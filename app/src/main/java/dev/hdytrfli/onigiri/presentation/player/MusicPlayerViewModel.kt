@@ -31,6 +31,8 @@ class MusicPlayerViewModel @Inject constructor(private val manager: MusicPlayerM
 
     fun pause() = manager.pause()
 
+    fun stop() = manager.stop()
+
     fun previous() = manager.previous()
 
     fun next() = manager.next()

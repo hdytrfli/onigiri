@@ -8,16 +8,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +53,7 @@ import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
+import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import kotlinx.coroutines.delay
 
 private val PlayerBackgroundTop = Color(0xFF181818)
@@ -74,6 +72,8 @@ fun MusicPlayerScreen(
     onCycleRepeat: () -> Unit,
     onToggleFavorite: () -> Unit,
     onOpenQueue: () -> Unit,
+    onArtistClick: (java.util.UUID) -> Unit,
+    onAlbumClick: (java.util.UUID) -> Unit,
     onClearError: () -> Unit,
 ) {
     var overlayMessage by remember { mutableStateOf<String?>(null) }
@@ -91,14 +91,21 @@ fun MusicPlayerScreen(
         }
     }
 
+    val safePadding = rememberSafePadding()
+
     Box(
         modifier =
             Modifier.fillMaxSize()
                 .background(Brush.verticalGradient(listOf(PlayerBackgroundTop, Color.Black)))
-                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(top = safePadding.top, bottom = safePadding.bottom)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            PlayerTopBar(navigateBack = navigateBack, onOpenQueue = onOpenQueue)
+            PlayerTopBar(
+                navigateBack = navigateBack,
+                favorite = state.current?.favorite == true,
+                onToggleFavorite = onToggleFavorite,
+                onOpenQueue = onOpenQueue,
+            )
             val current = state.current
             if (current == null) {
                 EmptyPlayer()
@@ -131,7 +138,8 @@ fun MusicPlayerScreen(
                             }
                         onCycleRepeat()
                     },
-                    onToggleFavorite = onToggleFavorite,
+                    onArtistClick = onArtistClick,
+                    onAlbumClick = onAlbumClick,
                     onClearError = onClearError,
                 )
             }
@@ -139,7 +147,8 @@ fun MusicPlayerScreen(
 
         overlayMessage?.let { message ->
             Surface(
-                modifier = Modifier.align(Alignment.Center),
+                modifier =
+                    Modifier.align(Alignment.TopCenter).padding(top = MaterialTheme.spacings.small),
                 shape = CircleShape,
                 color = Color(0xCC000000),
                 contentColor = Color.White,
@@ -156,7 +165,12 @@ fun MusicPlayerScreen(
 }
 
 @Composable
-private fun PlayerTopBar(navigateBack: () -> Unit, onOpenQueue: () -> Unit) {
+private fun PlayerTopBar(
+    navigateBack: () -> Unit,
+    favorite: Boolean,
+    onToggleFavorite: () -> Unit,
+    onOpenQueue: () -> Unit,
+) {
     Row(
         modifier =
             Modifier.fillMaxWidth()
@@ -164,30 +178,93 @@ private fun PlayerTopBar(navigateBack: () -> Unit, onOpenQueue: () -> Unit) {
                     horizontal = MaterialTheme.spacings.gutter,
                     vertical = MaterialTheme.spacings.small,
                 ),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AppIconButton(
             onClick = navigateBack,
-            variant = AppButtonVariant.Ghost,
+            variant = AppButtonVariant.Secondary,
             content = {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_arrow_left),
                     contentDescription = stringResource(CoreR.string.close),
-                    tint = PlayerOnBackground,
                 )
             },
         )
         Spacer(modifier = Modifier.weight(1f))
         AppIconButton(
+            onClick = onToggleFavorite,
+            variant = AppButtonVariant.Secondary,
+            content = {
+                Icon(
+                    painter =
+                        painterResource(
+                            if (favorite) CoreR.drawable.ic_heart_filled
+                            else CoreR.drawable.ic_heart
+                        ),
+                    contentDescription = stringResource(CoreR.string.favorite_button_description),
+                    tint =
+                        if (favorite) Color(0xFFE5484D)
+                        else MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            },
+        )
+        AppIconButton(
             onClick = onOpenQueue,
-            variant = AppButtonVariant.Ghost,
+            variant = AppButtonVariant.Secondary,
             content = {
                 Icon(
                     painter = painterResource(CoreR.drawable.ic_list),
                     contentDescription = stringResource(FilmR.string.music_queue),
-                    tint = PlayerOnBackground,
                 )
             },
+        )
+    }
+}
+
+@Composable
+private fun MusicEntityLink(
+    label: String,
+    imageUri: String?,
+    placeholder: Int,
+    onClick: () -> Unit,
+) {
+    if (label.isBlank()) return
+    Row(
+        modifier =
+            Modifier.clip(CircleShape)
+                .clickable(onClick = onClick)
+                .padding(vertical = MaterialTheme.spacings.extraSmall),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF2A2A2A)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (imageUri != null) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(placeholder),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = PlayerOnBackgroundMuted,
+                )
+            }
+        }
+        Spacer(Modifier.width(MaterialTheme.spacings.extraSmall))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = PlayerOnBackgroundMuted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = 140.dp),
         )
     }
 }
@@ -227,7 +304,8 @@ private fun BottomControls(
     onSeek: (Long) -> Unit,
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
-    onToggleFavorite: () -> Unit,
+    onArtistClick: (java.util.UUID) -> Unit,
+    onAlbumClick: (java.util.UUID) -> Unit,
     onClearError: () -> Unit,
 ) {
     var dragging by remember { mutableStateOf(false) }
@@ -250,46 +328,53 @@ private fun BottomControls(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth()) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = PlayerOnBackground,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = PlayerOnBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(MaterialTheme.spacings.small))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                item.artistId?.let { artistId ->
+                    MusicEntityLink(
+                        label = item.artist.orEmpty(),
+                        imageUri = item.artistImageUri,
+                        placeholder = CoreR.drawable.ic_user,
+                        onClick = { onArtistClick(artistId) },
                     )
-                    Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
+                }
+                item.albumId?.let { albumId ->
+                    MusicEntityLink(
+                        label = item.album.orEmpty(),
+                        imageUri = item.imageUri,
+                        placeholder = CoreR.drawable.ic_music,
+                        onClick = { onAlbumClick(albumId) },
+                    )
+                }
+                if (item.artistId == null && item.albumId == null) {
                     Text(
                         text = listOfNotNull(item.artist, item.album).joinToString(" · "),
                         style = MaterialTheme.typography.bodyMedium,
                         color = PlayerOnBackgroundMuted,
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                AppIconButton(
-                    onClick = onToggleFavorite,
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter =
-                                painterResource(
-                                    if (item.favorite) CoreR.drawable.ic_heart_filled
-                                    else CoreR.drawable.ic_heart
-                                ),
-                            contentDescription =
-                                stringResource(CoreR.string.favorite_button_description),
-                            tint = if (item.favorite) Color(0xFFE5484D) else PlayerOnBackground,
-                        )
-                    },
-                )
             }
 
             Spacer(Modifier.height(MaterialTheme.spacings.small))
             Slider(
                 state = sliderState,
-                onValueChange = { dragging = true },
+                onValueChange = {
+                    dragging = true
+                    sliderState.value = it
+                },
                 onValueChangeFinished = {
                     dragging = false
                     if (state.durationMs > 0L) {
@@ -376,7 +461,7 @@ private fun BottomControls(
                             Icon(
                                 painter =
                                     painterResource(
-                                        if (state.isPlaying) CoreR.drawable.ic_diamond
+                                        if (state.isPlaying) CoreR.drawable.ic_pause
                                         else CoreR.drawable.ic_play
                                     ),
                                 contentDescription =

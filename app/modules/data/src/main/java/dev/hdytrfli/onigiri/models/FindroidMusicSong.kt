@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.models
 
+import android.net.Uri
 import java.util.UUID
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -12,8 +13,10 @@ data class FindroidMusicSong(
     @Serializable(with = UuidSerializer::class) val id: UUID,
     val name: String,
     @Serializable(with = UuidSerializer::class) val albumId: UUID?,
+    @Serializable(with = UuidSerializer::class) val artistId: UUID?,
     val albumName: String?,
     val artistName: String?,
+    @Serializable(with = UriSerializer::class) val artistImage: Uri?,
     val indexNumber: Int?,
     val productionYear: Int?,
     val runtimeTicks: Long,
@@ -39,16 +42,23 @@ fun BaseItemDto.toFindroidMusicSong(
             null
         }
 
+    val artistId = albumArtists?.firstOrNull()?.id ?: artistItems?.firstOrNull()?.id
+    val artistImage = artistId?.let {
+        buildItemImageUrl(repository.getBaseUrl(), it, ImageType.PRIMARY)
+    }
+
     return FindroidMusicSong(
         id = id,
         name = name.orEmpty(),
         albumId = albumId,
+        artistId = artistId,
         albumName = album,
         artistName =
             albumArtist
                 ?: albumArtists?.firstOrNull()?.name
                 ?: artistItems?.firstOrNull()?.name
                 ?: artists?.joinToString(", "),
+        artistImage = artistImage,
         indexNumber = indexNumber,
         productionYear = productionYear,
         runtimeTicks = runTimeTicks ?: 0,

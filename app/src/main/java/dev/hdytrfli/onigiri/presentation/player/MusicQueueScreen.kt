@@ -2,10 +2,9 @@ package dev.hdytrfli.onigiri.presentation.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +13,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
@@ -25,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +54,7 @@ import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
+import java.util.UUID
 import kotlin.math.roundToInt
 
 /** A regular page, in the same shape as the reader's Contents page. */
@@ -67,6 +67,14 @@ fun MusicQueueScreen(
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    val latestQueue by rememberUpdatedState(queue)
+    val latestMove by rememberUpdatedState(onMove)
+    val density = LocalDensity.current
+    val rowHeightPx = with(density) { 72.dp.toPx() }
+    var draggingId by remember { mutableStateOf<UUID?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+
     PageScaffold(
         topBar = {
             PageTopBar(
@@ -75,10 +83,11 @@ fun MusicQueueScreen(
             )
         }
     ) { innerPadding ->
-        val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
-
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(contentPadding),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(all = MaterialTheme.spacings.gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (queue.isEmpty()) {
@@ -96,33 +105,52 @@ fun MusicQueueScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer
                         ),
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                    ) {
-                        queue.forEachIndexed { index, item ->
-                            key(item.id) {
-                                QueueRow(
-                                    item = item,
-                                    index = index,
-                                    queue = queue,
-                                    currentIndex = currentIndex,
-                                    onPlayNow = { onPlayNow(index) },
-                                    onPlayNext = {
-                                        val target = (currentIndex + 1).coerceIn(0, queue.lastIndex)
-                                        if (target != index) onMove(index, target)
-                                    },
-                                    onPlayEnd = {
-                                        if (index != queue.lastIndex) {
-                                            onMove(index, queue.lastIndex)
+                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                        itemsIndexed(queue, key = { _, item -> item.id }) { index, item ->
+                            val isDragging = draggingId == item.id
+                            QueueRow(
+                                item = item,
+                                index = index,
+                                currentIndex = currentIndex,
+                                onPlayNow = { onPlayNow(index) },
+                                onPlayNext = {
+                                    val target = (currentIndex + 1).coerceIn(0, queue.lastIndex)
+                                    if (target != index) onMove(index, target)
+                                },
+                                onPlayEnd = {
+                                    if (index != queue.lastIndex) onMove(index, queue.lastIndex)
+                                },
+                                onRemove = { onRemove(index) },
+                                onDragStart = {
+                                    draggingId = item.id
+                                    dragOffset = 0f
+                                },
+                                onDrag = { amount ->
+                                    dragOffset += amount
+                                    val from = latestQueue.indexOfFirst { it.id == item.id }
+                                    if (from >= 0) {
+                                        val shift = (dragOffset / rowHeightPx).roundToInt()
+                                        val to = (from + shift).coerceIn(0, latestQueue.lastIndex)
+                                        if (to != from) {
+                                            latestMove(from, to)
+                                            dragOffset -= (to - from) * rowHeightPx
                                         }
+                                    }
+                                },
+                                onDragEnd = {
+                                    draggingId = null
+                                    dragOffset = 0f
+                                },
+                                modifier =
+                                    if (isDragging) {
+                                        Modifier.zIndex(1f).offset {
+                                            IntOffset(0, dragOffset.roundToInt())
+                                        }
+                                    } else {
+                                        Modifier.animateItem()
                                     },
-                                    onRemove = { onRemove(index) },
-                                    onMove = onMove,
-                                )
-                            }
-                            if (index < queue.lastIndex) {
-                                HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
-                            }
+                                trailingDivider = index < queue.lastIndex,
+                            )
                         }
                     }
                 }
@@ -135,126 +163,115 @@ fun MusicQueueScreen(
 private fun QueueRow(
     item: MusicPlaybackItem,
     index: Int,
-    queue: List<MusicPlaybackItem>,
     currentIndex: Int,
     onPlayNow: () -> Unit,
     onPlayNext: () -> Unit,
     onPlayEnd: () -> Unit,
     onRemove: () -> Unit,
-    onMove: (fromIndex: Int, toIndex: Int) -> Unit,
+    onDragStart: () -> Unit,
+    onDrag: (Float) -> Unit,
+    onDragEnd: () -> Unit,
+    modifier: Modifier = Modifier,
+    trailingDivider: Boolean,
 ) {
-    val latestQueue by rememberUpdatedState(queue)
-    val latestMove by rememberUpdatedState(onMove)
-    val density = LocalDensity.current
-    val rowHeightPx = with(density) { 72.dp.toPx() }
-    var draggingId by remember { mutableStateOf<java.util.UUID?>(null) }
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    val isDragging = draggingId == item.id
+    val latestDragStart by rememberUpdatedState(onDragStart)
+    val latestDrag by rememberUpdatedState(onDrag)
+    val latestDragEnd by rememberUpdatedState(onDragEnd)
     val isCurrent = index == currentIndex
 
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .height(72.dp)
-                .zIndex(if (isDragging) 1f else 0f)
-                .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
-                .background(
-                    if (isDragging) MaterialTheme.colorScheme.surfaceContainerHigh
-                    else MaterialTheme.colorScheme.surfaceContainer
-                )
-                .clickable(onClick = onPlayNow)
-                .padding(start = MaterialTheme.spacings.extraSmall),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        Box(
+        Row(
             modifier =
-                Modifier.size(44.dp).pointerInput(item.id) {
-                    detectDragGestures(
-                        onDragStart = {
-                            draggingId = item.id
-                            dragOffset = 0f
-                        },
-                        onDrag = { change, amount ->
-                            change.consume()
-                            dragOffset += amount.y
-                            val list = latestQueue
-                            val from = list.indexOfFirst { it.id == item.id }
-                            if (from < 0) return@detectDragGestures
-                            val shift = (dragOffset / rowHeightPx).roundToInt()
-                            val to = (from + shift).coerceIn(0, list.lastIndex)
-                            if (to != from) {
-                                latestMove(from, to)
-                                dragOffset -= (to - from) * rowHeightPx
-                            }
-                        },
-                        onDragEnd = {
-                            draggingId = null
-                            dragOffset = 0f
-                        },
-                        onDragCancel = {
-                            draggingId = null
-                            dragOffset = 0f
-                        },
+                Modifier.fillMaxWidth()
+                    .height(72.dp)
+                    .background(
+                        if (isCurrent) MaterialTheme.colorScheme.surfaceContainerHigh
+                        else MaterialTheme.colorScheme.surfaceContainer
                     )
-                },
-            contentAlignment = Alignment.Center,
+                    .pointerInput(item.id) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { latestDragStart() },
+                            onDrag = { change, amount ->
+                                change.consume()
+                                latestDrag(amount.y)
+                            },
+                            onDragEnd = { latestDragEnd() },
+                            onDragCancel = { latestDragEnd() },
+                        )
+                    }
+                    .clickable(onClick = onPlayNow)
+                    .padding(start = MaterialTheme.spacings.small),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_grip_vertical),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+            Box(
+                modifier =
+                    Modifier.size(44.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (item.imageUri != null) {
+                    AsyncImage(
+                        model = item.imageUri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_music),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
 
-        Box(
-            modifier =
-                Modifier.size(44.dp)
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (item.imageUri != null) {
-                AsyncImage(
-                    model = item.imageUri,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_music),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            Column(
+                modifier = Modifier.weight(1f).padding(horizontal = MaterialTheme.spacings.small)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isCurrent) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_play),
+                            contentDescription = stringResource(FilmR.string.music_now_playing),
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(6.dp))
+                    }
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color =
+                            if (isCurrent) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Text(
+                    text = listOfNotNull(item.artist, item.album).joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-        }
 
-        Column(modifier = Modifier.weight(1f).padding(horizontal = MaterialTheme.spacings.small)) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.bodyMedium,
-                color =
-                    if (isCurrent) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = listOfNotNull(item.artist, item.album).joinToString(" · "),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            QueueMenu(
+                isCurrent = isCurrent,
+                onPlayNow = onPlayNow,
+                onPlayNext = onPlayNext,
+                onPlayEnd = onPlayEnd,
+                onRemove = onRemove,
             )
         }
 
-        QueueMenu(
-            isCurrent = isCurrent,
-            onPlayNow = onPlayNow,
-            onPlayNext = onPlayNext,
-            onPlayEnd = onPlayEnd,
-            onRemove = onRemove,
-        )
+        if (trailingDivider) {
+            HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
+        }
     }
 }
 
