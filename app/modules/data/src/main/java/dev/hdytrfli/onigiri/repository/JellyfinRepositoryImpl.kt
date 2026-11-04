@@ -332,10 +332,10 @@ class JellyfinRepositoryImpl(
                     recursive = true,
                     sortBy =
                         listOf(
-                            ItemSortBy.fromName("Album"),
-                            ItemSortBy.fromName("ParentIndexNumber"),
-                            ItemSortBy.fromName("IndexNumber"),
-                            ItemSortBy.fromName(SortBy.NAME.sortString),
+                            ItemSortBy.ALBUM,
+                            ItemSortBy.PARENT_INDEX_NUMBER,
+                            ItemSortBy.INDEX_NUMBER,
+                            ItemSortBy.SORT_NAME,
                         ),
                     sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
                 )
