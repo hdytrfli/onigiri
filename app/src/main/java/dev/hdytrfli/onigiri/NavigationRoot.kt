@@ -255,7 +255,7 @@ private fun MainNavigation(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val musicPlayerViewModel: MusicPlayerViewModel = hiltViewModel()
-    val currentMusic by musicPlayerViewModel.current.collectAsStateWithLifecycle()
+    val showMiniPlayer by musicPlayerViewModel.miniPlayerVisible.collectAsStateWithLifecycle()
     var exitPending by remember { mutableStateOf(false) }
 
     LaunchedEffect(musicDestination?.value) {
@@ -390,7 +390,6 @@ private fun MainNavigation(
                 }
             }
             val suiteVisible = currentRoute.drawsNavigationSuite(tabRoutes)
-            val showMiniPlayer = currentMusic != null
             val miniStartInset by
                 animateDpAsState(
                     targetValue = if (suiteVisible) LocalSuiteStartInset.current else 0.dp,

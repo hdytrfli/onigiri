@@ -20,10 +20,8 @@ fun MiniMusicPlayerHost(viewModel: MusicPlayerViewModel, modifier: Modifier = Mo
     MiniMusicPlayer(
         state = state,
         onOpen = { context.startActivity(Intent(context, MusicPlayerActivity::class.java)) },
-        onPlayPause = viewModel::togglePlayPause,
         onNext = viewModel::next,
         onPrevious = viewModel::previous,
-        onClose = viewModel::stop,
         modifier = modifier,
     )
 }

@@ -95,6 +95,7 @@ fun MusicQueueContent(
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
     modifier: Modifier = Modifier,
+    header: (@Composable () -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
     var displayQueue by remember { mutableStateOf(queue) }
@@ -150,6 +151,9 @@ fun MusicQueueContent(
                 state = listState,
                 modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth().weight(1f),
             ) {
+                if (header != null) {
+                    item(key = "player-header") { header() }
+                }
                 item(key = "played-header") {
                     SectionHeader(
                         title = stringResource(FilmR.string.music_played),

@@ -146,6 +146,30 @@ constructor(
             ?.let { song -> playerManager.addToQueue(listOf(song)) }
     }
 
+    fun toggleFavorite(songId: java.util.UUID) {
+        val song = _state.value.songs.firstOrNull { it.id == songId } ?: return
+        viewModelScope.launch {
+            val favorite = !song.favorite
+            runCatching {
+                if (favorite) {
+                    repository.markAsFavorite(songId)
+                } else {
+                    repository.unmarkAsFavorite(songId)
+                }
+            }
+                .onSuccess {
+                    _state.update { state ->
+                        state.copy(
+                            songs =
+                                state.songs.map {
+                                    if (it.id == songId) it.copy(favorite = favorite) else it
+                                }
+                        )
+                    }
+                }
+        }
+    }
+
     fun retry() = load(force = true)
 
     private fun sortSongs(

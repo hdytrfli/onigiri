@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,22 +29,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.core.R as CoreR
-import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
-import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
-import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import kotlin.math.abs
@@ -53,33 +47,25 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /**
- * Compact now-playing bar: a snackbar-style pill plus a separate pause/resume button. Swipe right
- * for the next track, left for the previous track, or up to dismiss it.
+ * Compact now-playing bar. Swipe right for the next track and left for the previous track. It is
+ * shown only while playback is active, so no close or play/pause controls are needed here.
  */
 @Composable
 fun MiniMusicPlayer(
     state: MusicPlaybackState,
     onOpen: () -> Unit,
-    onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
-    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val item = state.current ?: return
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipeThreshold = with(density) { 40.dp.toPx() }
-    val fadeDistance = with(density) { 140.dp.toPx() }
     var dragging by remember { mutableStateOf(false) }
     var dragX by remember { mutableFloatStateOf(0f) }
-    var dragY by remember { mutableFloatStateOf(0f) }
     var animatedX by remember { mutableFloatStateOf(0f) }
-    var animatedY by remember { mutableFloatStateOf(0f) }
     val contentOffsetX = if (dragging) dragX else animatedX
-    val containerOffsetY = if (dragging) dragY else animatedY
-    val containerAlpha =
-        (1f - ((-containerOffsetY).coerceAtLeast(0f) / fadeDistance)).coerceIn(0f, 1f)
 
     Box(
         modifier =
@@ -93,19 +79,13 @@ fun MiniMusicPlayer(
                 ),
         contentAlignment = Alignment.Center,
     ) {
-        Row(
+        Surface(
+            onClick = onOpen,
             modifier =
-                Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth().graphicsLayer {
-                    translationY = containerOffsetY
-                    alpha = containerAlpha
-                },
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Surface(
-                onClick = onOpen,
-                modifier =
-                    Modifier.weight(1f).height(52.dp).pointerInput(
+                Modifier.widthIn(max = Dimens.contentMaxWidth)
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .pointerInput(
                         state.hasNext,
                         state.hasPrevious,
                     ) {
@@ -113,87 +93,25 @@ fun MiniMusicPlayer(
                             onDragStart = {
                                 dragging = true
                                 dragX = 0f
-                                dragY = 0f
                             },
                             onDrag = { change, amount ->
                                 change.consume()
                                 dragX += amount.x
-                                dragY += amount.y
                             },
                             onDragEnd = {
                                 val startX = dragX
-                                val startY = dragY
-                                val horizontal = abs(startX) > abs(startY)
                                 dragging = false
                                 animatedX = startX
-                                animatedY = startY
                                 dragX = 0f
-                                dragY = 0f
 
-                                if (horizontal && abs(startX) >= swipeThreshold) {
+                                if (abs(startX) >= swipeThreshold) {
                                     if (startX > 0f) {
                                         if (state.hasNext) onNext()
                                     } else if (state.hasPrevious) {
                                         onPrevious()
                                     }
-                                    scope.launch {
-                                        animate(
-                                            startX,
-                                            0f,
-                                            animationSpec = tween(durationMillis = 180),
-                                        ) { value, _ ->
-                                            animatedX = value
-                                        }
-                                    }
-                                    scope.launch {
-                                        animate(
-                                            startY,
-                                            0f,
-                                            animationSpec = tween(durationMillis = 180),
-                                        ) { value, _ ->
-                                            animatedY = value
-                                        }
-                                    }
-                                } else if (!horizontal && startY <= -swipeThreshold) {
-                                    scope.launch {
-                                        animate(
-                                            initialValue = startY,
-                                            targetValue = -fadeDistance * 1.3f,
-                                            animationSpec = tween(durationMillis = 180),
-                                        ) { value, _ ->
-                                            animatedY = value
-                                        }
-                                        onClose()
-                                    }
-                                } else {
-                                    scope.launch {
-                                        animate(
-                                            startX,
-                                            0f,
-                                            animationSpec = tween(durationMillis = 180),
-                                        ) { value, _ ->
-                                            animatedX = value
-                                        }
-                                    }
-                                    scope.launch {
-                                        animate(
-                                            startY,
-                                            0f,
-                                            animationSpec = tween(durationMillis = 180),
-                                        ) { value, _ ->
-                                            animatedY = value
-                                        }
-                                    }
                                 }
-                            },
-                            onDragCancel = {
-                                val startX = dragX
-                                val startY = dragY
-                                dragging = false
-                                animatedX = startX
-                                animatedY = startY
-                                dragX = 0f
-                                dragY = 0f
+
                                 scope.launch {
                                     animate(
                                         startX,
@@ -203,66 +121,53 @@ fun MiniMusicPlayer(
                                         animatedX = value
                                     }
                                 }
+                            },
+                            onDragCancel = {
+                                val startX = dragX
+                                dragging = false
+                                animatedX = startX
+                                dragX = 0f
                                 scope.launch {
                                     animate(
-                                        startY,
+                                        startX,
                                         0f,
                                         animationSpec = tween(durationMillis = 180),
                                     ) { value, _ ->
-                                        animatedY = value
+                                        animatedX = value
                                     }
                                 }
                             },
                         )
                     },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 3.dp,
-                shadowElevation = 6.dp,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 3.dp,
+            shadowElevation = 6.dp,
+        ) {
+            Row(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .offset { IntOffset(contentOffsetX.roundToInt(), 0) }
+                        .padding(start = 8.dp, end = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier =
-                        Modifier.fillMaxSize()
-                            .offset { IntOffset(contentOffsetX.roundToInt(), 0) }
-                            .padding(start = 6.dp, end = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    MusicThumbnail(item = item)
-                    Column(modifier = Modifier.padding(start = MaterialTheme.spacings.small)) {
-                        Text(
-                            text = item.title,
-                            style = MaterialTheme.typography.labelLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = listOfNotNull(item.artist, item.album).joinToString(" · "),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                MusicThumbnail(item = item)
+                Column(modifier = Modifier.padding(start = MaterialTheme.spacings.small)) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = listOfNotNull(item.artist, item.album).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
-
-            AppIconButton(
-                onClick = onPlayPause,
-                variant = AppButtonVariant.Secondary,
-                content = {
-                    Icon(
-                        painter =
-                            painterResource(
-                                if (state.isPlaying) CoreR.drawable.ic_pause
-                                else CoreR.drawable.ic_play
-                            ),
-                        contentDescription =
-                            stringResource(
-                                if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
-                            ),
-                    )
-                },
-            )
         }
     }
 }
@@ -271,7 +176,7 @@ fun MiniMusicPlayer(
 private fun MusicThumbnail(item: MusicPlaybackItem) {
     Box(
         modifier =
-            Modifier.size(40.dp)
+            Modifier.size(48.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center,
@@ -287,6 +192,7 @@ private fun MusicThumbnail(item: MusicPlaybackItem) {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_music),
                 contentDescription = null,
+                modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

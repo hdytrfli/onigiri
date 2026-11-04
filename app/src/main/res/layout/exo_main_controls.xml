@@ -149,7 +149,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="32dp"
             android:background="@drawable/transparent_circle_background"
-            android:padding="16dp"
+            android:padding="12dp"
             android:src="@drawable/ic_skip_back"
             android:contentDescription="@string/player_controls_skip_back"
             app:tint="@android:color/white" />
@@ -160,7 +160,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="32dp"
             android:background="@drawable/transparent_circle_background"
-            android:padding="16dp"
+            android:padding="12dp"
             android:src="@drawable/ic_rewind"
             android:contentDescription="@string/player_controls_previous_chapter"
             app:tint="@android:color/white" />
@@ -171,7 +171,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/circle_background"
             android:backgroundTint="@android:color/white"
-            android:padding="16dp"
+            android:padding="12dp"
             android:src="@drawable/ic_play"
             app:tint="@android:color/black"
             android:contentDescription="@string/player_controls_play_pause" />
@@ -182,7 +182,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:background="@drawable/transparent_circle_background"
-            android:padding="16dp"
+            android:padding="12dp"
             android:src="@drawable/ic_fast_forward"
             android:contentDescription="@string/player_controls_next_chapter"
             app:tint="@android:color/white" />
@@ -193,7 +193,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:background="@drawable/transparent_circle_background"
-            android:padding="16dp"
+            android:padding="12dp"
             android:src="@drawable/ic_skip_forward"
             android:contentDescription="@string/player_controls_skip_forward"
             app:tint="@android:color/white" />

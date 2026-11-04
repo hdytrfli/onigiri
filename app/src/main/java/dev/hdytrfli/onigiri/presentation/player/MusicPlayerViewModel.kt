@@ -41,6 +41,17 @@ constructor(
                 initialValue = manager.state.value.current,
             )
 
+    /** The mini player only exists while audio is actually playing. */
+    val miniPlayerVisible: kotlinx.coroutines.flow.StateFlow<Boolean> =
+        manager.state
+            .map { it.current != null && it.isPlaying }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = manager.state.value.current != null && manager.state.value.isPlaying,
+            )
+
     fun togglePlayPause() = manager.togglePlayPause()
 
     fun pause() = manager.pause()

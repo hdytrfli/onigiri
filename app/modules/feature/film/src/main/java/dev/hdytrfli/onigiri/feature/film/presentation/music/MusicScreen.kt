@@ -200,6 +200,7 @@ fun MusicScreen(
                                 onSongClick = viewModel::playSong,
                                 onPlayNext = viewModel::playNext,
                                 onAddToQueue = viewModel::addToQueue,
+                                onToggleFavorite = viewModel::toggleFavorite,
                                 onArtistClick = onArtistClick,
                                 onAlbumClick = onAlbumClick,
                             )
@@ -263,6 +264,7 @@ private fun SongsGrid(
     onSongClick: (java.util.UUID) -> Unit,
     onPlayNext: (java.util.UUID) -> Unit,
     onAddToQueue: (java.util.UUID) -> Unit,
+    onToggleFavorite: (java.util.UUID) -> Unit,
     onArtistClick: (artistId: String) -> Unit,
     onAlbumClick: (albumId: String) -> Unit,
 ) {
@@ -302,6 +304,7 @@ private fun SongsGrid(
                     onPlay = { onSongClick(song.id) },
                     onPlayNext = { onPlayNext(song.id) },
                     onAddToQueue = { onAddToQueue(song.id) },
+                    onToggleFavorite = { onToggleFavorite(song.id) },
                     onViewArtist = song.artistId?.let { { onArtistClick(it.toString()) } },
                     onViewAlbum = song.albumId?.let { { onAlbumClick(it.toString()) } },
                 )
@@ -318,6 +321,7 @@ private fun SongListRow(
     onPlay: () -> Unit,
     onPlayNext: () -> Unit,
     onAddToQueue: () -> Unit,
+    onToggleFavorite: () -> Unit,
     onViewArtist: (() -> Unit)?,
     onViewAlbum: (() -> Unit)?,
 ) {
@@ -419,6 +423,20 @@ private fun SongListRow(
                     onClick = {
                         menuExpanded = false
                         onAddToQueue()
+                    },
+                )
+                MenuActionItem(
+                    label =
+                        stringResource(
+                            if (song.favorite) CoreR.string.remove_from_favorites
+                            else CoreR.string.add_to_favorites
+                        ),
+                    icon =
+                        if (song.favorite) CoreR.drawable.ic_heart_filled
+                        else CoreR.drawable.ic_heart,
+                    onClick = {
+                        menuExpanded = false
+                        onToggleFavorite()
                     },
                 )
                 MenuActionItem(
