@@ -90,7 +90,11 @@ constructor(
                 favorite = item.favorite,
                 images = item.images,
             )
-        playerManager.playSongs(listOf(song))
+        playerManager.playSongs(
+            songs = listOf(song),
+            isAudiobook = true,
+            overview = item.overview,
+        )
     }
 
     fun setPlayed(bookId: UUID, played: Boolean) {

@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import timber.log.Timber
 
 /**
@@ -130,9 +131,11 @@ constructor(
         songs: List<FindroidMusicSong>,
         startIndex: Int = 0,
         shuffle: Boolean = false,
+        isAudiobook: Boolean = false,
+        overview: String? = null,
     ) {
         scope.launch {
-            val items = buildMediaItems(songs)
+            val items = buildMediaItems(songs, isAudiobook = isAudiobook, overview = overview)
             if (items.isEmpty()) {
                 _state.update { it.copy(error = "No playable music stream was found") }
                 return@launch
@@ -194,8 +197,18 @@ constructor(
 
     fun playQueueItem(index: Int) {
         runOnController { player ->
-            if (index in 0 until player.mediaItemCount) {
-                player.seekTo(index, 0L)
+            if (index !in 0 until player.mediaItemCount) return@runOnController
+            batchPlayerUpdate {
+                val current = player.currentMediaItemIndex
+                if (index > current) {
+                    // Jumping forward moves the old current track into Played. Skipped tracks stay
+                    // in the current queue below the clicked track, not marked as played.
+                    val target = (current + 1).coerceAtMost(player.mediaItemCount - 1)
+                    player.moveMediaItem(index, target)
+                    player.seekTo(target, 0L)
+                } else {
+                    player.seekTo(index, 0L)
+                }
                 player.play()
             }
         }
@@ -270,21 +283,29 @@ constructor(
     }
 
     fun toggleShuffle() {
-        runOnController { player ->
-            batchPlayerUpdate {
-                if (shuffleEnabled) {
-                    shuffleEnabled = false
-                    val original = preShuffleOrder
-                    preShuffleOrder = null
-                    if (original != null) {
-                        restoreTailOrder(player, original)
+        if (_state.value.isShuffling) return
+        scope.launch {
+            _state.update { it.copy(isShuffling = true) }
+            // Let the UI render the loading state before the queue-wide reorder blocks the main
+            // thread. This also keeps lazy-list placement animations from running for every item.
+            yield()
+            runOnController { player ->
+                batchPlayerUpdate {
+                    if (shuffleEnabled) {
+                        shuffleEnabled = false
+                        val original = preShuffleOrder
+                        preShuffleOrder = null
+                        if (original != null) {
+                            restoreTailOrder(player, original)
+                        }
+                    } else {
+                        shuffleEnabled = true
+                        preShuffleOrder = allMediaIds(player)
+                        shuffleTail(player)
                     }
-                } else {
-                    shuffleEnabled = true
-                    preShuffleOrder = allMediaIds(player)
-                    shuffleTail(player)
+                    player.shuffleModeEnabled = false
                 }
-                player.shuffleModeEnabled = false
+                _state.update { it.copy(isShuffling = false) }
             }
         }
     }
@@ -372,12 +393,23 @@ constructor(
         _state.update { it.copy(error = null) }
     }
 
-    private suspend fun buildMediaItems(songs: List<FindroidMusicSong>): List<MediaItem> =
-        coroutineScope {
-            songs.map { song -> async { song.toMediaItem() } }.awaitAll().filterNotNull()
-        }
+    private suspend fun buildMediaItems(
+        songs: List<FindroidMusicSong>,
+        isAudiobook: Boolean = false,
+        overview: String? = null,
+    ): List<MediaItem> = coroutineScope {
+        songs
+            .map { song ->
+                async { song.toMediaItem(isAudiobook = isAudiobook, overview = overview) }
+            }
+            .awaitAll()
+            .filterNotNull()
+    }
 
-    private suspend fun FindroidMusicSong.toMediaItem(): MediaItem? {
+    private suspend fun FindroidMusicSong.toMediaItem(
+        isAudiobook: Boolean = false,
+        overview: String? = null,
+    ): MediaItem? {
         val url = repository.getAudioStreamUrl(id)
         if (url.isBlank()) return null
 
@@ -385,6 +417,8 @@ constructor(
             Bundle().apply {
                 putLong(EXTRA_DURATION_MS, runtimeTicks / 10_000L)
                 putBoolean(EXTRA_FAVORITE, favorite)
+                putBoolean(EXTRA_IS_AUDIOBOOK, isAudiobook)
+                putString(EXTRA_OVERVIEW, overview)
                 putString(EXTRA_ARTIST_ID, artistId?.toString())
                 putString(EXTRA_ARTIST_IMAGE, artistImage?.toString())
                 putString(EXTRA_ALBUM_ID, albumId?.toString())
@@ -430,6 +464,8 @@ constructor(
             durationMs =
                 metadata.durationMs?.takeIf { it > 0L } ?: extras?.getLong(EXTRA_DURATION_MS) ?: 0L,
             favorite = favoriteOverrides[id] ?: extras?.getBoolean(EXTRA_FAVORITE) ?: false,
+            isAudiobook = extras?.getBoolean(EXTRA_IS_AUDIOBOOK) ?: false,
+            overview = extras?.getString(EXTRA_OVERVIEW),
         )
     }
 
@@ -460,6 +496,7 @@ constructor(
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 durationMs = duration,
                 shuffleEnabled = shuffleEnabled,
+                isShuffling = _state.value.isShuffling,
                 repeatMode =
                     when (player.repeatMode) {
                         Player.REPEAT_MODE_ALL -> MusicRepeatMode.ALL
@@ -498,6 +535,8 @@ constructor(
     private companion object {
         const val EXTRA_DURATION_MS = "music_duration_ms"
         const val EXTRA_FAVORITE = "music_favorite"
+        const val EXTRA_IS_AUDIOBOOK = "music_is_audiobook"
+        const val EXTRA_OVERVIEW = "music_overview"
         const val EXTRA_ARTIST_ID = "music_artist_id"
         const val EXTRA_ARTIST_IMAGE = "music_artist_image"
         const val EXTRA_ALBUM_ID = "music_album_id"

@@ -75,7 +75,7 @@ fun MiniMusicPlayer(
                     start = MaterialTheme.spacings.gutter,
                     end = MaterialTheme.spacings.gutter,
                     top = MaterialTheme.spacings.extraSmall,
-                    bottom = MaterialTheme.spacings.gutter,
+                    bottom = 12.dp,
                 ),
         contentAlignment = Alignment.Center,
     ) {

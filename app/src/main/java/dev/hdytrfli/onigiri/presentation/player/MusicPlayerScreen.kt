@@ -126,6 +126,7 @@ fun MusicPlayerScreen(
         onCycleRepeat()
     }
     val gutter = MaterialTheme.spacings.gutter
+    val isAudiobook = current?.isAudiobook == true
 
     Box(
         modifier =
@@ -135,22 +136,12 @@ fun MusicPlayerScreen(
     ) {
         if (current != null && isLandscape) {
             Row(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.weight(0.5f).fillMaxHeight()) {
-                    PlayerTopBar(
-                        navigateBack = navigateBack,
-                        onOpenQueue = onOpenQueue,
-                        showQueueButton = false,
-                    )
+                Box(modifier = Modifier.weight(0.5f).fillMaxHeight()) {
                     BoxWithConstraints(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        val artSize =
-                            minOf(
-                                maxWidth - gutter * 2,
-                                maxHeight - gutter * 2,
-                                Dimens.contentMaxWidth,
-                            )
+                        val artSize = minOf(maxWidth, maxHeight, Dimens.contentMaxWidth)
                         AlbumArtwork(
                             item = current,
                             artworkType = artworkType,
@@ -158,23 +149,24 @@ fun MusicPlayerScreen(
                             modifier = Modifier.size(artSize),
                         )
                     }
+                    PlayerTopBar(
+                        navigateBack = navigateBack,
+                        onOpenQueue = onOpenQueue,
+                        showQueueButton = false,
+                        modifier = Modifier.align(Alignment.TopCenter),
+                    )
                 }
-                MusicQueueContent(
-                    queue = state.queue,
-                    currentIndex = state.currentIndex,
-                    onPlayNow = onPlayQueueItem,
-                    onRemove = onRemoveQueueItem,
-                    onMove = onMoveQueueItem,
-                    onToggleFavorite = onToggleFavoriteItem,
-                    modifier = Modifier.weight(0.5f).fillMaxHeight().padding(end = gutter),
-                    contentBottomPadding = MaterialTheme.spacings.gutter,
-                    header = {
+                if (isAudiobook) {
+                    Box(
+                        modifier = Modifier.weight(0.5f).fillMaxHeight(),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Column(
                             modifier =
                                 Modifier.fillMaxWidth()
                                     .padding(
                                         horizontal = MaterialTheme.spacings.medium,
-                                        vertical = MaterialTheme.spacings.small,
+                                        vertical = 48.dp,
                                     )
                         ) {
                             PlayerDetails(item = current)
@@ -197,15 +189,59 @@ fun MusicPlayerScreen(
                                 onClearError = onClearError,
                             )
                         }
-                    },
-                )
+                    }
+                } else {
+                    MusicQueueContent(
+                        queue = state.queue,
+                        currentIndex = state.currentIndex,
+                        onPlayNow = onPlayQueueItem,
+                        onRemove = onRemoveQueueItem,
+                        onMove = onMoveQueueItem,
+                        onToggleFavorite = onToggleFavoriteItem,
+                        isShuffling = state.isShuffling,
+                        modifier = Modifier.weight(0.5f).fillMaxHeight().padding(end = gutter),
+                        contentBottomPadding = MaterialTheme.spacings.gutter,
+                        header = {
+                            Column(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(
+                                            start = MaterialTheme.spacings.medium,
+                                            end = MaterialTheme.spacings.medium,
+                                            top = 48.dp,
+                                            bottom = 48.dp,
+                                        )
+                            ) {
+                                PlayerDetails(item = current)
+                                Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                                TransportControls(
+                                    state = state,
+                                    onPlayPause = onPlayPause,
+                                    onPrevious = onPrevious,
+                                    onNext = onNext,
+                                    onToggleShuffle = toggleShuffle,
+                                    onCycleRepeat = cycleRepeat,
+                                    onToggleFavorite = onToggleFavorite,
+                                    onArtistClick = onArtistClick,
+                                    onAlbumClick = onAlbumClick,
+                                )
+                                Spacer(Modifier.height(MaterialTheme.spacings.small))
+                                PlayerSeekBar(
+                                    state = state,
+                                    onSeek = onSeek,
+                                    onClearError = onClearError,
+                                )
+                            }
+                        },
+                    )
+                }
             }
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
                 PlayerTopBar(
                     navigateBack = navigateBack,
                     onOpenQueue = onOpenQueue,
-                    showQueueButton = !isLandscape,
+                    showQueueButton = !isLandscape && !isAudiobook,
                 )
                 if (current == null) {
                     EmptyPlayer()
@@ -285,10 +321,12 @@ private fun PlayerTopBar(
     navigateBack: () -> Unit,
     onOpenQueue: () -> Unit,
     showQueueButton: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier =
-            Modifier.fillMaxWidth()
+            modifier
+                .fillMaxWidth()
                 .padding(
                     horizontal = MaterialTheme.spacings.gutter,
                     vertical = MaterialTheme.spacings.small,
@@ -473,6 +511,19 @@ private fun PlayerDetails(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth(),
         )
+        item.overview
+            ?.takeIf { it.isNotBlank() }
+            ?.let { overview ->
+                Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
+                Text(
+                    text = overview,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = PlayerOnBackgroundMuted,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         item.album?.let { album ->
             Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
             Text(
@@ -506,7 +557,8 @@ private fun TransportControls(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement =
+            Arrangement.spacedBy(MaterialTheme.spacings.extraSmall, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AppIconButton(

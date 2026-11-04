@@ -33,7 +33,6 @@ import dev.hdytrfli.onigiri.LocalTabReselect
 import dev.hdytrfli.onigiri.MusicRoute
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
-import dev.hdytrfli.onigiri.feature.film.presentation.DisplayInfoDialog
 import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverlay
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
@@ -41,9 +40,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicRowAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SectionHeader
-import dev.hdytrfli.onigiri.feature.film.presentation.components.SortByDialog
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
-import dev.hdytrfli.onigiri.feature.film.presentation.library.ListDisplayField
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
@@ -60,12 +57,6 @@ import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
 import dev.hdytrfli.onigiri.ui.utils.gridColumns
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
-
-private enum class MusicTab {
-    SONGS,
-    ARTISTS,
-    ALBUMS,
-}
 
 @Composable
 fun MusicScreen(
@@ -179,7 +170,7 @@ fun MusicScreen(
                             SongsGrid(
                                 songs = songs,
                                 currentSongId = currentSongId,
-                                displayFields = state.displayFields,
+                                displayFields = state.songDisplayFields,
                                 loading = state.isLoading,
                                 error = state.error,
                                 contentPadding = contentPadding,
@@ -194,6 +185,7 @@ fun MusicScreen(
                         MusicTab.ARTISTS ->
                             ArtistsGrid(
                                 artists = artists,
+                                displayFields = state.artistDisplayFields,
                                 loading = state.isLoading,
                                 error = state.error,
                                 contentPadding = contentPadding,
@@ -203,7 +195,7 @@ fun MusicScreen(
                         MusicTab.ALBUMS ->
                             AlbumsGrid(
                                 albums = albums,
-                                displayFields = state.displayFields,
+                                displayFields = state.albumDisplayFields,
                                 loading = state.isLoading,
                                 error = state.error,
                                 contentPadding = contentPadding,
@@ -220,23 +212,92 @@ fun MusicScreen(
         }
     }
 
+    val songSortOptions =
+        listOf(
+            MusicSortField.Title to stringResource(CoreR.string.sort_by_options_0),
+            MusicSortField.Duration to stringResource(FilmR.string.music_duration_label),
+            MusicSortField.Artist to stringResource(FilmR.string.music_artist_label),
+            MusicSortField.Album to stringResource(FilmR.string.music_album_label),
+            MusicSortField.Year to stringResource(CoreR.string.display_year),
+        )
+    val artistSortOptions =
+        listOf(
+            MusicSortField.Title to stringResource(CoreR.string.sort_by_options_0),
+            MusicSortField.AlbumCount to stringResource(FilmR.string.music_album_count_label),
+        )
+    val albumSortOptions =
+        listOf(
+            MusicSortField.Title to stringResource(CoreR.string.sort_by_options_0),
+            MusicSortField.Artist to stringResource(FilmR.string.music_artist_label),
+            MusicSortField.Year to stringResource(CoreR.string.display_year),
+        )
+    val songDisplayOptions =
+        listOf(
+            MusicDisplayField.Duration to stringResource(FilmR.string.music_duration_label),
+            MusicDisplayField.Artist to stringResource(FilmR.string.music_artist_label),
+            MusicDisplayField.Album to stringResource(FilmR.string.music_album_label),
+            MusicDisplayField.Year to stringResource(CoreR.string.display_year),
+        )
+    val artistDisplayOptions =
+        listOf(MusicDisplayField.AlbumCount to stringResource(FilmR.string.music_album_count_label))
+    val albumDisplayOptions =
+        listOf(
+            MusicDisplayField.Artist to stringResource(FilmR.string.music_artist_label),
+            MusicDisplayField.Year to stringResource(CoreR.string.display_year),
+        )
+
     if (showSortDialog) {
-        SortByDialog(
-            currentSortBy = state.sortBy,
-            currentSortOrder = state.sortOrder,
-            onUpdate = viewModel::changeSorting,
+        val options =
+            when (selectedTab) {
+                MusicTab.SONGS -> songSortOptions
+                MusicTab.ARTISTS -> artistSortOptions
+                MusicTab.ALBUMS -> albumSortOptions
+            }
+        val currentSortBy =
+            when (selectedTab) {
+                MusicTab.SONGS -> state.songSortBy
+                MusicTab.ARTISTS -> state.artistSortBy
+                MusicTab.ALBUMS -> state.albumSortBy
+            }
+        val currentSortOrder =
+            when (selectedTab) {
+                MusicTab.SONGS -> state.songSortOrder
+                MusicTab.ARTISTS -> state.artistSortOrder
+                MusicTab.ALBUMS -> state.albumSortOrder
+            }
+        MusicSortDialog(
+            options = options,
+            currentSortBy = currentSortBy,
+            currentSortOrder = currentSortOrder,
+            onUpdate = { field, order -> viewModel.changeSorting(selectedTab, field, order) },
             onDismissRequest = { showSortDialog = false },
-            availableSortOptions = MUSIC_SORT_OPTIONS,
         )
     }
 
     if (showDisplayDialog) {
-        DisplayInfoDialog(
-            fields = state.displayFields,
-            onToggle = viewModel::toggleDisplayField,
-            onDismiss = { showDisplayDialog = false },
-            availableFields = setOf(ListDisplayField.Year),
-        )
+        when (selectedTab) {
+            MusicTab.SONGS ->
+                MusicDisplayDialog(
+                    options = songDisplayOptions,
+                    selected = state.songDisplayFields,
+                    onToggle = { viewModel.toggleDisplayField(MusicTab.SONGS, it) },
+                    onDismiss = { showDisplayDialog = false },
+                )
+            MusicTab.ARTISTS ->
+                MusicDisplayDialog(
+                    options = artistDisplayOptions,
+                    selected = state.artistDisplayFields,
+                    onToggle = { viewModel.toggleDisplayField(MusicTab.ARTISTS, it) },
+                    onDismiss = { showDisplayDialog = false },
+                )
+            MusicTab.ALBUMS ->
+                MusicDisplayDialog(
+                    options = albumDisplayOptions,
+                    selected = state.albumDisplayFields,
+                    onToggle = { viewModel.toggleDisplayField(MusicTab.ALBUMS, it) },
+                    onDismiss = { showDisplayDialog = false },
+                )
+        }
     }
 }
 
@@ -244,7 +305,7 @@ fun MusicScreen(
 private fun SongsGrid(
     songs: List<dev.hdytrfli.onigiri.models.FindroidMusicSong>,
     currentSongId: java.util.UUID?,
-    displayFields: Set<ListDisplayField>,
+    displayFields: Set<MusicDisplayField>,
     loading: Boolean,
     error: Exception?,
     contentPadding: PaddingValues,
@@ -289,7 +350,7 @@ private fun SongsGrid(
                 SongListRow(
                     song = song,
                     isCurrent = song.id == currentSongId,
-                    showYear = ListDisplayField.Year in displayFields,
+                    displayFields = displayFields,
                     onPlay = { onSongClick(song.id) },
                     onPlayNext = { onPlayNext(song.id) },
                     onAddToQueue = { onAddToQueue(song.id) },
@@ -306,7 +367,7 @@ private fun SongsGrid(
 private fun SongListRow(
     song: dev.hdytrfli.onigiri.models.FindroidMusicSong,
     isCurrent: Boolean,
-    showYear: Boolean,
+    displayFields: Set<MusicDisplayField>,
     onPlay: () -> Unit,
     onPlayNext: () -> Unit,
     onAddToQueue: () -> Unit,
@@ -318,15 +379,20 @@ private fun SongListRow(
         title = song.name,
         subtitle =
             listOfNotNull(
-                    song.artistName,
-                    song.albumName,
-                    song.productionYear.takeIf { showYear }?.toString(),
+                    song.artistName.takeIf { MusicDisplayField.Artist in displayFields },
+                    song.albumName.takeIf { MusicDisplayField.Album in displayFields },
+                    song.productionYear
+                        .takeIf { MusicDisplayField.Year in displayFields }
+                        ?.toString(),
                 )
                 .joinToString(" · "),
         imageUri = song.images.primary,
         isCurrent = isCurrent,
         onClick = onPlay,
-        trailingText = formatDuration(song.runtimeTicks),
+        trailingText =
+            formatDuration(song.runtimeTicks).takeIf {
+                MusicDisplayField.Duration in displayFields
+            },
         actions =
             listOf(
                 MusicRowAction(
@@ -382,6 +448,7 @@ private fun formatDuration(ticks: Long): String {
 @Composable
 private fun ArtistsGrid(
     artists: List<dev.hdytrfli.onigiri.models.FindroidMusicArtist>,
+    displayFields: Set<MusicDisplayField>,
     loading: Boolean,
     error: Exception?,
     contentPadding: PaddingValues,
@@ -423,9 +490,9 @@ private fun ArtistsGrid(
                         MusicCard(
                             title = artist.name,
                             subtitle =
-                                artist.albumCount?.let {
-                                    stringResource(FilmR.string.music_album_count, it)
-                                },
+                                artist.albumCount
+                                    ?.takeIf { MusicDisplayField.AlbumCount in displayFields }
+                                    ?.let { stringResource(FilmR.string.music_album_count, it) },
                             image = artist.images.primary ?: artist.images.logo,
                             circular = true,
                             placeholderIcon = CoreR.drawable.ic_user,
@@ -441,7 +508,7 @@ private fun ArtistsGrid(
 @Composable
 private fun AlbumsGrid(
     albums: List<dev.hdytrfli.onigiri.models.FindroidMusicAlbum>,
-    displayFields: Set<ListDisplayField>,
+    displayFields: Set<MusicDisplayField>,
     loading: Boolean,
     error: Exception?,
     contentPadding: PaddingValues,
@@ -484,12 +551,13 @@ private fun AlbumsGrid(
                             title = album.name,
                             subtitle =
                                 buildSubtitle(
-                                    album.artistName
-                                        ?: stringResource(FilmR.string.music_unknown_artist),
-                                    if (ListDisplayField.Year in displayFields) {
-                                        album.productionYear
-                                    } else {
-                                        null
+                                    album.artistName?.takeIf {
+                                        MusicDisplayField.Artist in displayFields
+                                    }
+                                        ?: stringResource(FilmR.string.music_unknown_artist)
+                                            .takeIf { MusicDisplayField.Artist in displayFields },
+                                    album.productionYear.takeIf {
+                                        MusicDisplayField.Year in displayFields
                                     },
                                 ),
                             image = album.images.primary,

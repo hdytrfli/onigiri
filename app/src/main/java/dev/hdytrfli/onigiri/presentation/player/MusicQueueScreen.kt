@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.presentation.player
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,11 +9,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -47,6 +50,7 @@ fun MusicQueueScreen(
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
     onToggleFavorite: (UUID) -> Unit,
+    isShuffling: Boolean = false,
 ) {
     PageScaffold(
         topBar = {
@@ -63,6 +67,7 @@ fun MusicQueueScreen(
             onRemove = onRemove,
             onMove = onMove,
             onToggleFavorite = onToggleFavorite,
+            isShuffling = isShuffling,
             modifier =
                 Modifier.fillMaxSize()
                     .padding(innerPadding)
@@ -70,6 +75,8 @@ fun MusicQueueScreen(
         )
     }
 }
+
+private data class QueueEntry(val key: Long, val item: MusicPlaybackItem)
 
 /** Queue contents shared by the full queue page and the landscape player's right column. */
 @Composable
@@ -81,31 +88,42 @@ fun MusicQueueContent(
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
     onToggleFavorite: (UUID) -> Unit,
     modifier: Modifier = Modifier,
+    isShuffling: Boolean = false,
     contentBottomPadding: androidx.compose.ui.unit.Dp = 0.dp,
     header: (@Composable () -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
-    var displayQueue by remember { mutableStateOf(queue) }
+    val initialEntries = remember {
+        queue.mapIndexed { index, item -> QueueEntry(index.toLong(), item) }
+    }
+    var displayQueue by remember { mutableStateOf(initialEntries) }
+    var nextKey by remember { mutableLongStateOf(initialEntries.size.toLong()) }
     val latestDisplayQueue by rememberUpdatedState(displayQueue)
     val latestCurrentIndex by rememberUpdatedState(currentIndex)
     val latestOnMove by rememberUpdatedState(onMove)
 
     LaunchedEffect(queue) {
-        if (displayQueue.map { it.id } != queue.map { it.id }) {
-            displayQueue = queue
-        } else if (displayQueue != queue) {
-            val updatedById = queue.associateBy { it.id }
-            displayQueue = displayQueue.map { updatedById[it.id] ?: it }
+        val keysById =
+            displayQueue.groupBy { it.item.id }.mapValues { (_, entries) -> entries.map { it.key } }
+        val occurrences = mutableMapOf<UUID, Int>()
+        val updated = queue.map { item ->
+            val occurrence = occurrences.getOrDefault(item.id, 0)
+            occurrences[item.id] = occurrence + 1
+            val key = keysById[item.id]?.getOrNull(occurrence) ?: nextKey.also { nextKey = it + 1 }
+            QueueEntry(key, item)
+        }
+        if (updated != displayQueue) {
+            displayQueue = updated
         }
     }
 
     val reorderableState =
         rememberReorderableLazyListState(listState) { from, to ->
-            val fromId = from.key as? UUID ?: return@rememberReorderableLazyListState
-            val toId = to.key as? UUID ?: return@rememberReorderableLazyListState
+            val fromKey = from.key as? Long ?: return@rememberReorderableLazyListState
+            val toKey = to.key as? Long ?: return@rememberReorderableLazyListState
             val current = latestDisplayQueue
-            val fromIndex = current.indexOfFirst { it.id == fromId }
-            val toIndex = current.indexOfFirst { it.id == toId }
+            val fromIndex = current.indexOfFirst { it.key == fromKey }
+            val toIndex = current.indexOfFirst { it.key == toKey }
             val firstUpNext = latestCurrentIndex + 1
             if (fromIndex < firstUpNext || toIndex < firstUpNext) {
                 return@rememberReorderableLazyListState
@@ -116,17 +134,17 @@ fun MusicQueueContent(
         }
 
     val safeCurrentIndex = currentIndex.coerceIn(0, displayQueue.lastIndex.coerceAtLeast(0))
+    val currentQueue =
+        if (displayQueue.isEmpty()) {
+            emptyList()
+        } else {
+            (safeCurrentIndex until displayQueue.size).map { it to displayQueue[it] }
+        }
     val played =
         if (displayQueue.isEmpty()) {
             emptyList()
         } else {
-            (safeCurrentIndex downTo 0).map { it to displayQueue[it] }
-        }
-    val upNext =
-        if (displayQueue.isEmpty()) {
-            emptyList()
-        } else {
-            ((safeCurrentIndex + 1) until displayQueue.size).map { it to displayQueue[it] }
+            ((safeCurrentIndex - 1) downTo 0).map { it to displayQueue[it] }
         }
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -136,6 +154,14 @@ fun MusicQueueContent(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        } else if (isShuffling) {
+            if (header != null) header()
+            Box(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
         } else {
             LazyColumn(
                 state = listState,
@@ -146,66 +172,39 @@ fun MusicQueueContent(
                 if (header != null) {
                     item(key = "player-header") { header() }
                 }
-                item(key = "played-header") {
+                item(key = "current-queue-header") {
                     SectionHeader(
-                        title = stringResource(FilmR.string.music_played),
+                        title = stringResource(FilmR.string.music_current_queue),
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                        trailingContent = { ItemCountBadge(count = played.size) },
+                        trailingContent = { ItemCountBadge(count = currentQueue.size) },
                     )
                 }
-                itemsIndexed(played, key = { _, entry -> entry.second.id }) { _, entry ->
+                itemsIndexed(currentQueue, key = { _, entry -> entry.second.key }) {
+                    queueIndex,
+                    entry ->
                     val index = entry.first
-                    val item = entry.second
-                    QueueRow(
-                        item = item,
-                        index = index,
-                        currentIndex = currentIndex,
-                        dragging = false,
-                        onPlayNow = { onPlayNow(index) },
-                        onPlayNext = {
-                            val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
-                            if (target != index) onMove(index, target)
-                        },
-                        onPlayEnd = {
-                            if (index != displayQueue.lastIndex) {
-                                onMove(index, displayQueue.lastIndex)
-                            }
-                        },
-                        onRemove = { onRemove(index) },
-                        onToggleFavorite = { onToggleFavorite(item.id) },
-                        trailingDivider = index > 0,
-                    )
-                }
-                item(key = "up-next-header") {
-                    SectionHeader(
-                        title = stringResource(FilmR.string.music_up_next),
-                        modifier =
-                            Modifier.padding(
-                                start = MaterialTheme.spacings.medium,
-                                end = MaterialTheme.spacings.medium,
-                                top = MaterialTheme.spacings.medium,
-                            ),
-                        trailingContent = { ItemCountBadge(count = upNext.size) },
-                    )
-                }
-                if (upNext.isEmpty()) {
-                    item(key = "up-next-empty") {
-                        Text(
-                            text = stringResource(FilmR.string.music_empty_queue),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier =
-                                Modifier.padding(
-                                    horizontal = MaterialTheme.spacings.medium,
-                                    vertical = MaterialTheme.spacings.small,
-                                ),
+                    val item = entry.second.item
+                    if (index == safeCurrentIndex) {
+                        QueueRow(
+                            item = item,
+                            index = index,
+                            currentIndex = currentIndex,
+                            dragging = false,
+                            onPlayNow = { onPlayNow(index) },
+                            onPlayNext = {},
+                            onPlayEnd = {},
+                            onRemove = { onRemove(index) },
+                            onToggleFavorite = { onToggleFavorite(item.id) },
+                            modifier = Modifier.animateItem(),
+                            trailingDivider = currentQueue.size > 1,
                         )
-                    }
-                } else {
-                    itemsIndexed(upNext, key = { _, entry -> entry.second.id }) { _, entry ->
-                        val index = entry.first
-                        val item = entry.second
-                        ReorderableItem(reorderableState, key = item.id) { isDragging ->
+                    } else {
+                        val animatedModifier = Modifier.animateItem()
+                        ReorderableItem(
+                            reorderableState,
+                            key = entry.second.key,
+                            modifier = animatedModifier,
+                        ) { isDragging ->
                             QueueRow(
                                 item = item,
                                 index = index,
@@ -228,6 +227,44 @@ fun MusicQueueContent(
                                 trailingDivider = index < displayQueue.lastIndex,
                             )
                         }
+                    }
+                }
+                if (played.isNotEmpty()) {
+                    item(key = "played-header") {
+                        SectionHeader(
+                            title = stringResource(FilmR.string.music_played),
+                            modifier =
+                                Modifier.padding(
+                                    start = MaterialTheme.spacings.medium,
+                                    end = MaterialTheme.spacings.medium,
+                                    top = MaterialTheme.spacings.medium,
+                                ),
+                            trailingContent = { ItemCountBadge(count = played.size) },
+                        )
+                    }
+                    itemsIndexed(played, key = { _, entry -> entry.second.key }) { _, entry ->
+                        val index = entry.first
+                        val item = entry.second.item
+                        QueueRow(
+                            item = item,
+                            index = index,
+                            currentIndex = currentIndex,
+                            dragging = false,
+                            onPlayNow = { onPlayNow(index) },
+                            onPlayNext = {
+                                val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
+                                if (target != index) onMove(index, target)
+                            },
+                            onPlayEnd = {
+                                if (index != displayQueue.lastIndex) {
+                                    onMove(index, displayQueue.lastIndex)
+                                }
+                            },
+                            onRemove = { onRemove(index) },
+                            onToggleFavorite = { onToggleFavorite(item.id) },
+                            modifier = Modifier.animateItem(),
+                            trailingDivider = index > 0,
+                        )
                     }
                 }
             }
@@ -266,11 +303,13 @@ private fun QueueRow(
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_play_next),
                     icon = CoreR.drawable.ic_skip_forward,
+                    enabled = !isCurrent,
                     onClick = onPlayNext,
                 ),
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_play_end),
                     icon = CoreR.drawable.ic_arrow_down_to_line,
+                    enabled = !isCurrent,
                     onClick = onPlayEnd,
                 ),
                 MusicRowAction(

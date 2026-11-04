@@ -51,6 +51,7 @@ class MusicQueueActivity : ComponentActivity() {
                         onRemove = viewModel::removeQueueItem,
                         onMove = viewModel::moveQueueItem,
                         onToggleFavorite = viewModel::toggleFavoriteItem,
+                        isShuffling = state.isShuffling,
                     )
                 }
             }

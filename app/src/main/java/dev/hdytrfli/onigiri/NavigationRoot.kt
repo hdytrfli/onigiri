@@ -446,7 +446,7 @@ private fun MainNavigation(
                             end = MaterialTheme.spacings.gutter,
                             bottom =
                                 LocalSuiteBottomInset.current +
-                                    if (showMiniPlayer) 80.dp else MaterialTheme.spacings.gutter,
+                                    if (showMiniPlayer) 92.dp else 12.dp,
                         ),
             )
         }

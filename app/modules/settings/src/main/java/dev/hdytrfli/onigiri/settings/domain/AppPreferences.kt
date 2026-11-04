@@ -196,8 +196,18 @@ class AppPreferences(
     val sortOrder = Preference("pref_sort_order", "Ascending")
     val bookSortBy = Preference("pref_book_sort_by", "SortName")
     val bookSortOrder = Preference("pref_book_sort_order", "Ascending")
-    val musicSortBy = Preference("pref_music_sort_by", "SortName")
-    val musicSortOrder = Preference("pref_music_sort_order", "Ascending")
+    val musicSongSortBy = Preference("pref_music_song_sort_by", "Title")
+    val musicSongSortOrder = Preference("pref_music_song_sort_order", "Ascending")
+    val musicArtistSortBy = Preference("pref_music_artist_sort_by", "Title")
+    val musicArtistSortOrder = Preference("pref_music_artist_sort_order", "Ascending")
+    val musicAlbumSortBy = Preference("pref_music_album_sort_by", "Title")
+    val musicAlbumSortOrder = Preference("pref_music_album_sort_order", "Ascending")
+    val musicSongDisplayFields =
+        Preference("pref_music_song_display_fields", setOf("duration", "artist", "album", "year"))
+    val musicArtistDisplayFields =
+        Preference("pref_music_artist_display_fields", setOf("album_count"))
+    val musicAlbumDisplayFields =
+        Preference("pref_music_album_display_fields", setOf("artist", "year"))
     val musicArtworkType = Preference("pref_music_artwork_type", "album")
 
     // Offline mode

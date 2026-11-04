@@ -838,7 +838,7 @@ class JellyfinRepositoryImpl(
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
-            jellyfinApi.userLibraryApi.markFavoriteItem(itemId)
+            jellyfinApi.userLibraryApi.markFavoriteItem(itemId, userId)
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, true)
         }
@@ -847,7 +847,7 @@ class JellyfinRepositoryImpl(
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
-            jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId)
+            jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId, userId)
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, false)
         }

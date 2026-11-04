@@ -14,6 +14,8 @@ data class MusicPlaybackItem(
     val imageUri: String?,
     val durationMs: Long,
     val favorite: Boolean,
+    val isAudiobook: Boolean = false,
+    val overview: String? = null,
 )
 
 enum class MusicRepeatMode {
@@ -35,6 +37,7 @@ data class MusicPlaybackState(
     val positionMs: Long = 0,
     val durationMs: Long = 0,
     val shuffleEnabled: Boolean = false,
+    val isShuffling: Boolean = false,
     val repeatMode: MusicRepeatMode = MusicRepeatMode.OFF,
     val isConnected: Boolean = false,
     val error: String? = null,

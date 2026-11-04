@@ -47,6 +47,9 @@
     <string name="music_context_artists">artists</string>
     <string name="music_context_albums">albums</string>
     <string name="music_album_count">%1$d albums</string>
+    <string name="music_album_count_label">Album count</string>
+    <string name="music_current_queue">Current queue</string>
+    <string name="music_duration_label">Duration</string>
     <string name="music_song_count">%1$d songs</string>
     <string name="music_unknown_artist">Unknown artist</string>
     <string name="music_no_albums">No albums</string>
