@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.models.FindroidBook
+import dev.hdytrfli.onigiri.models.FindroidMusicSong
+import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.swr.SwrStore
@@ -34,6 +36,7 @@ constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
     private val swrStore: SwrStore,
+    private val playerManager: MusicPlayerManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(BookDetailState())
     val state = _state.asStateFlow()
@@ -63,6 +66,31 @@ constructor(
                     )
                 }
         }
+    }
+
+    fun playAudiobook(item: FindroidBook) {
+        val authors =
+            item.people
+                .filter { it.type == org.jellyfin.sdk.model.api.PersonKind.AUTHOR }
+                .ifEmpty { item.people }
+                .joinToString(", ") { it.name }
+                .takeIf { it.isNotBlank() }
+        val song =
+            FindroidMusicSong(
+                id = item.id,
+                name = item.name,
+                albumId = null,
+                artistId = null,
+                albumName = null,
+                artistName = authors,
+                artistImage = null,
+                indexNumber = 1,
+                productionYear = item.productionYear,
+                runtimeTicks = item.runtimeTicks,
+                favorite = item.favorite,
+                images = item.images,
+            )
+        playerManager.playSongs(listOf(song))
     }
 
     fun setPlayed(bookId: UUID, played: Boolean) {

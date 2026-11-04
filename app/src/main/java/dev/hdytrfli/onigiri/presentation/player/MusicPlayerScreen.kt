@@ -230,42 +230,51 @@ private fun MusicEntityLink(
     onClick: () -> Unit,
 ) {
     if (label.isBlank()) return
-    Row(
+    Box(
         modifier =
-            Modifier.clip(CircleShape)
-                .clickable(onClick = onClick)
-                .padding(vertical = MaterialTheme.spacings.extraSmall),
-        verticalAlignment = Alignment.CenterVertically,
+            Modifier.clip(CircleShape).background(Color(0xFF242424)).clickable(onClick = onClick)
     ) {
-        Box(
-            modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFF2A2A2A)),
-            contentAlignment = Alignment.Center,
+        Row(
+            modifier =
+                Modifier.padding(
+                    start = MaterialTheme.spacings.small,
+                    end = MaterialTheme.spacings.small,
+                    top = MaterialTheme.spacings.extraSmall,
+                    bottom = MaterialTheme.spacings.extraSmall,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (imageUri != null) {
-                AsyncImage(
-                    model = imageUri,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    painter = painterResource(placeholder),
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = PlayerOnBackgroundMuted,
-                )
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFF2A2A2A)),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(placeholder),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = PlayerOnBackgroundMuted,
+                    )
+                }
             }
+            Spacer(Modifier.width(MaterialTheme.spacings.small))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = PlayerOnBackgroundMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 180.dp),
+            )
+            Spacer(Modifier.width(MaterialTheme.spacings.extraSmall))
         }
-        Spacer(Modifier.width(MaterialTheme.spacings.extraSmall))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = PlayerOnBackgroundMuted,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 180.dp),
-        )
     }
 }
 
@@ -331,7 +340,11 @@ private fun BottomControls(
             // Transport controls first, like the video player.
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement =
+                    Arrangement.spacedBy(
+                        MaterialTheme.spacings.small,
+                        Alignment.CenterHorizontally,
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppIconButton(
@@ -467,12 +480,45 @@ private fun BottomControls(
             Spacer(Modifier.height(MaterialTheme.spacings.medium))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             ) {
                 Text(
                     text = formatTime((sliderState.value * state.durationMs).toLong()),
                     style = MaterialTheme.typography.bodySmall,
                     color = PlayerOnBackgroundMuted,
+                )
+                Slider(
+                    state = sliderState,
+                    onValueChange = {
+                        dragging = true
+                        sliderState.value = it
+                    },
+                    onValueChangeFinished = {
+                        dragging = false
+                        if (state.durationMs > 0L) {
+                            onSeek((sliderState.value * state.durationMs).toLong())
+                        }
+                    },
+                    enabled = state.durationMs > 0L,
+                    colors = playerSliderColors(),
+                    thumb = {
+                        Box(
+                            modifier =
+                                Modifier.width(4.dp)
+                                    .height(16.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color.White)
+                        )
+                    },
+                    track = { sliderState ->
+                        SliderDefaults.Track(
+                            sliderState = sliderState,
+                            colors = playerSliderColors(),
+                            modifier = Modifier.height(12.dp),
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
                 )
                 Text(
                     text = formatTime(state.durationMs),
@@ -480,37 +526,6 @@ private fun BottomControls(
                     color = PlayerOnBackgroundMuted,
                 )
             }
-            Slider(
-                state = sliderState,
-                onValueChange = {
-                    dragging = true
-                    sliderState.value = it
-                },
-                onValueChangeFinished = {
-                    dragging = false
-                    if (state.durationMs > 0L) {
-                        onSeek((sliderState.value * state.durationMs).toLong())
-                    }
-                },
-                enabled = state.durationMs > 0L,
-                colors = playerSliderColors(),
-                thumb = {
-                    Box(
-                        modifier =
-                            Modifier.width(4.dp)
-                                .height(16.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(Color.White)
-                    )
-                },
-                track = { sliderState ->
-                    SliderDefaults.Track(
-                        sliderState = sliderState,
-                        colors = playerSliderColors(),
-                        modifier = Modifier.height(12.dp),
-                    )
-                },
-            )
 
             state.error?.let { error ->
                 Spacer(Modifier.height(MaterialTheme.spacings.small))

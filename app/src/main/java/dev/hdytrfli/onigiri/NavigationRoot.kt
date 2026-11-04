@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -390,6 +391,16 @@ private fun MainNavigation(
             }
             val suiteVisible = currentRoute.drawsNavigationSuite(tabRoutes)
             val showMiniPlayer = currentMusic != null
+            val miniStartInset by
+                animateDpAsState(
+                    targetValue = if (suiteVisible) LocalSuiteStartInset.current else 0.dp,
+                    label = "mini-player-start-inset",
+                )
+            val miniBottomInset by
+                animateDpAsState(
+                    targetValue = if (suiteVisible) LocalSuiteBottomInset.current else 0.dp,
+                    label = "mini-player-bottom-inset",
+                )
             AnimatedVisibility(
                 visible = showMiniPlayer,
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -397,8 +408,8 @@ private fun MainNavigation(
                 Box(
                     modifier =
                         Modifier.padding(
-                            start = if (suiteVisible) LocalSuiteStartInset.current else 0.dp,
-                            bottom = if (suiteVisible) LocalSuiteBottomInset.current else 0.dp,
+                            start = miniStartInset,
+                            bottom = miniBottomInset,
                         )
                 ) {
                     MiniMusicPlayerHost(viewModel = musicPlayerViewModel)
@@ -435,9 +446,8 @@ private fun MainNavigation(
                             start = MaterialTheme.spacings.gutter,
                             end = MaterialTheme.spacings.gutter,
                             bottom =
-                                MaterialTheme.spacings.medium +
-                                    LocalSuiteBottomInset.current +
-                                    if (showMiniPlayer) 68.dp else 0.dp,
+                                LocalSuiteBottomInset.current +
+                                    if (showMiniPlayer) 80.dp else MaterialTheme.spacings.gutter,
                         ),
             )
         }
@@ -636,6 +646,9 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         startFromBeginning = startFromBeginning,
                     )
                 )
+            },
+            onOpenPlayer = {
+                context.startActivity(Intent(context, MusicPlayerActivity::class.java))
             },
             navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
             onAuthorClick = { personId ->

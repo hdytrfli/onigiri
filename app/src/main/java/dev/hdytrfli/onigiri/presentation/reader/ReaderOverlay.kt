@@ -187,6 +187,7 @@ fun ReaderOverlay(
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Text(
                                 text = displayedPage.toString(),
@@ -196,7 +197,42 @@ fun ReaderOverlay(
                                         color = Color.White,
                                     ),
                             )
-                            Spacer(modifier = Modifier.weight(1f))
+                            Slider(
+                                state = sliderState,
+                                onValueChange = { value ->
+                                    if (state.pageCount > 1) {
+                                        isScrubbing = true
+                                        scrubValue = value
+                                        onInteraction()
+                                        onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
+                                    }
+                                },
+                                onValueChangeFinished = { isScrubbing = false },
+                                colors =
+                                    SliderDefaults.colors(
+                                        thumbColor = Color.White,
+                                        activeTrackColor = Color.White,
+                                        inactiveTrackColor = Color(0x33FFFFFF),
+                                        activeTickColor = Color.Transparent,
+                                        inactiveTickColor = Color.Transparent,
+                                    ),
+                                thumb = { ReaderSliderThumb() },
+                                track = { sliderState ->
+                                    SliderDefaults.Track(
+                                        sliderState = sliderState,
+                                        colors =
+                                            SliderDefaults.colors(
+                                                activeTrackColor = Color.White,
+                                                inactiveTrackColor = Color(0x33FFFFFF),
+                                                activeTickColor = Color.Transparent,
+                                                inactiveTickColor = Color.Transparent,
+                                            ),
+                                        modifier = Modifier.height(12.dp),
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = state.pageCount > 1,
+                            )
                             Text(
                                 text = state.pageCount.toString(),
                                 style =
@@ -206,42 +242,6 @@ fun ReaderOverlay(
                                     ),
                             )
                         }
-                        Slider(
-                            state = sliderState,
-                            onValueChange = { value ->
-                                if (state.pageCount > 1) {
-                                    isScrubbing = true
-                                    scrubValue = value
-                                    onInteraction()
-                                    onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
-                                }
-                            },
-                            onValueChangeFinished = { isScrubbing = false },
-                            colors =
-                                SliderDefaults.colors(
-                                    thumbColor = Color.White,
-                                    activeTrackColor = Color.White,
-                                    inactiveTrackColor = Color(0x33FFFFFF),
-                                    activeTickColor = Color.Transparent,
-                                    inactiveTickColor = Color.Transparent,
-                                ),
-                            thumb = { ReaderSliderThumb() },
-                            track = { sliderState ->
-                                SliderDefaults.Track(
-                                    sliderState = sliderState,
-                                    colors =
-                                        SliderDefaults.colors(
-                                            activeTrackColor = Color.White,
-                                            inactiveTrackColor = Color(0x33FFFFFF),
-                                            activeTickColor = Color.Transparent,
-                                            inactiveTickColor = Color.Transparent,
-                                        ),
-                                    modifier = Modifier.height(12.dp),
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = state.pageCount > 1,
-                        )
                     }
                 }
             }

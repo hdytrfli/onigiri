@@ -14,8 +14,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -128,99 +127,91 @@ fun MusicQueueScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                Card(
+                LazyColumn(
+                    state = listState,
                     modifier =
                         Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth().weight(1f),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
-                        ),
                 ) {
-                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                        item(key = "played-header") {
-                            SectionHeader(
-                                title = stringResource(FilmR.string.music_played),
-                                modifier =
-                                    Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                                trailingContent = { ItemCountBadge(count = played.size) },
-                            )
-                        }
-                        itemsIndexed(played, key = { _, entry -> entry.second.id }) { _, entry ->
-                            val index = entry.first
-                            val item = entry.second
-                            QueueRow(
-                                item = item,
-                                index = index,
-                                currentIndex = currentIndex,
-                                onPlayNow = { onPlayNow(index) },
-                                onPlayNext = {
-                                    val target =
-                                        (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
-                                    if (target != index) onMove(index, target)
-                                },
-                                onPlayEnd = {
-                                    if (index != displayQueue.lastIndex) {
-                                        onMove(index, displayQueue.lastIndex)
-                                    }
-                                },
-                                onRemove = { onRemove(index) },
-                                trailingDivider = index > 0,
-                            )
-                        }
-                        item(key = "up-next-header") {
-                            SectionHeader(
-                                title = stringResource(FilmR.string.music_up_next),
+                    item(key = "played-header") {
+                        SectionHeader(
+                            title = stringResource(FilmR.string.music_played),
+                            modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
+                            trailingContent = { ItemCountBadge(count = played.size) },
+                        )
+                    }
+                    itemsIndexed(played, key = { _, entry -> entry.second.id }) { _, entry ->
+                        val index = entry.first
+                        val item = entry.second
+                        QueueRow(
+                            item = item,
+                            index = index,
+                            currentIndex = currentIndex,
+                            onPlayNow = { onPlayNow(index) },
+                            onPlayNext = {
+                                val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
+                                if (target != index) onMove(index, target)
+                            },
+                            onPlayEnd = {
+                                if (index != displayQueue.lastIndex) {
+                                    onMove(index, displayQueue.lastIndex)
+                                }
+                            },
+                            onRemove = { onRemove(index) },
+                            trailingDivider = index > 0,
+                        )
+                    }
+                    item(key = "up-next-header") {
+                        SectionHeader(
+                            title = stringResource(FilmR.string.music_up_next),
+                            modifier =
+                                Modifier.padding(
+                                    start = MaterialTheme.spacings.medium,
+                                    end = MaterialTheme.spacings.medium,
+                                    top = MaterialTheme.spacings.medium,
+                                ),
+                            trailingContent = { ItemCountBadge(count = upNext.size) },
+                        )
+                    }
+                    if (upNext.isEmpty()) {
+                        item(key = "up-next-empty") {
+                            Text(
+                                text = stringResource(FilmR.string.music_empty_queue),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier =
                                     Modifier.padding(
-                                        start = MaterialTheme.spacings.medium,
-                                        end = MaterialTheme.spacings.medium,
-                                        top = MaterialTheme.spacings.medium,
+                                        horizontal = MaterialTheme.spacings.medium,
+                                        vertical = MaterialTheme.spacings.small,
                                     ),
-                                trailingContent = { ItemCountBadge(count = upNext.size) },
                             )
                         }
-                        if (upNext.isEmpty()) {
-                            item(key = "up-next-empty") {
-                                Text(
-                                    text = stringResource(FilmR.string.music_empty_queue),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier =
-                                        Modifier.padding(
-                                            horizontal = MaterialTheme.spacings.medium,
-                                            vertical = MaterialTheme.spacings.small,
-                                        ),
+                    } else {
+                        itemsIndexed(upNext, key = { _, entry -> entry.second.id }) { _, entry ->
+                            val index = entry.first
+                            val item = entry.second
+                            ReorderableItem(reorderableState, key = item.id) { _ ->
+                                QueueRow(
+                                    item = item,
+                                    index = index,
+                                    currentIndex = currentIndex,
+                                    onPlayNow = { onPlayNow(index) },
+                                    onPlayNext = {
+                                        val target =
+                                            (currentIndex + 1).coerceIn(
+                                                0,
+                                                displayQueue.lastIndex,
+                                            )
+                                        if (target != index) onMove(index, target)
+                                    },
+                                    onPlayEnd = {
+                                        if (index != displayQueue.lastIndex) {
+                                            onMove(index, displayQueue.lastIndex)
+                                        }
+                                    },
+                                    onRemove = { onRemove(index) },
+                                    modifier = Modifier.longPressDraggableHandle(),
+                                    trailingDivider = index < displayQueue.lastIndex,
                                 )
-                            }
-                        } else {
-                            itemsIndexed(upNext, key = { _, entry -> entry.second.id }) { _, entry
-                                ->
-                                val index = entry.first
-                                val item = entry.second
-                                ReorderableItem(reorderableState, key = item.id) { _ ->
-                                    QueueRow(
-                                        item = item,
-                                        index = index,
-                                        currentIndex = currentIndex,
-                                        onPlayNow = { onPlayNow(index) },
-                                        onPlayNext = {
-                                            val target =
-                                                (currentIndex + 1).coerceIn(
-                                                    0,
-                                                    displayQueue.lastIndex,
-                                                )
-                                            if (target != index) onMove(index, target)
-                                        },
-                                        onPlayEnd = {
-                                            if (index != displayQueue.lastIndex) {
-                                                onMove(index, displayQueue.lastIndex)
-                                            }
-                                        },
-                                        onRemove = { onRemove(index) },
-                                        modifier = Modifier.longPressDraggableHandle(),
-                                        trailingDivider = index < displayQueue.lastIndex,
-                                    )
-                                }
                             }
                         }
                     }
@@ -262,7 +253,7 @@ private fun QueueRow(
             Box(
                 modifier =
                     Modifier.size(44.dp)
-                        .clip(MaterialTheme.shapes.small)
+                        .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center,
             ) {
