@@ -65,6 +65,9 @@ class MusicPlayerActivity : ComponentActivity() {
                             openMusicDetail(artistId = artistId.toString())
                         },
                         onAlbumClick = { albumId -> openMusicDetail(albumId = albumId.toString()) },
+                        onPlayQueueItem = viewModel::playQueueItem,
+                        onRemoveQueueItem = viewModel::removeQueueItem,
+                        onMoveQueueItem = viewModel::moveQueueItem,
                         onClearError = viewModel::clearError,
                     )
                 }

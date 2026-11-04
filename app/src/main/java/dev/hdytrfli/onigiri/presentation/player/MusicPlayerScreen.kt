@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.presentation.player
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,6 +85,9 @@ fun MusicPlayerScreen(
     onOpenQueue: () -> Unit,
     onArtistClick: (java.util.UUID) -> Unit,
     onAlbumClick: (java.util.UUID) -> Unit,
+    onPlayQueueItem: (Int) -> Unit,
+    onRemoveQueueItem: (Int) -> Unit,
+    onMoveQueueItem: (fromIndex: Int, toIndex: Int) -> Unit,
     onClearError: () -> Unit,
 ) {
     var overlayMessage by remember { mutableStateOf<String?>(null) }
@@ -100,6 +106,7 @@ fun MusicPlayerScreen(
     }
 
     val safePadding = rememberSafePadding()
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Box(
         modifier =
@@ -137,6 +144,64 @@ fun MusicPlayerScreen(
             val current = state.current
             if (current == null) {
                 EmptyPlayer()
+            } else if (isLandscape) {
+                Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(0.58f).fillMaxHeight()) {
+                        BoxWithConstraints(
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val gutter = MaterialTheme.spacings.gutter
+                            val artSize =
+                                minOf(maxWidth - gutter * 2, Dimens.contentMaxWidth, maxHeight)
+                            AlbumArtwork(
+                                item = current,
+                                artworkType = artworkType,
+                                isPlaying = state.isPlaying,
+                                modifier = Modifier.size(artSize),
+                            )
+                        }
+                        BottomControls(
+                            state = state,
+                            item = current,
+                            onPlayPause = onPlayPause,
+                            onPrevious = onPrevious,
+                            onNext = onNext,
+                            onSeek = onSeek,
+                            onToggleShuffle = {
+                                overlayMessage = if (state.shuffleEnabled) shuffleOff else shuffleOn
+                                onToggleShuffle()
+                            },
+                            onCycleRepeat = {
+                                overlayMessage =
+                                    when (state.repeatMode) {
+                                        MusicRepeatMode.OFF -> repeatAll
+                                        MusicRepeatMode.ALL -> repeatOne
+                                        MusicRepeatMode.ONE -> repeatOff
+                                    }
+                                onCycleRepeat()
+                            },
+                            onArtistClick = onArtistClick,
+                            onAlbumClick = onAlbumClick,
+                            onClearError = onClearError,
+                        )
+                    }
+                    MusicQueueContent(
+                        queue = state.queue,
+                        currentIndex = state.currentIndex,
+                        onPlayNow = onPlayQueueItem,
+                        onRemove = onRemoveQueueItem,
+                        onMove = onMoveQueueItem,
+                        modifier =
+                            Modifier.weight(0.42f)
+                                .fillMaxHeight()
+                                .padding(
+                                    start = MaterialTheme.spacings.small,
+                                    end = MaterialTheme.spacings.gutter,
+                                    bottom = MaterialTheme.spacings.medium,
+                                ),
+                    )
+                }
             } else {
                 BoxWithConstraints(
                     modifier = Modifier.weight(1f).fillMaxWidth(),

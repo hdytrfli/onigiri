@@ -169,7 +169,7 @@ class JellyfinRepositoryImpl(
                 if (libraryIds.isEmpty()) {
                     addAll(
                         jellyfinApi.artistsApi
-                            .getArtists(
+                            .getAlbumArtists(
                                 userId = jellyfinApi.userId,
                                 fields = listOf(ItemFields.ITEM_COUNTS),
                                 sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
@@ -183,7 +183,7 @@ class JellyfinRepositoryImpl(
                     for (libraryId in libraryIds) {
                         addAll(
                             jellyfinApi.artistsApi
-                                .getArtists(
+                                .getAlbumArtists(
                                     userId = jellyfinApi.userId,
                                     parentId = libraryId,
                                     fields = listOf(ItemFields.ITEM_COUNTS),
@@ -295,9 +295,9 @@ class JellyfinRepositoryImpl(
             jellyfinApi.itemsApi
                 .getItems(
                     jellyfinApi.userId!!,
-                    parentId = artistId,
+                    albumArtistIds = listOf(artistId),
                     includeItemTypes = listOf(BaseItemKind.MUSIC_ALBUM),
-                    recursive = false,
+                    recursive = true,
                     sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
                     sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
                 )
