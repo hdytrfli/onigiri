@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.presentation.player
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -112,8 +113,27 @@ fun MusicPlayerScreen(
                 favorite = state.current?.favorite == true,
                 onToggleFavorite = onToggleFavorite,
                 onOpenQueue = onOpenQueue,
-                message = overlayMessage,
             )
+            AnimatedVisibility(visible = overlayMessage != null) {
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth().padding(bottom = MaterialTheme.spacings.small),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xCC000000),
+                        contentColor = Color.White,
+                        shadowElevation = 6.dp,
+                    ) {
+                        Text(
+                            text = overlayMessage.orEmpty(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                        )
+                    }
+                }
+            }
             val current = state.current
             if (current == null) {
                 EmptyPlayer()
@@ -166,7 +186,6 @@ private fun PlayerTopBar(
     favorite: Boolean,
     onToggleFavorite: () -> Unit,
     onOpenQueue: () -> Unit,
-    message: String?,
 ) {
     Row(
         modifier =
@@ -188,22 +207,7 @@ private fun PlayerTopBar(
                 )
             },
         )
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            message?.let {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xCC000000),
-                    contentColor = Color.White,
-                    shadowElevation = 6.dp,
-                ) {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                    )
-                }
-            }
-        }
+        Spacer(modifier = Modifier.weight(1f))
         AppIconButton(
             onClick = onToggleFavorite,
             variant = AppButtonVariant.Secondary,
@@ -250,9 +254,9 @@ private fun MusicEntityLink(
             modifier =
                 Modifier.padding(
                     start = MaterialTheme.spacings.small,
-                    end = MaterialTheme.spacings.small,
-                    top = MaterialTheme.spacings.extraSmall,
-                    bottom = MaterialTheme.spacings.extraSmall,
+                    end = MaterialTheme.spacings.small + MaterialTheme.spacings.extraSmall,
+                    top = MaterialTheme.spacings.small,
+                    bottom = MaterialTheme.spacings.small,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -285,7 +289,6 @@ private fun MusicEntityLink(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.widthIn(max = 180.dp),
             )
-            Spacer(Modifier.width(MaterialTheme.spacings.extraSmall))
         }
     }
 }
@@ -310,7 +313,8 @@ private fun AlbumArtwork(
             }
         }
 
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+            val scrimSize = minOf(maxWidth, maxHeight) * 0.3f
             Box(
                 modifier =
                     Modifier.fillMaxSize()
@@ -319,7 +323,7 @@ private fun AlbumArtwork(
                         .background(Color(0xFF242424))
                         .border(
                             width = 8.dp,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = Color(0xFF242424),
                             shape = CircleShape,
                         ),
                 contentAlignment = Alignment.Center,
@@ -342,7 +346,13 @@ private fun AlbumArtwork(
             }
             Box(
                 modifier =
-                    Modifier.size(24.dp)
+                    Modifier.size(scrimSize)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.5f))
+            )
+            Box(
+                modifier =
+                    Modifier.size(48.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.background)
             )
