@@ -44,6 +44,7 @@ class MusicPlayerManager
 constructor(
     @ApplicationContext private val context: Context,
     private val repository: JellyfinRepository,
+    private val appPreferences: dev.hdytrfli.onigiri.settings.domain.AppPreferences,
 ) : Player.Listener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val sessionToken =
@@ -138,16 +139,32 @@ constructor(
                 return@launch
             }
             val safeIndex = startIndex.coerceIn(0, items.lastIndex)
+            val remember = appPreferences.getValue(appPreferences.musicRememberShuffleRepeat)
+            val rememberedShuffle =
+                remember && appPreferences.getValue(appPreferences.musicShuffleMode)
+            val rememberedRepeat = appPreferences.getValue(appPreferences.musicRepeatMode)
             runOnController { player ->
                 player.shuffleModeEnabled = false
                 player.setMediaItems(items, safeIndex, 0L)
                 player.prepare()
-                if (shuffle) {
+                player.repeatMode =
+                    when (rememberedRepeat) {
+                        "ALL" -> Player.REPEAT_MODE_ALL
+                        "ONE" -> Player.REPEAT_MODE_ONE
+                        else -> Player.REPEAT_MODE_OFF
+                    }
+                if (shuffle || rememberedShuffle) {
                     val order =
                         intArrayOf(safeIndex) +
                             (items.indices.filter { it != safeIndex }).shuffled()
                     setShuffleOrder(order)
                     player.shuffleModeEnabled = true
+                }
+                if (remember) {
+                    appPreferences.setValue(
+                        appPreferences.musicShuffleMode,
+                        player.shuffleModeEnabled,
+                    )
                 }
                 player.play()
             }
@@ -309,6 +326,12 @@ constructor(
                 setShuffleOrder(order)
                 player.shuffleModeEnabled = true
             }
+            if (appPreferences.getValue(appPreferences.musicRememberShuffleRepeat)) {
+                appPreferences.setValue(
+                    appPreferences.musicShuffleMode,
+                    player.shuffleModeEnabled,
+                )
+            }
             sync()
         }
     }
@@ -337,6 +360,16 @@ constructor(
                     Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
                     else -> Player.REPEAT_MODE_OFF
                 }
+            if (appPreferences.getValue(appPreferences.musicRememberShuffleRepeat)) {
+                appPreferences.setValue(
+                    appPreferences.musicRepeatMode,
+                    when (player.repeatMode) {
+                        Player.REPEAT_MODE_ALL -> "ALL"
+                        Player.REPEAT_MODE_ONE -> "ONE"
+                        else -> "OFF"
+                    },
+                )
+            }
         }
     }
 

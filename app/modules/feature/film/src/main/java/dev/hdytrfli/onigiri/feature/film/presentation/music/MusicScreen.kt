@@ -396,11 +396,6 @@ private fun SongListRow(
         actions =
             listOf(
                 MusicRowAction(
-                    label = stringResource(CoreR.string.play),
-                    icon = CoreR.drawable.ic_play,
-                    onClick = onPlay,
-                ),
-                MusicRowAction(
                     label = stringResource(FilmR.string.music_play_next),
                     icon = CoreR.drawable.ic_skip_forward,
                     onClick = onPlayNext,

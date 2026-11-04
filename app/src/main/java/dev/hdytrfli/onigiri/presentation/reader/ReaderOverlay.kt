@@ -133,7 +133,7 @@ fun ReaderOverlay(
                         modifier =
                             Modifier.fillMaxWidth()
                                 .statusBarsPadding()
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .padding(horizontal = 12.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AppIconButton(onClick = onBack, variant = AppButtonVariant.Ghost) {

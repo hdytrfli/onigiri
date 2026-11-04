@@ -14,14 +14,49 @@ data class CollectionSection(val id: Int, val name: UiText, var items: List<Find
  */
 fun mediaSections(items: List<FindroidItem>): List<CollectionSection> {
     if (items.isEmpty()) return emptyList()
+    val music = items.filterIsInstance<FindroidMusicFavorite>()
+    val songs = music.filter { it.kind == MusicFavoriteKind.Song }
+    val albums = music.filter { it.kind == MusicFavoriteKind.Album }
+    val artists = music.filter { it.kind == MusicFavoriteKind.Artist }
     val episodes = items.filter { it is FindroidEpisode }
     val seasons = items.filter { it is FindroidSeason }
     val shows = items.filter { it is FindroidShow }
     val books = items.filter { it is FindroidBook }
     val movies = items.filterNot {
-        it is FindroidShow || it is FindroidSeason || it is FindroidEpisode || it is FindroidBook
+        it is FindroidShow ||
+            it is FindroidSeason ||
+            it is FindroidEpisode ||
+            it is FindroidBook ||
+            it is FindroidMusicFavorite
     }
     return buildList {
+        if (songs.isNotEmpty()) {
+            add(
+                CollectionSection(
+                    id = Constants.FAVORITE_TYPE_SONGS,
+                    name = UiText.StringResource(CoreR.string.favorite_songs_label),
+                    items = songs,
+                )
+            )
+        }
+        if (albums.isNotEmpty()) {
+            add(
+                CollectionSection(
+                    id = Constants.FAVORITE_TYPE_ALBUMS,
+                    name = UiText.StringResource(CoreR.string.favorite_albums_label),
+                    items = albums,
+                )
+            )
+        }
+        if (artists.isNotEmpty()) {
+            add(
+                CollectionSection(
+                    id = Constants.FAVORITE_TYPE_ARTISTS,
+                    name = UiText.StringResource(CoreR.string.favorite_artists_label),
+                    items = artists,
+                )
+            )
+        }
         if (books.isNotEmpty()) {
             add(
                 CollectionSection(

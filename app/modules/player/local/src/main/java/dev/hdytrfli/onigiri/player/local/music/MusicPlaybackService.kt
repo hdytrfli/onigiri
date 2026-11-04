@@ -14,7 +14,15 @@ import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
+import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import java.util.UUID
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 /**
  * Owns music playback while the app is in the background. Media3's service keeps the ExoPlayer,
@@ -22,7 +30,10 @@ import java.util.UUID
  */
 @AndroidEntryPoint
 class MusicPlaybackService : MediaSessionService() {
+    @Inject lateinit var appPreferences: AppPreferences
+
     private var mediaSession: MediaSession? = null
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val sessionCallback =
         object : MediaSession.Callback {
@@ -81,6 +92,19 @@ class MusicPlaybackService : MediaSessionService() {
                 .setWakeMode(C.WAKE_MODE_NETWORK)
                 .build()
 
+        serviceScope.launch {
+            combine(
+                    appPreferences.observe(appPreferences.musicSkipSilence),
+                    appPreferences.observe(appPreferences.musicGapless),
+                ) { skipSilence, gapless ->
+                    skipSilence to gapless
+                }
+                .collect { (skipSilence, gapless) ->
+                    player.skipSilenceEnabled = skipSilence
+                    player.pauseAtEndOfMediaItems = !gapless
+                }
+        }
+
         val sessionActivity =
             PendingIntent.getActivity(
                 this,
@@ -111,6 +135,7 @@ class MusicPlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         mediaSession?.run {
             player.release()
             release()

@@ -48,6 +48,7 @@ constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
     private val playerManager: MusicPlayerManager,
+    private val swrStore: dev.hdytrfli.onigiri.swr.SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MusicState())
     val state = _state.asStateFlow()
@@ -254,6 +255,7 @@ constructor(
                                 }
                         )
                     }
+                    swrStore.invalidateMediaLists()
                 }
         }
     }

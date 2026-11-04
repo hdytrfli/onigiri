@@ -7,6 +7,9 @@
     <string name="discard">Discard</string>
     <string name="title_home">Home</string>
     <string name="title_music">Music</string>
+    <string name="favorite_songs_label">Songs</string>
+    <string name="favorite_albums_label">Albums</string>
+    <string name="favorite_artists_label">Artists</string>
     <string name="title_media">My media</string>
     <string name="title_favorite">Favorites</string>
     <string name="title_settings">Settings</string>

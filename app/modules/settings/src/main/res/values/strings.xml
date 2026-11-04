@@ -8,6 +8,12 @@
     <string name="settings_category_music_summary">Music player appearance</string>
     <string name="settings_music_artwork_type">Player artwork</string>
     <string name="settings_music_artwork_type_summary">Choose how album art appears in the music player</string>
+    <string name="settings_music_skip_silence">Skip silence</string>
+    <string name="settings_music_skip_silence_summary">Skip silent parts between tracks</string>
+    <string name="settings_music_gapless">Gapless playback</string>
+    <string name="settings_music_gapless_summary">Play consecutive tracks without pausing</string>
+    <string name="settings_music_remember_shuffle_repeat">Remember shuffle and repeat</string>
+    <string name="settings_music_remember_shuffle_repeat_summary">Restore shuffle and repeat modes for new queues</string>
     <string name="settings_group_server">Server</string>
     <string name="settings_group_storage">Storage</string>
     <string name="settings_category_download">Downloads</string>

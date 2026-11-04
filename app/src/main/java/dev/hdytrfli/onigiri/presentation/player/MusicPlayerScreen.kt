@@ -2,10 +2,12 @@ package dev.hdytrfli.onigiri.presentation.player
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
+import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
 import dev.hdytrfli.onigiri.player.local.music.MusicRepeatMode
@@ -67,8 +72,10 @@ import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
+import kotlin.math.abs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 private val PlayerBackgroundTop = Color(0xFF181818)
 private val PlayerOnBackground = Color.White
@@ -192,10 +199,7 @@ fun MusicPlayerScreen(
                         Column(
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .padding(
-                                        horizontal = MaterialTheme.spacings.medium,
-                                        vertical = 48.dp,
-                                    )
+                                    .padding(horizontal = 24.dp, vertical = 48.dp)
                         ) {
                             PlayerDetails(item = current)
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
@@ -207,37 +211,37 @@ fun MusicPlayerScreen(
                         }
                     }
                 } else {
-                    Column(modifier = Modifier.weight(0.5f).fillMaxHeight().padding(end = gutter)) {
-                        Column(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(
-                                        start = MaterialTheme.spacings.medium,
-                                        end = MaterialTheme.spacings.medium,
-                                        top = 48.dp,
-                                        bottom = 48.dp,
-                                    )
-                        ) {
-                            PlayerDetails(item = current)
-                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
-                            PlayerSeekBar(
-                                state = state,
-                                onSeek = onSeek,
-                                onClearError = onClearError,
-                            )
-                        }
-                        MusicQueueContent(
-                            queue = state.queue,
-                            currentIndex = state.currentIndex,
-                            onPlayNow = onPlayQueueItem,
-                            onRemove = onRemoveQueueItem,
-                            onMove = onMoveQueueItem,
-                            onToggleFavorite = onToggleFavoriteItem,
-                            isShuffling = state.isShuffling,
-                            modifier = Modifier.weight(1f).fillMaxWidth(),
-                            contentBottomPadding = MaterialTheme.spacings.gutter,
-                        )
-                    }
+                    MusicQueueContent(
+                        queue = state.queue,
+                        currentIndex = state.currentIndex,
+                        onPlayNow = onPlayQueueItem,
+                        onRemove = onRemoveQueueItem,
+                        onMove = onMoveQueueItem,
+                        onToggleFavorite = onToggleFavoriteItem,
+                        isShuffling = state.isShuffling,
+                        modifier = Modifier.weight(0.5f).fillMaxHeight().padding(end = gutter),
+                        contentBottomPadding = MaterialTheme.spacings.gutter,
+                        header = {
+                            Column(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(
+                                            start = 24.dp,
+                                            end = 24.dp,
+                                            top = 48.dp,
+                                            bottom = MaterialTheme.spacings.medium,
+                                        )
+                            ) {
+                                PlayerDetails(item = current)
+                                Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                                PlayerSeekBar(
+                                    state = state,
+                                    onSeek = onSeek,
+                                    onClearError = onClearError,
+                                )
+                            }
+                        },
+                    )
                 }
             }
         } else {
@@ -296,7 +300,7 @@ fun MusicPlayerScreen(
                     }
                     PlayerDetails(
                         item = current,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = gutter),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
                     PlayerSeekBar(
@@ -305,8 +309,8 @@ fun MusicPlayerScreen(
                         onClearError = onClearError,
                         modifier =
                             Modifier.padding(
-                                start = gutter,
-                                end = gutter,
+                                start = 24.dp,
+                                end = 24.dp,
                                 bottom = MaterialTheme.spacings.medium,
                             ),
                     )
@@ -315,6 +319,8 @@ fun MusicPlayerScreen(
         }
         AnimatedVisibility(
             visible = overlayMessage != null,
+            enter = fadeIn(tween(150)),
+            exit = fadeOut(tween(150)),
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 72.dp),
         ) {
             Surface(
@@ -341,13 +347,7 @@ private fun PlayerTopBar(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = MaterialTheme.spacings.gutter,
-                    vertical = MaterialTheme.spacings.small,
-                ),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -440,11 +440,16 @@ private fun AlbumArtwork(
             }
         }
 
-        BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
-            val scrimSize = minOf(maxWidth, maxHeight) * 0.3f
+        BoxWithConstraints(
+            modifier = modifier.aspectRatio(1f),
+            contentAlignment = Alignment.Center,
+        ) {
+            val discSize = minOf(maxWidth, maxHeight)
+            val scrimSize = discSize * 0.3f
             Box(
                 modifier =
-                    Modifier.fillMaxSize()
+                    Modifier.size(discSize)
+                        .aspectRatio(1f)
                         .graphicsLayer { rotationZ = rotation.value }
                         .clip(CircleShape)
                         .background(Color(0xFF242424))
@@ -513,7 +518,6 @@ private fun PlayerDetails(
     item: MusicPlaybackItem,
     modifier: Modifier = Modifier,
 ) {
-    var overviewExpanded by remember(item.id) { mutableStateOf(false) }
     Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
         MusicEntityLink(
             label = item.artist.orEmpty(),
@@ -533,17 +537,13 @@ private fun PlayerDetails(
             ?.takeIf { it.isNotBlank() }
             ?.let { overview ->
                 Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
-                Text(
-                    text = overview,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = PlayerOnBackgroundMuted,
-                    maxLines = if (overviewExpanded) Int.MAX_VALUE else 3,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier =
-                        Modifier.fillMaxWidth().animateContentSize().clickable {
-                            overviewExpanded = !overviewExpanded
-                        },
-                )
+                androidx.compose.runtime.key(item.id) {
+                    OverviewText(
+                        text = overview,
+                        maxCollapsedLines = 3,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         item.album?.let { album ->
             Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
@@ -727,10 +727,18 @@ private fun PlayerSeekBar(
     modifier: Modifier = Modifier,
 ) {
     var dragging by remember { mutableStateOf(false) }
+    var dragMoved by remember { mutableStateOf(false) }
+    var animatingSeek by remember { mutableStateOf(false) }
+    var pendingSeekTarget by remember { mutableStateOf<Long?>(null) }
     val sliderState = remember { SliderState(0f) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(state.positionMs, dragging) {
-        if (!dragging && state.durationMs > 0L) {
+    LaunchedEffect(state.positionMs, dragging, animatingSeek, pendingSeekTarget) {
+        val target = pendingSeekTarget
+        if (target != null && abs(state.positionMs - target) <= 1_000L) {
+            pendingSeekTarget = null
+        }
+        if (!dragging && !animatingSeek && pendingSeekTarget == null && state.durationMs > 0L) {
             sliderState.value = (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
         }
     }
@@ -749,14 +757,31 @@ private fun PlayerSeekBar(
             Slider(
                 state = sliderState,
                 onValueChange = {
+                    if (dragging) dragMoved = true
                     dragging = true
                     sliderState.value = it
                 },
                 onValueChangeFinished = {
                     dragging = false
+                    val target = sliderState.value
                     if (state.durationMs > 0L) {
-                        onSeek((sliderState.value * state.durationMs).toLong())
+                        val targetMs = (target * state.durationMs).toLong()
+                        if (!dragMoved) {
+                            val start =
+                                (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
+                            sliderState.value = start
+                            animatingSeek = true
+                            scope.launch {
+                                animate(start, target, animationSpec = tween(180)) { value, _ ->
+                                    sliderState.value = value
+                                }
+                                animatingSeek = false
+                            }
+                        }
+                        pendingSeekTarget = targetMs
+                        onSeek(targetMs)
                     }
+                    dragMoved = false
                 },
                 enabled = state.durationMs > 0L,
                 colors = playerSliderColors(),

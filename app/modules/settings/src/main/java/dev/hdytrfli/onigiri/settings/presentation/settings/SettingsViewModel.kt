@@ -1243,7 +1243,33 @@ constructor(
                                                     options = R.array.music_artwork_type_options,
                                                     optionValues =
                                                         R.array.music_artwork_type_values,
-                                                )
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_music_skip_silence,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_skip_silence_summary,
+                                                    backendPreference =
+                                                        appPreferences.musicSkipSilence,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_music_gapless,
+                                                    descriptionStringRes =
+                                                        R.string.settings_music_gapless_summary,
+                                                    backendPreference = appPreferences.musicGapless,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string
+                                                            .settings_music_remember_shuffle_repeat,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_remember_shuffle_repeat_summary,
+                                                    backendPreference =
+                                                        appPreferences.musicRememberShuffleRepeat,
+                                                ),
                                             )
                                     )
                                 ),

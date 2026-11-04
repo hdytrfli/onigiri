@@ -199,12 +199,7 @@ fun MusicQueueContent(
                             trailingDivider = currentQueue.size > 1,
                         )
                     } else {
-                        val animatedModifier = Modifier.animateItem()
-                        ReorderableItem(
-                            reorderableState,
-                            key = entry.second.key,
-                            modifier = animatedModifier,
-                        ) { isDragging ->
+                        ReorderableItem(reorderableState, key = entry.second.key) { isDragging ->
                             QueueRow(
                                 item = item,
                                 index = index,
@@ -294,12 +289,6 @@ private fun QueueRow(
         isCurrent = isCurrent,
         actions =
             listOf(
-                MusicRowAction(
-                    label = stringResource(FilmR.string.music_play_now),
-                    icon = CoreR.drawable.ic_play,
-                    enabled = !isCurrent,
-                    onClick = onPlayNow,
-                ),
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_play_next),
                     icon = CoreR.drawable.ic_skip_forward,

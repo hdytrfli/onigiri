@@ -74,8 +74,10 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidFolder
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicFavorite
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
+import dev.hdytrfli.onigiri.models.MusicFavoriteKind
 import dev.hdytrfli.onigiri.navigation.navigateOrReuse
 import dev.hdytrfli.onigiri.navigation.resumedAction
 import dev.hdytrfli.onigiri.presentation.onboarding.AddProfileScreen
@@ -952,6 +954,25 @@ private fun navigateToItem(navigator: Navigator, item: FindroidItem) {
                 CollectionRoute(collectionId = item.id.toString(), collectionName = item.name)
             )
         is FindroidMovie -> navigator.navigate(MovieRoute(movieId = item.id.toString()))
+        is FindroidMusicFavorite ->
+            when (item.kind) {
+                MusicFavoriteKind.Album ->
+                    item.albumId?.let {
+                        navigator.navigate(AlbumDetailRoute(albumId = it.toString()))
+                    }
+                MusicFavoriteKind.Artist ->
+                    item.artistId?.let {
+                        navigator.navigate(ArtistDetailRoute(artistId = it.toString()))
+                    }
+                MusicFavoriteKind.Song ->
+                    (item.albumId ?: item.artistId)?.let { id ->
+                        if (item.albumId != null) {
+                            navigator.navigate(AlbumDetailRoute(albumId = id.toString()))
+                        } else {
+                            navigator.navigate(ArtistDetailRoute(artistId = id.toString()))
+                        }
+                    }
+            }
         is FindroidShow -> navigator.navigate(ShowRoute(showId = item.id.toString()))
         is FindroidSeason -> navigator.navigate(SeasonRoute(seasonId = item.id.toString()))
         is FindroidEpisode -> navigator.navigate(EpisodeRoute(episodeId = item.id.toString()))

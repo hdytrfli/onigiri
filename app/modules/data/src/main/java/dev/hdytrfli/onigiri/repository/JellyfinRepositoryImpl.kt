@@ -27,6 +27,7 @@ import dev.hdytrfli.onigiri.models.toFindroidItem
 import dev.hdytrfli.onigiri.models.toFindroidMovie
 import dev.hdytrfli.onigiri.models.toFindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.toFindroidMusicArtist
+import dev.hdytrfli.onigiri.models.toFindroidMusicFavorite
 import dev.hdytrfli.onigiri.models.toFindroidMusicSong
 import dev.hdytrfli.onigiri.models.toFindroidPerson
 import dev.hdytrfli.onigiri.models.toFindroidSeason
@@ -429,12 +430,23 @@ class JellyfinRepositoryImpl(
                             BaseItemKind.EPISODE,
                             BaseItemKind.BOOK,
                             BaseItemKind.AUDIO_BOOK,
+                            BaseItemKind.AUDIO,
+                            BaseItemKind.MUSIC_ALBUM,
+                            BaseItemKind.MUSIC_ARTIST,
                         ),
                     recursive = true,
                 )
                 .content
                 .items
-                .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+                .mapNotNull { dto ->
+                    when (dto.type) {
+                        BaseItemKind.AUDIO,
+                        BaseItemKind.MUSIC_ALBUM,
+                        BaseItemKind.MUSIC_ARTIST ->
+                            dto.toFindroidMusicFavorite(this@JellyfinRepositoryImpl)
+                        else -> dto.toFindroidItem(this@JellyfinRepositoryImpl, database)
+                    }
+                }
         }
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> =

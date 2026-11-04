@@ -14,4 +14,7 @@ object Constants {
     const val FAVORITE_TYPE_BOOKS = 4
     const val FAVORITE_TYPE_EPISODES = 2
     const val FAVORITE_TYPE_SEASONS = 3
+    const val FAVORITE_TYPE_SONGS = 5
+    const val FAVORITE_TYPE_ALBUMS = 6
+    const val FAVORITE_TYPE_ARTISTS = 7
 }

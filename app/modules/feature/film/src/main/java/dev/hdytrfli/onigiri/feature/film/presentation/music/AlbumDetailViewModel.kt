@@ -31,6 +31,7 @@ class AlbumDetailViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val playerManager: MusicPlayerManager,
+    private val swrStore: dev.hdytrfli.onigiri.swr.SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AlbumDetailState())
     val state = _state.asStateFlow()
@@ -104,6 +105,7 @@ constructor(
             }
                 .onSuccess {
                     _state.update { it.copy(album = it.album?.copy(favorite = favorite)) }
+                    swrStore.invalidateMediaLists()
                 }
         }
     }
