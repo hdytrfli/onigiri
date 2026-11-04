@@ -39,6 +39,7 @@
     <string name="music_all_artists">All artists</string>
     <string name="music_all_albums">All albums</string>
     <string name="music_artist_label">Artist</string>
+    <string name="music_album_label">Album</string>
     <string name="music_year_label">Year</string>
     <string name="music_songs_label">Songs</string>
     <string name="music_runtime_label">Runtime</string>
@@ -68,4 +69,6 @@
     <string name="music_repeat_all">Repeat all</string>
     <string name="music_play_now">Play now</string>
     <string name="music_play_end">Play at the end</string>
+    <string name="music_played">Played</string>
+    <string name="music_up_next">Up next</string>
 </resources>

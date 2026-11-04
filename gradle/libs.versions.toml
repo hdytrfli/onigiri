@@ -16,6 +16,7 @@ androidx-core = "1.19.1"
 androidx-hilt = "1.4.0"
 androidx-lifecycle = "2.11.0"
 androidx-media3 = "1.11.1"
+reorderable = "3.1.0"
 androidx-navigation3 = "1.2.0"
 androidx-paging = "3.5.1"
 androidx-room3 = "3.0.3"
@@ -63,6 +64,7 @@ androidx-media3-common = { group = "androidx.media3", name = "media3-common", ve
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "androidx-media3" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "androidx-media3" }
 androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "androidx-media3" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "androidx-navigation3" }
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "androidx-navigation3" }
 androidx-paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidx-paging" }

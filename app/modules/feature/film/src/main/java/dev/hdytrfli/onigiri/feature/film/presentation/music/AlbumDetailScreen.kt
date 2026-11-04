@@ -274,6 +274,7 @@ private fun SongRow(
             text = (song.indexNumber ?: index + 1).toString(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             modifier = Modifier.width(24.dp),
         )
         Column(modifier = Modifier.weight(1f)) {

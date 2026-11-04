@@ -105,6 +105,7 @@ fun MusicPlayerScreen(
                 favorite = state.current?.favorite == true,
                 onToggleFavorite = onToggleFavorite,
                 onOpenQueue = onOpenQueue,
+                message = overlayMessage,
             )
             val current = state.current
             if (current == null) {
@@ -144,23 +145,6 @@ fun MusicPlayerScreen(
                 )
             }
         }
-
-        overlayMessage?.let { message ->
-            Surface(
-                modifier =
-                    Modifier.align(Alignment.TopCenter).padding(top = MaterialTheme.spacings.small),
-                shape = CircleShape,
-                color = Color(0xCC000000),
-                contentColor = Color.White,
-                shadowElevation = 6.dp,
-            ) {
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                )
-            }
-        }
     }
 }
 
@@ -170,6 +154,7 @@ private fun PlayerTopBar(
     favorite: Boolean,
     onToggleFavorite: () -> Unit,
     onOpenQueue: () -> Unit,
+    message: String?,
 ) {
     Row(
         modifier =
@@ -191,7 +176,22 @@ private fun PlayerTopBar(
                 )
             },
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            message?.let {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xCC000000),
+                    contentColor = Color.White,
+                    shadowElevation = 6.dp,
+                ) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                    )
+                }
+            }
+        }
         AppIconButton(
             onClick = onToggleFavorite,
             variant = AppButtonVariant.Secondary,
@@ -238,7 +238,7 @@ private fun MusicEntityLink(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF2A2A2A)),
+            modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFF2A2A2A)),
             contentAlignment = Alignment.Center,
         ) {
             if (imageUri != null) {
@@ -260,11 +260,11 @@ private fun MusicEntityLink(
         Spacer(Modifier.width(MaterialTheme.spacings.extraSmall))
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = PlayerOnBackgroundMuted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 140.dp),
+            modifier = Modifier.widthIn(max = 180.dp),
         )
     }
 }
@@ -328,95 +328,7 @@ private fun BottomControls(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth()) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = PlayerOnBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(MaterialTheme.spacings.small))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                item.artistId?.let { artistId ->
-                    MusicEntityLink(
-                        label = item.artist.orEmpty(),
-                        imageUri = item.artistImageUri,
-                        placeholder = CoreR.drawable.ic_user,
-                        onClick = { onArtistClick(artistId) },
-                    )
-                }
-                item.albumId?.let { albumId ->
-                    MusicEntityLink(
-                        label = item.album.orEmpty(),
-                        imageUri = item.imageUri,
-                        placeholder = CoreR.drawable.ic_music,
-                        onClick = { onAlbumClick(albumId) },
-                    )
-                }
-                if (item.artistId == null && item.albumId == null) {
-                    Text(
-                        text = listOfNotNull(item.artist, item.album).joinToString(" · "),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = PlayerOnBackgroundMuted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(MaterialTheme.spacings.small))
-            Slider(
-                state = sliderState,
-                onValueChange = {
-                    dragging = true
-                    sliderState.value = it
-                },
-                onValueChangeFinished = {
-                    dragging = false
-                    if (state.durationMs > 0L) {
-                        onSeek((sliderState.value * state.durationMs).toLong())
-                    }
-                },
-                enabled = state.durationMs > 0L,
-                colors = playerSliderColors(),
-                thumb = {
-                    Box(
-                        modifier =
-                            Modifier.width(4.dp)
-                                .height(16.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(Color.White)
-                    )
-                },
-                track = { sliderState ->
-                    SliderDefaults.Track(
-                        sliderState = sliderState,
-                        colors = playerSliderColors(),
-                        modifier = Modifier.height(12.dp),
-                    )
-                },
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = formatTime((sliderState.value * state.durationMs).toLong()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = PlayerOnBackgroundMuted,
-                )
-                Text(
-                    text = formatTime(state.durationMs),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = PlayerOnBackgroundMuted,
-                )
-            }
-
-            Spacer(Modifier.height(MaterialTheme.spacings.small))
+            // Transport controls first, like the video player.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -506,6 +418,99 @@ private fun BottomControls(
                     },
                 )
             }
+
+            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+            item.artistId?.let { artistId ->
+                MusicEntityLink(
+                    label = item.artist.orEmpty(),
+                    imageUri = item.artistImageUri,
+                    placeholder = CoreR.drawable.ic_user,
+                    onClick = { onArtistClick(artistId) },
+                )
+            }
+                ?: item.artist?.let { artist ->
+                    Text(
+                        text = artist,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = PlayerOnBackgroundMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = PlayerOnBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            item.album?.let { album ->
+                Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
+                Text(
+                    text = album,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = PlayerOnBackgroundMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .then(
+                                item.albumId?.let { albumId ->
+                                    Modifier.clickable { onAlbumClick(albumId) }
+                                } ?: Modifier
+                            ),
+                )
+            }
+
+            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = formatTime((sliderState.value * state.durationMs).toLong()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = PlayerOnBackgroundMuted,
+                )
+                Text(
+                    text = formatTime(state.durationMs),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = PlayerOnBackgroundMuted,
+                )
+            }
+            Slider(
+                state = sliderState,
+                onValueChange = {
+                    dragging = true
+                    sliderState.value = it
+                },
+                onValueChangeFinished = {
+                    dragging = false
+                    if (state.durationMs > 0L) {
+                        onSeek((sliderState.value * state.durationMs).toLong())
+                    }
+                },
+                enabled = state.durationMs > 0L,
+                colors = playerSliderColors(),
+                thumb = {
+                    Box(
+                        modifier =
+                            Modifier.width(4.dp)
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.White)
+                    )
+                },
+                track = { sliderState ->
+                    SliderDefaults.Track(
+                        sliderState = sliderState,
+                        colors = playerSliderColors(),
+                        modifier = Modifier.height(12.dp),
+                    )
+                },
+            )
 
             state.error?.let { error ->
                 Spacer(Modifier.height(MaterialTheme.spacings.small))

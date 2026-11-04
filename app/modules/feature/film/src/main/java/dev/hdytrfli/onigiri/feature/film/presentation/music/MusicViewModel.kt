@@ -134,6 +134,18 @@ constructor(
         }
     }
 
+    fun playNext(songId: java.util.UUID) {
+        _state.value.songs
+            .firstOrNull { it.id == songId }
+            ?.let { song -> playerManager.playNext(listOf(song)) }
+    }
+
+    fun addToQueue(songId: java.util.UUID) {
+        _state.value.songs
+            .firstOrNull { it.id == songId }
+            ?.let { song -> playerManager.addToQueue(listOf(song)) }
+    }
+
     fun retry() = load(force = true)
 
     private fun sortSongs(
