@@ -245,6 +245,9 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong> = emptyList()
 
+    override suspend fun getMusicSongsByArtist(artistId: UUID): List<FindroidMusicSong> =
+        emptyList()
+
     override suspend fun getSearchItems(query: String): List<FindroidItem> =
         downloadedItems().filter { it.name.contains(query, ignoreCase = true) }
 
@@ -322,6 +325,8 @@ class JellyfinRepositoryOfflineImpl(
         // Offline playback resolves the downloaded file directly from the local source.
         return ""
     }
+
+    override suspend fun getAudioStreamUrl(itemId: UUID): String = ""
 
     override suspend fun getDownload(itemId: UUID): ByteArray = ByteArray(0)
 

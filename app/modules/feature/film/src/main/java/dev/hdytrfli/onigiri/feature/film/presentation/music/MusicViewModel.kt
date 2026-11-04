@@ -9,6 +9,7 @@ import dev.hdytrfli.onigiri.models.FindroidMusicArtist
 import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.models.SortBy
 import dev.hdytrfli.onigiri.models.SortOrder
+import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import javax.inject.Inject
@@ -40,6 +41,7 @@ class MusicViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val appPreferences: AppPreferences,
+    private val playerManager: MusicPlayerManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(MusicState())
     val state = _state.asStateFlow()
@@ -122,6 +124,14 @@ constructor(
             fields.map { it.key }.toSet(),
         )
         _state.update { it.copy(displayFields = fields) }
+    }
+
+    fun playSong(songId: java.util.UUID) {
+        val songs = _state.value.songs
+        val index = songs.indexOfFirst { it.id == songId }
+        if (index >= 0) {
+            playerManager.playSongs(songs = songs, startIndex = index)
+        }
     }
 
     fun retry() = load(force = true)

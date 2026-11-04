@@ -65,6 +65,11 @@ fun ArtistDetailScreen(
         onAlbumClick = onAlbumClick,
         onEditImages = { state.artist?.let { navigateToEditImages(it.id.toString()) } },
         onIdentify = { state.artist?.let { navigateToIdentify(it.id.toString()) } },
+        onPlay = { viewModel.play(id) },
+        onShuffle = { viewModel.play(id, shuffle = true) },
+        onFavorite = { viewModel.toggleFavorite(id) },
+        onPlayNext = { viewModel.playNext(id) },
+        onAddToQueue = { viewModel.addToQueue(id) },
         onRetry = { viewModel.retry(id) },
         onIdentifyApplied = { viewModel.load(id, force = true) },
     )
@@ -77,6 +82,11 @@ private fun ArtistDetailLayout(
     onAlbumClick: (albumId: String) -> Unit,
     onEditImages: () -> Unit,
     onIdentify: () -> Unit,
+    onPlay: () -> Unit,
+    onShuffle: () -> Unit,
+    onFavorite: () -> Unit,
+    onPlayNext: () -> Unit,
+    onAddToQueue: () -> Unit,
     onRetry: () -> Unit,
     onIdentifyApplied: () -> Unit,
 ) {
@@ -126,6 +136,19 @@ private fun ArtistDetailLayout(
                                 }
                             }
                         }
+                    }
+
+                    item {
+                        Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                        MusicActionsBar(
+                            favorite = artist.favorite,
+                            onPlay = onPlay,
+                            onShuffle = onShuffle,
+                            onFavorite = onFavorite,
+                            onPlayNext = onPlayNext,
+                            onAddToQueue = onAddToQueue,
+                            modifier = Modifier.padding(horizontal = paddingStart),
+                        )
                     }
 
                     if (artist.overview.isNotBlank()) {

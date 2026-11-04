@@ -175,6 +175,7 @@ fun MusicScreen(
                                 error = state.error,
                                 contentPadding = contentPadding,
                                 onRefresh = viewModel::retry,
+                                onSongClick = viewModel::playSong,
                             )
                         MusicTab.ARTISTS ->
                             ArtistsGrid(
@@ -233,6 +234,7 @@ private fun SongsGrid(
     error: Exception?,
     contentPadding: PaddingValues,
     onRefresh: () -> Unit,
+    onSongClick: (java.util.UUID) -> Unit,
 ) {
     val sectionTitle = stringResource(FilmR.string.music_all_songs)
     if (error != null && songs.isEmpty()) {
@@ -280,6 +282,7 @@ private fun SongsGrid(
                             image = song.images.primary,
                             circular = false,
                             placeholderIcon = CoreR.drawable.ic_music,
+                            onClick = { onSongClick(song.id) },
                         )
                     }
                 }

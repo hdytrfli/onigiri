@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.FindroidMusicArtist
+import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
@@ -25,8 +26,12 @@ data class ArtistDetailState(
 )
 
 @HiltViewModel
-class ArtistDetailViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class ArtistDetailViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val playerManager: MusicPlayerManager,
+) : ViewModel() {
     private val _state = MutableStateFlow(ArtistDetailState())
     val state = _state.asStateFlow()
 
@@ -58,6 +63,50 @@ class ArtistDetailViewModel @Inject constructor(private val repository: Jellyfin
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, error = e) }
             }
+        }
+    }
+
+    fun play(artistId: UUID, shuffle: Boolean = false) {
+        viewModelScope.launch {
+            val songs = repository.getMusicSongsByArtist(artistId)
+            if (songs.isNotEmpty()) {
+                playerManager.playSongs(songs = songs, shuffle = shuffle)
+            }
+        }
+    }
+
+    fun playNext(artistId: UUID) {
+        viewModelScope.launch {
+            val songs = repository.getMusicSongsByArtist(artistId)
+            if (songs.isNotEmpty()) {
+                playerManager.playNext(songs)
+            }
+        }
+    }
+
+    fun addToQueue(artistId: UUID) {
+        viewModelScope.launch {
+            val songs = repository.getMusicSongsByArtist(artistId)
+            if (songs.isNotEmpty()) {
+                playerManager.addToQueue(songs)
+            }
+        }
+    }
+
+    fun toggleFavorite(artistId: UUID) {
+        val artist = _state.value.artist ?: return
+        viewModelScope.launch {
+            val favorite = !artist.favorite
+            runCatching {
+                if (favorite) {
+                    repository.markAsFavorite(artistId)
+                } else {
+                    repository.unmarkAsFavorite(artistId)
+                }
+            }
+                .onSuccess {
+                    _state.update { it.copy(artist = it.artist?.copy(favorite = favorite)) }
+                }
         }
     }
 

@@ -69,6 +69,12 @@ fun AlbumDetailScreen(
         onArtistClick = onArtistClick,
         onEditImages = { state.album?.let { navigateToEditImages(it.id.toString()) } },
         onIdentify = { state.album?.let { navigateToIdentify(it.id.toString()) } },
+        onPlay = { viewModel.play() },
+        onShuffle = { viewModel.play(shuffle = true) },
+        onFavorite = { viewModel.toggleFavorite(id) },
+        onPlayNext = viewModel::playNext,
+        onAddToQueue = viewModel::addToQueue,
+        onSongClick = { songId -> viewModel.play(songId) },
         onRetry = { viewModel.retry(id) },
         onIdentifyApplied = { viewModel.load(id, force = true) },
     )
@@ -81,6 +87,12 @@ private fun AlbumDetailLayout(
     onArtistClick: (artistId: String) -> Unit,
     onEditImages: () -> Unit,
     onIdentify: () -> Unit,
+    onPlay: () -> Unit,
+    onShuffle: () -> Unit,
+    onFavorite: () -> Unit,
+    onPlayNext: () -> Unit,
+    onAddToQueue: () -> Unit,
+    onSongClick: (UUID) -> Unit,
     onRetry: () -> Unit,
     onIdentifyApplied: () -> Unit,
 ) {
@@ -165,6 +177,15 @@ private fun AlbumDetailLayout(
                                 )
                             }
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                            MusicActionsBar(
+                                favorite = album.favorite,
+                                onPlay = onPlay,
+                                onShuffle = onShuffle,
+                                onFavorite = onFavorite,
+                                onPlayNext = onPlayNext,
+                                onAddToQueue = onAddToQueue,
+                            )
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
                             if (album.overview.isNotBlank()) {
                                 OverviewText(text = album.overview, maxCollapsedLines = 3)
                                 Spacer(Modifier.height(MaterialTheme.spacings.medium))
@@ -197,6 +218,7 @@ private fun AlbumDetailLayout(
                                             index = index,
                                             song = song,
                                             horizontalPadding = paddingStart,
+                                            onClick = { onSongClick(song.id) },
                                         )
                                         if (index < state.songs.lastIndex) {
                                             HorizontalDivider(
@@ -238,10 +260,13 @@ private fun SongRow(
     index: Int,
     song: FindroidMusicSong,
     horizontalPadding: androidx.compose.ui.unit.Dp,
+    onClick: () -> Unit,
 ) {
     Row(
         modifier =
-            Modifier.fillMaxWidth().padding(horizontal = horizontalPadding, vertical = 12.dp),
+            Modifier.fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = horizontalPadding, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
     ) {

@@ -1,6 +1,7 @@
 package dev.hdytrfli.onigiri.repository
 
 import android.content.Context
+import android.net.Uri
 import dev.hdytrfli.onigiri.api.JellyfinApi
 import dev.hdytrfli.onigiri.database.ServerDatabaseDao
 import dev.hdytrfli.onigiri.models.FindroidCollection
@@ -321,6 +322,28 @@ class JellyfinRepositoryImpl(
                 .map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
         }
 
+    override suspend fun getMusicSongsByArtist(artistId: UUID): List<FindroidMusicSong> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    albumArtistIds = listOf(artistId),
+                    includeItemTypes = listOf(BaseItemKind.AUDIO),
+                    recursive = true,
+                    sortBy =
+                        listOf(
+                            ItemSortBy.fromName("Album"),
+                            ItemSortBy.fromName("ParentIndexNumber"),
+                            ItemSortBy.fromName("IndexNumber"),
+                            ItemSortBy.fromName(SortBy.NAME.sortString),
+                        ),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
+        }
+
     override suspend fun getItems(
         parentId: UUID?,
         includeTypes: List<BaseItemKind>?,
@@ -625,6 +648,26 @@ class JellyfinRepositoryImpl(
                     static = true,
                     mediaSourceId = mediaSourceId,
                 )
+            } catch (e: Exception) {
+                Timber.e(e)
+                ""
+            }
+        }
+
+    override suspend fun getAudioStreamUrl(itemId: UUID): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val url = jellyfinApi.audioApi.getAudioStreamUrl(itemId = itemId, static = true)
+                // The SDK's URL builder does not attach the session token, while ExoPlayer is
+                // outside the authenticated API client. Jellyfin's media endpoints accept it as
+                // the standard api_key query parameter.
+                jellyfinApi.api.accessToken?.let { token ->
+                    Uri.parse(url)
+                        .buildUpon()
+                        .appendQueryParameter("api_key", token)
+                        .build()
+                        .toString()
+                } ?: url
             } catch (e: Exception) {
                 Timber.e(e)
                 ""

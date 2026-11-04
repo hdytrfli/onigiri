@@ -12,6 +12,7 @@ data class FindroidMusicArtist(
     val name: String,
     val overview: String,
     val albumCount: Int?,
+    val favorite: Boolean,
     val images: FindroidImages,
 )
 
@@ -23,5 +24,6 @@ fun BaseItemDto.toFindroidMusicArtist(
         name = name.orEmpty(),
         overview = overview.orEmpty(),
         albumCount = albumCount ?: childCount,
+        favorite = userData?.isFavorite == true,
         images = toFindroidImages(repository),
     )

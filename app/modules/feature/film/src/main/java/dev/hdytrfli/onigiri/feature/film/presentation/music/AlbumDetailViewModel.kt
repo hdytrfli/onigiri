@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.FindroidMusicSong
+import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
@@ -25,8 +26,12 @@ data class AlbumDetailState(
 )
 
 @HiltViewModel
-class AlbumDetailViewModel @Inject constructor(private val repository: JellyfinRepository) :
-    ViewModel() {
+class AlbumDetailViewModel
+@Inject
+constructor(
+    private val repository: JellyfinRepository,
+    private val playerManager: MusicPlayerManager,
+) : ViewModel() {
     private val _state = MutableStateFlow(AlbumDetailState())
     val state = _state.asStateFlow()
 
@@ -58,6 +63,48 @@ class AlbumDetailViewModel @Inject constructor(private val repository: JellyfinR
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, error = e) }
             }
+        }
+    }
+
+    fun play(songId: UUID? = null, shuffle: Boolean = false) {
+        val songs = _state.value.songs
+        if (songs.isEmpty()) return
+        val index = songId?.let { id -> songs.indexOfFirst { it.id == id } } ?: 0
+        playerManager.playSongs(
+            songs = songs,
+            startIndex = index.coerceAtLeast(0),
+            shuffle = shuffle,
+        )
+    }
+
+    fun playNext() {
+        val songs = _state.value.songs
+        if (songs.isNotEmpty()) {
+            playerManager.playNext(songs)
+        }
+    }
+
+    fun addToQueue() {
+        val songs = _state.value.songs
+        if (songs.isNotEmpty()) {
+            playerManager.addToQueue(songs)
+        }
+    }
+
+    fun toggleFavorite(albumId: UUID) {
+        val album = _state.value.album ?: return
+        viewModelScope.launch {
+            val favorite = !album.favorite
+            runCatching {
+                if (favorite) {
+                    repository.markAsFavorite(albumId)
+                } else {
+                    repository.unmarkAsFavorite(albumId)
+                }
+            }
+                .onSuccess {
+                    _state.update { it.copy(album = it.album?.copy(favorite = favorite)) }
+                }
         }
     }
 

@@ -61,6 +61,8 @@ interface JellyfinRepository {
 
     suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong>
 
+    suspend fun getMusicSongsByArtist(artistId: UUID): List<FindroidMusicSong>
+
     suspend fun getItems(
         parentId: UUID? = null,
         includeTypes: List<BaseItemKind>? = null,
@@ -114,6 +116,9 @@ interface JellyfinRepository {
     suspend fun getMediaSources(itemId: UUID, includePath: Boolean = false): List<FindroidSource>
 
     suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String
+
+    /** Direct audio stream for the music player, accepting the signed-in user's token. */
+    suspend fun getAudioStreamUrl(itemId: UUID): String
 
     /** Downloads the original file through Jellyfin's item download endpoint. */
     suspend fun getDownload(itemId: UUID): ByteArray

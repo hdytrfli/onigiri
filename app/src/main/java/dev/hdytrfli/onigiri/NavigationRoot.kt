@@ -26,6 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -76,6 +79,8 @@ import dev.hdytrfli.onigiri.navigation.navigateOrReuse
 import dev.hdytrfli.onigiri.navigation.resumedAction
 import dev.hdytrfli.onigiri.presentation.onboarding.AddProfileScreen
 import dev.hdytrfli.onigiri.presentation.onboarding.OnboardingScreen
+import dev.hdytrfli.onigiri.presentation.player.MiniMusicPlayerHost
+import dev.hdytrfli.onigiri.presentation.player.MusicPlayerViewModel
 import dev.hdytrfli.onigiri.presentation.reader.ReaderFontScreen
 import dev.hdytrfli.onigiri.presentation.settings.AboutScreen
 import dev.hdytrfli.onigiri.presentation.settings.ProfilePickerScreen
@@ -245,6 +250,8 @@ private fun MainNavigation(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val musicPlayerViewModel: MusicPlayerViewModel = hiltViewModel()
+    val currentMusic by musicPlayerViewModel.current.collectAsStateWithLifecycle()
     var exitPending by remember { mutableStateOf(false) }
 
     LaunchedEffect(swrStore) {
@@ -329,6 +336,7 @@ private fun MainNavigation(
             },
         LocalPlaybackLauncher provides
             PlaybackLauncher { itemId, itemKind, startFromBeginning ->
+                musicPlayerViewModel.pause()
                 val intent = Intent(context, PlayerActivity::class.java)
                 intent.putExtra("itemId", itemId.toString())
                 intent.putExtra("itemKind", itemKind.serialName)
@@ -363,11 +371,28 @@ private fun MainNavigation(
                     navigator.goBack()
                 }
             }
+            val suiteVisible = currentRoute.drawsNavigationSuite(tabRoutes)
+            val showMiniPlayer = currentMusic != null
+            AnimatedVisibility(
+                visible = showMiniPlayer,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) {
+                Box(
+                    modifier =
+                        Modifier.padding(
+                            start = if (suiteVisible) LocalSuiteStartInset.current else 0.dp,
+                            bottom = if (suiteVisible) LocalSuiteBottomInset.current else 0.dp,
+                        )
+                ) {
+                    MiniMusicPlayerHost(viewModel = musicPlayerViewModel)
+                }
+            }
+
             // The suite is drawn over the content, outside the NavDisplay, so a page transition
             // never moves it: switching tabs animates only the content behind it. Its presence is
             // animated, so hiding it on immersive pages is a quick fade instead of a pop.
             AnimatedVisibility(
-                visible = currentRoute.drawsNavigationSuite(tabRoutes),
+                visible = suiteVisible,
                 enter = SUITE_ENTER_TRANSITION,
                 exit = SUITE_EXIT_TRANSITION,
                 modifier =
@@ -392,7 +417,10 @@ private fun MainNavigation(
                         .padding(
                             start = MaterialTheme.spacings.gutter,
                             end = MaterialTheme.spacings.gutter,
-                            bottom = MaterialTheme.spacings.medium + LocalSuiteBottomInset.current,
+                            bottom =
+                                MaterialTheme.spacings.medium +
+                                    LocalSuiteBottomInset.current +
+                                    if (showMiniPlayer) 68.dp else 0.dp,
                         ),
             )
         }

@@ -17,6 +17,7 @@ data class FindroidMusicSong(
     val indexNumber: Int?,
     val productionYear: Int?,
     val runtimeTicks: Long,
+    val favorite: Boolean,
     val images: FindroidImages,
 )
 
@@ -51,6 +52,7 @@ fun BaseItemDto.toFindroidMusicSong(
         indexNumber = indexNumber,
         productionYear = productionYear,
         runtimeTicks = runTimeTicks ?: 0,
+        favorite = userData?.isFavorite == true,
         images = baseImages.copy(primary = baseImages.primary ?: albumImage),
     )
 }

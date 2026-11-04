@@ -77,6 +77,9 @@ class RoutingJellyfinRepository(
     override suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong> =
         current().getMusicSongs(albumId)
 
+    override suspend fun getMusicSongsByArtist(artistId: UUID): List<FindroidMusicSong> =
+        current().getMusicSongsByArtist(artistId)
+
     override suspend fun getItems(
         parentId: UUID?,
         includeTypes: List<BaseItemKind>?,
@@ -167,6 +170,9 @@ class RoutingJellyfinRepository(
 
     override suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String =
         current().getStreamUrl(itemId, mediaSourceId)
+
+    override suspend fun getAudioStreamUrl(itemId: UUID): String =
+        current().getAudioStreamUrl(itemId)
 
     override suspend fun getDownload(itemId: UUID): ByteArray = current().getDownload(itemId)
 

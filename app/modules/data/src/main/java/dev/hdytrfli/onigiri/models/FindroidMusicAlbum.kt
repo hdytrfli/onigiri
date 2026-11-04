@@ -16,6 +16,7 @@ data class FindroidMusicAlbum(
     val productionYear: Int?,
     val songCount: Int?,
     val runtimeTicks: Long,
+    val favorite: Boolean,
     val images: FindroidImages,
 )
 
@@ -35,5 +36,6 @@ fun BaseItemDto.toFindroidMusicAlbum(
         productionYear = productionYear,
         songCount = songCount ?: childCount,
         runtimeTicks = runTimeTicks ?: 0,
+        favorite = userData?.isFavorite == true,
         images = toFindroidImages(repository),
     )
