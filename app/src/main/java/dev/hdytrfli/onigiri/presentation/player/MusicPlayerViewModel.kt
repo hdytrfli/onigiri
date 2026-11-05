@@ -33,6 +33,15 @@ constructor(
                 initialValue = appPreferences.getValue(appPreferences.musicArtworkType),
             )
 
+    val swipeArtwork: kotlinx.coroutines.flow.StateFlow<Boolean> =
+        appPreferences
+            .observe(appPreferences.musicSwipeArtwork)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = appPreferences.getValue(appPreferences.musicSwipeArtwork),
+            )
+
     /** Changes only when the track changes, so the navigation shell does not tick with progress. */
     val current: kotlinx.coroutines.flow.StateFlow<MusicPlaybackItem?> =
         manager.state

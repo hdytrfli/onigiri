@@ -167,6 +167,7 @@ constructor(
                     appPreferences.getValue(appPreferences.playerSeekForwardInc)
                 )
                 .setPauseAtEndOfMediaItems(true)
+                .setPreciseSeeking(appPreferences.getValue(appPreferences.playerPreciseSeeking))
                 .setVideoOutput(appPreferences.getValue(appPreferences.playerMpvVo))
                 .setAudioOutput(appPreferences.getValue(appPreferences.playerMpvAo))
                 .setHwDec(appPreferences.getValue(appPreferences.playerMpvHwdec))

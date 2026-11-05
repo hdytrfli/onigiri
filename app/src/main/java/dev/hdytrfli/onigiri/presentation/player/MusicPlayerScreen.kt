@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -85,6 +87,7 @@ private val PlayerOnBackgroundMuted = Color(0xB3FFFFFF)
 fun MusicPlayerScreen(
     state: MusicPlaybackState,
     artworkType: String,
+    swipeArtwork: Boolean,
     navigateBack: () -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
@@ -109,6 +112,8 @@ fun MusicPlayerScreen(
     val repeatOff = stringResource(FilmR.string.music_repeat_off)
     val repeatAll = stringResource(FilmR.string.music_repeat_all)
     val repeatOne = stringResource(FilmR.string.music_repeat_one)
+    val addFavorite = stringResource(CoreR.string.add_to_favorites)
+    val removeFavorite = stringResource(CoreR.string.remove_from_favorites)
 
     LaunchedEffect(overlayMessage) {
         if (overlayMessage != null) {
@@ -132,6 +137,10 @@ fun MusicPlayerScreen(
                 MusicRepeatMode.ONE -> repeatOff
             }
         onCycleRepeat()
+    }
+    val toggleFavorite: () -> Unit = {
+        overlayMessage = if (state.current?.favorite == true) removeFavorite else addFavorite
+        onToggleFavorite()
     }
     val gutter = MaterialTheme.spacings.gutter
     val isAudiobook = current?.isAudiobook == true
@@ -164,10 +173,12 @@ fun MusicPlayerScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
-                            AlbumArtwork(
-                                item = current,
+                            PlayerArtwork(
+                                state = state,
                                 artworkType = artworkType,
-                                isPlaying = state.isPlaying,
+                                swipeEnabled = swipeArtwork,
+                                onPrevious = onPrevious,
+                                onNext = onNext,
                                 modifier = Modifier.size(artSize),
                             )
                             Spacer(Modifier.height(48.dp))
@@ -178,7 +189,7 @@ fun MusicPlayerScreen(
                                 onNext = onNext,
                                 onToggleShuffle = toggleShuffle,
                                 onCycleRepeat = cycleRepeat,
-                                onToggleFavorite = onToggleFavorite,
+                                onToggleFavorite = toggleFavorite,
                                 onArtistClick = onArtistClick,
                                 onAlbumClick = onAlbumClick,
                             )
@@ -277,10 +288,12 @@ fun MusicPlayerScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
                             ) {
-                                AlbumArtwork(
-                                    item = current,
+                                PlayerArtwork(
+                                    state = state,
                                     artworkType = artworkType,
-                                    isPlaying = state.isPlaying,
+                                    swipeEnabled = swipeArtwork,
+                                    onPrevious = onPrevious,
+                                    onNext = onNext,
                                     modifier = Modifier.size(artSize),
                                 )
                                 Spacer(Modifier.height(48.dp))
@@ -291,7 +304,7 @@ fun MusicPlayerScreen(
                                     onNext = onNext,
                                     onToggleShuffle = toggleShuffle,
                                     onCycleRepeat = cycleRepeat,
-                                    onToggleFavorite = onToggleFavorite,
+                                    onToggleFavorite = toggleFavorite,
                                     onArtistClick = onArtistClick,
                                     onAlbumClick = onAlbumClick,
                                 )
@@ -417,6 +430,62 @@ private fun MusicEntityLink(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = 220.dp),
         )
+    }
+}
+
+@Composable
+private fun PlayerArtwork(
+    state: MusicPlaybackState,
+    artworkType: String,
+    swipeEnabled: Boolean,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val current = state.current ?: return
+    val pagerState = rememberPagerState(initialPage = 1) { 3 }
+    var pendingDirection by remember { mutableStateOf(0) }
+
+    LaunchedEffect(pagerState.settledPage) {
+        when (pagerState.settledPage) {
+            0 ->
+                if (state.hasPrevious) {
+                    pendingDirection = -1
+                    onPrevious()
+                } else {
+                    pagerState.scrollToPage(1)
+                }
+            2 ->
+                if (state.hasNext) {
+                    pendingDirection = 1
+                    onNext()
+                } else {
+                    pagerState.scrollToPage(1)
+                }
+        }
+    }
+
+    LaunchedEffect(state.currentIndex) {
+        if (pendingDirection != 0) {
+            pagerState.scrollToPage(1)
+            pendingDirection = 0
+        }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        userScrollEnabled = swipeEnabled && state.queue.size > 1,
+        modifier = modifier,
+    ) { page ->
+        val item = state.queue.getOrNull(state.currentIndex + page - 1) ?: current
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            AlbumArtwork(
+                item = item,
+                artworkType = artworkType,
+                isPlaying = state.isPlaying && page == 1,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 

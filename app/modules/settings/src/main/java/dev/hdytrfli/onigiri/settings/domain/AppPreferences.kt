@@ -209,8 +209,12 @@ class AppPreferences(
     val musicAlbumDisplayFields =
         Preference("pref_music_album_display_fields", setOf("artist", "year"))
     val musicArtworkType = Preference("pref_music_artwork_type", "album")
-    val musicSkipSilence = Preference("pref_music_skip_silence", false)
     val musicGapless = Preference("pref_music_gapless", true)
+    val musicCrossfade = Preference("pref_music_crossfade", false)
+    val musicCrossfadeDuration = Preference("pref_music_crossfade_duration", "5")
+    val musicAudioNormalization = Preference("pref_music_audio_normalization", false)
+    val musicSwipeArtwork = Preference("pref_music_swipe_artwork", true)
+    val playerPreciseSeeking = Preference("pref_player_precise_seeking", false)
 
     // Offline mode
     val offlineMode = Preference("pref_offline_mode", false)

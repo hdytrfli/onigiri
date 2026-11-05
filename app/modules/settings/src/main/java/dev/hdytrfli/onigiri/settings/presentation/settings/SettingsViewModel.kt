@@ -1003,6 +1003,15 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.playerGesturesSeekTrickplay,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_player_precise_seeking,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_player_precise_seeking_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerPreciseSeeking,
+                                                ),
                                             ),
                                     ),
                                 ),
@@ -1246,19 +1255,48 @@ constructor(
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
-                                                        R.string.settings_music_skip_silence,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_music_skip_silence_summary,
-                                                    backendPreference =
-                                                        appPreferences.musicSkipSilence,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
                                                         R.string.settings_music_gapless,
                                                     descriptionStringRes =
                                                         R.string.settings_music_gapless_summary,
                                                     backendPreference = appPreferences.musicGapless,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_music_crossfade,
+                                                    descriptionStringRes =
+                                                        R.string.settings_music_crossfade_summary,
+                                                    backendPreference =
+                                                        appPreferences.musicCrossfade,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_music_crossfade_duration,
+                                                    backendPreference =
+                                                        appPreferences.musicCrossfadeDuration,
+                                                    options =
+                                                        R.array.music_crossfade_duration_options,
+                                                    optionValues =
+                                                        R.array.music_crossfade_duration_values,
+                                                    dependencies =
+                                                        listOf(appPreferences.musicCrossfade),
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_music_audio_normalization,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_audio_normalization_summary,
+                                                    backendPreference =
+                                                        appPreferences.musicAudioNormalization,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_music_swipe_artwork,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_swipe_artwork_summary,
+                                                    backendPreference =
+                                                        appPreferences.musicSwipeArtwork,
                                                 ),
                                             )
                                     )

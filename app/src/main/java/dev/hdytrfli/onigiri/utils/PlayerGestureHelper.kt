@@ -12,13 +12,9 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
 import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
-import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.media3.ui.PlayerView
 import coil3.load
@@ -207,60 +203,25 @@ class PlayerGestureHelper(
 
     private fun fastForward() {
         val currentPosition = playerView.player?.currentPosition ?: 0
-        val fastForwardPosition =
-            currentPosition + appPreferences.getValue(appPreferences.playerSeekForwardInc)
-        seekTo(fastForwardPosition)
-        animateRipple(activity.binding.imageFfwdAnimationRipple)
+        val increment = appPreferences.getValue(appPreferences.playerSeekForwardInc)
+        seekTo(currentPosition + increment)
+        activity.showPlayerOverlayMessage("+${increment / 1_000}s")
     }
 
     private fun rewind() {
         val currentPosition = playerView.player?.currentPosition ?: 0
-        val rewindPosition =
-            currentPosition - appPreferences.getValue(appPreferences.playerSeekBackInc)
-        seekTo(rewindPosition.coerceAtLeast(0))
-        animateRipple(activity.binding.imageRewindAnimationRipple)
+        val increment = appPreferences.getValue(appPreferences.playerSeekBackInc)
+        seekTo((currentPosition - increment).coerceAtLeast(0))
+        activity.showPlayerOverlayMessage("-${increment / 1_000}s")
     }
 
     private fun togglePlayback() {
         playerView.player?.playWhenReady = !playerView.player?.playWhenReady!!
-        animateRipple(activity.binding.imagePlaybackAnimationRipple)
     }
 
     private fun seekTo(position: Long) {
         playerView.player?.seekTo(position)
     }
-
-    private fun animateRipple(image: ImageView) {
-        image.animateSeekingRippleStart().withEndAction { resetRippleImage(image) }.start()
-    }
-
-    private fun ImageView.animateSeekingRippleStart(): ViewPropertyAnimator {
-        val rippleImageHeight = this.height
-        val playerViewHeight = playerView.height.toFloat()
-        val playerViewWidth = playerView.width.toFloat()
-        val scaleDifference = playerViewHeight / rippleImageHeight
-        val playerViewAspectRatio = playerViewWidth / playerViewHeight
-        val scaleValue = scaleDifference * playerViewAspectRatio
-        return animate()
-            .alpha(1f)
-            .scaleX(scaleValue)
-            .scaleY(scaleValue)
-            .setDuration(180)
-            .setInterpolator(DecelerateInterpolator())
-    }
-
-    private fun resetRippleImage(image: ImageView) {
-        image
-            .animateSeekingRippleEnd()
-            .withEndAction {
-                image.scaleX = 1f
-                image.scaleY = 1f
-            }
-            .start()
-    }
-
-    private fun ImageView.animateSeekingRippleEnd() =
-        animate().alpha(0f).setDuration(150).setInterpolator(AccelerateInterpolator())
 
     private val seekGestureDetector =
         GestureDetector(

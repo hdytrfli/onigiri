@@ -2,9 +2,11 @@ package dev.hdytrfli.onigiri.player.local.music
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.media.audiofx.LoudnessEnhancer
 import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.ExoPlayer
@@ -19,23 +21,38 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
  * Owns music playback while the app is in the background. Media3's service keeps the ExoPlayer,
  * media session and notification alive independently of any activity.
  */
+private data class AudioPreferences(
+    val gapless: Boolean,
+    val crossfade: Boolean,
+    val crossfadeSeconds: Int,
+    val normalization: Boolean,
+)
+
 @AndroidEntryPoint
 class MusicPlaybackService : MediaSessionService() {
     @Inject lateinit var appPreferences: AppPreferences
 
     private var mediaSession: MediaSession? = null
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var crossfadeEnabled = false
+    private var crossfadeDurationMs = 5_000L
+    private var normalizationEnabled = false
+    private var normalizer: LoudnessEnhancer? = null
+    private var trackStartPosition = 0L
 
     private val sessionCallback =
         object : MediaSession.Callback {
@@ -118,15 +135,71 @@ class MusicPlaybackService : MediaSessionService() {
 
         serviceScope.launch {
             combine(
-                    appPreferences.observe(appPreferences.musicSkipSilence),
                     appPreferences.observe(appPreferences.musicGapless),
-                ) { skipSilence, gapless ->
-                    skipSilence to gapless
+                    appPreferences.observe(appPreferences.musicCrossfade),
+                    appPreferences.observe(appPreferences.musicCrossfadeDuration),
+                    appPreferences.observe(appPreferences.musicAudioNormalization),
+                ) { gapless, crossfade, duration, normalization ->
+                    AudioPreferences(
+                        gapless = gapless,
+                        crossfade = crossfade,
+                        crossfadeSeconds = duration.toIntOrNull() ?: 5,
+                        normalization = normalization,
+                    )
                 }
-                .collect { (skipSilence, gapless) ->
-                    player.skipSilenceEnabled = skipSilence
-                    player.pauseAtEndOfMediaItems = !gapless
+                .collect { prefs ->
+                    player.pauseAtEndOfMediaItems = !prefs.gapless
+                    crossfadeEnabled = prefs.crossfade
+                    crossfadeDurationMs = prefs.crossfadeSeconds.coerceAtLeast(1) * 1_000L
+                    normalizationEnabled = prefs.normalization
+                    if (!prefs.crossfade) player.volume = 1f
                 }
+        }
+
+        player.addListener(
+            object : Player.Listener {
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    trackStartPosition = 0L
+                    if (crossfadeEnabled) player.volume = 0f
+                }
+            }
+        )
+
+        serviceScope.launch {
+            while (isActive) {
+                delay(100)
+                if (crossfadeEnabled && player.isPlaying) {
+                    val duration = player.duration
+                    val position = player.currentPosition
+                    if (duration > 0L && duration != C.TIME_UNSET) {
+                        val fadeIn =
+                            ((position - trackStartPosition).toFloat() / crossfadeDurationMs)
+                                .coerceIn(0f, 1f)
+                        val fadeOut =
+                            ((duration - position).toFloat() / crossfadeDurationMs).coerceIn(0f, 1f)
+                        player.volume = min(fadeIn, fadeOut)
+                    } else {
+                        player.volume = 1f
+                    }
+                } else if (!crossfadeEnabled && player.volume != 1f) {
+                    player.volume = 1f
+                }
+
+                if (normalizationEnabled) {
+                    if (normalizer == null && player.audioSessionId != C.AUDIO_SESSION_ID_UNSET) {
+                        runCatching {
+                            normalizer =
+                                LoudnessEnhancer(player.audioSessionId).apply {
+                                    setTargetGain(300)
+                                    enabled = true
+                                }
+                        }
+                    }
+                } else {
+                    normalizer?.release()
+                    normalizer = null
+                }
+            }
         }
 
         val sessionActivity =
@@ -160,6 +233,8 @@ class MusicPlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         serviceScope.cancel()
+        normalizer?.release()
+        normalizer = null
         mediaSession?.run {
             player.release()
             release()

@@ -76,6 +76,7 @@ class MPVPlayer(
     private val seekBackIncrement: Long = C.DEFAULT_SEEK_BACK_INCREMENT_MS,
     private val seekForwardIncrement: Long = C.DEFAULT_SEEK_FORWARD_INCREMENT_MS,
     private val pauseAtEndOfMediaItems: Boolean = false,
+    private val preciseSeeking: Boolean = false,
     videoOutput: String = "gpu-next",
     audioOutput: String = "aaudio",
     hwDec: String = "mediacodec",
@@ -110,6 +111,7 @@ class MPVPlayer(
         seekBackIncrement = builder.seekBackIncrementMs,
         seekForwardIncrement = builder.seekForwardIncrementMs,
         pauseAtEndOfMediaItems = builder.pauseAtEndOfMediaItems,
+        preciseSeeking = builder.preciseSeeking,
         videoOutput = builder.videoOutput,
         audioOutput = builder.audioOutput,
         hwDec = builder.hwDec,
@@ -144,6 +146,9 @@ class MPVPlayer(
             private set
 
         var pauseAtEndOfMediaItems: Boolean = false
+            private set
+
+        var preciseSeeking: Boolean = false
             private set
 
         var videoOutput: String = "gpu-next"
@@ -210,6 +215,10 @@ class MPVPlayer(
 
         fun setPauseAtEndOfMediaItems(pauseAtEndOfMediaItems: Boolean) = apply {
             this.pauseAtEndOfMediaItems = pauseAtEndOfMediaItems
+        }
+
+        fun setPreciseSeeking(preciseSeeking: Boolean) = apply {
+            this.preciseSeeking = preciseSeeking
         }
 
         fun setVideoOutput(videoOutput: String) = apply { this.videoOutput = videoOutput }
@@ -1195,7 +1204,7 @@ class MPVPlayer(
                     val durationMs =
                         MPVLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND)?.toLong()
                     val seekMode =
-                        if (durationMs != null && durationMs in 1..120_000L) {
+                        if (preciseSeeking || (durationMs != null && durationMs in 1..120_000L)) {
                             "absolute+exact"
                         } else {
                             "absolute+keyframes"
