@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.ui
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.view.animation.DecelerateInterpolator
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
 
@@ -34,10 +36,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     // While the user drags the scrubber, draw from the finger position instead of the playback
     // position (which only updates after the interaction ends).
     private var scrubbing: Boolean = false
+    private var scrubMoved: Boolean = false
     private var scrubPosition: Long = 0L
     // After the finger is lifted, keep drawing the scrub position until the player has seeked
     // there, otherwise the periodic position updates snap the bar back to the old position.
     private var awaitingSeek: Boolean = false
+    private var animatedPosition: Long = 0L
+    private var seekAnimator: ValueAnimator? = null
 
     private val playedColor: Int
     private val bufferedColor: Int
@@ -72,13 +77,17 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         addListener(
             object : TimeBar.OnScrubListener {
                 override fun onScrubStart(timeBar: TimeBar, position: Long) {
-                    scrubbing = true
+                    seekAnimator?.cancel()
+                    scrubbing = false
+                    scrubMoved = false
                     awaitingSeek = false
                     scrubPosition = position
                     invalidate()
                 }
 
                 override fun onScrubMove(timeBar: TimeBar, position: Long) {
+                    scrubMoved = true
+                    scrubbing = true
                     scrubPosition = position
                     invalidate()
                 }
@@ -87,10 +96,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                     scrubbing = false
                     if (canceled) {
                         awaitingSeek = false
-                    } else {
+                    } else if (scrubMoved) {
                         // Hold the scrub position until the player reports a position near it.
                         scrubPosition = position
                         awaitingSeek = true
+                    } else {
+                        // A tap jumps to the tapped timestamp: animate the bar to it instead of
+                        // snapping. The player seek itself still starts immediately.
+                        animateSeekTo(position)
                     }
                     invalidate()
                 }
@@ -98,12 +111,38 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         )
     }
 
+    private fun animateSeekTo(target: Long) {
+        seekAnimator?.cancel()
+        scrubPosition = target
+        awaitingSeek = true
+        animatedPosition = currentPosition
+        seekAnimator =
+            ValueAnimator.ofFloat(currentPosition.toFloat(), target.toFloat()).apply {
+                duration = 180L
+                interpolator = DecelerateInterpolator()
+                addUpdateListener {
+                    animatedPosition = (it.animatedValue as Float).toLong()
+                    invalidate()
+                }
+                start()
+            }
+    }
+
     override fun setPosition(position: Long) {
         currentPosition = position
-        if (awaitingSeek && kotlin.math.abs(position - scrubPosition) <= SEEK_TOLERANCE_MS) {
-            awaitingSeek = false
+        if (seekAnimator?.isRunning != true) {
+            animatedPosition = position
+            if (awaitingSeek && kotlin.math.abs(position - scrubPosition) <= SEEK_TOLERANCE_MS) {
+                awaitingSeek = false
+            }
         }
         super.setPosition(position)
+    }
+
+    override fun onDetachedFromWindow() {
+        seekAnimator?.cancel()
+        seekAnimator = null
+        super.onDetachedFromWindow()
     }
 
     override fun setDuration(duration: Long) {
@@ -130,7 +169,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         val trackEnd = width - inset
         val trackWidth = (trackEnd - trackStart).coerceAtLeast(0f)
 
-        val position = if (scrubbing || awaitingSeek) scrubPosition else currentPosition
+        val position =
+            when {
+                seekAnimator?.isRunning == true -> animatedPosition
+                scrubbing || awaitingSeek -> scrubPosition
+                else -> currentPosition
+            }
         // Until the duration is known the bar is just the rounded unplayed track.
         val playedFraction =
             if (currentDuration > 0L) {

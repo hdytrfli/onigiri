@@ -61,6 +61,7 @@ fun EditImageSearchScreen(
     itemId: UUID,
     type: ImageType,
     isEpisode: Boolean,
+    music: Boolean = false,
     navigateBack: () -> Unit,
     viewModel: EditImageSearchViewModel = hiltViewModel(),
 ) {
@@ -77,6 +78,7 @@ fun EditImageSearchScreen(
     EditImageSearchLayout(
         type = type,
         isEpisode = isEpisode,
+        music = music,
         state = state,
         onApply = { result -> viewModel.apply(itemId, type, result) },
         navigateBack = navigateBack,
@@ -88,6 +90,7 @@ fun EditImageSearchScreen(
 private fun EditImageSearchLayout(
     type: ImageType,
     isEpisode: Boolean,
+    music: Boolean,
     state: EditImageSearchState,
     onApply: (RemoteImageInfo) -> Unit,
     navigateBack: () -> Unit,
@@ -96,7 +99,8 @@ private fun EditImageSearchLayout(
     // A poster-shaped result and a wide (16:9) result are different tile shapes, so they use the
     // matching grid size.
     val gridSize =
-        if (isPosterShapedSearchResult(type, isEpisode)) GridSize.POSTER else GridSize.THUMBNAIL
+        if (isPosterShapedSearchResult(type, isEpisode, music)) GridSize.POSTER
+        else GridSize.THUMBNAIL
 
     PageScaffold(
         topBar = {
@@ -147,6 +151,7 @@ private fun EditImageSearchLayout(
                             RemoteImageTile(
                                 type = type,
                                 isEpisode = isEpisode,
+                                music = music,
                                 result = result,
                                 onClick = { onApply(result) },
                             )
@@ -161,6 +166,7 @@ private fun EditImageSearchLayout(
 private fun RemoteImageTile(
     type: ImageType,
     isEpisode: Boolean,
+    music: Boolean,
     result: RemoteImageInfo,
     onClick: () -> Unit,
 ) {
@@ -173,7 +179,7 @@ private fun RemoteImageTile(
             contentScale = searchImageContentScale(type),
             modifier =
                 Modifier.fillMaxWidth()
-                    .aspectRatio(remoteImageAspectRatio(type, result, isEpisode))
+                    .aspectRatio(remoteImageAspectRatio(type, result, isEpisode, music))
                     .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .clickable(enabled = result.url != null, onClick = onClick),
@@ -211,6 +217,7 @@ private fun remoteImageAspectRatio(
     type: ImageType,
     image: RemoteImageInfo,
     isEpisode: Boolean,
+    music: Boolean,
 ): Float {
     if (type == ImageType.BANNER) {
         val width = image.width
@@ -219,17 +226,21 @@ private fun remoteImageAspectRatio(
             return width.toFloat() / height.toFloat()
         }
     }
-    return searchImageAspectRatio(type, isEpisode)
+    return searchImageAspectRatio(type, isEpisode, music)
 }
 
-private fun searchImageAspectRatio(type: ImageType, isEpisode: Boolean): Float =
+private fun searchImageAspectRatio(type: ImageType, isEpisode: Boolean, music: Boolean): Float =
     if (type == ImageType.BOX) imageTypeAspectRatio(ImageType.PRIMARY)
-    else imageTypeAspectRatio(type, isEpisode)
+    else imageTypeAspectRatio(type, isEpisode = isEpisode, isMusic = music)
 
 /** Whether a result of [type] uses the poster shape rather than a wide (16:9) one. */
-private fun isPosterShapedSearchResult(type: ImageType, isEpisode: Boolean): Boolean =
+private fun isPosterShapedSearchResult(
+    type: ImageType,
+    isEpisode: Boolean,
+    music: Boolean,
+): Boolean =
     when (type) {
-        ImageType.PRIMARY -> !isEpisode
+        ImageType.PRIMARY -> music || !isEpisode
         ImageType.BOX -> true
         else -> false
     }

@@ -1,6 +1,7 @@
 package dev.hdytrfli.onigiri.repository
 
 import android.content.Context
+import android.net.Uri
 import dev.hdytrfli.onigiri.api.JellyfinApi
 import dev.hdytrfli.onigiri.database.ServerDatabaseDao
 import dev.hdytrfli.onigiri.models.FindroidCollection
@@ -8,6 +9,9 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidGenre
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.FindroidMusicArtist
+import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
@@ -21,6 +25,10 @@ import dev.hdytrfli.onigiri.models.toFindroidCollection
 import dev.hdytrfli.onigiri.models.toFindroidEpisode
 import dev.hdytrfli.onigiri.models.toFindroidItem
 import dev.hdytrfli.onigiri.models.toFindroidMovie
+import dev.hdytrfli.onigiri.models.toFindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.toFindroidMusicArtist
+import dev.hdytrfli.onigiri.models.toFindroidMusicFavorite
+import dev.hdytrfli.onigiri.models.toFindroidMusicSong
 import dev.hdytrfli.onigiri.models.toFindroidPerson
 import dev.hdytrfli.onigiri.models.toFindroidSeason
 import dev.hdytrfli.onigiri.models.toFindroidShow
@@ -31,6 +39,10 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.FileInfo
+import org.jellyfin.sdk.model.api.AlbumInfo
+import org.jellyfin.sdk.model.api.AlbumInfoRemoteSearchQuery
+import org.jellyfin.sdk.model.api.ArtistInfo
+import org.jellyfin.sdk.model.api.ArtistInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.DeviceOptionsDto
@@ -63,6 +75,7 @@ import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.SortOrder as ItemSortOrder
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.SubtitleProfile
+import org.jellyfin.sdk.model.api.UpdateUserItemDataDto
 import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
 import org.jellyfin.sdk.model.api.request.GetGenresRequest
@@ -146,6 +159,199 @@ class JellyfinRepositoryImpl(
                 .items
                 .firstOrNull()
                 ?.toFindroidItem(this@JellyfinRepositoryImpl, database)
+        }
+
+    override suspend fun getMusicArtists(): List<FindroidMusicArtist> =
+        withContext(Dispatchers.IO) {
+            // Jellyfin's /Items endpoint is not scoped to a library for music artists, so a
+            // global MusicArtist query also returns contributors from audiobook libraries. Query
+            // the Artists endpoint per music library instead, matching jellyfin-web.
+            val libraryIds = getMusicLibraryIds()
+            val items = buildList {
+                if (libraryIds.isEmpty()) {
+                    addAll(
+                        jellyfinApi.artistsApi
+                            .getAlbumArtists(
+                                userId = jellyfinApi.userId,
+                                fields = listOf(ItemFields.ITEM_COUNTS),
+                                sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                                sortOrder =
+                                    listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                            )
+                            .content
+                            .items
+                    )
+                } else {
+                    for (libraryId in libraryIds) {
+                        addAll(
+                            jellyfinApi.artistsApi
+                                .getAlbumArtists(
+                                    userId = jellyfinApi.userId,
+                                    parentId = libraryId,
+                                    fields = listOf(ItemFields.ITEM_COUNTS),
+                                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                                    sortOrder =
+                                        listOf(
+                                            ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)
+                                        ),
+                                )
+                                .content
+                                .items
+                        )
+                    }
+                }
+            }
+
+            items.distinctBy { it.id }.map { it.toFindroidMusicArtist(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicAlbums(): List<FindroidMusicAlbum> =
+        withContext(Dispatchers.IO) {
+            val libraryIds = getMusicLibraryIds()
+            val items = buildList {
+                if (libraryIds.isEmpty()) {
+                    addAll(getMusicAlbumsForParent(parentId = null))
+                } else {
+                    for (libraryId in libraryIds) {
+                        addAll(getMusicAlbumsForParent(parentId = libraryId))
+                    }
+                }
+            }
+
+            items.distinctBy { it.id }.map { it.toFindroidMusicAlbum(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicSongs(): List<FindroidMusicSong> =
+        withContext(Dispatchers.IO) {
+            val libraryIds = getMusicLibraryIds()
+            val items = buildList {
+                if (libraryIds.isEmpty()) {
+                    addAll(getMusicSongsForParent(parentId = null))
+                } else {
+                    for (libraryId in libraryIds) {
+                        addAll(getMusicSongsForParent(parentId = libraryId))
+                    }
+                }
+            }
+
+            items.distinctBy { it.id }.map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
+        }
+
+    /**
+     * Music libraries only. A global item query includes audiobook contributors because their
+     * people and audio entries reuse the music item kinds.
+     */
+    private suspend fun getMusicLibraryIds(): List<UUID> =
+        jellyfinApi.viewsApi
+            .getUserViews(jellyfinApi.userId!!)
+            .content
+            .items
+            .filter { it.collectionType?.serialName == "music" }
+            .mapNotNull { it.id }
+
+    private suspend fun getMusicAlbumsForParent(parentId: UUID?): List<BaseItemDto> =
+        jellyfinApi.itemsApi
+            .getItems(
+                jellyfinApi.userId!!,
+                parentId = parentId,
+                includeItemTypes = listOf(BaseItemKind.MUSIC_ALBUM),
+                recursive = true,
+                sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+            )
+            .content
+            .items
+
+    private suspend fun getMusicSongsForParent(parentId: UUID?): List<BaseItemDto> =
+        jellyfinApi.itemsApi
+            .getItems(
+                jellyfinApi.userId!!,
+                parentId = parentId,
+                includeItemTypes = listOf(BaseItemKind.AUDIO),
+                recursive = true,
+                sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                limit = 500,
+            )
+            .content
+            .items
+
+    override suspend fun getMusicSong(itemId: UUID): FindroidMusicSong? =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi
+                .getItem(itemId, jellyfinApi.userId!!)
+                .content
+                .toFindroidMusicSong(this@JellyfinRepositoryImpl)
+        }
+
+    override suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist? =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi
+                .getItem(itemId, jellyfinApi.userId!!)
+                .content
+                .toFindroidMusicArtist(this@JellyfinRepositoryImpl)
+        }
+
+    override suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum? =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.userLibraryApi
+                .getItem(itemId, jellyfinApi.userId!!)
+                .content
+                .toFindroidMusicAlbum(this@JellyfinRepositoryImpl)
+        }
+
+    override suspend fun getMusicAlbums(artistId: UUID): List<FindroidMusicAlbum> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    albumArtistIds = listOf(artistId),
+                    includeItemTypes = listOf(BaseItemKind.MUSIC_ALBUM),
+                    recursive = true,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicAlbum(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    parentId = albumId,
+                    includeItemTypes = listOf(BaseItemKind.AUDIO),
+                    recursive = false,
+                    sortBy = listOf(ItemSortBy.fromName(SortBy.NAME.sortString)),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
+        }
+
+    override suspend fun getMusicSongsByArtist(artistId: UUID): List<FindroidMusicSong> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemsApi
+                .getItems(
+                    jellyfinApi.userId!!,
+                    albumArtistIds = listOf(artistId),
+                    includeItemTypes = listOf(BaseItemKind.AUDIO),
+                    recursive = true,
+                    sortBy =
+                        listOf(
+                            ItemSortBy.ALBUM,
+                            ItemSortBy.PARENT_INDEX_NUMBER,
+                            ItemSortBy.INDEX_NUMBER,
+                            ItemSortBy.SORT_NAME,
+                        ),
+                    sortOrder = listOf(ItemSortOrder.fromName(SortOrder.ASCENDING.sortString)),
+                )
+                .content
+                .items
+                .map { it.toFindroidMusicSong(this@JellyfinRepositoryImpl) }
         }
 
     override suspend fun getItems(
@@ -232,12 +438,23 @@ class JellyfinRepositoryImpl(
                             BaseItemKind.EPISODE,
                             BaseItemKind.BOOK,
                             BaseItemKind.AUDIO_BOOK,
+                            BaseItemKind.AUDIO,
+                            BaseItemKind.MUSIC_ALBUM,
+                            BaseItemKind.MUSIC_ARTIST,
                         ),
                     recursive = true,
                 )
                 .content
                 .items
-                .mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+                .mapNotNull { dto ->
+                    when (dto.type) {
+                        BaseItemKind.AUDIO,
+                        BaseItemKind.MUSIC_ALBUM,
+                        BaseItemKind.MUSIC_ARTIST ->
+                            dto.toFindroidMusicFavorite(this@JellyfinRepositoryImpl)
+                        else -> dto.toFindroidItem(this@JellyfinRepositoryImpl, database)
+                    }
+                }
         }
 
     override suspend fun getSearchItems(query: String): List<FindroidItem> =
@@ -458,6 +675,26 @@ class JellyfinRepositoryImpl(
             }
         }
 
+    override suspend fun getAudioStreamUrl(itemId: UUID): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val url = jellyfinApi.audioApi.getAudioStreamUrl(itemId = itemId, static = true)
+                // The SDK's URL builder does not attach the session token, while ExoPlayer is
+                // outside the authenticated API client. Jellyfin's media endpoints accept it as
+                // the standard api_key query parameter.
+                jellyfinApi.api.accessToken?.let { token ->
+                    Uri.parse(url)
+                        .buildUpon()
+                        .appendQueryParameter("api_key", token)
+                        .build()
+                        .toString()
+                } ?: url
+            } catch (e: Exception) {
+                Timber.e(e)
+                ""
+            }
+        }
+
     override suspend fun getDownload(itemId: UUID): ByteArray =
         withContext(Dispatchers.IO) { jellyfinApi.libraryApi.getDownload(itemId).content }
 
@@ -622,7 +859,11 @@ class JellyfinRepositoryImpl(
     override suspend fun markAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
-            jellyfinApi.userLibraryApi.markFavoriteItem(itemId)
+            jellyfinApi.itemsApi.updateItemUserData(
+                itemId = itemId,
+                userId = userId,
+                data = UpdateUserItemDataDto(isFavorite = true),
+            )
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, true)
         }
@@ -631,7 +872,11 @@ class JellyfinRepositoryImpl(
     override suspend fun unmarkAsFavorite(itemId: UUID) {
         withContext(Dispatchers.IO) {
             val userId = jellyfinApi.userId!!
-            jellyfinApi.userLibraryApi.unmarkFavoriteItem(itemId)
+            jellyfinApi.itemsApi.updateItemUserData(
+                itemId = itemId,
+                userId = userId,
+                data = UpdateUserItemDataDto(isFavorite = false),
+            )
             database.getUserDataOrCreateNew(itemId, userId)
             database.setFavorite(userId, itemId, false)
         }
@@ -761,6 +1006,72 @@ class JellyfinRepositoryImpl(
                             null,
                             null,
                             false,
+                        ),
+                        itemId,
+                        null,
+                        false,
+                    )
+                )
+                .content
+        }
+
+    override suspend fun searchRemoteMusicArtists(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi
+                .getMusicArtistRemoteSearchResults(
+                    ArtistInfoRemoteSearchQuery(
+                        ArtistInfo(
+                            name = name,
+                            originalTitle = null,
+                            path = null,
+                            metadataLanguage = null,
+                            metadataCountryCode = null,
+                            providerIds = providerIds,
+                            year = year,
+                            indexNumber = null,
+                            parentIndexNumber = null,
+                            premiereDate = null,
+                            isAutomated = false,
+                            songInfos = emptyList(),
+                        ),
+                        itemId,
+                        null,
+                        false,
+                    )
+                )
+                .content
+        }
+
+    override suspend fun searchRemoteMusicAlbums(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String>,
+    ): List<RemoteSearchResult> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.itemLookupApi
+                .getMusicAlbumRemoteSearchResults(
+                    AlbumInfoRemoteSearchQuery(
+                        AlbumInfo(
+                            name = name,
+                            originalTitle = null,
+                            path = null,
+                            metadataLanguage = null,
+                            metadataCountryCode = null,
+                            providerIds = providerIds,
+                            year = year,
+                            indexNumber = null,
+                            parentIndexNumber = null,
+                            premiereDate = null,
+                            isAutomated = false,
+                            albumArtists = emptyList(),
+                            artistProviderIds = emptyMap(),
+                            songInfos = emptyList(),
                         ),
                         itemId,
                         null,

@@ -14,6 +14,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object BooksRoute : NavKey
 
+@Serializable data object MusicRoute : NavKey
+
+@Serializable data class ArtistDetailRoute(val artistId: String) : NavKey
+
+@Serializable data class AlbumDetailRoute(val albumId: String) : NavKey
+
 @Serializable
 data class GenreListRoute(
     val genreId: String,
@@ -50,15 +56,21 @@ data class BookDetailRoute(val bookId: String, val audiobook: Boolean = false) :
 
 @Serializable data class SubtitleSearchRoute(val itemId: String) : NavKey
 
-@Serializable data class IdentifyRoute(val itemId: String, val series: Boolean = false) : NavKey
+@Serializable
+data class IdentifyRoute(
+    val itemId: String,
+    val series: Boolean = false,
+    val musicKind: String? = null,
+) : NavKey
 
-@Serializable data class EditImagesRoute(val itemId: String) : NavKey
+@Serializable data class EditImagesRoute(val itemId: String, val music: Boolean = false) : NavKey
 
 @Serializable
 data class EditImageSearchRoute(
     val itemId: String,
     val type: String,
     val isEpisode: Boolean = false,
+    val music: Boolean = false,
 ) : NavKey
 
 @Serializable
@@ -69,7 +81,10 @@ data class IdentifyResultsRoute(
     val imdbId: String,
     val tmdbId: String,
     val tvdbId: String,
+    val musicBrainzId: String = "",
+    val discogsId: String = "",
     val series: Boolean = false,
+    val musicKind: String? = null,
 ) : NavKey
 
 @Serializable data class SettingsRoute(val indexes: List<Int>) : NavKey

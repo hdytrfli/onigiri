@@ -8,6 +8,8 @@ data class IdentifyState(
     val imdbId: String = "",
     val tmdbId: String = "",
     val tvdbId: String = "",
+    val musicBrainzId: String = "",
+    val discogsId: String = "",
     val advanced: Boolean = false,
     val isSearching: Boolean = false,
     val results: List<RemoteSearchResult> = emptyList(),

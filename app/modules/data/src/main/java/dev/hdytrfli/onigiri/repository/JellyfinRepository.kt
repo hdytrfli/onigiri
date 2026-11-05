@@ -5,6 +5,9 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidGenre
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
+import dev.hdytrfli.onigiri.models.FindroidMusicArtist
+import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
@@ -43,6 +46,24 @@ interface JellyfinRepository {
     suspend fun getLibraries(): List<FindroidCollection>
 
     suspend fun getItem(itemId: UUID): FindroidItem?
+
+    suspend fun getMusicArtists(): List<FindroidMusicArtist>
+
+    suspend fun getMusicAlbums(): List<FindroidMusicAlbum>
+
+    suspend fun getMusicSongs(): List<FindroidMusicSong>
+
+    suspend fun getMusicSong(itemId: UUID): FindroidMusicSong?
+
+    suspend fun getMusicArtist(itemId: UUID): FindroidMusicArtist?
+
+    suspend fun getMusicAlbum(itemId: UUID): FindroidMusicAlbum?
+
+    suspend fun getMusicAlbums(artistId: UUID): List<FindroidMusicAlbum>
+
+    suspend fun getMusicSongs(albumId: UUID): List<FindroidMusicSong>
+
+    suspend fun getMusicSongsByArtist(artistId: UUID): List<FindroidMusicSong>
 
     suspend fun getItems(
         parentId: UUID? = null,
@@ -97,6 +118,9 @@ interface JellyfinRepository {
     suspend fun getMediaSources(itemId: UUID, includePath: Boolean = false): List<FindroidSource>
 
     suspend fun getStreamUrl(itemId: UUID, mediaSourceId: String): String
+
+    /** Direct audio stream for the music player, accepting the signed-in user's token. */
+    suspend fun getAudioStreamUrl(itemId: UUID): String
 
     /** Downloads the original file through Jellyfin's item download endpoint. */
     suspend fun getDownload(itemId: UUID): ByteArray
@@ -153,6 +177,20 @@ interface JellyfinRepository {
 
     /** Searches remote metadata providers for series matching [name] (optionally [year]). */
     suspend fun searchRemoteSeries(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String> = emptyMap(),
+    ): List<RemoteSearchResult>
+
+    suspend fun searchRemoteMusicArtists(
+        itemId: UUID,
+        name: String,
+        year: Int?,
+        providerIds: Map<String, String> = emptyMap(),
+    ): List<RemoteSearchResult>
+
+    suspend fun searchRemoteMusicAlbums(
         itemId: UUID,
         name: String,
         year: Int?,

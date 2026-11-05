@@ -143,6 +143,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.session)
+    implementation(libs.reorderable)
     implementation(libs.androidx.paging)
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.window)

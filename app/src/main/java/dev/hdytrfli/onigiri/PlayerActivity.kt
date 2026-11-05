@@ -121,7 +121,16 @@ class PlayerActivity : BasePlayerActivity() {
     private val detailItemIsEpisode = mutableStateOf(false)
 
     private val hidePlayerOverlayMessageAction = Runnable {
-        binding.progressScrubberLayout.visibility = View.GONE
+        binding.progressScrubberLayout.animate().cancel()
+        binding.progressScrubberLayout
+            .animate()
+            .alpha(0f)
+            .setDuration(150L)
+            .withEndAction {
+                binding.progressScrubberLayout.visibility = View.GONE
+                binding.progressScrubberLayout.alpha = 1f
+            }
+            .start()
     }
 
     private val isPipSupported by lazy {
@@ -1008,7 +1017,10 @@ class PlayerActivity : BasePlayerActivity() {
     internal fun showPlayerOverlayMessage(message: String) {
         binding.progressScrubberTrickplay.visibility = View.GONE
         binding.progressScrubberText.text = message
+        binding.progressScrubberLayout.animate().cancel()
+        binding.progressScrubberLayout.alpha = 0f
         binding.progressScrubberLayout.visibility = View.VISIBLE
+        binding.progressScrubberLayout.animate().alpha(1f).setDuration(150L).start()
         binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
         binding.progressScrubberLayout.postDelayed(hidePlayerOverlayMessageAction, 1500L)
     }
@@ -1017,7 +1029,10 @@ class PlayerActivity : BasePlayerActivity() {
     internal fun showPersistentPlayerOverlayMessage(message: String) {
         binding.progressScrubberTrickplay.visibility = View.GONE
         binding.progressScrubberText.text = message
+        binding.progressScrubberLayout.animate().cancel()
+        binding.progressScrubberLayout.alpha = 0f
         binding.progressScrubberLayout.visibility = View.VISIBLE
+        binding.progressScrubberLayout.animate().alpha(1f).setDuration(150L).start()
         binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
     }
 

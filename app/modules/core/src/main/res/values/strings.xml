@@ -6,6 +6,10 @@
     <string name="cancel">Cancel</string>
     <string name="discard">Discard</string>
     <string name="title_home">Home</string>
+    <string name="title_music">Music</string>
+    <string name="favorite_songs_label">Songs</string>
+    <string name="favorite_albums_label">Albums</string>
+    <string name="favorite_artists_label">Artists</string>
     <string name="title_media">My media</string>
     <string name="title_favorite">Favorites</string>
     <string name="title_settings">Settings</string>
@@ -186,6 +190,12 @@
     <string name="identify_tmdb_hint">TMDb ID</string>
     <string name="identify_tvdb">TVDb ID</string>
     <string name="identify_tvdb_hint">TVDb ID</string>
+    <string name="identify_musicbrainz">MusicBrainz ID</string>
+    <string name="identify_musicbrainz_hint">MusicBrainz ID</string>
+    <string name="identify_discogs">Discogs ID</string>
+    <string name="identify_discogs_hint">Discogs ID</string>
+    <string name="identify_music_artist_hint">Artist name</string>
+    <string name="identify_music_album_hint">Album name</string>
     <string name="identify_year">Year</string>
     <string name="identify_source">Source</string>
     <string name="identify_providers">Provider IDs</string>

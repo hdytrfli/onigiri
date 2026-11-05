@@ -35,7 +35,9 @@ import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
+import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
+import dev.hdytrfli.onigiri.feature.film.presentation.music.MusicCard
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
@@ -109,16 +111,31 @@ private fun SearchGroup(
             title = group.type.title(),
             titleModifier = Modifier.padding(horizontal = gutter),
         ) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = gutter),
-                horizontalArrangement = Arrangement.spacedBy(gap),
-            ) {
-                items(items = group.results, key = { "${it.kind}-${it.id}" }) { result ->
-                    SearchResultCard(
-                        result = result,
-                        width = itemWidth,
-                        onClick = onResultClick,
-                    )
+            if (group.type == HomeSearchGroupType.SONGS) {
+                Column(modifier = Modifier.padding(horizontal = gutter)) {
+                    group.results.forEach { result ->
+                        MusicTrackRow(
+                            title = result.name,
+                            subtitle = result.subtitle.orEmpty(),
+                            imageUri = result.image,
+                            isCurrent = false,
+                            actions = emptyList(),
+                            onClick = { onResultClick(result) },
+                        )
+                    }
+                }
+            } else {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = gutter),
+                    horizontalArrangement = Arrangement.spacedBy(gap),
+                ) {
+                    items(items = group.results, key = { "${it.kind}-${it.id}" }) { result ->
+                        SearchResultCard(
+                            result = result,
+                            width = itemWidth,
+                            onClick = onResultClick,
+                        )
+                    }
                 }
             }
         }
@@ -131,6 +148,19 @@ private fun SearchResultCard(
     width: Dp,
     onClick: (HomeSearchResult) -> Unit,
 ) {
+    if (result.kind == BaseItemKind.MUSIC_ALBUM || result.kind == BaseItemKind.MUSIC_ARTIST) {
+        MusicCard(
+            title = result.name,
+            subtitle = result.subtitle,
+            image = result.image,
+            circular = result.kind == BaseItemKind.MUSIC_ARTIST,
+            modifier = Modifier.width(width),
+            placeholderIcon = result.kind.placeholderIcon(),
+            onClick = if (result.kind.isNavigable()) ({ onClick(result) }) else null,
+        )
+        return
+    }
+
     val circular = result.isPerson || result.kind == BaseItemKind.MUSIC_ARTIST
     val navigable = result.kind.isNavigable()
     val aspectRatio = result.aspectRatio()
@@ -250,7 +280,9 @@ private fun BaseItemKind?.isNavigable(): Boolean =
         BaseItemKind.SEASON,
         BaseItemKind.BOOK,
         BaseItemKind.AUDIO_BOOK,
-        BaseItemKind.BOX_SET -> true
+        BaseItemKind.BOX_SET,
+        BaseItemKind.MUSIC_ARTIST,
+        BaseItemKind.MUSIC_ALBUM -> true
         else -> false
     }
 

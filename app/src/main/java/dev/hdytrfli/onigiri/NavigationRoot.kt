@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -59,6 +63,9 @@ import dev.hdytrfli.onigiri.feature.film.presentation.ShowScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.ShowsScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.SubtitleSearchScreen
 import dev.hdytrfli.onigiri.feature.film.presentation.home.HomeSearchResult
+import dev.hdytrfli.onigiri.feature.film.presentation.music.AlbumDetailScreen
+import dev.hdytrfli.onigiri.feature.film.presentation.music.ArtistDetailScreen
+import dev.hdytrfli.onigiri.feature.film.presentation.music.MusicScreen
 import dev.hdytrfli.onigiri.models.CollectionType
 import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.models.FindroidBoxSet
@@ -67,12 +74,16 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidFolder
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMovie
+import dev.hdytrfli.onigiri.models.FindroidMusicFavorite
 import dev.hdytrfli.onigiri.models.FindroidSeason
 import dev.hdytrfli.onigiri.models.FindroidShow
+import dev.hdytrfli.onigiri.models.MusicFavoriteKind
 import dev.hdytrfli.onigiri.navigation.navigateOrReuse
 import dev.hdytrfli.onigiri.navigation.resumedAction
 import dev.hdytrfli.onigiri.presentation.onboarding.AddProfileScreen
 import dev.hdytrfli.onigiri.presentation.onboarding.OnboardingScreen
+import dev.hdytrfli.onigiri.presentation.player.MiniMusicPlayerHost
+import dev.hdytrfli.onigiri.presentation.player.MusicPlayerViewModel
 import dev.hdytrfli.onigiri.presentation.reader.ReaderFontScreen
 import dev.hdytrfli.onigiri.presentation.settings.AboutScreen
 import dev.hdytrfli.onigiri.presentation.settings.ProfilePickerScreen
@@ -100,7 +111,7 @@ import org.jellyfin.sdk.model.api.ImageType
 private val SETTINGS_ROOT_ROUTE = SettingsRoute(indexes = emptyList())
 
 private val TOP_LEVEL_ROUTES =
-    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, SETTINGS_ROOT_ROUTE)
+    setOf(HomeRoute, MoviesRoute, ShowsRoute, BooksRoute, MusicRoute, SETTINGS_ROOT_ROUTE)
 
 data class TabBarItem(
     @param:StringRes val title: Int,
@@ -133,6 +144,13 @@ val booksTab =
         route = BooksRoute,
     )
 
+val musicTab =
+    TabBarItem(
+        title = CoreR.string.title_music,
+        icon = CoreR.drawable.ic_music,
+        route = MusicRoute,
+    )
+
 val settingsTab =
     TabBarItem(
         title = CoreR.string.title_settings,
@@ -149,6 +167,7 @@ fun NavigationRoot(
     profileLoggedOut: Boolean,
     swrStore: SwrStore,
     confirmExit: Boolean = false,
+    musicDestination: MutableState<MusicLaunchDestination?>? = null,
 ) {
     val setupComplete = onboardingComplete && hasServers && hasCurrentServer && hasCurrentUser
     val loggedOutProfileSelection =
@@ -213,6 +232,7 @@ fun NavigationRoot(
             searchExpanded = searchExpanded,
             confirmExit = confirmExit,
             swrStore = swrStore,
+            musicDestination = musicDestination,
         )
     } else {
         SetupNavigation(
@@ -231,11 +251,28 @@ private fun MainNavigation(
     searchExpanded: MutableState<Boolean>,
     confirmExit: Boolean,
     swrStore: SwrStore,
+    musicDestination: MutableState<MusicLaunchDestination?>? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val musicPlayerViewModel: MusicPlayerViewModel = hiltViewModel()
+    val showMiniPlayer by musicPlayerViewModel.miniPlayerVisible.collectAsStateWithLifecycle()
     var exitPending by remember { mutableStateOf(false) }
+
+    LaunchedEffect(musicDestination?.value) {
+        when (val destination = musicDestination?.value) {
+            is MusicLaunchDestination.Artist -> {
+                navigator.navigate(ArtistDetailRoute(destination.id))
+                musicDestination.value = null
+            }
+            is MusicLaunchDestination.Album -> {
+                navigator.navigate(AlbumDetailRoute(destination.id))
+                musicDestination.value = null
+            }
+            null -> Unit
+        }
+    }
 
     LaunchedEffect(swrStore) {
         swrStore.failures.collect { failure ->
@@ -258,7 +295,8 @@ private fun MainNavigation(
         }
     }
 
-    val tabRoutes = listOf(homeTab, moviesTab, showsTab, booksTab, settingsTab).map { it.route }
+    val tabRoutes =
+        listOf(homeTab, moviesTab, showsTab, booksTab, musicTab, settingsTab).map { it.route }
 
     val topLevelRoute = navigationState.topLevelRoute
 
@@ -301,6 +339,7 @@ private fun MainNavigation(
                 navigator.navigate(MediaRoute)
             },
             searchExpanded = searchExpanded,
+            onPlaySong = musicPlayerViewModel::playSongById,
         )
     }
 
@@ -318,6 +357,7 @@ private fun MainNavigation(
             },
         LocalPlaybackLauncher provides
             PlaybackLauncher { itemId, itemKind, startFromBeginning ->
+                musicPlayerViewModel.pause()
                 val intent = Intent(context, PlayerActivity::class.java)
                 intent.putExtra("itemId", itemId.toString())
                 intent.putExtra("itemKind", itemKind.serialName)
@@ -352,11 +392,37 @@ private fun MainNavigation(
                     navigator.goBack()
                 }
             }
+            val suiteVisible = currentRoute.drawsNavigationSuite(tabRoutes)
+            val miniStartInset by
+                animateDpAsState(
+                    targetValue = if (suiteVisible) LocalSuiteStartInset.current else 0.dp,
+                    label = "mini-player-start-inset",
+                )
+            val miniBottomInset by
+                animateDpAsState(
+                    targetValue = if (suiteVisible) LocalSuiteBottomInset.current else 0.dp,
+                    label = "mini-player-bottom-inset",
+                )
+            AnimatedVisibility(
+                visible = showMiniPlayer,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) {
+                Box(
+                    modifier =
+                        Modifier.padding(
+                            start = miniStartInset,
+                            bottom = miniBottomInset,
+                        )
+                ) {
+                    MiniMusicPlayerHost(viewModel = musicPlayerViewModel)
+                }
+            }
+
             // The suite is drawn over the content, outside the NavDisplay, so a page transition
             // never moves it: switching tabs animates only the content behind it. Its presence is
             // animated, so hiding it on immersive pages is a quick fade instead of a pop.
             AnimatedVisibility(
-                visible = currentRoute.drawsNavigationSuite(tabRoutes),
+                visible = suiteVisible,
                 enter = SUITE_ENTER_TRANSITION,
                 exit = SUITE_EXIT_TRANSITION,
                 modifier =
@@ -381,7 +447,9 @@ private fun MainNavigation(
                         .padding(
                             start = MaterialTheme.spacings.gutter,
                             end = MaterialTheme.spacings.gutter,
-                            bottom = MaterialTheme.spacings.medium + LocalSuiteBottomInset.current,
+                            bottom =
+                                LocalSuiteBottomInset.current +
+                                    if (showMiniPlayer) 92.dp else 12.dp,
                         ),
             )
         }
@@ -411,6 +479,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     tabReselect: TabReselect,
     onSearchClick: () -> Unit,
     searchExpanded: MutableState<Boolean>,
+    onPlaySong: (java.util.UUID) -> Unit,
 ) {
     entry<HomeRoute> {
         SuiteInsetBox {
@@ -444,7 +513,13 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                     dropUnlessResumed { navigator.navigate(SettingsRoute(indexes = emptyList())) },
                 onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
                 onSearchResultClick =
-                    resumedAction { result -> navigateToSearchResult(navigator, result) },
+                    resumedAction { result ->
+                        navigateToSearchResult(
+                            navigator = navigator,
+                            result = result,
+                            onPlaySong = onPlaySong,
+                        )
+                    },
             )
         }
     }
@@ -494,6 +569,48 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             BooksScreen(onItemClick = resumedAction { item -> navigateToItem(navigator, item) })
         }
     }
+    entry<MusicRoute> {
+        SuiteInsetBox {
+            MusicScreen(
+                onArtistClick =
+                    resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
+                onAlbumClick =
+                    resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
+            )
+        }
+    }
+    entry<ArtistDetailRoute> { key ->
+        ArtistDetailScreen(
+            artistId = key.artistId,
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onAlbumClick =
+                resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId, music = true))
+                },
+            navigateToIdentify =
+                resumedAction { itemId ->
+                    navigator.navigate(IdentifyRoute(itemId = itemId, musicKind = "artist"))
+                },
+        )
+    }
+    entry<AlbumDetailRoute> { key ->
+        AlbumDetailScreen(
+            albumId = key.albumId,
+            navigateBack = dropUnlessResumed { navigator.goBack() },
+            onArtistClick =
+                resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
+            navigateToEditImages =
+                resumedAction { itemId ->
+                    navigator.navigate(EditImagesRoute(itemId = itemId, music = true))
+                },
+            navigateToIdentify =
+                resumedAction { itemId ->
+                    navigator.navigate(IdentifyRoute(itemId = itemId, musicKind = "album"))
+                },
+        )
+    }
     entry<MediaRoute> {
         MediaScreen(
             onItemClick = resumedAction { item -> navigateToItem(navigator, item) },
@@ -538,6 +655,9 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         startFromBeginning = startFromBeginning,
                     )
                 )
+            },
+            onOpenPlayer = {
+                context.startActivity(Intent(context, MusicPlayerActivity::class.java))
             },
             navigateToDownloads = dropUnlessResumed { navigator.navigate(DownloadsRoute) },
             onAuthorClick = { personId ->
@@ -667,7 +787,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
         IdentifyScreen(
             itemId = UUID.fromString(key.itemId),
             navigateBack = dropUnlessResumed { navigator.goBack() },
-            onSearch = { query, year, imdbId, tmdbId, tvdbId ->
+            musicKind = key.musicKind,
+            onSearch = { query, year, imdbId, tmdbId, tvdbId, musicBrainzId, discogsId ->
                 navigator.navigate(
                     IdentifyResultsRoute(
                         itemId = key.itemId,
@@ -676,7 +797,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                         imdbId = imdbId,
                         tmdbId = tmdbId,
                         tvdbId = tvdbId,
+                        musicBrainzId = musicBrainzId,
+                        discogsId = discogsId,
                         series = key.series,
+                        musicKind = key.musicKind,
                     )
                 )
             },
@@ -690,7 +814,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             imdbId = key.imdbId,
             tmdbId = key.tmdbId,
             tvdbId = key.tvdbId,
+            musicBrainzId = key.musicBrainzId,
+            discogsId = key.discogsId,
             series = key.series,
+            musicKind = key.musicKind,
             navigateBack = dropUnlessResumed { navigator.goBack() },
             onApplied = {
                 // Return to the media detail page (form + results are on the stack).
@@ -702,6 +829,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     entry<EditImagesRoute> { key ->
         EditImagesScreen(
             itemId = UUID.fromString(key.itemId),
+            music = key.music,
             navigateBack = dropUnlessResumed { navigator.goBack() },
             navigateToImageSearch =
                 resumedAction { type, isEpisode ->
@@ -710,6 +838,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                             itemId = key.itemId,
                             type = type.name,
                             isEpisode = isEpisode,
+                            music = key.music,
                         )
                     )
                 },
@@ -720,6 +849,7 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             itemId = UUID.fromString(key.itemId),
             type = ImageType.valueOf(key.type),
             isEpisode = key.isEpisode,
+            music = key.music,
             navigateBack = dropUnlessResumed { navigator.goBack() },
         )
     }
@@ -795,8 +925,13 @@ private fun EntryProviderScope<NavKey>.mainEntries(
     }
 }
 
-private fun navigateToSearchResult(navigator: Navigator, result: HomeSearchResult) {
+private fun navigateToSearchResult(
+    navigator: Navigator,
+    result: HomeSearchResult,
+    onPlaySong: (java.util.UUID) -> Unit,
+) {
     when (result.kind) {
+        BaseItemKind.AUDIO -> onPlaySong(result.id)
         BaseItemKind.MOVIE -> navigator.navigate(MovieRoute(result.id.toString()))
         BaseItemKind.SERIES -> navigator.navigate(ShowRoute(result.id.toString()))
         BaseItemKind.EPISODE -> navigator.navigate(EpisodeRoute(result.id.toString()))
@@ -813,6 +948,10 @@ private fun navigateToSearchResult(navigator: Navigator, result: HomeSearchResul
                     collectionName = result.name,
                 )
             )
+        BaseItemKind.MUSIC_ARTIST ->
+            navigator.navigate(ArtistDetailRoute(artistId = result.id.toString()))
+        BaseItemKind.MUSIC_ALBUM ->
+            navigator.navigate(AlbumDetailRoute(albumId = result.id.toString()))
         else -> Unit
     }
 }
@@ -828,6 +967,25 @@ private fun navigateToItem(navigator: Navigator, item: FindroidItem) {
                 CollectionRoute(collectionId = item.id.toString(), collectionName = item.name)
             )
         is FindroidMovie -> navigator.navigate(MovieRoute(movieId = item.id.toString()))
+        is FindroidMusicFavorite ->
+            when (item.kind) {
+                MusicFavoriteKind.Album ->
+                    item.albumId?.let {
+                        navigator.navigate(AlbumDetailRoute(albumId = it.toString()))
+                    }
+                MusicFavoriteKind.Artist ->
+                    item.artistId?.let {
+                        navigator.navigate(ArtistDetailRoute(artistId = it.toString()))
+                    }
+                MusicFavoriteKind.Song ->
+                    (item.albumId ?: item.artistId)?.let { id ->
+                        if (item.albumId != null) {
+                            navigator.navigate(AlbumDetailRoute(albumId = id.toString()))
+                        } else {
+                            navigator.navigate(ArtistDetailRoute(artistId = id.toString()))
+                        }
+                    }
+            }
         is FindroidShow -> navigator.navigate(ShowRoute(showId = item.id.toString()))
         is FindroidSeason -> navigator.navigate(SeasonRoute(seasonId = item.id.toString()))
         is FindroidEpisode -> navigator.navigate(EpisodeRoute(episodeId = item.id.toString()))

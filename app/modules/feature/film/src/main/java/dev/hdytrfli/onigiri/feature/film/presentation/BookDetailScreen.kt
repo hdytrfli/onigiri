@@ -50,6 +50,7 @@ fun BookDetailScreen(
     bookId: UUID,
     navigateBack: () -> Unit,
     onRead: (FindroidBook, Boolean) -> Unit,
+    onOpenPlayer: () -> Unit = {},
     navigateToDownloads: () -> Unit,
     onAuthorClick: (UUID) -> Unit = {},
     viewModel: BookDetailViewModel = hiltViewModel(),
@@ -86,8 +87,10 @@ fun BookDetailScreen(
                 val item = state.item!!
                 val progress = state.readingProgress
                 val readable = item.isReadable
+                val audiobook = item.isAudiobook
                 val readLabel =
                     when {
+                        audiobook -> stringResource(CoreR.string.play)
                         !readable -> stringResource(R.string.book_unsupported)
                         item.played -> "Read"
                         state.pagesLeft > 0 -> "${state.pagesLeft} pages left"
@@ -117,18 +120,26 @@ fun BookDetailScreen(
                         ItemButtonsBar(
                             item = item,
                             onPlayClick = { startFromBeginning ->
-                                if (readable) onRead(item, startFromBeginning)
+                                when {
+                                    audiobook -> {
+                                        viewModel.playAudiobook(item)
+                                        onOpenPlayer()
+                                    }
+                                    readable -> onRead(item, startFromBeginning)
+                                }
                             },
                             onMarkAsPlayedClick = { viewModel.setPlayed(item.id, !item.played) },
                             onMarkAsFavoriteClick = {
                                 viewModel.setFavorite(item.id, !item.favorite)
                             },
-                            canPlay = readable,
+                            canPlay = readable || audiobook,
                             playLabel = readLabel,
-                            playIconRes = CoreR.drawable.ic_book_open,
+                            playIconRes =
+                                if (audiobook) CoreR.drawable.ic_play
+                                else CoreR.drawable.ic_book_open,
                             showRestartButton = readable,
                             hasProgress = readable && progress > 0f && !item.played,
-                            forcePlayEnabled = readable,
+                            forcePlayEnabled = readable || audiobook,
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(MaterialTheme.spacings.medium))

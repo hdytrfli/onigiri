@@ -1192,10 +1192,18 @@ class MPVPlayer(
             val seekTo = if (positionMs != C.TIME_UNSET) positionMs else initialSeekTo
             initialSeekTo =
                 if (isPlayerReady) {
+                    val durationMs =
+                        MPVLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND)?.toLong()
+                    val seekMode =
+                        if (durationMs != null && durationMs in 1..120_000L) {
+                            "absolute+exact"
+                        } else {
+                            "absolute+keyframes"
+                        }
                     MPVLib.command(
                         "seek",
                         "${seekTo.toDouble().div(C.MILLIS_PER_SECOND)}",
-                        "absolute",
+                        seekMode,
                     )
                     0L
                 } else {

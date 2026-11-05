@@ -4,6 +4,14 @@
     <string name="settings_preferred_audio_language">Preferred audio language</string>
     <string name="settings_preferred_subtitle_language">Preferred subtitle language</string>
     <string name="settings_category_player">Player</string>
+    <string name="settings_category_music">Music</string>
+    <string name="settings_category_music_summary">Music player appearance</string>
+    <string name="settings_music_artwork_type">Player artwork</string>
+    <string name="settings_music_artwork_type_summary">Choose how album art appears in the music player</string>
+    <string name="settings_music_skip_silence">Skip silence</string>
+    <string name="settings_music_skip_silence_summary">Skip silent parts between tracks</string>
+    <string name="settings_music_gapless">Gapless playback</string>
+    <string name="settings_music_gapless_summary">Play consecutive tracks without pausing</string>
     <string name="settings_group_server">Server</string>
     <string name="settings_group_storage">Storage</string>
     <string name="settings_category_download">Downloads</string>

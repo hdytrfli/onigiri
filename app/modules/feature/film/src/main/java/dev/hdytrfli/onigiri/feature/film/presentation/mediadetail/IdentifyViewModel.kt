@@ -80,6 +80,14 @@ constructor(
         _state.update { it.copy(tvdbId = value) }
     }
 
+    fun setMusicBrainzId(value: String) {
+        _state.update { it.copy(musicBrainzId = value) }
+    }
+
+    fun setDiscogsId(value: String) {
+        _state.update { it.copy(discogsId = value) }
+    }
+
     /** Runs a search with explicit criteria (used by the results screen). */
     fun search(
         itemId: UUID,
@@ -87,25 +95,41 @@ constructor(
         year: Int?,
         providerIds: Map<String, String>,
         series: Boolean = false,
+        musicKind: String? = null,
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true, results = emptyList(), error = null) }
             try {
                 val results =
-                    if (series) {
-                        repository.searchRemoteSeries(
-                            itemId = itemId,
-                            name = query,
-                            year = year,
-                            providerIds = providerIds,
-                        )
-                    } else {
-                        repository.searchRemoteMovies(
-                            itemId = itemId,
-                            name = query,
-                            year = year,
-                            providerIds = providerIds,
-                        )
+                    when {
+                        musicKind == "artist" ->
+                            repository.searchRemoteMusicArtists(
+                                itemId = itemId,
+                                name = query,
+                                year = year,
+                                providerIds = providerIds,
+                            )
+                        musicKind == "album" ->
+                            repository.searchRemoteMusicAlbums(
+                                itemId = itemId,
+                                name = query,
+                                year = year,
+                                providerIds = providerIds,
+                            )
+                        series ->
+                            repository.searchRemoteSeries(
+                                itemId = itemId,
+                                name = query,
+                                year = year,
+                                providerIds = providerIds,
+                            )
+                        else ->
+                            repository.searchRemoteMovies(
+                                itemId = itemId,
+                                name = query,
+                                year = year,
+                                providerIds = providerIds,
+                            )
                     }
                 _state.update { it.copy(isSearching = false, results = results) }
             } catch (e: Exception) {

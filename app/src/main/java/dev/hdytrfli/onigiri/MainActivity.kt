@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -43,12 +45,14 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
+    private val pendingMusicDestination = mutableStateOf<MusicLaunchDestination?>(null)
 
     @Inject lateinit var appPreferences: AppPreferences
     @Inject lateinit var swrStore: SwrStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleMusicIntent(intent)
 
         enableEdgeToEdge()
 
@@ -140,11 +144,29 @@ class MainActivity : AppCompatActivity() {
                                 profileLoggedOut = state.profileLoggedOut,
                                 confirmExit = state.confirmExit,
                                 swrStore = swrStore,
+                                musicDestination = pendingMusicDestination,
                             )
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleMusicIntent(intent)
+    }
+
+    private fun handleMusicIntent(intent: Intent?) {
+        val artistId = intent?.getStringExtra(ExtraMusicArtistId)
+        val albumId = intent?.getStringExtra(ExtraMusicAlbumId)
+        pendingMusicDestination.value =
+            when {
+                artistId != null -> MusicLaunchDestination.Artist(artistId)
+                albumId != null -> MusicLaunchDestination.Album(albumId)
+                else -> null
+            }
     }
 }

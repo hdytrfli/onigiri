@@ -27,6 +27,7 @@ android {
 dependencies {
     implementation(projects.core)
     implementation(projects.data)
+    implementation(projects.player.local)
     implementation(projects.settings)
     implementation(projects.ui)
     implementation(libs.timber)
@@ -39,6 +40,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.media3.common)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel)

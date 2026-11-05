@@ -66,7 +66,10 @@ fun IdentifyResultsScreen(
     imdbId: String,
     tmdbId: String,
     tvdbId: String,
+    musicBrainzId: String = "",
+    discogsId: String = "",
     series: Boolean = false,
+    musicKind: String? = null,
     navigateBack: () -> Unit,
     onApplied: () -> Unit,
     viewModel: IdentifyViewModel = hiltViewModel(),
@@ -75,9 +78,22 @@ fun IdentifyResultsScreen(
 
     LaunchedEffect(itemId) {
         val providerIds = buildMap {
-            imdbId.trim().takeIf { it.isNotEmpty() }?.let { put("Imdb", it) }
-            tmdbId.trim().takeIf { it.isNotEmpty() }?.let { put("Tmdb", it) }
-            tvdbId.trim().takeIf { it.isNotEmpty() }?.let { put("Tvdb", it) }
+            if (musicKind != null) {
+                musicBrainzId
+                    .trim()
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        put(
+                            if (musicKind == "artist") "MusicBrainzArtist" else "MusicBrainzAlbum",
+                            it,
+                        )
+                    }
+                discogsId.trim().takeIf { it.isNotEmpty() }?.let { put("Discogs", it) }
+            } else {
+                imdbId.trim().takeIf { it.isNotEmpty() }?.let { put("Imdb", it) }
+                tmdbId.trim().takeIf { it.isNotEmpty() }?.let { put("Tmdb", it) }
+                tvdbId.trim().takeIf { it.isNotEmpty() }?.let { put("Tvdb", it) }
+            }
         }
         viewModel.search(
             itemId = itemId,
@@ -85,6 +101,7 @@ fun IdentifyResultsScreen(
             year = year.trim().toIntOrNull(),
             providerIds = providerIds,
             series = series,
+            musicKind = musicKind,
         )
     }
 
