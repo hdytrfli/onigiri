@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -524,6 +525,7 @@ private fun PlayerArtwork(
     var rotationSpeedJob by remember { mutableStateOf<Job?>(null) }
     var boostActive by remember { mutableStateOf(false) }
     var swipeActive by remember { mutableStateOf(false) }
+    val dragVelocityTracker = remember { VelocityTracker() }
 
     val settle: () -> Unit = {
         settleJob?.cancel()
@@ -639,19 +641,37 @@ private fun PlayerArtwork(
                         onDragStart = {
                             settleJob?.cancel()
                             swipeActive = true
+                            dragVelocityTracker.resetTracking()
                             stopRotationBoost()
                             onSpeedBoost(false)
                             dragOffset = 0f
                         },
                         onHorizontalDrag = { change, amount ->
                             change.consume()
+                            dragVelocityTracker.addPosition(
+                                change.uptimeMillis,
+                                change.position,
+                            )
                             dragOffset = (dragOffset + amount).coerceIn(-stepPx, stepPx)
                         },
                         onDragEnd = {
+                            // A swipe either passes 15% of the page or is a deliberate flick.
+                            // The velocity path matters on compact screens where 15% is a short
+                            // physical distance and a quick flick should still change tracks.
+                            val velocity = dragVelocityTracker.calculateVelocity().x
+                            val flingThreshold = with(density) { 800.dp.toPx() }
+                            val flung = abs(velocity) >= flingThreshold
+                            val direction =
+                                when {
+                                    flung -> if (velocity < 0f) -1 else 1
+                                    abs(dragOffset) >= stepPx * 0.15f ->
+                                        if (dragOffset < 0f) -1 else 1
+                                    else -> 0
+                                }
                             val target =
                                 when {
-                                    dragOffset <= -stepPx / 2f && state.hasNext -> 1
-                                    dragOffset >= stepPx / 2f && state.hasPrevious -> -1
+                                    direction < 0 && state.hasNext -> 1
+                                    direction > 0 && state.hasPrevious -> -1
                                     else -> 0
                                 }
                             if (target != 0) {
