@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_welcome_title">Welcome to Findroid+</string>
+    <string name="onboarding_welcome_title">Welcome to Onigiri</string>
     <string name="onboarding_welcome_description">Your films, shows and books in one place. Connect your Jellyfin server and choose the profile you want to use on this device.</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_server_title">Connect your server</string>
@@ -159,11 +159,11 @@
     <string name="reader_font_note">Applies to books you read in the app. Styled books may keep some of their own typography.</string>
     <string name="about_description">A native Jellyfin client for Android with a dedicated reading experience.</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_our_github">Findroid+ on GitHub</string>
+    <string name="about_our_github">Onigiri on GitHub</string>
     <string name="about_findroid">Findroid</string>
     <string name="about_jellyfin">Jellyfin</string>
     <string name="about_open_link">Open link</string>
-    <string name="about_fork_note">Findroid+ is an independent fork of Findroid. Licensed under GPLv3.</string>
+    <string name="about_fork_note">Onigiri is an independent fork of Findroid. Licensed under GPLv3.</string>
     <string name="swr_refresh_failed">Couldn\'t refresh. Showing cached data.</string>
     <string name="swr_offline_cached">Offline. Showing cached data.</string>
     <string name="swr_offline_no_data">Offline, and there is no cached data yet.</string>

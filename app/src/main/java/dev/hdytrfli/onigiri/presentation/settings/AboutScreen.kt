@@ -40,7 +40,7 @@ import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
 
-private const val OUR_GITHUB_URL = "https://github.com/hdytrfli/findroid"
+private const val OUR_GITHUB_URL = "https://github.com/hdytrfli/onigiri"
 private const val FINDROID_URL = "https://github.com/jarnedemeulemeester/findroid"
 private const val JELLYFIN_URL = "https://jellyfin.org"
 

@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="icons/findroid-plus.svg" width="120" alt="Findroid+ logo">
+  <img src="icons/ic_launcher-web.png" width="120" alt="Onigiri logo">
 </p>
 
-<h1 align="center">Findroid+</h1>
+<h1 align="center">Onigiri</h1>
 
 <p align="center">A native Jellyfin client for Android, with a built-in reader.</p>
 
-<p align="center"><strong>1.0.0-beta.2</strong></p>
+<p align="center"><strong>1.0.0-beta.4</strong></p>
 
-Findroid+ is an independent Android client for Jellyfin. It began as a fork of
+Onigiri is an independent Android client for Jellyfin. It began as a fork of
 [Findroid](https://github.com/jarnedemeulemeester/findroid) and continues its native-first
 approach while adding a reading experience, a fuller profile system, and a more consistent
 interface.
 
-## What this fork adds
+## What Onigiri adds
 
 ### Reading
 
@@ -81,15 +81,29 @@ interface.
 
 ## Links
 
-- [Findroid+ on GitHub](https://github.com/hdytrfli/findroid)
+- [Onigiri on GitHub](https://github.com/hdytrfli/onigiri)
 - [Findroid, the upstream project](https://github.com/jarnedemeulemeester/findroid)
 - [Jellyfin](https://jellyfin.org)
 
+## Thanks to the Findroid project
+
+Onigiri would not exist without the work of
+[Jarden Demeulemeester](https://github.com/jarnedemeulemeester) and every contributor to the
+[Findroid](https://github.com/jarnedemeulemeester/findroid) project.
+
+The upstream project built the foundation this app still relies on: the Jellyfin integration,
+library browsing, playback architecture, downloads, offline behavior, and much of the Android
+and Compose structure. Their years of work made it possible to focus this fork on reading,
+profiles, and interface refinements instead of starting from zero.
+
+Thank you to Jarden and to all Findroid contributors, past and present. Your effort and generosity
+in sharing the project under an open-source license are the reason Onigiri can exist.
+
 ## License
 
-Findroid+ is licensed under the GNU General Public License v3.0.
+Onigiri is licensed under the GNU General Public License v3.0.
 
-Findroid+ is an independent fork and is not affiliated with the Jellyfin project or the Findroid
+Onigiri is an independent fork and is not affiliated with the Jellyfin project or the Findroid
 project. The original Findroid project and its contributors remain the foundation of this work.
 Playback, library browsing, and much of the application architecture originate there.
 
