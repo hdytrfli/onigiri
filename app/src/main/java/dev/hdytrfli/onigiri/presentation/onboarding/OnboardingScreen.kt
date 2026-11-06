@@ -56,6 +56,8 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppTextField
 import dev.hdytrfli.onigiri.ui.components.LoadingButton
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.OnScrimSecondary
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.utils.ObserveAsEvents
@@ -280,56 +282,68 @@ fun OnboardingScaffold(
     onBack: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val contentMaxHeight = maxHeight * 0.76f
-
-        Image(
-            painter = painterResource(CoreR.drawable.onboarding_background),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(
-                brush = Brush.verticalGradient(colors = listOf(Color(0x33000000), Color.Black))
-            )
-        }
-
-        CompositionLocalProvider(LocalContentColor provides Color.White) {
-            Column(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            CompositionLocalProvider(LocalContentColor provides Color.White) {
                 ItemTopBar(
                     hasBackButton = onBack != null,
                     onBackClick = { onBack?.invoke() },
                 )
-                Column(
-                    modifier =
-                        Modifier.weight(1f)
-                            .fillMaxWidth()
-                            .imePadding()
-                            .navigationBarsPadding()
-                            .padding(horizontal = MaterialTheme.spacings.default)
-                ) {
-                    Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    ) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val contentMaxHeight = maxHeight * 0.76f
+
+            Image(
+                painter = painterResource(CoreR.drawable.onboarding_background),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawRect(
+                    brush = Brush.verticalGradient(colors = listOf(Color(0x33000000), Color.Black))
+                )
+            }
+
+            CompositionLocalProvider(LocalContentColor provides Color.White) {
+                Column(modifier = Modifier.fillMaxSize()) {
                     Column(
                         modifier =
-                            Modifier.widthIn(max = 420.dp)
+                            Modifier.weight(1f)
                                 .fillMaxWidth()
-                                .align(Alignment.CenterHorizontally)
-                                .heightIn(max = contentMaxHeight)
-                                .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
-                        content = content,
-                    )
-                    if (stepIndex != null) {
-                        OnboardingDots(
-                            stepIndex = stepIndex,
+                                .imePadding()
+                                .navigationBarsPadding()
+                                .padding(
+                                    top = LocalRootPageContentInset.current,
+                                    start = MaterialTheme.spacings.default,
+                                    end = MaterialTheme.spacings.default,
+                                )
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Column(
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(
-                                        top = MaterialTheme.spacings.medium,
-                                        bottom = MaterialTheme.spacings.small,
-                                    ),
+                                Modifier.widthIn(max = 420.dp)
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterHorizontally)
+                                    .heightIn(max = contentMaxHeight)
+                                    .verticalScroll(rememberScrollState()),
+                            verticalArrangement =
+                                Arrangement.spacedBy(MaterialTheme.spacings.medium),
+                            content = content,
                         )
+                        if (stepIndex != null) {
+                            OnboardingDots(
+                                stepIndex = stepIndex,
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(
+                                            top = MaterialTheme.spacings.medium,
+                                            bottom = MaterialTheme.spacings.small,
+                                        ),
+                            )
+                        }
                     }
                 }
             }

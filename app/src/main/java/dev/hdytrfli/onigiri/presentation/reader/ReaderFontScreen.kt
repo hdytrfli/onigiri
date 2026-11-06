@@ -38,8 +38,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.R as AppR
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.settings.domain.SubtitleFonts
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -68,17 +69,18 @@ fun ReaderFontScreen(
 
     val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
 
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(AppR.string.reader_font_title),
                 onBack = navigateBack,
             )
         }
-    ) { innerPadding ->
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPadding + innerPadding,
+            contentPadding =
+                contentPadding + PaddingValues(top = LocalRootPageContentInset.current),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

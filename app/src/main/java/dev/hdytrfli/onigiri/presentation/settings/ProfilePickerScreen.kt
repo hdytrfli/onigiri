@@ -53,7 +53,9 @@ import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.AppTextField
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.MenuActionItem
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -86,16 +88,8 @@ fun ProfilePickerScreen(
 
     BackHandler(enabled = !canGoBack) {}
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(CoreR.drawable.onboarding_background),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
-
-        Column(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
             ItemTopBar(
                 hasBackButton = canGoBack && onBack != null,
                 onBackClick = { onBack?.invoke() },
@@ -112,6 +106,17 @@ fun ProfilePickerScreen(
                     }
                 },
             )
+        }
+    ) {
+        Image(
+            painter = painterResource(CoreR.drawable.onboarding_background),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+
+        Column(modifier = Modifier.fillMaxSize()) {
             ProfilePickerContent(
                 state = state,
                 onProfileClick = { profile ->
@@ -220,7 +225,10 @@ private fun ProfilePickerContent(
                 }
 
             Column(
-                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = LocalRootPageContentInset.current),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start,
             ) {
@@ -520,7 +528,6 @@ private fun ProfileCard(
                     AppDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
-                        alignEnd = true,
                     ) {
                         if (onChangePin != null) {
                             MenuActionItem(

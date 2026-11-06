@@ -4,7 +4,7 @@ import dev.hdytrfli.onigiri.settings.domain.models.Preference as PreferenceBacke
 
 interface Preference {
     val nameStringResource: Int
-    val descriptionStringRes: Int?
+    val descriptionStringRes: Int
     val iconDrawableId: Int?
     val enabled: Boolean
     val dependencies: List<PreferenceBackend<Boolean>>

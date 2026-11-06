@@ -1,6 +1,5 @@
 package dev.hdytrfli.onigiri.presentation.settings.components
 
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,11 +20,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import dev.hdytrfli.onigiri.settings.presentation.models.Preference
 import dev.hdytrfli.onigiri.ui.theme.spacings
 
 /** Maximum fraction of a row's width its trailing value may take before it ellipsises. */
-private const val TRAILING_VALUE_MAX_WIDTH_FRACTION = 0.45f
+private val TRAILING_VALUE_MAX_WIDTH = 180.dp
 
 /** Alpha every part of a disabled row fades to, title and trailing text alike. */
 private const val DISABLED_ALPHA = 0.38f
@@ -86,49 +86,48 @@ private fun SettingsCardRow(
     value: String?,
     trailing: @Composable (() -> Unit)?,
 ) {
-    BoxWithConstraints {
-        val trailingValueMaxWidth = maxWidth * TRAILING_VALUE_MAX_WIDTH_FRACTION
-        // The title fades through its Surface's content colour, so the trailing texts have to
-        // apply the same fade themselves to stay in step with it.
-        val textAlpha = if (preference.enabled) 1.0f else DISABLED_ALPHA
-        Row(
-            modifier = Modifier.padding(MaterialTheme.spacings.medium),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (preference.iconDrawableId != null) {
-                Icon(
-                    painter = painterResource(preference.iconDrawableId!!),
-                    contentDescription = null,
-                )
-                Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
-                preference.descriptionStringRes?.let {
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
-                    Text(
-                        text = stringResource(id = it),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
-                    )
-                }
-            }
-            if (value != null) {
-                Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
+    // A fixed cap keeps the row from measuring the whole card width for every item. That
+    // measurement made long settings lists expensive while the page transition was running.
+    val textAlpha = if (preference.enabled) 1.0f else DISABLED_ALPHA
+    Row(
+        modifier = Modifier.padding(MaterialTheme.spacings.medium),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (preference.iconDrawableId != null) {
+            Icon(
+                painter = painterResource(preference.iconDrawableId!!),
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            preference.descriptionStringRes?.let {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacings.extraSmall))
                 Text(
-                    text = value,
-                    modifier = Modifier.widthIn(max = trailingValueMaxWidth),
+                    text = stringResource(id = it),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.End,
                 )
             }
-            if (trailing != null) {
-                Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
-                trailing()
-            }
+        }
+        if (value != null) {
+            Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
+            Text(
+                text = value,
+                modifier = Modifier.widthIn(max = TRAILING_VALUE_MAX_WIDTH),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
+            )
+        }
+        if (trailing != null) {
+            Spacer(modifier = Modifier.width(MaterialTheme.spacings.default))
+            trailing()
         }
     }
 }

@@ -1,7 +1,6 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
@@ -26,10 +25,9 @@ import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
-import dev.hdytrfli.onigiri.ui.components.PageSearchField
-import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
-import dev.hdytrfli.onigiri.ui.components.RootPage
+import dev.hdytrfli.onigiri.ui.components.SearchablePageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import java.util.UUID
 
 /** A genre's media grid, with a floating title bar, search field, and display/sort actions. */
@@ -86,27 +84,18 @@ fun GenreScreen(
         )
     }
 
-    RootPage(
-        header = {
-            AnimatedContent(
-                targetState = state.searchExpanded,
-                label = "genre-search",
-            ) { searchExpanded ->
-                if (searchExpanded) {
-                    PageSearchField(
-                        value = state.searchQuery,
-                        onValueChange = { viewModel.onAction(LibraryAction.SetSearchQuery(it)) },
-                        onClose = { viewModel.onAction(LibraryAction.ToggleSearch) },
-                    )
-                } else {
-                    PageTopBar(
-                        title = genreName.ifBlank { stringResource(CoreR.string.genres) },
-                        onBack = navigateBack,
-                        trailingContent = toolbarActions,
-                        includeTopInset = false,
-                    )
-                }
-            }
+    TopBarPageShell(
+        topBar = {
+            SearchablePageTopBar(
+                searchExpanded = state.searchExpanded,
+                searchQuery = state.searchQuery,
+                onSearchQueryChange = { viewModel.onAction(LibraryAction.SetSearchQuery(it)) },
+                onCloseSearch = { viewModel.onAction(LibraryAction.ToggleSearch) },
+                title = genreName.ifBlank { stringResource(CoreR.string.genres) },
+                onBack = navigateBack,
+                includeTopInset = false,
+                trailingContent = toolbarActions,
+            )
         }
     ) {
         LibraryContent(
@@ -123,7 +112,6 @@ fun GenreScreen(
             onShowDisplayDialogChange = { showDisplayDialog = it },
             pullToRefreshState = pullToRefreshState,
             showPullIndicator = false,
-            embedded = true,
             sectionTitle = genreName.takeIf { it.isNotBlank() },
             showSearchField = false,
             modifier = Modifier.fillMaxSize(),

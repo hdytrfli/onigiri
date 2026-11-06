@@ -41,7 +41,7 @@ fun SettingsGroupCard(
     onAction: (SettingsAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column {
+    Column(modifier = Modifier.fillMaxWidth()) {
         group.nameStringResource?.let {
             Text(
                 text = stringResource(it),
@@ -180,6 +180,8 @@ private fun SettingsGroupCardPreview() {
                             ),
                             PreferenceSelect(
                                 nameStringResource = SettingsR.string.pref_player_mpv_hwdec,
+                                descriptionStringRes =
+                                    SettingsR.string.pref_player_mpv_hwdec_summary,
                                 dependencies = listOf(Preference("", false)),
                                 backendPreference = Preference("", ""),
                                 options = SettingsR.array.mpv_hwdec,
@@ -187,6 +189,7 @@ private fun SettingsGroupCardPreview() {
                             ),
                             PreferenceSelect(
                                 nameStringResource = SettingsR.string.pref_player_mpv_vo,
+                                descriptionStringRes = SettingsR.string.pref_player_mpv_vo_summary,
                                 dependencies = listOf(Preference("", false)),
                                 backendPreference = Preference("", ""),
                                 options = SettingsR.array.mpv_vos,
@@ -194,6 +197,7 @@ private fun SettingsGroupCardPreview() {
                             ),
                             PreferenceSelect(
                                 nameStringResource = SettingsR.string.pref_player_mpv_ao,
+                                descriptionStringRes = SettingsR.string.pref_player_mpv_ao_summary,
                                 dependencies = listOf(Preference("", false)),
                                 backendPreference = Preference("", ""),
                                 options = SettingsR.array.mpv_aos,

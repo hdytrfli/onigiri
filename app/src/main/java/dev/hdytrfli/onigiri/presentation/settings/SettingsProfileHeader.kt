@@ -93,7 +93,6 @@ fun SettingsProfileHeader(
                 AppDropdownMenu(
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false },
-                    alignEnd = true,
                 ) {
                     MenuActionItem(
                         icon = CoreR.drawable.ic_user,

@@ -60,8 +60,8 @@ import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
-import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeSection
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeSuggestions
 import dev.hdytrfli.onigiri.ui.preview.dummyHomeView
@@ -149,8 +149,8 @@ fun HomeScreen(
         viewModel.onAction(action)
     }
 
-    RootPage(
-        header = {
+    TopBarPageShell(
+        topBar = {
             AnimatedContent(targetState = searchExpanded, label = "home-search") { expanded ->
                 if (expanded) {
                     PageSearchField(
@@ -233,9 +233,8 @@ fun HomeScreen(
                             showPullIndicator = false,
                         )
                     else ->
-                        DownloadsScreen(
+                        DownloadsContent(
                             onItemClick = onItemClick,
-                            embedded = true,
                             viewModel = downloadsViewModel,
                             pullToRefreshState = pullToRefreshState,
                             showPullIndicator = false,

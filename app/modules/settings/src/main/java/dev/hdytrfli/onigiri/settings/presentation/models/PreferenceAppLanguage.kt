@@ -6,7 +6,7 @@ import dev.hdytrfli.onigiri.settings.domain.models.Preference as PreferenceBacke
 
 data class PreferenceAppLanguage(
     @param:StringRes override val nameStringResource: Int,
-    @param:StringRes override val descriptionStringRes: Int? = null,
+    @param:StringRes override val descriptionStringRes: Int,
     @param:DrawableRes override val iconDrawableId: Int? = null,
     override val enabled: Boolean = true,
     override val dependencies: List<PreferenceBackend<Boolean>> = emptyList(),

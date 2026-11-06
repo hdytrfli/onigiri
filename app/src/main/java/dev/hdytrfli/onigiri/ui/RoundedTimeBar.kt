@@ -7,10 +7,15 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.os.SystemClock
 import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.view.animation.DecelerateInterpolator
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
+import dev.hdytrfli.onigiri.ui.components.PreciseSeekController
+import kotlin.math.abs
 
 /**
  * A [DefaultTimeBar] that draws the progress bar with fully rounded ends (both ends), using the
@@ -26,6 +31,17 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     private var currentDuration: Long = 0L
     private var currentBuffered: Long = 0L
     private var chapterPositions: LongArray = LongArray(0)
+
+    /** When enabled, holding/dragging scrubs relatively; a quick tap still jumps. */
+    private var preciseSeekingEnabled = false
+    private var onPreciseSeek: ((Long) -> Unit)? = null
+    private var seekController: PreciseSeekController? = null
+    private var lastPreciseSeekAt = 0L
+
+    fun setPreciseSeeking(enabled: Boolean, onSeek: (Long) -> Unit) {
+        preciseSeekingEnabled = enabled
+        onPreciseSeek = onSeek
+    }
 
     fun setChapterMarkers(positions: LongArray) {
         if (chapterPositions.contentEquals(positions)) return
@@ -145,6 +161,84 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         super.onDetachedFromWindow()
     }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!preciseSeekingEnabled || currentDuration <= 0L) {
+            return super.onTouchEvent(event)
+        }
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                parent?.requestDisallowInterceptTouchEvent(true)
+                val controller =
+                    PreciseSeekController(
+                        touchSlopPx = ViewConfiguration.get(context).scaledTouchSlop.toFloat(),
+                        holdToScrubMs = HOLD_TO_SCRUB_MS,
+                    )
+                seekController = controller
+                controller.onDown(
+                    x = event.x,
+                    width = width.toFloat(),
+                    startFraction = currentPosition.toFloat() / currentDuration,
+                    timeMs = event.eventTime,
+                )
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                seekController?.onMove(event.x, event.eventTime)?.let { fraction ->
+                    updatePrecisePosition(fraction)
+                }
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+                when (val result = seekController?.onUp(event.x, event.eventTime)) {
+                    is PreciseSeekController.Result.Tap -> {
+                        val target = (result.fraction * currentDuration).toLong()
+                        seekToTarget(target)
+                        animateSeekTo(target)
+                    }
+                    is PreciseSeekController.Result.Scrub -> {
+                        val target = (result.fraction * currentDuration).toLong()
+                        seekToTarget(target)
+                        scrubbing = false
+                        scrubPosition = target
+                        awaitingSeek = true
+                        invalidate()
+                    }
+                    null -> Unit
+                }
+                seekController = null
+                return true
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+                seekController?.onCancel()
+                seekController = null
+                scrubbing = false
+                awaitingSeek = false
+                invalidate()
+                return true
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
+    private fun updatePrecisePosition(fraction: Float) {
+        val target = (fraction * currentDuration).toLong().coerceIn(0L, currentDuration)
+        scrubbing = true
+        scrubPosition = target
+        invalidate()
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastPreciseSeekAt >= PRECISE_SEEK_INTERVAL_MS) {
+            lastPreciseSeekAt = now
+            seekToTarget(target)
+        }
+    }
+
+    private fun seekToTarget(position: Long) {
+        onPreciseSeek?.invoke(position)
+    }
+
     override fun setDuration(duration: Long) {
         currentDuration = duration
         super.setDuration(duration)
@@ -256,6 +350,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
 /** How close the player's position must be to the scrub position before we trust it again. */
 private const val SEEK_TOLERANCE_MS = 1_000L
+
+/** Hold this long before the seek bar switches from tap-to-jump to relative scrubbing. */
+private const val HOLD_TO_SCRUB_MS = 180L
+
+/** Minimum interval between player seeks while dragging precisely, to avoid seek spam. */
+private const val PRECISE_SEEK_INTERVAL_MS = 50L
 
 /** Handle size in dp: a rounded vertical line, matching the Compose slider thumb. */
 private const val HANDLE_WIDTH_DP = 4f

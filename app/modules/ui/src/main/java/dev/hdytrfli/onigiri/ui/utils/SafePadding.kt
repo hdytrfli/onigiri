@@ -41,8 +41,8 @@ fun topBarWindowInsets(): WindowInsets =
  *
  * Pages that call `Modifier.recalculateWindowInsets()` reset the consumed insets of their subtree,
  * undoing the app-wide hidden-status-bar consumption (see MainActivity), so they must drop the top
- * inset themselves - exactly as their top bars do with [topBarWindowInsets]. [PageScaffold] applies
- * this automatically.
+ * inset themselves - exactly as their top bars do with [topBarWindowInsets]. [TopBarPageShell]
+ * applies this automatically.
  */
 @Composable
 fun pageContentWindowInsets(): WindowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom)

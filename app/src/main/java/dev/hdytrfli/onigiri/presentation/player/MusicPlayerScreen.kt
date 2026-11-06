@@ -2,7 +2,6 @@ package dev.hdytrfli.onigiri.presentation.player
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
@@ -11,6 +10,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,8 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,27 +40,37 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
+import dev.hdytrfli.onigiri.player.local.R as PlayerR
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
 import dev.hdytrfli.onigiri.player.local.music.MusicRepeatMode
@@ -70,14 +79,17 @@ import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.MenuActionItem
-import dev.hdytrfli.onigiri.ui.theme.Dimens
+import dev.hdytrfli.onigiri.ui.components.ReservedWidthText
+import dev.hdytrfli.onigiri.ui.components.preciseSeekable
 import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import kotlin.math.abs
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 private val PlayerBackgroundTop = Color(0xFF181818)
 private val PlayerOnBackground = Color.White
@@ -88,10 +100,12 @@ fun MusicPlayerScreen(
     state: MusicPlaybackState,
     artworkType: String,
     swipeArtwork: Boolean,
+    preciseSeeking: Boolean,
     navigateBack: () -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
+    onSpeedBoost: (Boolean) -> Unit,
     onSeek: (Long) -> Unit,
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
@@ -101,22 +115,27 @@ fun MusicPlayerScreen(
     onArtistClick: (java.util.UUID) -> Unit,
     onAlbumClick: (java.util.UUID) -> Unit,
     onPlayQueueItem: (Int) -> Unit,
+    onJumpQueueItem: (Int) -> Unit,
     onRemoveQueueItem: (Int) -> Unit,
     onMoveQueueItem: (fromIndex: Int, toIndex: Int) -> Unit,
     onClearError: () -> Unit,
 ) {
     var overlayMessage by remember { mutableStateOf<String?>(null) }
+    var displayedOverlayMessage by remember { mutableStateOf("") }
 
     val shuffleOn = stringResource(FilmR.string.music_shuffle_on)
     val shuffleOff = stringResource(FilmR.string.music_shuffle_off)
+    val shuffleUnavailable = stringResource(FilmR.string.music_shuffle_unavailable)
     val repeatOff = stringResource(FilmR.string.music_repeat_off)
     val repeatAll = stringResource(FilmR.string.music_repeat_all)
     val repeatOne = stringResource(FilmR.string.music_repeat_one)
     val addFavorite = stringResource(CoreR.string.add_to_favorites)
     val removeFavorite = stringResource(CoreR.string.remove_from_favorites)
+    val speedUp = stringResource(PlayerR.string.player_speed_up)
 
     LaunchedEffect(overlayMessage) {
         if (overlayMessage != null) {
+            displayedOverlayMessage = overlayMessage.orEmpty()
             delay(1_500)
             overlayMessage = null
         }
@@ -125,9 +144,31 @@ fun MusicPlayerScreen(
     val safePadding = rememberSafePadding()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val current = state.current
+    val discRotation = remember { mutableFloatStateOf(0f) }
+    val rotationSpeed = remember { mutableFloatStateOf(1f) }
+    LaunchedEffect(state.playWhenReady) {
+        if (!state.playWhenReady) return@LaunchedEffect
+        var lastFrame = 0L
+        while (isActive) {
+            withFrameNanos { now ->
+                if (lastFrame != 0L) {
+                    val seconds = ((now - lastFrame) / 1_000_000_000f).coerceAtMost(0.1f)
+                    discRotation.floatValue =
+                        (discRotation.floatValue +
+                            NORMAL_DISC_DEGREES_PER_SECOND * rotationSpeed.floatValue * seconds) %
+                            360f
+                }
+                lastFrame = now
+            }
+        }
+    }
     val toggleShuffle: () -> Unit = {
-        overlayMessage = if (state.shuffleEnabled) shuffleOff else shuffleOn
-        onToggleShuffle()
+        if (state.queue.size <= 1) {
+            overlayMessage = shuffleUnavailable
+        } else {
+            overlayMessage = if (state.shuffleEnabled) shuffleOff else shuffleOn
+            onToggleShuffle()
+        }
     }
     val cycleRepeat: () -> Unit = {
         overlayMessage =
@@ -143,6 +184,8 @@ fun MusicPlayerScreen(
         onToggleFavorite()
     }
     val gutter = MaterialTheme.spacings.gutter
+    val artworkHorizontalGutter =
+        if (LocalConfiguration.current.smallestScreenWidthDp >= 600) 48.dp else 24.dp
     val isAudiobook = current?.isAudiobook == true
 
     Box(
@@ -162,26 +205,34 @@ fun MusicPlayerScreen(
                             minOf(
                                     maxWidth,
                                     maxHeight - 48.dp - AppButtonSize.Default.value,
-                                    Dimens.contentMaxWidth,
                                 )
                                 .coerceAtLeast(0.dp)
                         Column(
-                            modifier =
-                                Modifier.widthIn(max = Dimens.contentMaxWidth)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = MaterialTheme.spacings.small),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
-                            PlayerArtwork(
-                                state = state,
-                                artworkType = artworkType,
-                                swipeEnabled = swipeArtwork,
-                                onPrevious = onPrevious,
-                                onNext = onNext,
-                                modifier = Modifier.size(artSize),
-                            )
-                            Spacer(Modifier.height(48.dp))
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                PlayerArtwork(
+                                    state = state,
+                                    artworkType = artworkType,
+                                    swipeEnabled = swipeArtwork,
+                                    artSize = artSize,
+                                    horizontalGutter = artworkHorizontalGutter,
+                                    onPrevious = onPrevious,
+                                    onNext = onNext,
+                                    onSpeedBoost = { active ->
+                                        overlayMessage = if (active) speedUp else null
+                                        onSpeedBoost(active)
+                                    },
+                                    discRotation = discRotation,
+                                    rotationSpeed = rotationSpeed,
+                                    modifier = Modifier.fillMaxWidth().height(artSize),
+                                )
+                            }
                             TransportControls(
                                 state = state,
                                 onPlayPause = onPlayPause,
@@ -216,6 +267,7 @@ fun MusicPlayerScreen(
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
                             PlayerSeekBar(
                                 state = state,
+                                preciseSeeking = preciseSeeking,
                                 onSeek = onSeek,
                                 onClearError = onClearError,
                             )
@@ -226,6 +278,7 @@ fun MusicPlayerScreen(
                         queue = state.queue,
                         currentIndex = state.currentIndex,
                         onPlayNow = onPlayQueueItem,
+                        onJumpToItem = onJumpQueueItem,
                         onRemove = onRemoveQueueItem,
                         onMove = onMoveQueueItem,
                         onToggleFavorite = onToggleFavoriteItem,
@@ -237,8 +290,8 @@ fun MusicPlayerScreen(
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(
-                                            start = 24.dp,
-                                            end = 24.dp,
+                                            start = MaterialTheme.spacings.gutter,
+                                            end = MaterialTheme.spacings.gutter,
                                             top = 48.dp,
                                             bottom = MaterialTheme.spacings.medium,
                                         )
@@ -247,6 +300,7 @@ fun MusicPlayerScreen(
                                 Spacer(Modifier.height(MaterialTheme.spacings.medium))
                                 PlayerSeekBar(
                                     state = state,
+                                    preciseSeeking = preciseSeeking,
                                     onSeek = onSeek,
                                     onClearError = onClearError,
                                 )
@@ -277,26 +331,34 @@ fun MusicPlayerScreen(
                                 minOf(
                                         maxWidth,
                                         maxHeight - 48.dp - AppButtonSize.Default.value,
-                                        Dimens.contentMaxWidth,
                                     )
                                     .coerceAtLeast(0.dp)
                             Column(
-                                modifier =
-                                    Modifier.widthIn(max = Dimens.contentMaxWidth)
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.spacings.small),
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
                             ) {
-                                PlayerArtwork(
-                                    state = state,
-                                    artworkType = artworkType,
-                                    swipeEnabled = swipeArtwork,
-                                    onPrevious = onPrevious,
-                                    onNext = onNext,
-                                    modifier = Modifier.size(artSize),
-                                )
-                                Spacer(Modifier.height(48.dp))
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    PlayerArtwork(
+                                        state = state,
+                                        artworkType = artworkType,
+                                        swipeEnabled = swipeArtwork,
+                                        artSize = artSize,
+                                        horizontalGutter = artworkHorizontalGutter,
+                                        onPrevious = onPrevious,
+                                        onNext = onNext,
+                                        onSpeedBoost = { active ->
+                                            overlayMessage = if (active) speedUp else null
+                                            onSpeedBoost(active)
+                                        },
+                                        discRotation = discRotation,
+                                        rotationSpeed = rotationSpeed,
+                                        modifier = Modifier.fillMaxWidth().height(artSize),
+                                    )
+                                }
                                 TransportControls(
                                     state = state,
                                     onPlayPause = onPlayPause,
@@ -313,17 +375,20 @@ fun MusicPlayerScreen(
                     }
                     PlayerDetails(
                         item = current,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(horizontal = MaterialTheme.spacings.gutter),
                     )
                     Spacer(Modifier.height(MaterialTheme.spacings.extraSmall))
                     PlayerSeekBar(
                         state = state,
+                        preciseSeeking = preciseSeeking,
                         onSeek = onSeek,
                         onClearError = onClearError,
                         modifier =
                             Modifier.padding(
-                                start = 24.dp,
-                                end = 24.dp,
+                                start = MaterialTheme.spacings.gutter,
+                                end = MaterialTheme.spacings.gutter,
                                 bottom = MaterialTheme.spacings.medium,
                             ),
                     )
@@ -343,7 +408,7 @@ fun MusicPlayerScreen(
                 shadowElevation = 6.dp,
             ) {
                 Text(
-                    text = overlayMessage.orEmpty(),
+                    text = displayedOverlayMessage,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
                 )
@@ -438,54 +503,240 @@ private fun PlayerArtwork(
     state: MusicPlaybackState,
     artworkType: String,
     swipeEnabled: Boolean,
+    artSize: Dp,
+    horizontalGutter: Dp,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
+    onSpeedBoost: (Boolean) -> Unit,
+    discRotation: MutableFloatState,
+    rotationSpeed: MutableFloatState,
     modifier: Modifier = Modifier,
 ) {
     val current = state.current ?: return
-    val pagerState = rememberPagerState(initialPage = 1) { 3 }
-    var pendingDirection by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    val scope = rememberCoroutineScope()
+    val stepPx = with(density) { artSize.toPx() + 16.dp.toPx() }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var visualIndex by remember { mutableIntStateOf(state.currentIndex.coerceAtLeast(0)) }
+    val currentId = current.id
+    var visualItemId by remember { mutableStateOf(currentId) }
+    var settleJob by remember { mutableStateOf<Job?>(null) }
+    var rotationSpeedJob by remember { mutableStateOf<Job?>(null) }
+    var boostActive by remember { mutableStateOf(false) }
+    var swipeActive by remember { mutableStateOf(false) }
 
-    LaunchedEffect(pagerState.settledPage) {
-        when (pagerState.settledPage) {
-            0 ->
-                if (state.hasPrevious) {
-                    pendingDirection = -1
-                    onPrevious()
-                } else {
-                    pagerState.scrollToPage(1)
-                }
-            2 ->
-                if (state.hasNext) {
-                    pendingDirection = 1
-                    onNext()
-                } else {
-                    pagerState.scrollToPage(1)
-                }
+    val settle: () -> Unit = {
+        settleJob?.cancel()
+        val start = dragOffset
+        settleJob = scope.launch {
+            animate(start, 0f, animationSpec = tween(260)) { value, _ -> dragOffset = value }
         }
     }
 
-    LaunchedEffect(state.currentIndex) {
-        if (pendingDirection != 0) {
-            pagerState.scrollToPage(1)
-            pendingDirection = 0
+    val stopRotationBoost: () -> Unit = {
+        if (boostActive) {
+            boostActive = false
+            rotationSpeedJob?.cancel()
+            rotationSpeedJob = scope.launch {
+                animate(
+                    rotationSpeed.floatValue,
+                    1f,
+                    animationSpec = tween(400, easing = LinearEasing),
+                ) { value, _ ->
+                    rotationSpeed.floatValue = value
+                }
+            }
         }
     }
 
-    HorizontalPager(
-        state = pagerState,
-        userScrollEnabled = swipeEnabled && state.queue.size > 1,
-        modifier = modifier,
-    ) { page ->
-        val item = state.queue.getOrNull(state.currentIndex + page - 1) ?: current
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            AlbumArtwork(
-                item = item,
+    val startRotationBoost: () -> Unit = {
+        if (!boostActive) {
+            boostActive = true
+            rotationSpeedJob?.cancel()
+            rotationSpeedJob = scope.launch {
+                animate(
+                    rotationSpeed.floatValue,
+                    4f,
+                    animationSpec = tween(250, easing = LinearEasing),
+                ) { value, _ ->
+                    rotationSpeed.floatValue = value
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(artSize) {
+        settleJob?.cancel()
+        rotationSpeedJob?.cancel()
+        dragOffset = 0f
+        visualIndex = state.currentIndex.coerceAtLeast(0)
+        visualItemId = state.current?.id ?: visualItemId
+        rotationSpeed.floatValue = 1f
+        boostActive = false
+    }
+
+    LaunchedEffect(state.current?.id, state.currentIndex) {
+        val actualIndex = state.currentIndex.coerceAtLeast(0)
+        val actualItem = state.current ?: return@LaunchedEffect
+        if (actualItem.id == visualItemId) {
+            // Shuffle/reorder changed the index but the same track is still playing. Keep the
+            // artwork exactly where it is instead of sliding it out and back in.
+            if (dragOffset == 0f) {
+                settleJob?.cancel()
+                visualIndex = actualIndex
+            }
+            return@LaunchedEffect
+        }
+        val direction = if (actualIndex > visualIndex) 1 else -1
+        visualIndex = actualIndex
+        visualItemId = actualItem.id
+        dragOffset = direction * stepPx
+        settle()
+    }
+
+    val queue = state.queue
+    val restingIndex =
+        queue.indexOfFirst { it.id == visualItemId }.takeIf { it >= 0 }
+            ?: state.currentIndex.coerceAtLeast(0)
+    val renderIndex = if (abs(dragOffset) < 0.5f) restingIndex else visualIndex
+    val visualCurrent = queue.getOrNull(renderIndex) ?: current
+    val previous = queue.getOrNull(renderIndex - 1)
+    val next = queue.getOrNull(renderIndex + 1)
+    val previousOffset = dragOffset - stepPx
+    val nextOffset = dragOffset + stepPx
+    val currentAlpha = (1f - abs(dragOffset) / stepPx).coerceIn(0f, 1f)
+    val previousAlpha = (1f - abs(previousOffset) / stepPx).coerceIn(0f, 1f)
+    val nextAlpha = (1f - abs(nextOffset) / stepPx).coerceIn(0f, 1f)
+
+    Box(
+        modifier =
+            modifier
+                .clipToBounds()
+                .pointerInput(Unit) {
+                    val holdMs = viewConfiguration.longPressTimeoutMillis
+                    detectTapGestures(
+                        onPress = {
+                            val releasedEarly = withTimeoutOrNull(holdMs) { tryAwaitRelease() }
+                            if (releasedEarly == null && !swipeActive) {
+                                onSpeedBoost(true)
+                                startRotationBoost()
+                                tryAwaitRelease()
+                                stopRotationBoost()
+                                onSpeedBoost(false)
+                            }
+                        }
+                    )
+                }
+                .pointerInput(
+                    swipeEnabled,
+                    state.hasNext,
+                    state.hasPrevious,
+                    queue.size,
+                    stepPx,
+                ) {
+                    if (!swipeEnabled || queue.size <= 1) return@pointerInput
+                    detectHorizontalDragGestures(
+                        onDragStart = {
+                            settleJob?.cancel()
+                            swipeActive = true
+                            stopRotationBoost()
+                            onSpeedBoost(false)
+                            dragOffset = 0f
+                        },
+                        onHorizontalDrag = { change, amount ->
+                            change.consume()
+                            dragOffset = (dragOffset + amount).coerceIn(-stepPx, stepPx)
+                        },
+                        onDragEnd = {
+                            val target =
+                                when {
+                                    dragOffset <= -stepPx / 2f && state.hasNext -> 1
+                                    dragOffset >= stepPx / 2f && state.hasPrevious -> -1
+                                    else -> 0
+                                }
+                            if (target != 0) {
+                                val newIndex = (visualIndex + target).coerceIn(0, queue.lastIndex)
+                                visualIndex = newIndex
+                                visualItemId = queue.getOrNull(newIndex)?.id ?: visualItemId
+                                dragOffset += target * stepPx
+                                if (target > 0) onNext() else onPrevious()
+                            }
+                            settle()
+                            swipeActive = false
+                        },
+                        onDragCancel = {
+                            swipeActive = false
+                            settle()
+                        },
+                    )
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        previous?.let {
+            ArtworkPage(
+                item = it,
                 artworkType = artworkType,
-                isPlaying = state.isPlaying && page == 1,
-                modifier = Modifier.fillMaxSize(),
+                artSize = artSize,
+                horizontalPadding = horizontalGutter,
+                offsetPx = previousOffset,
+                alpha = previousAlpha,
+                discRotation = discRotation,
             )
         }
+        next?.let {
+            ArtworkPage(
+                item = it,
+                artworkType = artworkType,
+                artSize = artSize,
+                horizontalPadding = horizontalGutter,
+                offsetPx = nextOffset,
+                alpha = nextAlpha,
+                discRotation = discRotation,
+            )
+        }
+        ArtworkPage(
+            item = visualCurrent,
+            artworkType = artworkType,
+            artSize = artSize,
+            horizontalPadding = horizontalGutter,
+            offsetPx = dragOffset,
+            alpha = currentAlpha,
+            discRotation = discRotation,
+        )
+    }
+}
+
+@Composable
+private fun ArtworkPage(
+    item: MusicPlaybackItem,
+    artworkType: String,
+    artSize: Dp,
+    horizontalPadding: Dp,
+    offsetPx: Float,
+    alpha: Float = 1f,
+    discRotation: MutableFloatState,
+) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize().graphicsLayer {
+                translationX = offsetPx
+                this.alpha = alpha
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        AlbumArtwork(
+            item = item,
+            artworkType = artworkType,
+            discRotation = discRotation,
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        top = horizontalPadding,
+                        bottom = 48.dp,
+                    ),
+        )
     }
 }
 
@@ -493,21 +744,10 @@ private fun PlayerArtwork(
 private fun AlbumArtwork(
     item: MusicPlaybackItem,
     artworkType: String,
-    isPlaying: Boolean,
+    discRotation: MutableFloatState,
     modifier: Modifier = Modifier,
 ) {
     if (artworkType == "disc") {
-        val rotation = remember { Animatable(0f) }
-        LaunchedEffect(isPlaying) {
-            if (isPlaying) {
-                while (isActive) {
-                    rotation.animateTo(
-                        targetValue = rotation.value + 360f,
-                        animationSpec = tween(durationMillis = 12_000, easing = LinearEasing),
-                    )
-                }
-            }
-        }
 
         BoxWithConstraints(
             modifier = modifier.aspectRatio(1f),
@@ -519,7 +759,7 @@ private fun AlbumArtwork(
                 modifier =
                     Modifier.size(discSize)
                         .aspectRatio(1f)
-                        .graphicsLayer { rotationZ = rotation.value }
+                        .graphicsLayer { rotationZ = discRotation.floatValue }
                         .clip(CircleShape)
                         .background(Color(0xFF242424))
                         .border(
@@ -560,7 +800,11 @@ private fun AlbumArtwork(
         }
     } else {
         Box(
-            modifier = modifier.clip(MaterialTheme.shapes.large).background(Color(0xFF242424)),
+            modifier =
+                modifier
+                    .aspectRatio(1f)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(Color(0xFF242424)),
             contentAlignment = Alignment.Center,
         ) {
             if (item.imageUri != null) {
@@ -645,143 +889,156 @@ private fun TransportControls(
     val favorite = item?.favorite == true
     var menuExpanded by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppIconButton(
-            onClick = onToggleFavorite,
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(
-                    painter =
-                        painterResource(
-                            if (favorite) CoreR.drawable.ic_heart_filled
-                            else CoreR.drawable.ic_heart
-                        ),
-                    contentDescription = stringResource(CoreR.string.favorite_button_description),
-                    tint = if (favorite) Red else PlayerOnBackgroundMuted,
-                )
-            },
-        )
-        AppIconButton(
-            onClick = onToggleShuffle,
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_shuffle),
-                    contentDescription = stringResource(FilmR.string.music_shuffle),
-                    tint =
-                        if (state.shuffleEnabled) PlayerOnBackground else PlayerOnBackgroundMuted,
-                )
-            },
-        )
-        AppIconButton(
-            onClick = onPrevious,
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_skip_back),
-                    contentDescription = stringResource(FilmR.string.music_previous),
-                    tint = PlayerOnBackground,
-                )
-            },
-        )
-        Box(
-            modifier =
-                Modifier.size(AppButtonSize.Default.value)
-                    .clip(CircleShape)
-                    .background(Color.White)
-                    .clickable(onClick = onPlayPause),
-            contentAlignment = Alignment.Center,
+    BoxWithConstraints(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        val buttonCount = 7
+        val gap =
+            ((maxWidth - AppButtonSize.Default.value * buttonCount) / (buttonCount - 1)).coerceIn(
+                4.dp,
+                32.dp,
+            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (state.isBuffering) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = Color.Black,
-                )
-            } else {
-                Icon(
-                    painter =
-                        painterResource(
-                            if (state.isPlaying) CoreR.drawable.ic_pause else CoreR.drawable.ic_play
-                        ),
-                    contentDescription =
-                        stringResource(
-                            if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
-                        ),
-                    tint = Color.Black,
-                )
-            }
-        }
-        AppIconButton(
-            onClick = onNext,
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(
-                    painter = painterResource(CoreR.drawable.ic_skip_forward),
-                    contentDescription = stringResource(FilmR.string.music_next),
-                    tint = PlayerOnBackground,
-                )
-            },
-        )
-        AppIconButton(
-            onClick = onCycleRepeat,
-            variant = AppButtonVariant.Ghost,
-            content = {
-                Icon(
-                    painter =
-                        painterResource(
-                            if (state.repeatMode == MusicRepeatMode.ONE) {
-                                CoreR.drawable.ic_repeat_one
-                            } else {
-                                CoreR.drawable.ic_repeat
-                            }
-                        ),
-                    contentDescription = stringResource(FilmR.string.music_repeat),
-                    tint =
-                        if (state.repeatMode != MusicRepeatMode.OFF) PlayerOnBackground
-                        else PlayerOnBackgroundMuted,
-                )
-            },
-        )
-        Box {
             AppIconButton(
-                onClick = { menuExpanded = true },
+                onClick = onToggleFavorite,
                 variant = AppButtonVariant.Ghost,
                 content = {
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_ellipsis),
-                        contentDescription = stringResource(CoreR.string.more_options),
-                        tint = PlayerOnBackgroundMuted,
+                        painter =
+                            painterResource(
+                                if (favorite) CoreR.drawable.ic_heart_filled
+                                else CoreR.drawable.ic_heart
+                            ),
+                        contentDescription =
+                            stringResource(CoreR.string.favorite_button_description),
+                        tint = if (favorite) Red else PlayerOnBackgroundMuted,
                     )
                 },
             )
-            AppDropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false },
-                alignEnd = true,
+            AppIconButton(
+                onClick = onToggleShuffle,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_shuffle),
+                        contentDescription = stringResource(FilmR.string.music_shuffle),
+                        tint =
+                            when {
+                                state.queue.size <= 1 -> PlayerOnBackgroundMuted.copy(alpha = 0.4f)
+                                state.shuffleEnabled -> PlayerOnBackground
+                                else -> PlayerOnBackgroundMuted
+                            },
+                    )
+                },
+            )
+            AppIconButton(
+                onClick = onPrevious,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_skip_back),
+                        contentDescription = stringResource(FilmR.string.music_previous),
+                        tint = PlayerOnBackground,
+                    )
+                },
+            )
+            Box(
+                modifier =
+                    Modifier.size(AppButtonSize.Default.value)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .clickable(onClick = onPlayPause),
+                contentAlignment = Alignment.Center,
             ) {
-                MenuActionItem(
-                    label = stringResource(FilmR.string.music_artist_label),
-                    icon = CoreR.drawable.ic_user,
-                    enabled = item?.artistId != null,
-                    onClick = {
-                        menuExpanded = false
-                        item?.artistId?.let(onArtistClick)
+                if (state.isBuffering) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.Black,
+                    )
+                } else {
+                    Icon(
+                        painter =
+                            painterResource(
+                                if (state.isPlaying) CoreR.drawable.ic_pause
+                                else CoreR.drawable.ic_play
+                            ),
+                        contentDescription =
+                            stringResource(
+                                if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
+                            ),
+                        tint = Color.Black,
+                    )
+                }
+            }
+            AppIconButton(
+                onClick = onNext,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_skip_forward),
+                        contentDescription = stringResource(FilmR.string.music_next),
+                        tint = PlayerOnBackground,
+                    )
+                },
+            )
+            AppIconButton(
+                onClick = onCycleRepeat,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter =
+                            painterResource(
+                                if (state.repeatMode == MusicRepeatMode.ONE) {
+                                    CoreR.drawable.ic_repeat_one
+                                } else {
+                                    CoreR.drawable.ic_repeat
+                                }
+                            ),
+                        contentDescription = stringResource(FilmR.string.music_repeat),
+                        tint =
+                            if (state.repeatMode != MusicRepeatMode.OFF) PlayerOnBackground
+                            else PlayerOnBackgroundMuted,
+                    )
+                },
+            )
+            Box {
+                AppIconButton(
+                    onClick = { menuExpanded = true },
+                    variant = AppButtonVariant.Ghost,
+                    content = {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_ellipsis),
+                            contentDescription = stringResource(CoreR.string.more_options),
+                            tint = PlayerOnBackgroundMuted,
+                        )
                     },
                 )
-                MenuActionItem(
-                    label = stringResource(FilmR.string.music_album_label),
-                    icon = CoreR.drawable.ic_music,
-                    enabled = item?.albumId != null,
-                    onClick = {
-                        menuExpanded = false
-                        item?.albumId?.let(onAlbumClick)
-                    },
-                )
+                AppDropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                ) {
+                    MenuActionItem(
+                        label = stringResource(FilmR.string.music_artist_label),
+                        icon = CoreR.drawable.ic_user,
+                        enabled = item?.artistId != null,
+                        onClick = {
+                            menuExpanded = false
+                            item?.artistId?.let(onArtistClick)
+                        },
+                    )
+                    MenuActionItem(
+                        label = stringResource(FilmR.string.music_album_label),
+                        icon = CoreR.drawable.ic_music,
+                        enabled = item?.albumId != null,
+                        onClick = {
+                            menuExpanded = false
+                            item?.albumId?.let(onAlbumClick)
+                        },
+                    )
+                }
             }
         }
     }
@@ -791,6 +1048,7 @@ private fun TransportControls(
 @Composable
 private fun PlayerSeekBar(
     state: MusicPlaybackState,
+    preciseSeeking: Boolean,
     onSeek: (Long) -> Unit,
     onClearError: () -> Unit,
     modifier: Modifier = Modifier,
@@ -801,6 +1059,7 @@ private fun PlayerSeekBar(
     var pendingSeekTarget by remember { mutableStateOf<Long?>(null) }
     val sliderState = remember { SliderState(0f) }
     val scope = rememberCoroutineScope()
+    val latestState by rememberUpdatedState(state)
 
     LaunchedEffect(state.positionMs, dragging, animatingSeek, pendingSeekTarget) {
         val target = pendingSeekTarget
@@ -818,62 +1077,97 @@ private fun PlayerSeekBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         ) {
-            Text(
-                text = formatTime((sliderState.value * state.durationMs).toLong()),
+            ReservedWidthText(
+                text =
+                    formatTime((sliderState.value * state.durationMs).toLong(), state.durationMs),
+                referenceText = formatTime(state.durationMs, state.durationMs),
                 style = MaterialTheme.typography.bodySmall,
                 color = PlayerOnBackgroundMuted,
             )
-            Slider(
-                state = sliderState,
-                onValueChange = {
-                    if (dragging) dragMoved = true
-                    dragging = true
-                    sliderState.value = it
-                },
-                onValueChangeFinished = {
-                    dragging = false
-                    val target = sliderState.value
-                    if (state.durationMs > 0L) {
-                        val targetMs = (target * state.durationMs).toLong()
-                        if (!dragMoved) {
-                            val start =
-                                (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
-                            sliderState.value = start
-                            animatingSeek = true
-                            scope.launch {
-                                animate(start, target, animationSpec = tween(180)) { value, _ ->
-                                    sliderState.value = value
+            Box(modifier = Modifier.weight(1f)) {
+                Slider(
+                    state = sliderState,
+                    onValueChange = {
+                        if (dragging) dragMoved = true
+                        dragging = true
+                        sliderState.value = it
+                    },
+                    onValueChangeFinished = {
+                        dragging = false
+                        val target = sliderState.value
+                        if (state.durationMs > 0L) {
+                            val targetMs = (target * state.durationMs).toLong()
+                            if (!dragMoved) {
+                                val start =
+                                    (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
+                                sliderState.value = start
+                                animatingSeek = true
+                                scope.launch {
+                                    animate(start, target, animationSpec = tween(180)) { value, _ ->
+                                        sliderState.value = value
+                                    }
+                                    animatingSeek = false
                                 }
-                                animatingSeek = false
                             }
+                            pendingSeekTarget = targetMs
+                            onSeek(targetMs)
                         }
-                        pendingSeekTarget = targetMs
-                        onSeek(targetMs)
-                    }
-                    dragMoved = false
-                },
-                enabled = state.durationMs > 0L,
-                colors = playerSliderColors(),
-                thumb = {
+                        dragMoved = false
+                    },
+                    enabled = state.durationMs > 0L,
+                    colors = playerSliderColors(),
+                    thumb = {
+                        Box(
+                            modifier =
+                                Modifier.width(4.dp)
+                                    .height(16.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color.White)
+                        )
+                    },
+                    track = { sliderState ->
+                        SliderDefaults.Track(
+                            sliderState = sliderState,
+                            colors = playerSliderColors(),
+                            modifier = Modifier.height(12.dp),
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (preciseSeeking && state.durationMs > 0L) {
                     Box(
                         modifier =
-                            Modifier.width(4.dp)
-                                .height(16.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(Color.White)
+                            Modifier.matchParentSize()
+                                .preciseSeekable(
+                                    enabled = true,
+                                    startFraction = {
+                                        (latestState.positionMs.toFloat() / latestState.durationMs)
+                                            .coerceIn(0f, 1f)
+                                    },
+                                    onScrub = { fraction ->
+                                        dragging = true
+                                        sliderState.value = fraction
+                                        val targetMs = (fraction * latestState.durationMs).toLong()
+                                        pendingSeekTarget = targetMs
+                                        onSeek(targetMs)
+                                    },
+                                    onScrubEnd = { fraction ->
+                                        dragging = false
+                                        val targetMs = (fraction * latestState.durationMs).toLong()
+                                        pendingSeekTarget = targetMs
+                                        onSeek(targetMs)
+                                    },
+                                    onTap = { fraction ->
+                                        val targetMs = (fraction * latestState.durationMs).toLong()
+                                        pendingSeekTarget = targetMs
+                                        onSeek(targetMs)
+                                    },
+                                )
                     )
-                },
-                track = { sliderState ->
-                    SliderDefaults.Track(
-                        sliderState = sliderState,
-                        colors = playerSliderColors(),
-                        modifier = Modifier.height(12.dp),
-                    )
-                },
-                modifier = Modifier.weight(1f),
-            )
+                }
+            }
             Text(
-                text = formatTime(state.durationMs),
+                text = formatTime(state.durationMs, state.durationMs),
                 style = MaterialTheme.typography.bodySmall,
                 color = PlayerOnBackgroundMuted,
             )
@@ -921,7 +1215,16 @@ private fun EmptyPlayer() {
     }
 }
 
-private fun formatTime(ms: Long): String {
+private const val NORMAL_DISC_DEGREES_PER_SECOND = 30f
+
+private fun formatTime(ms: Long, totalMs: Long): String {
     val totalSeconds = (ms / 1000L).coerceAtLeast(0L)
-    return "%d:%02d".format(totalSeconds / 60, totalSeconds % 60)
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return if (totalMs >= 3_600_000L) {
+        "%02d:%02d:%02d".format(hours, minutes, seconds)
+    } else {
+        "%02d:%02d".format(totalSeconds / 60, seconds)
+    }
 }

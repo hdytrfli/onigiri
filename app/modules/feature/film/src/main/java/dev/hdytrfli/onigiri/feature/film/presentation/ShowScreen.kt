@@ -2,12 +2,10 @@ package dev.hdytrfli.onigiri.feature.film.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -50,6 +48,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.show.ShowViewModel
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyShow
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.LocalContentSpacingScale
@@ -136,7 +135,25 @@ private fun ShowScreenLayout(
 
     val spacingScale = LocalContentSpacingScale.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            ItemTopBar(
+                hasBackButton = true,
+                onBackClick = { onAction(ShowAction.OnBackClick) },
+                trailingContent = {
+                    state.show?.let { show ->
+                        DetailActionsMenu(
+                            itemId = show.id,
+                            actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
+                            onIdentify = { onIdentify(show.id) },
+                            onIdentifyApplied = onIdentifyApplied,
+                            onEditImages = { onEditImages(show.id) },
+                        )
+                    }
+                },
+            )
+        }
+    ) {
         state.show?.let { show ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
                 ItemHeader(
@@ -277,22 +294,6 @@ private fun ShowScreenLayout(
                     AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
-
-        ItemTopBar(
-            hasBackButton = true,
-            onBackClick = { onAction(ShowAction.OnBackClick) },
-            trailingContent = {
-                state.show?.let { show ->
-                    DetailActionsMenu(
-                        itemId = show.id,
-                        actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
-                        onIdentify = { onIdentify(show.id) },
-                        onIdentifyApplied = onIdentifyApplied,
-                        onEditImages = { onEditImages(show.id) },
-                    )
-                }
-            },
-        )
     }
 }
 

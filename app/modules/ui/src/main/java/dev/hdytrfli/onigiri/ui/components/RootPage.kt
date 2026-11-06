@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +38,7 @@ fun RootPage(
     val contentInset = headerTop + 48.dp + MaterialTheme.spacings.gutter
 
     CompositionLocalProvider(LocalRootPageContentInset provides contentInset) {
-        Box(modifier = modifier.fillMaxSize()) {
+        Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             content()
             Box(
                 modifier =

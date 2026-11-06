@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.presentation.player
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,8 +33,11 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicRowAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SectionHeader
 import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackItem
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
-import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
+import dev.hdytrfli.onigiri.ui.components.SearchablePageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -47,31 +52,60 @@ fun MusicQueueScreen(
     currentIndex: Int,
     navigateBack: () -> Unit,
     onPlayNow: (Int) -> Unit,
+    onJumpToItem: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
     onToggleFavorite: (UUID) -> Unit,
     isShuffling: Boolean = false,
 ) {
-    PageScaffold(
+    var searchExpanded by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    BackHandler(enabled = searchExpanded) {
+        searchExpanded = false
+        searchQuery = ""
+    }
+
+    TopBarPageShell(
         topBar = {
-            PageTopBar(
+            SearchablePageTopBar(
+                searchExpanded = searchExpanded,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = {
+                    searchExpanded = false
+                    searchQuery = ""
+                },
                 title = stringResource(FilmR.string.music_queue),
                 onBack = navigateBack,
+                trailingContent = {
+                    AppIconButton(
+                        onClick = { searchExpanded = true },
+                        variant = AppButtonVariant.Secondary,
+                        content = {
+                            androidx.compose.material3.Icon(
+                                painter =
+                                    androidx.compose.ui.res.painterResource(
+                                        CoreR.drawable.ic_search
+                                    ),
+                                contentDescription = stringResource(CoreR.string.search),
+                            )
+                        },
+                    )
+                },
             )
         }
-    ) { innerPadding ->
+    ) {
         MusicQueueContent(
             queue = queue,
             currentIndex = currentIndex,
+            searchQuery = searchQuery,
             onPlayNow = onPlayNow,
+            onJumpToItem = onJumpToItem,
             onRemove = onRemove,
             onMove = onMove,
             onToggleFavorite = onToggleFavorite,
             isShuffling = isShuffling,
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(all = MaterialTheme.spacings.gutter),
+            modifier = Modifier.fillMaxSize().padding(horizontal = MaterialTheme.spacings.gutter),
         )
     }
 }
@@ -84,10 +118,12 @@ fun MusicQueueContent(
     queue: List<MusicPlaybackItem>,
     currentIndex: Int,
     onPlayNow: (Int) -> Unit,
+    onJumpToItem: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
     onToggleFavorite: (UUID) -> Unit,
     modifier: Modifier = Modifier,
+    searchQuery: String = "",
     isShuffling: Boolean = false,
     contentBottomPadding: androidx.compose.ui.unit.Dp = 0.dp,
     header: (@Composable () -> Unit)? = null,
@@ -146,6 +182,15 @@ fun MusicQueueContent(
         } else {
             ((safeCurrentIndex - 1) downTo 0).map { it to displayQueue[it] }
         }
+    val query = searchQuery.trim()
+    val canReorder = query.isBlank()
+    fun matches(item: MusicPlaybackItem): Boolean =
+        query.isBlank() ||
+            item.title.contains(query, ignoreCase = true) ||
+            item.artist?.contains(query, ignoreCase = true) == true ||
+            item.album?.contains(query, ignoreCase = true) == true
+    val visibleCurrentQueue = currentQueue.filter { matches(it.second.item) }
+    val visiblePlayed = played.filter { matches(it.second.item) }
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         if (displayQueue.isEmpty()) {
@@ -167,7 +212,10 @@ fun MusicQueueContent(
                 state = listState,
                 modifier = Modifier.widthIn(max = Dimens.contentMaxWidth).fillMaxWidth().weight(1f),
                 contentPadding =
-                    androidx.compose.foundation.layout.PaddingValues(bottom = contentBottomPadding),
+                    androidx.compose.foundation.layout.PaddingValues(
+                        top = LocalRootPageContentInset.current,
+                        bottom = contentBottomPadding,
+                    ),
             ) {
                 if (header != null) {
                     item(key = "player-header") { header() }
@@ -176,27 +224,35 @@ fun MusicQueueContent(
                     SectionHeader(
                         title = stringResource(FilmR.string.music_current_queue),
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacings.medium),
-                        trailingContent = { ItemCountBadge(count = currentQueue.size) },
+                        trailingContent = { ItemCountBadge(count = visibleCurrentQueue.size) },
                     )
                 }
-                itemsIndexed(currentQueue, key = { _, entry -> entry.second.key }) {
+                itemsIndexed(visibleCurrentQueue, key = { _, entry -> entry.second.key }) {
                     queueIndex,
                     entry ->
                     val index = entry.first
                     val item = entry.second.item
-                    if (index == safeCurrentIndex) {
+                    if (index == safeCurrentIndex || !canReorder) {
                         QueueRow(
                             item = item,
                             index = index,
                             currentIndex = currentIndex,
                             dragging = false,
                             onPlayNow = { onPlayNow(index) },
-                            onPlayNext = {},
-                            onPlayEnd = {},
+                            onJumpToItem = { onJumpToItem(index) },
+                            onPlayNext = {
+                                val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
+                                if (target != index) onMove(index, target)
+                            },
+                            onPlayEnd = {
+                                if (index != displayQueue.lastIndex) {
+                                    onMove(index, displayQueue.lastIndex)
+                                }
+                            },
                             onRemove = { onRemove(index) },
                             onToggleFavorite = { onToggleFavorite(item.id) },
                             modifier = Modifier.animateItem(),
-                            trailingDivider = currentQueue.size > 1,
+                            trailingDivider = visibleCurrentQueue.size > 1,
                         )
                     } else {
                         ReorderableItem(reorderableState, key = entry.second.key) { isDragging ->
@@ -206,6 +262,7 @@ fun MusicQueueContent(
                                 currentIndex = currentIndex,
                                 dragging = isDragging,
                                 onPlayNow = { onPlayNow(index) },
+                                onJumpToItem = { onJumpToItem(index) },
                                 onPlayNext = {
                                     val target =
                                         (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
@@ -224,7 +281,7 @@ fun MusicQueueContent(
                         }
                     }
                 }
-                if (played.isNotEmpty()) {
+                if (visiblePlayed.isNotEmpty()) {
                     item(key = "played-header") {
                         SectionHeader(
                             title = stringResource(FilmR.string.music_played),
@@ -234,10 +291,11 @@ fun MusicQueueContent(
                                     end = MaterialTheme.spacings.medium,
                                     top = MaterialTheme.spacings.medium,
                                 ),
-                            trailingContent = { ItemCountBadge(count = played.size) },
+                            trailingContent = { ItemCountBadge(count = visiblePlayed.size) },
                         )
                     }
-                    itemsIndexed(played, key = { _, entry -> entry.second.key }) { _, entry ->
+                    itemsIndexed(visiblePlayed, key = { _, entry -> entry.second.key }) { _, entry
+                        ->
                         val index = entry.first
                         val item = entry.second.item
                         QueueRow(
@@ -246,6 +304,7 @@ fun MusicQueueContent(
                             currentIndex = currentIndex,
                             dragging = false,
                             onPlayNow = { onPlayNow(index) },
+                            onJumpToItem = { onJumpToItem(index) },
                             onPlayNext = {
                                 val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
                                 if (target != index) onMove(index, target)
@@ -274,6 +333,7 @@ private fun QueueRow(
     currentIndex: Int,
     dragging: Boolean,
     onPlayNow: () -> Unit,
+    onJumpToItem: () -> Unit,
     onPlayNext: () -> Unit,
     onPlayEnd: () -> Unit,
     onRemove: () -> Unit,
@@ -290,18 +350,6 @@ private fun QueueRow(
         actions =
             listOf(
                 MusicRowAction(
-                    label = stringResource(FilmR.string.music_play_next),
-                    icon = CoreR.drawable.ic_skip_forward,
-                    enabled = !isCurrent,
-                    onClick = onPlayNext,
-                ),
-                MusicRowAction(
-                    label = stringResource(FilmR.string.music_play_end),
-                    icon = CoreR.drawable.ic_arrow_down_to_line,
-                    enabled = !isCurrent,
-                    onClick = onPlayEnd,
-                ),
-                MusicRowAction(
                     label =
                         stringResource(
                             if (item.favorite) CoreR.string.remove_from_favorites
@@ -313,6 +361,24 @@ private fun QueueRow(
                     iconTint = if (item.favorite) Red else null,
                     dismissOnClick = false,
                     onClick = onToggleFavorite,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_jump_to_here),
+                    icon = CoreR.drawable.ic_play,
+                    enabled = !isCurrent,
+                    onClick = onJumpToItem,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_play_next),
+                    icon = CoreR.drawable.ic_skip_forward,
+                    enabled = !isCurrent,
+                    onClick = onPlayNext,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_play_end),
+                    icon = CoreR.drawable.ic_arrow_down_to_line,
+                    enabled = !isCurrent,
+                    onClick = onPlayEnd,
                 ),
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_remove_from_queue),

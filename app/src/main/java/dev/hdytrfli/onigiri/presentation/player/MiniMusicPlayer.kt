@@ -105,7 +105,7 @@ fun MiniMusicPlayer(
                                 dragX = 0f
 
                                 if (abs(startX) >= swipeThreshold) {
-                                    if (startX > 0f) {
+                                    if (startX < 0f) {
                                         if (state.hasNext) onNext()
                                     } else if (state.hasPrevious) {
                                         onPrevious()

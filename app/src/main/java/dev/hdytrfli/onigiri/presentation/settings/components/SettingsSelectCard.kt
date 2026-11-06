@@ -69,6 +69,8 @@ private fun SettingsSelectCardPreview() {
             preference =
                 PreferenceSelect(
                     nameStringResource = SettingsR.string.settings_preferred_audio_language,
+                    descriptionStringRes =
+                        SettingsR.string.settings_preferred_audio_language_summary,
                     iconDrawableId = CoreR.drawable.ic_speaker,
                     backendPreference = Preference("", ""),
                     options = SettingsR.array.languages,

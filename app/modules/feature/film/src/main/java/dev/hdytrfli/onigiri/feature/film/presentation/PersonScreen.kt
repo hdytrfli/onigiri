@@ -2,13 +2,11 @@ package dev.hdytrfli.onigiri.feature.film.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -51,6 +49,7 @@ import dev.hdytrfli.onigiri.models.FindroidPerson
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.preview.dummyPersonDetail
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
@@ -108,7 +107,21 @@ private fun PersonScreenLayout(
 
     val itemsPadding = PaddingValues(start = paddingStart, end = paddingEnd)
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            PageTopBar(
+                title =
+                    stringResource(
+                        if (isAuthor) {
+                            FilmR.string.author_title
+                        } else {
+                            CoreR.string.cast_amp_crew
+                        }
+                    ),
+                onBack = { onAction(PersonAction.NavigateBack) },
+            )
+        }
+    ) {
         state.person?.let { person ->
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Spacer(Modifier.height(paddingTop))
@@ -239,18 +252,6 @@ private fun PersonScreenLayout(
                     AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
-
-        PageTopBar(
-            title =
-                stringResource(
-                    if (isAuthor) {
-                        FilmR.string.author_title
-                    } else {
-                        CoreR.string.cast_amp_crew
-                    }
-                ),
-            onBack = { onAction(PersonAction.NavigateBack) },
-        )
     }
 }
 

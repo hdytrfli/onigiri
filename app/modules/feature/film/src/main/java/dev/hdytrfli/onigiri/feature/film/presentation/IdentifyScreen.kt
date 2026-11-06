@@ -40,9 +40,10 @@ import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.IdentifyState
 import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.IdentifyViewModel
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppTextField
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageContent
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.LocalOfflineMode
@@ -119,22 +120,26 @@ private fun IdentifyScreenLayout(
     onSearch: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(CoreR.string.identify),
                 onBack = navigateBack,
             )
         }
-    ) { innerPadding ->
+    ) {
         if (LocalOfflineMode.current) {
-            OfflineNotice(modifier = Modifier.padding(innerPadding))
-            return@PageScaffold
+            OfflineNotice(modifier = Modifier.padding(top = LocalRootPageContentInset.current))
+            return@TopBarPageShell
         }
-        PageContent(modifier = Modifier.padding(innerPadding)) {
+        PageContent {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
+                contentPadding =
+                    PaddingValues(
+                        top = LocalRootPageContentInset.current + MaterialTheme.spacings.gutter,
+                        bottom = MaterialTheme.spacings.gutter,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

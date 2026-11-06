@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.core.R as CoreR
@@ -116,7 +115,6 @@ private fun FavoritesScreenLayout(
         ) {
             CollectionGrid(
                 sections = state.sections,
-                innerPadding = PaddingValues(0.dp),
                 contentPadding = contentPadding,
                 onAction = { action ->
                     if (action is CollectionAction.OnItemClick) {
@@ -135,6 +133,13 @@ private fun FavoritesScreenLayout(
                                 actions =
                                     listOf(
                                         MusicRowAction(
+                                            label =
+                                                stringResource(CoreR.string.remove_from_favorites),
+                                            icon = CoreR.drawable.ic_heart_filled,
+                                            iconTint = MaterialTheme.colorScheme.error,
+                                            onClick = { onRemoveFavorite(item) },
+                                        ),
+                                        MusicRowAction(
                                             label = stringResource(FilmR.string.music_play_next),
                                             icon = CoreR.drawable.ic_skip_forward,
                                             onClick = { onPlayNext(item) },
@@ -143,13 +148,6 @@ private fun FavoritesScreenLayout(
                                             label = stringResource(FilmR.string.music_add_to_queue),
                                             icon = CoreR.drawable.ic_plus,
                                             onClick = { onAddToQueue(item) },
-                                        ),
-                                        MusicRowAction(
-                                            label =
-                                                stringResource(CoreR.string.remove_from_favorites),
-                                            icon = CoreR.drawable.ic_heart_filled,
-                                            iconTint = MaterialTheme.colorScheme.error,
-                                            onClick = { onRemoveFavorite(item) },
                                         ),
                                     ),
                                 onClick = { onPlaySong(item) },

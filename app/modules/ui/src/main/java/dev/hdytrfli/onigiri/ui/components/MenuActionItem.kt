@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
@@ -31,20 +30,13 @@ fun AppDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    alignEnd: Boolean = false,
-    anchorWidth: Dp = 48.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = modifier.width(MenuWidth),
-        offset =
-            if (alignEnd) {
-                DpOffset(x = anchorWidth - MenuWidth, y = MenuOffset.y)
-            } else {
-                MenuOffset
-            },
+        offset = MenuOffset,
         content = content,
     )
 }

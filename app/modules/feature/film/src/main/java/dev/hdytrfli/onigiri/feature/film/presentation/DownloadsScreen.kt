@@ -1,13 +1,8 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -29,19 +24,17 @@ import dev.hdytrfli.onigiri.models.mediaSections
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
+import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
-import dev.hdytrfli.onigiri.ui.utils.pageContentWindowInsets
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
-import dev.hdytrfli.onigiri.ui.utils.topBarWindowInsets
 
 @Composable
 fun DownloadsScreen(
     onItemClick: (item: FindroidItem) -> Unit,
-    embedded: Boolean = false,
     viewModel: DownloadsViewModel = hiltViewModel(),
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     showPullIndicator: Boolean = false,
@@ -51,7 +44,49 @@ fun DownloadsScreen(
     LaunchedEffect(true) { viewModel.loadItemsIfNeeded() }
     OfflineModeReload { viewModel.loadItems(force = true) }
 
-    DownloadsScreenLayout(
+    TopBarPageShell(
+        topBar = {
+            PageTopBar(
+                title = stringResource(CoreR.string.title_download),
+                trailingContent = {
+                    PullToRefreshButton(
+                        state = pullToRefreshState,
+                        isRefreshing = state.isLoading,
+                        onRefresh = { viewModel.loadItems(force = true) },
+                    )
+                },
+            )
+        }
+    ) {
+        DownloadsContentLayout(
+            state = state,
+            onAction = { action ->
+                when (action) {
+                    is CollectionAction.OnItemClick -> onItemClick(action.item)
+                    is CollectionAction.OnBackClick -> Unit
+                }
+            },
+            onRefresh = { viewModel.loadItems(force = true) },
+            pullToRefreshState = pullToRefreshState,
+            showPullIndicator = showPullIndicator,
+        )
+    }
+}
+
+/** The downloads grid without its page shell, for the Home downloads tab. */
+@Composable
+fun DownloadsContent(
+    onItemClick: (item: FindroidItem) -> Unit,
+    viewModel: DownloadsViewModel = hiltViewModel(),
+    pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
+    showPullIndicator: Boolean = false,
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(true) { viewModel.loadItemsIfNeeded() }
+    OfflineModeReload { viewModel.loadItems(force = true) }
+
+    DownloadsContentLayout(
         state = state,
         onAction = { action ->
             when (action) {
@@ -60,97 +95,58 @@ fun DownloadsScreen(
             }
         },
         onRefresh = { viewModel.loadItems(force = true) },
-        embedded = embedded,
         pullToRefreshState = pullToRefreshState,
         showPullIndicator = showPullIndicator,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DownloadsScreenLayout(
+private fun DownloadsContentLayout(
     state: CollectionState,
     onAction: (CollectionAction) -> Unit,
     onRefresh: () -> Unit = {},
-    embedded: Boolean = false,
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     showPullIndicator: Boolean = false,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val safePadding = rememberSafePadding()
+    val contentPadding =
+        PaddingValues(
+            start = safePadding.start + MaterialTheme.spacings.gutter,
+            top = LocalRootPageContentInset.current,
+            end = safePadding.end + MaterialTheme.spacings.gutter,
+            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+        )
 
-    PageScaffold(
-        scrollBehavior = scrollBehavior,
-        topBar = {
-            if (!embedded) {
-                TopAppBar(
-                    title = { Text(text = stringResource(CoreR.string.title_download)) },
-                    windowInsets = topBarWindowInsets(),
-                    scrollBehavior = scrollBehavior,
-                    actions = {
-                        PullToRefreshButton(
-                            state = pullToRefreshState,
-                            isRefreshing = state.isLoading,
-                            onRefresh = onRefresh,
-                        )
-                    },
-                )
-            }
-        },
-        contentWindowInsets =
-            if (embedded) {
-                WindowInsets(0, 0, 0, 0)
-            } else {
-                pageContentWindowInsets()
-            },
-    ) { innerPadding ->
-        val contentPadding =
-            if (embedded) {
-                // Under a root page the floating header overlays the grid and the Scaffold adds
-                // no padding, so the scroll inset holds both the header and the safe area.
-                PaddingValues(
-                    start = safePadding.start + MaterialTheme.spacings.gutter,
-                    top = LocalRootPageContentInset.current,
-                    end = safePadding.end + MaterialTheme.spacings.gutter,
-                    bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-                )
-            } else {
-                // Standalone, the Scaffold's inner padding already holds the top bar and safe area.
-                PaddingValues(all = MaterialTheme.spacings.default)
-            }
-
-        AppPullToRefreshBox(
-            isRefreshing = state.isLoading,
+    AppPullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize(),
+        state = pullToRefreshState,
+        showIndicator = showPullIndicator,
+    ) {
+        EmptyStateOverlay(
+            visible = state.sections.isEmpty(),
+            loading = state.isLoading,
+            context = stringResource(CoreR.string.empty_context_downloads),
             onRefresh = onRefresh,
-            modifier = Modifier.fillMaxSize(),
-            state = pullToRefreshState,
-            showIndicator = showPullIndicator,
+            title = stringResource(CoreR.string.title_download),
+            contentPadding = contentPadding,
         ) {
-            EmptyStateOverlay(
-                visible = state.sections.isEmpty(),
-                loading = state.isLoading,
-                context = stringResource(CoreR.string.empty_context_downloads),
-                onRefresh = onRefresh,
-                title = stringResource(CoreR.string.title_download),
+            CollectionGrid(
+                sections = state.sections,
                 contentPadding = contentPadding,
-            ) {
-                CollectionGrid(
-                    sections = state.sections,
-                    innerPadding = innerPadding,
-                    contentPadding = contentPadding,
-                    onAction = onAction,
-                    displayFields = state.displayFields,
-                )
-            }
+                onAction = onAction,
+                displayFields = state.displayFields,
+            )
         }
     }
 }
 
 @PreviewScreenSizes
 @Composable
-private fun DownloadsScreenLayoutPreview() {
+private fun DownloadsContentLayoutPreview() {
     FindroidTheme {
-        DownloadsScreenLayout(
+        DownloadsContentLayout(
             state = CollectionState(sections = mediaSections(dummyMovies)),
             onAction = {},
         )

@@ -48,6 +48,7 @@ class MusicQueueActivity : ComponentActivity() {
                         currentIndex = state.currentIndex,
                         navigateBack = ::finish,
                         onPlayNow = viewModel::playQueueItem,
+                        onJumpToItem = viewModel::jumpToQueueItem,
                         onRemove = viewModel::removeQueueItem,
                         onMove = viewModel::moveQueueItem,
                         onToggleFavorite = viewModel::toggleFavoriteItem,

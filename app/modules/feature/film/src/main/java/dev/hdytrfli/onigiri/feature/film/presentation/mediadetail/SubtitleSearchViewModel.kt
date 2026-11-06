@@ -56,13 +56,37 @@ constructor(
             _state.update { it.copy(isLoading = true) }
             val language =
                 appPreferences.getValue(appPreferences.preferredSubtitleLanguage) ?: "eng"
+            val recentLanguages =
+                appPreferences
+                    .getValue(appPreferences.subtitleSearchRecentLanguages)
+                    .split(',')
+                    .map(String::trim)
+                    .filter(String::isNotEmpty)
+                    .distinct()
+                    .take(5)
             val existing = loadExistingSubtitles(itemId)
-            _state.update { it.copy(isLoading = false, language = language, existing = existing) }
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    language = language,
+                    recentLanguages = recentLanguages,
+                    existing = existing,
+                )
+            }
         }
     }
 
     fun setLanguage(language: String) {
-        _state.update { it.copy(language = language) }
+        val recent =
+            (listOf(language) + _state.value.recentLanguages)
+                .filter(String::isNotBlank)
+                .distinct()
+                .take(5)
+        appPreferences.setValue(
+            appPreferences.subtitleSearchRecentLanguages,
+            recent.joinToString(","),
+        )
+        _state.update { it.copy(language = language, recentLanguages = recent) }
     }
 
     fun search(itemId: UUID) {

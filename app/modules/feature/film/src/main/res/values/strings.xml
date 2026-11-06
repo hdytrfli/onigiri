@@ -55,6 +55,7 @@
     <string name="music_no_albums">No albums</string>
     <string name="music_no_songs">No songs</string>
     <string name="music_shuffle">Shuffle</string>
+    <string name="music_shuffle_unavailable">At least 2 songs are needed to shuffle</string>
     <string name="music_play_next">Play next</string>
     <string name="music_add_to_queue">Add to queue</string>
     <string name="music_now_playing">Now playing</string>
@@ -63,6 +64,7 @@
     <string name="music_repeat_one">Repeat one</string>
     <string name="music_empty_queue">Nothing is queued</string>
     <string name="music_remove_from_queue">Remove from queue</string>
+    <string name="music_jump_to_here">Jump to here</string>
     <string name="music_previous">Previous</string>
     <string name="music_next">Next</string>
     <string name="music_pause">Pause</string>

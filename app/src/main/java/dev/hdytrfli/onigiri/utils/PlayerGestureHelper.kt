@@ -38,6 +38,9 @@ import timber.log.Timber
 private const val SPEED_RAMP_STEPS = 20
 private const val SPEED_RAMP_STEP_MS = 15L
 
+/** How long consecutive double taps keep adding before the accumulated seek is applied. */
+private const val DOUBLE_TAP_WINDOW_MS = 500L
+
 class PlayerGestureHelper(
     private val appPreferences: AppPreferences,
     private val activity: PlayerActivity,
@@ -77,6 +80,15 @@ class PlayerGestureHelper(
     /** The speed a running ramp is heading for, so an interrupted ramp resumes from there. */
     private var rampingSpeed: Float? = null
     private var speedRampCallback: Runnable? = null
+
+    /**
+     * Double-tap seek is accumulated for up to one second. Every further double tap inside that
+     * window adds another increment and restarts the window; only when the window expires is the
+     * total applied in one seek.
+     */
+    private var doubleTapAccumulator: Long = 0L
+    private var doubleTapDirection: Int = 0
+    private val doubleTapSeekRunnable = Runnable { applyDoubleTapSeek() }
 
     private val screenWidth = Resources.getSystem().displayMetrics.widthPixels
     private val screenHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -126,21 +138,58 @@ class PlayerGestureHelper(
                     when (e.x.toInt()) {
                         in leftmostAreaStart until middleAreaStart -> {
                             // Tapped on the leftmost area (seek backward)
-                            rewind()
+                            queueDoubleTapSeek(-1)
                         }
                         in middleAreaStart until rightmostAreaStart -> {
                             // Tapped on the middle area (toggle pause/unpause)
+                            doubleTapDirection = 0
+                            doubleTapAccumulator = 0L
+                            playerView.removeCallbacks(doubleTapSeekRunnable)
                             togglePlayback()
                         }
                         in rightmostAreaStart until viewWidth -> {
                             // Tapped on the rightmost area (seek forward)
-                            fastForward()
+                            queueDoubleTapSeek(1)
                         }
                     }
                     return true
                 }
             },
         )
+
+    private fun queueDoubleTapSeek(direction: Int) {
+        if (direction != doubleTapDirection) {
+            doubleTapDirection = direction
+            doubleTapAccumulator = 0L
+        }
+        doubleTapAccumulator +=
+            if (direction > 0) {
+                appPreferences.getValue(appPreferences.playerSeekForwardIncStep).toLongOrNull()
+                    ?: 5_000L
+            } else {
+                appPreferences.getValue(appPreferences.playerSeekBackIncStep).toLongOrNull()
+                    ?: 5_000L
+            }
+        playerView.removeCallbacks(doubleTapSeekRunnable)
+        playerView.postDelayed(doubleTapSeekRunnable, DOUBLE_TAP_WINDOW_MS)
+        activity.showPersistentPlayerOverlayMessage(
+            longToTimestamp(direction * doubleTapAccumulator)
+        )
+    }
+
+    private fun applyDoubleTapSeek() {
+        val player = playerView.player ?: return
+        if (doubleTapDirection == 0 || doubleTapAccumulator <= 0L) return
+        val target =
+            (player.currentPosition + doubleTapDirection * doubleTapAccumulator).coerceIn(
+                0L,
+                maxSeekPosition(player),
+            )
+        seekTo(target)
+        activity.schedulePlayerOverlayMessageHide()
+        doubleTapDirection = 0
+        doubleTapAccumulator = 0L
+    }
 
     private fun enableSpeedIncrease() {
         playerView.player?.let {
@@ -201,18 +250,9 @@ class PlayerGestureHelper(
         activity.window.attributes = activity.window.attributes.apply { screenBrightness = value }
     }
 
-    private fun fastForward() {
-        val currentPosition = playerView.player?.currentPosition ?: 0
-        val increment = appPreferences.getValue(appPreferences.playerSeekForwardInc)
-        seekTo(currentPosition + increment)
-        activity.showPlayerOverlayMessage("+${increment / 1_000}s")
-    }
-
-    private fun rewind() {
-        val currentPosition = playerView.player?.currentPosition ?: 0
-        val increment = appPreferences.getValue(appPreferences.playerSeekBackInc)
-        seekTo((currentPosition - increment).coerceAtLeast(0))
-        activity.showPlayerOverlayMessage("-${increment / 1_000}s")
+    private fun maxSeekPosition(player: androidx.media3.common.Player): Long {
+        val duration = player.duration
+        return if (duration > 0L) duration else Long.MAX_VALUE
     }
 
     private fun togglePlayback() {

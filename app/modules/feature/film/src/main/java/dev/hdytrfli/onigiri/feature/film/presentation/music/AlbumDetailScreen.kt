@@ -49,6 +49,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
 import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import java.util.UUID
@@ -111,7 +112,25 @@ private fun AlbumDetailLayout(
     val listState = rememberLazyListState()
     val album = state.album
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            if (album != null) {
+                ItemTopBar(
+                    hasBackButton = true,
+                    onBackClick = onBack,
+                    trailingContent = {
+                        DetailActionsMenu(
+                            itemId = album.id,
+                            actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
+                            onIdentify = onIdentify,
+                            onEditImages = onEditImages,
+                            onIdentifyApplied = onIdentifyApplied,
+                        )
+                    },
+                )
+            }
+        }
+    ) {
         when {
             state.isLoading && album == null ->
                 AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
@@ -242,22 +261,6 @@ private fun AlbumDetailLayout(
 
                     item { Spacer(Modifier.height(MaterialTheme.spacings.medium)) }
                 }
-        }
-
-        if (album != null) {
-            ItemTopBar(
-                hasBackButton = true,
-                onBackClick = onBack,
-                trailingContent = {
-                    DetailActionsMenu(
-                        itemId = album.id,
-                        actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
-                        onIdentify = onIdentify,
-                        onEditImages = onEditImages,
-                        onIdentifyApplied = onIdentifyApplied,
-                    )
-                },
-            )
         }
     }
 }

@@ -309,10 +309,10 @@
         <item>human</item>
     </string-array>
     <string-array name="player_controls_timeout_options">
-        <item>2 seconds</item>
-        <item>3 seconds</item>
-        <item>5 seconds</item>
-        <item>10 seconds</item>
+        <item>2s</item>
+        <item>3s</item>
+        <item>5s</item>
+        <item>10s</item>
         <item>Never</item>
     </string-array>
     <string-array name="player_controls_timeout_values">
@@ -927,5 +927,27 @@
         <item>8</item>
         <item>9</item>
         <item>10</item>
+    </string-array>
+    <string-array name="seek_increment_options">
+        <item>2s</item>
+        <item>5s</item>
+        <item>10s</item>
+        <item>15s</item>
+        <item>30s</item>
+    </string-array>
+    <string-array name="seek_increment_values">
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>15000</item>
+        <item>30000</item>
+    </string-array>
+    <string-array name="player_seek_mode_options">
+        <item>Exact</item>
+        <item>Keyframes</item>
+    </string-array>
+    <string-array name="player_seek_mode_values">
+        <item>exact</item>
+        <item>keyframes</item>
     </string-array>
 </resources>

@@ -101,6 +101,7 @@ private fun SettingsIntInputCardPreview() {
             preference =
                 PreferenceIntInput(
                     nameStringResource = SettingsR.string.settings_cache_size,
+                    descriptionStringRes = SettingsR.string.settings_cache_size_message,
                     backendPreference = PreferenceBackend("", 0),
                     suffixRes = SettingsR.string.mb,
                     value = 25,
@@ -118,6 +119,7 @@ private fun SettingsLongInputCardPreview() {
             preference =
                 PreferenceLongInput(
                     nameStringResource = SettingsR.string.settings_cache_size,
+                    descriptionStringRes = SettingsR.string.settings_cache_size_message,
                     backendPreference = PreferenceBackend("", 0L),
                     suffixRes = SettingsR.string.mb,
                     value = 25,

@@ -45,9 +45,10 @@ import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageContent
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -129,19 +130,19 @@ private fun IdentifyResultsLayout(
     onCloseInfo: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(CoreR.string.identify),
                 onBack = navigateBack,
             )
         }
-    ) { innerPadding ->
+    ) {
         if (LocalOfflineMode.current) {
-            OfflineNotice(modifier = Modifier.padding(innerPadding))
-            return@PageScaffold
+            OfflineNotice(modifier = Modifier.padding(top = LocalRootPageContentInset.current))
+            return@TopBarPageShell
         }
-        PageContent(modifier = Modifier.padding(innerPadding)) {
+        PageContent {
             when {
                 state.isSearching ->
                     AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
@@ -163,7 +164,13 @@ private fun IdentifyResultsLayout(
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(GridSize.POSTER)),
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
+                        contentPadding =
+                            PaddingValues(
+                                top =
+                                    LocalRootPageContentInset.current +
+                                        MaterialTheme.spacings.gutter,
+                                bottom = MaterialTheme.spacings.gutter,
+                            ),
                         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {

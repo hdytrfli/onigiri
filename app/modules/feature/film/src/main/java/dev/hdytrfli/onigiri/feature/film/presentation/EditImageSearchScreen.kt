@@ -40,8 +40,9 @@ import dev.hdytrfli.onigiri.feature.film.presentation.editimages.EditImageSearch
 import dev.hdytrfli.onigiri.feature.film.presentation.editimages.EditImageSearchViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.editimages.imageTypeAspectRatio
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -102,19 +103,19 @@ private fun EditImageSearchLayout(
         if (isPosterShapedSearchResult(type, isEpisode, music)) GridSize.POSTER
         else GridSize.THUMBNAIL
 
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(CoreR.string.search_images),
                 onBack = navigateBack,
             )
         }
-    ) { innerPadding ->
+    ) {
         if (LocalOfflineMode.current) {
-            OfflineNotice(modifier = Modifier.padding(innerPadding))
-            return@PageScaffold
+            OfflineNotice(modifier = Modifier.padding(top = LocalRootPageContentInset.current))
+            return@TopBarPageShell
         }
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        Box(modifier = Modifier.fillMaxSize()) {
             when {
                 state.isSearching ->
                     AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
@@ -136,7 +137,15 @@ private fun EditImageSearchLayout(
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumns(gridSize)),
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter),
+                        contentPadding =
+                            PaddingValues(
+                                start = MaterialTheme.spacings.gutter,
+                                top =
+                                    LocalRootPageContentInset.current +
+                                        MaterialTheme.spacings.gutter,
+                                end = MaterialTheme.spacings.gutter,
+                                bottom = MaterialTheme.spacings.gutter,
+                            ),
                         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),
                     ) {

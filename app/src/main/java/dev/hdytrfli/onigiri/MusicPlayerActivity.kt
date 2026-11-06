@@ -43,6 +43,7 @@ class MusicPlayerActivity : ComponentActivity() {
             val state by viewModel.state.collectAsStateWithLifecycle()
             val artworkType by viewModel.artworkType.collectAsStateWithLifecycle()
             val swipeArtwork by viewModel.swipeArtwork.collectAsStateWithLifecycle()
+            val preciseSeeking by viewModel.preciseSeeking.collectAsStateWithLifecycle()
 
             CompositionLocalProvider(LocalHideStatusBar provides hideStatusBar) {
                 FindroidTheme {
@@ -50,10 +51,12 @@ class MusicPlayerActivity : ComponentActivity() {
                         state = state,
                         artworkType = artworkType,
                         swipeArtwork = swipeArtwork,
+                        preciseSeeking = preciseSeeking,
                         navigateBack = ::finish,
                         onPlayPause = viewModel::togglePlayPause,
                         onPrevious = viewModel::previous,
                         onNext = viewModel::next,
+                        onSpeedBoost = viewModel::setSpeedBoost,
                         onSeek = viewModel::seekTo,
                         onToggleShuffle = viewModel::toggleShuffle,
                         onCycleRepeat = viewModel::cycleRepeatMode,
@@ -69,6 +72,7 @@ class MusicPlayerActivity : ComponentActivity() {
                         },
                         onAlbumClick = { albumId -> openMusicDetail(albumId = albumId.toString()) },
                         onPlayQueueItem = viewModel::playQueueItem,
+                        onJumpQueueItem = viewModel::jumpToQueueItem,
                         onRemoveQueueItem = viewModel::removeQueueItem,
                         onMoveQueueItem = viewModel::moveQueueItem,
                         onClearError = viewModel::clearError,

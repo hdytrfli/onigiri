@@ -3,7 +3,6 @@ package dev.hdytrfli.onigiri.feature.film.presentation.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -29,7 +28,6 @@ import dev.hdytrfli.onigiri.ui.utils.gridColumns
 @Composable
 fun CollectionGrid(
     sections: List<CollectionSection>,
-    innerPadding: PaddingValues,
     contentPadding: PaddingValues,
     onAction: (CollectionAction) -> Unit,
     displayFields: Set<ListDisplayField> = emptySet(),
@@ -50,7 +48,7 @@ fun CollectionGrid(
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
-        modifier = Modifier.padding(innerPadding).fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
         horizontalArrangement = Arrangement.spacedBy(LocalGridGap.current),
         verticalArrangement = Arrangement.spacedBy(LocalGridGap.current),

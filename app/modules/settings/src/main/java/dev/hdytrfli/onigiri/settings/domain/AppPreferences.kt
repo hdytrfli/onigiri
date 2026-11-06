@@ -49,6 +49,7 @@ class AppPreferences(
     // Language
     val preferredAudioLanguage = Preference<String?>("pref_audio_language", defaultLanguage)
     val preferredSubtitleLanguage = Preference<String?>("pref_subtitle_language", defaultLanguage)
+    val subtitleSearchRecentLanguages = Preference("pref_subtitle_search_recent_languages", "")
 
     // Interface
     val hideStatusBar = Preference("pref_hide_status_bar", false)
@@ -136,6 +137,7 @@ class AppPreferences(
     val readerFontWeight = Preference("pref_reader_font_weight", "1.0")
     val readerPageMargins = Preference("pref_reader_page_margins", "1.0")
     val readerMode = Preference("pref_reader_mode", "scroll")
+    val readerPreciseSeeking = Preference("pref_reader_precise_seeking", true)
     val readerPullDistance = Preference("pref_reader_pull_distance", "0.15")
     val readerTextAlign = Preference("pref_reader_text_align", "justify")
     val readerTextNormalization = Preference("pref_reader_normalize", false)
@@ -168,13 +170,15 @@ class AppPreferences(
     // Player - seeking
     val playerSeekBackInc = Preference("pref_player_seek_back_inc", 5_000L)
     val playerSeekForwardInc = Preference("pref_player_seek_forward_inc", 5_000L)
+    val playerSeekBackIncStep = Preference("pref_player_seek_back_inc_step", "5000")
+    val playerSeekForwardIncStep = Preference("pref_player_seek_forward_inc_step", "5000")
 
     // Player - trickplay
     val playerTrickplay = Preference("pref_player_trickplay", true)
+    val playerPreciseSeeking = Preference("pref_player_precise_seeking", false)
+    val playerSeekMode = Preference("pref_player_seek_mode", "exact")
 
     // Player - PiP
-    val playerPipGesture = Preference("pref_player_picture_in_picture_gesture", false)
-
     // Downloads
     val downloadOverMobileData = Preference("pref_downloads_mobile_data", false)
     val downloadWhenRoaming = Preference("pref_downloads_roaming", false)
@@ -214,7 +218,7 @@ class AppPreferences(
     val musicCrossfadeDuration = Preference("pref_music_crossfade_duration", "5")
     val musicAudioNormalization = Preference("pref_music_audio_normalization", false)
     val musicSwipeArtwork = Preference("pref_music_swipe_artwork", true)
-    val playerPreciseSeeking = Preference("pref_player_precise_seeking", false)
+    val musicPreciseSeeking = Preference("pref_music_precise_seeking", true)
 
     // Offline mode
     val offlineMode = Preference("pref_offline_mode", false)

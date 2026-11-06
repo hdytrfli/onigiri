@@ -33,9 +33,10 @@ import dev.hdytrfli.onigiri.R
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.ui.components.AppOptionRow
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageContent
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
 
@@ -49,17 +50,20 @@ fun AboutScreen(navigateBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     val openLink = { url: String -> runCatching { uriHandler.openUri(url) } }
 
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(title = stringResource(SettingsR.string.about), onBack = navigateBack)
         }
-    ) { innerPadding ->
-        PageContent(modifier = Modifier.padding(innerPadding)) {
+    ) {
+        PageContent {
             Column(
                 modifier =
                     Modifier.fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(vertical = MaterialTheme.spacings.large),
+                        .padding(
+                            top = LocalRootPageContentInset.current + MaterialTheme.spacings.large,
+                            bottom = MaterialTheme.spacings.large,
+                        ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(

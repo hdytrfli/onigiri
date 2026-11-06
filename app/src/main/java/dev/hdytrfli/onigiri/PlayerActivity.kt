@@ -62,6 +62,7 @@ import dev.hdytrfli.onigiri.presentation.player.PlayerStatsPanel
 import dev.hdytrfli.onigiri.presentation.player.SubtitleOffsetControl
 import dev.hdytrfli.onigiri.presentation.player.formatSubtitleOffset
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
+import dev.hdytrfli.onigiri.ui.PaddedTimeTextView
 import dev.hdytrfli.onigiri.ui.RoundedTimeBar
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.utils.BackdropRatios
@@ -116,6 +117,12 @@ class PlayerActivity : BasePlayerActivity() {
     private val playerControlsVisible = mutableStateOf(true)
 
     private lateinit var playerTimeRight: TextView
+    private lateinit var playerTimePosition: PaddedTimeTextView
+    private lateinit var chapterBackButton: ImageButton
+    private lateinit var chapterForwardButton: ImageButton
+    private lateinit var mediaPreviousButton: ImageButton
+    private lateinit var mediaNextButton: ImageButton
+    private var hasChapters = false
 
     private val detailItemId = mutableStateOf<UUID?>(null)
     private val detailItemIsEpisode = mutableStateOf(false)
@@ -167,15 +174,56 @@ class PlayerActivity : BasePlayerActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         binding.playerView.player = viewModel.player
-        binding.playerView.findViewById<ImageButton>(R.id.exo_rew).setOnClickListener {
+        chapterBackButton = binding.playerView.findViewById(R.id.exo_rew)
+        chapterForwardButton = binding.playerView.findViewById(R.id.exo_ffwd)
+        chapterBackButton.setOnClickListener {
+            if (!hasChapters) {
+                showPlayerOverlayMessage(getString(R.string.player_no_chapters))
+                return@setOnClickListener
+            }
             viewModel.seekToPreviousChapter()?.let { chapter ->
                 chapter.name?.takeIf { it.isNotBlank() }?.let(::showPlayerOverlayMessage)
             }
         }
-        binding.playerView.findViewById<ImageButton>(R.id.exo_ffwd).setOnClickListener {
+        chapterForwardButton.setOnClickListener {
+            if (!hasChapters) {
+                showPlayerOverlayMessage(getString(R.string.player_no_chapters))
+                return@setOnClickListener
+            }
             viewModel.seekToNextChapter()?.let { chapter ->
                 chapter.name?.takeIf { it.isNotBlank() }?.let(::showPlayerOverlayMessage)
             }
+        }
+
+        mediaPreviousButton = binding.playerView.findViewById(R.id.exo_prev)
+        mediaNextButton = binding.playerView.findViewById(R.id.exo_next)
+        mediaPreviousButton.setOnClickListener {
+            val player = viewModel.player
+            if (!player.hasPreviousMediaItem()) {
+                showPlayerOverlayMessage(getString(R.string.player_no_previous_item))
+            } else {
+                player.seekToPreviousMediaItem()
+            }
+        }
+        mediaNextButton.setOnClickListener {
+            val player = viewModel.player
+            if (!player.hasNextMediaItem()) {
+                showPlayerOverlayMessage(getString(R.string.player_no_next_item))
+            } else {
+                player.seekToNextMediaItem()
+            }
+        }
+        // PlayerControlView disables these on every progress update. Keep them touchable so the
+        // disabled state can still explain itself with a toast.
+        binding.playerView.viewTreeObserver.addOnPreDrawListener {
+            val player = viewModel.player
+            val hasNext = runCatching { player.hasNextMediaItem() }.getOrDefault(false)
+            val hasPrevious = runCatching { player.hasPreviousMediaItem() }.getOrDefault(false)
+            mediaNextButton.isEnabled = true
+            mediaPreviousButton.isEnabled = true
+            mediaNextButton.imageAlpha = if (hasNext) 255 else 75
+            mediaPreviousButton.imageAlpha = if (hasPrevious) 255 else 75
+            true
         }
         // How long the overlay stays up before hiding itself ("Never" is stored as -1). The fade
         // does the hiding, so media3's own timeout is off and this drives it instead.
@@ -253,6 +301,7 @@ class PlayerActivity : BasePlayerActivity() {
         val btnEpisodes = binding.playerView.findViewById<ImageButton>(R.id.btn_episodes)
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
+        playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
@@ -350,6 +399,11 @@ class PlayerActivity : BasePlayerActivity() {
                             playerGestureHelper?.let { it.currentTrickplay = currentTrickplay }
 
                             // Chapters
+                            hasChapters = currentChapters.size > 1
+                            chapterBackButton.isEnabled = true
+                            chapterForwardButton.isEnabled = true
+                            chapterBackButton.imageAlpha = if (hasChapters) 255 else 75
+                            chapterForwardButton.imageAlpha = if (hasChapters) 255 else 75
                             val timeBar = findViewById<DefaultTimeBar>(R.id.exo_progress)
                             if (timeBar is RoundedTimeBar) {
                                 timeBar.setChapterMarkers(
@@ -412,11 +466,9 @@ class PlayerActivity : BasePlayerActivity() {
                                     )
                                 }
 
-                                if (appPreferences.getValue(appPreferences.playerPipGesture)) {
-                                    try {
-                                        setPictureInPictureParams(pipParams(event.isPlaying))
-                                    } catch (_: IllegalArgumentException) {}
-                                }
+                                try {
+                                    setPictureInPictureParams(pipParams(event.isPlaying))
+                                } catch (_: IllegalArgumentException) {}
                             }
                         }
                     }
@@ -619,6 +671,14 @@ class PlayerActivity : BasePlayerActivity() {
         // Set marker color
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(R.id.exo_progress)
 
+        if (timeBar is RoundedTimeBar) {
+            timeBar.setPreciseSeeking(
+                appPreferences.getValue(appPreferences.playerPreciseSeeking)
+            ) { position ->
+                viewModel.player.seekTo(position)
+            }
+        }
+
         if (appPreferences.getValue(appPreferences.playerTrickplay)) {
             val imagePreview = binding.playerView.findViewById<ImageView>(R.id.image_preview)
             previewScrubListener = PreviewScrubListener(imagePreview, timeBar, viewModel.player)
@@ -647,18 +707,6 @@ class PlayerActivity : BasePlayerActivity() {
             itemKind = itemKind ?: "",
             startFromBeginning = startFromBeginning,
         )
-    }
-
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        if (
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-                appPreferences.getValue(appPreferences.playerPipGesture) &&
-                viewModel.player.isPlaying &&
-                !isControlsLocked
-        ) {
-            pictureInPicture()
-        }
     }
 
     private fun finishPlayback() {
@@ -1029,11 +1077,19 @@ class PlayerActivity : BasePlayerActivity() {
     internal fun showPersistentPlayerOverlayMessage(message: String) {
         binding.progressScrubberTrickplay.visibility = View.GONE
         binding.progressScrubberText.text = message
-        binding.progressScrubberLayout.animate().cancel()
-        binding.progressScrubberLayout.alpha = 0f
-        binding.progressScrubberLayout.visibility = View.VISIBLE
-        binding.progressScrubberLayout.animate().alpha(1f).setDuration(150L).start()
         binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
+        if (binding.progressScrubberLayout.visibility != View.VISIBLE) {
+            binding.progressScrubberLayout.animate().cancel()
+            binding.progressScrubberLayout.alpha = 0f
+            binding.progressScrubberLayout.visibility = View.VISIBLE
+            binding.progressScrubberLayout.animate().alpha(1f).setDuration(150L).start()
+        }
+    }
+
+    /** Starts the normal auto-hide countdown without re-showing or re-fading the overlay. */
+    internal fun schedulePlayerOverlayMessageHide() {
+        binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
+        binding.progressScrubberLayout.postDelayed(hidePlayerOverlayMessageAction, 1500L)
     }
 
     private fun updatePlayerTimeRight() {
@@ -1042,6 +1098,7 @@ class PlayerActivity : BasePlayerActivity() {
             playerTimeRight.text = ""
             return
         }
+        playerTimePosition.showHours = duration >= 3_600_000L
 
         val position = viewModel.player.currentPosition
         val remaining = (duration - position).coerceAtLeast(0)
@@ -1075,7 +1132,7 @@ class PlayerActivity : BasePlayerActivity() {
         val minutes = (totalSeconds % 3600) / 60
         val seconds = totalSeconds % 60
         return if (hours > 0) {
-            String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
+            String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
         } else {
             String.format(Locale.US, "%02d:%02d", minutes, seconds)
         }

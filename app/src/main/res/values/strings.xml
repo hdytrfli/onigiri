@@ -103,6 +103,9 @@
     <string name="player_subtitle_delay_earlier">Subtitles earlier</string>
     <string name="player_subtitle_delay_later">Subtitles later</string>
     <string name="player_time_finished_at">finished at %1$s</string>
+    <string name="player_no_chapters">No chapters available</string>
+    <string name="player_no_next_item">No next item available</string>
+    <string name="player_no_previous_item">No previous item available</string>
     <string name="player_time_finished_in">finished in %1$d mins</string>
     <string name="refresh">Refresh</string>
     <string name="player_gestures_locked">Volume, brightness and zoom locked</string>

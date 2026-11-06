@@ -46,9 +46,10 @@ import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.ErrorDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.MenuActionItem
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalOfflineMode
@@ -117,21 +118,21 @@ private fun EditImagesScreenLayout(
     onDismissError: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(CoreR.string.edit_images),
                 onBack = navigateBack,
             )
         }
-    ) { innerPadding ->
+    ) {
         if (LocalOfflineMode.current) {
-            OfflineNotice(modifier = Modifier.padding(innerPadding))
-            return@PageScaffold
+            OfflineNotice(modifier = Modifier.padding(top = LocalRootPageContentInset.current))
+            return@TopBarPageShell
         }
         if (state.isLoading && state.images.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier.fillMaxSize().padding(top = LocalRootPageContentInset.current),
                 contentAlignment = Alignment.Center,
             ) {
                 AppLoadingIndicator()
@@ -151,10 +152,12 @@ private fun EditImagesScreenLayout(
             Column(
                 modifier =
                     Modifier.fillMaxSize()
-                        .padding(innerPadding)
                         .padding(horizontal = MaterialTheme.spacings.gutter)
                         .verticalScroll(rememberScrollState())
-                        .padding(vertical = MaterialTheme.spacings.gutter),
+                        .padding(
+                            top = LocalRootPageContentInset.current + MaterialTheme.spacings.gutter,
+                            bottom = MaterialTheme.spacings.gutter,
+                        ),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.large),
             ) {
                 // Labels sit above each tile, the same way the thumb/logo/art row does.

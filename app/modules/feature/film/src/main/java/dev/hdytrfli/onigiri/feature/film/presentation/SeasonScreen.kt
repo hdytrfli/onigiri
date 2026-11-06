@@ -1,12 +1,10 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -41,6 +39,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.season.SeasonViewModel
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummySeason
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.LocalContentSpacingScale
@@ -113,7 +112,33 @@ private fun SeasonScreenLayout(
 
     val spacingScale = LocalContentSpacingScale.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            ItemTopBar(
+                hasBackButton = true,
+                onBackClick = { onAction(SeasonAction.OnBackClick) },
+                trailingContent = {
+                    state.season?.let { season ->
+                        DetailActionsMenu(
+                            itemId = season.id,
+                            actions = setOf(DetailAction.EDIT_IMAGES),
+                            onEditImages = { onEditImages(season.id) },
+                        )
+                    }
+                },
+                content = {
+                    state.season?.let { season ->
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                        ParentNavMenu(
+                            onShowClick = {
+                                onAction(SeasonAction.NavigateToSeries(season.seriesId))
+                            }
+                        )
+                    }
+                },
+            )
+        }
+    ) {
         state.season?.let { season ->
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
@@ -212,28 +237,6 @@ private fun SeasonScreenLayout(
                     AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
-
-        ItemTopBar(
-            hasBackButton = true,
-            onBackClick = { onAction(SeasonAction.OnBackClick) },
-            trailingContent = {
-                state.season?.let { season ->
-                    DetailActionsMenu(
-                        itemId = season.id,
-                        actions = setOf(DetailAction.EDIT_IMAGES),
-                        onEditImages = { onEditImages(season.id) },
-                    )
-                }
-            },
-            content = {
-                state.season?.let { season ->
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    ParentNavMenu(
-                        onShowClick = { onAction(SeasonAction.NavigateToSeries(season.seriesId)) }
-                    )
-                }
-            },
-        )
     }
 }
 

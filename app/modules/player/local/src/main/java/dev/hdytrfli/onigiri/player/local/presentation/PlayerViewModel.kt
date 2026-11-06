@@ -162,12 +162,16 @@ constructor(
             MPVPlayer.Builder(application)
                 .setAudioAttributes(audioAttributes, true)
                 .setTrackSelectionParameters(trackSelectionParameters)
-                .setSeekBackIncrementMs(appPreferences.getValue(appPreferences.playerSeekBackInc))
+                .setSeekBackIncrementMs(
+                    appPreferences.getValue(appPreferences.playerSeekBackIncStep).toLongOrNull()
+                        ?: 5_000L
+                )
                 .setSeekForwardIncrementMs(
-                    appPreferences.getValue(appPreferences.playerSeekForwardInc)
+                    appPreferences.getValue(appPreferences.playerSeekForwardIncStep).toLongOrNull()
+                        ?: 5_000L
                 )
                 .setPauseAtEndOfMediaItems(true)
-                .setPreciseSeeking(appPreferences.getValue(appPreferences.playerPreciseSeeking))
+                .setExactSeeking(appPreferences.getValue(appPreferences.playerSeekMode) == "exact")
                 .setVideoOutput(appPreferences.getValue(appPreferences.playerMpvVo))
                 .setAudioOutput(appPreferences.getValue(appPreferences.playerMpvAo))
                 .setHwDec(appPreferences.getValue(appPreferences.playerMpvHwdec))

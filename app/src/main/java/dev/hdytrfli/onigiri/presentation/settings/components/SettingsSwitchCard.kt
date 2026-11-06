@@ -37,6 +37,7 @@ private fun SettingsSwitchCardPreview() {
             preference =
                 PreferenceSwitch(
                     nameStringResource = SettingsR.string.settings_use_cache_title,
+                    descriptionStringRes = SettingsR.string.settings_use_cache_summary,
                     backendPreference = Preference("", true),
                     value = false,
                 ),
@@ -53,6 +54,7 @@ private fun SettingsSwitchCardDisabledPreview() {
             preference =
                 PreferenceSwitch(
                     nameStringResource = SettingsR.string.settings_use_cache_title,
+                    descriptionStringRes = SettingsR.string.settings_use_cache_summary,
                     backendPreference = Preference("", true),
                     enabled = false,
                 ),

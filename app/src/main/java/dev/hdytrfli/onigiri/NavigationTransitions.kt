@@ -1,6 +1,7 @@
 package dev.hdytrfli.onigiri
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -19,14 +20,21 @@ private const val PAGE_TRANSITION_DURATION_MS = 300
 private const val PAGE_TRANSITION_OFFSET_PERCENT = 5
 
 internal val PAGE_TRANSITION_SPEC =
-    (fadeIn(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) +
-        slideInHorizontally(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) {
-            it * PAGE_TRANSITION_OFFSET_PERCENT / 100
-        }) togetherWith
-        (fadeOut(tween(durationMillis = PAGE_TRANSITION_DURATION_MS - 40)) +
-            slideOutHorizontally(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) {
-                -it * PAGE_TRANSITION_OFFSET_PERCENT / 100
-            })
+    ContentTransform(
+        targetContentEnter =
+            fadeIn(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) +
+                slideInHorizontally(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) {
+                    it * PAGE_TRANSITION_OFFSET_PERCENT / 100
+                },
+        initialContentExit =
+            fadeOut(tween(durationMillis = PAGE_TRANSITION_DURATION_MS - 40)) +
+                slideOutHorizontally(tween(durationMillis = PAGE_TRANSITION_DURATION_MS)) {
+                    -it * PAGE_TRANSITION_OFFSET_PERCENT / 100
+                },
+        // The whole page already slides/fades. Animating the container size as well makes every
+        // settings row remeasure on each frame, which is especially visible on tablets.
+        sizeTransform = null,
+    )
 
 // The suite never moves between pages, so its appearance is animated instead: it fades out when
 // an immersive page takes over (a detail screen, the player) and fades back in on the way home.

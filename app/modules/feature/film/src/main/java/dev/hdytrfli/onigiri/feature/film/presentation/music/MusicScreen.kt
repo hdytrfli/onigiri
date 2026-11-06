@@ -3,7 +3,6 @@ package dev.hdytrfli.onigiri.feature.film.presentation.music
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,15 +40,14 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SectionHeader
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
-import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
-import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
@@ -93,8 +90,8 @@ fun MusicScreen(
     val artists = state.artists.filter { query.isBlank() || it.name.contains(query, true) }
     val albums = state.albums.filter { query.isBlank() || it.name.contains(query, true) }
 
-    RootPage(
-        header = {
+    TopBarPageShell(
+        topBar = {
             AnimatedContent(targetState = searchExpanded, label = "music-search") { expanded ->
                 if (expanded) {
                     PageSearchField(
@@ -164,49 +161,43 @@ fun MusicScreen(
                 showIndicator = false,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (MusicTab.entries[tabIndex]) {
-                        MusicTab.SONGS ->
-                            SongsGrid(
-                                songs = songs,
-                                currentSongId = currentSongId,
-                                displayFields = state.songDisplayFields,
-                                loading = state.isLoading,
-                                error = state.error,
-                                contentPadding = contentPadding,
-                                onRefresh = viewModel::retry,
-                                onSongClick = viewModel::playSong,
-                                onPlayNext = viewModel::playNext,
-                                onAddToQueue = viewModel::addToQueue,
-                                onToggleFavorite = viewModel::toggleFavorite,
-                                onArtistClick = onArtistClick,
-                                onAlbumClick = onAlbumClick,
-                            )
-                        MusicTab.ARTISTS ->
-                            ArtistsGrid(
-                                artists = artists,
-                                displayFields = state.artistDisplayFields,
-                                loading = state.isLoading,
-                                error = state.error,
-                                contentPadding = contentPadding,
-                                onRefresh = viewModel::retry,
-                                onArtistClick = onArtistClick,
-                            )
-                        MusicTab.ALBUMS ->
-                            AlbumsGrid(
-                                albums = albums,
-                                displayFields = state.albumDisplayFields,
-                                loading = state.isLoading,
-                                error = state.error,
-                                contentPadding = contentPadding,
-                                onRefresh = viewModel::retry,
-                                onAlbumClick = onAlbumClick,
-                            )
-                    }
-
-                    if (state.isLoading && !state.hasContent()) {
-                        AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
+                when (MusicTab.entries[tabIndex]) {
+                    MusicTab.SONGS ->
+                        SongsGrid(
+                            songs = songs,
+                            currentSongId = currentSongId,
+                            displayFields = state.songDisplayFields,
+                            loading = state.isLoading,
+                            error = state.error,
+                            contentPadding = contentPadding,
+                            onRefresh = viewModel::retry,
+                            onSongClick = viewModel::playSong,
+                            onPlayNext = viewModel::playNext,
+                            onAddToQueue = viewModel::addToQueue,
+                            onToggleFavorite = viewModel::toggleFavorite,
+                            onArtistClick = onArtistClick,
+                            onAlbumClick = onAlbumClick,
+                        )
+                    MusicTab.ARTISTS ->
+                        ArtistsGrid(
+                            artists = artists,
+                            displayFields = state.artistDisplayFields,
+                            loading = state.isLoading,
+                            error = state.error,
+                            contentPadding = contentPadding,
+                            onRefresh = viewModel::retry,
+                            onArtistClick = onArtistClick,
+                        )
+                    MusicTab.ALBUMS ->
+                        AlbumsGrid(
+                            albums = albums,
+                            displayFields = state.albumDisplayFields,
+                            loading = state.isLoading,
+                            error = state.error,
+                            contentPadding = contentPadding,
+                            onRefresh = viewModel::retry,
+                            onAlbumClick = onAlbumClick,
+                        )
                 }
             }
         }
@@ -396,16 +387,6 @@ private fun SongListRow(
         actions =
             listOf(
                 MusicRowAction(
-                    label = stringResource(FilmR.string.music_play_next),
-                    icon = CoreR.drawable.ic_skip_forward,
-                    onClick = onPlayNext,
-                ),
-                MusicRowAction(
-                    label = stringResource(FilmR.string.music_add_to_queue),
-                    icon = CoreR.drawable.ic_plus,
-                    onClick = onAddToQueue,
-                ),
-                MusicRowAction(
                     label =
                         stringResource(
                             if (song.favorite) CoreR.string.remove_from_favorites
@@ -417,6 +398,16 @@ private fun SongListRow(
                     iconTint = if (song.favorite) Red else null,
                     dismissOnClick = false,
                     onClick = onToggleFavorite,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_play_next),
+                    icon = CoreR.drawable.ic_skip_forward,
+                    onClick = onPlayNext,
+                ),
+                MusicRowAction(
+                    label = stringResource(FilmR.string.music_add_to_queue),
+                    icon = CoreR.drawable.ic_plus,
+                    onClick = onAddToQueue,
                 ),
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_artist_label),

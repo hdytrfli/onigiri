@@ -23,8 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.hdytrfli.onigiri.R
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.plus
@@ -57,17 +58,18 @@ fun ReaderTocScreen(
 ) {
     val contentPadding = PaddingValues(all = MaterialTheme.spacings.gutter)
 
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(R.string.reader_contents_title),
                 onBack = onBack,
             )
         }
-    ) { innerPadding ->
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPadding + innerPadding,
+            contentPadding =
+                contentPadding + PaddingValues(top = LocalRootPageContentInset.current),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

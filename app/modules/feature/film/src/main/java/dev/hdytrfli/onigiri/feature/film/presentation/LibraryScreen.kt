@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -62,16 +61,15 @@ import dev.hdytrfli.onigiri.ui.components.AppTextField
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
 import dev.hdytrfli.onigiri.ui.utils.gridColumns
-import dev.hdytrfli.onigiri.ui.utils.pageContentWindowInsets
 import dev.hdytrfli.onigiri.ui.utils.plus
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import java.util.UUID
@@ -83,9 +81,6 @@ fun LibraryScreen(
     libraryType: CollectionType,
     onItemClick: (item: FindroidItem) -> Unit,
     navigateBack: () -> Unit,
-    showTopBar: Boolean = true,
-    embedded: Boolean = false,
-    sectionTitle: String? = null,
     genreIds: List<UUID> = emptyList(),
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
@@ -99,9 +94,6 @@ fun LibraryScreen(
 
     LibraryScreenLayout(
         libraryName = libraryName,
-        showTopBar = showTopBar,
-        embedded = embedded,
-        sectionTitle = sectionTitle,
         state = state,
         onAction = { action ->
             when (action) {
@@ -118,9 +110,6 @@ fun LibraryScreen(
 @Composable
 private fun LibraryScreenLayout(
     libraryName: String?,
-    showTopBar: Boolean,
-    embedded: Boolean,
-    sectionTitle: String?,
     state: LibraryState,
     onAction: (LibraryAction) -> Unit,
 ) {
@@ -128,34 +117,25 @@ private fun LibraryScreenLayout(
     var showDisplayDialog by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
 
-    PageScaffold(
-        contentWindowInsets =
-            if (embedded) {
-                WindowInsets(0, 0, 0, 0)
-            } else {
-                pageContentWindowInsets()
-            },
+    TopBarPageShell(
         topBar = {
-            if (showTopBar) {
-                PageTopBar(
-                    title =
-                        libraryName?.takeIf { it.isNotBlank() }
-                            ?: stringResource(CoreR.string.genres),
-                    onBack = { onAction(LibraryAction.OnBackClick) },
-                    trailingContent = {
-                        LibraryActionButtons(
-                            onSearch = { onAction(LibraryAction.ToggleSearch) },
-                            onInfo = { showDisplayDialog = true },
-                            onSort = { showSortByDialog = true },
-                            pullToRefreshState = pullToRefreshState,
-                            isRefreshing = state.isLoading,
-                            onRefresh = { onAction(LibraryAction.RefreshItems) },
-                        )
-                    },
-                )
-            }
-        },
-    ) { innerPadding ->
+            PageTopBar(
+                title =
+                    libraryName?.takeIf { it.isNotBlank() } ?: stringResource(CoreR.string.genres),
+                onBack = { onAction(LibraryAction.OnBackClick) },
+                trailingContent = {
+                    LibraryActionButtons(
+                        onSearch = { onAction(LibraryAction.ToggleSearch) },
+                        onInfo = { showDisplayDialog = true },
+                        onSort = { showSortByDialog = true },
+                        pullToRefreshState = pullToRefreshState,
+                        isRefreshing = state.isLoading,
+                        onRefresh = { onAction(LibraryAction.RefreshItems) },
+                    )
+                },
+            )
+        }
+    ) {
         LibraryContent(
             state = state,
             onAction = onAction,
@@ -164,10 +144,7 @@ private fun LibraryScreenLayout(
             onShowSortDialogChange = { showSortByDialog = it },
             onShowDisplayDialogChange = { showDisplayDialog = it },
             pullToRefreshState = pullToRefreshState,
-            showPullIndicator = !showTopBar,
-            embedded = embedded,
-            innerPadding = innerPadding,
-            sectionTitle = sectionTitle,
+            showPullIndicator = false,
         )
     }
 }
@@ -185,32 +162,24 @@ fun LibraryContent(
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     showPullIndicator: Boolean = true,
     modifier: Modifier = Modifier,
-    embedded: Boolean = false,
-    innerPadding: PaddingValues = PaddingValues(0.dp),
     sectionTitle: String? = null,
     showSearchField: Boolean = true,
 ) {
     val safePadding = rememberSafePadding()
-    // Under a root page the floating header overlays the content, so the first grid item
-    // starts below it; standalone the grid keeps its own spacing.
-    val rootInset = LocalRootPageContentInset.current
+    val searchFieldVisible = showSearchField && state.searchExpanded
     val contentPadding =
-        if (embedded) {
-            PaddingValues(
-                start = safePadding.start + MaterialTheme.spacings.gutter,
-                top =
-                    rootInset +
-                        if (sectionTitle != null) {
-                            0.dp
-                        } else {
-                            MaterialTheme.spacings.default
-                        },
-                end = safePadding.end + MaterialTheme.spacings.gutter,
-                bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
-            )
-        } else {
-            PaddingValues(all = MaterialTheme.spacings.default)
-        }
+        PaddingValues(
+            start = safePadding.start + MaterialTheme.spacings.gutter,
+            top =
+                (if (searchFieldVisible) 0.dp else LocalRootPageContentInset.current) +
+                    if (sectionTitle != null) {
+                        0.dp
+                    } else {
+                        MaterialTheme.spacings.default
+                    },
+            end = safePadding.end + MaterialTheme.spacings.gutter,
+            bottom = safePadding.bottom + MaterialTheme.spacings.gutter,
+        )
 
     val items = state.items
     // The badge on the section title shows the cached list's total.
@@ -235,7 +204,7 @@ fun LibraryContent(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(innerPadding)) {
+    Column(modifier = modifier.fillMaxSize()) {
         if (showSearchField && state.searchExpanded) {
             AppTextField(
                 value = state.searchQuery,
@@ -244,7 +213,7 @@ fun LibraryContent(
                     Modifier.fillMaxWidth()
                         .padding(
                             start = MaterialTheme.spacings.default,
-                            top = MaterialTheme.spacings.small,
+                            top = LocalRootPageContentInset.current + MaterialTheme.spacings.small,
                             end = MaterialTheme.spacings.default,
                         )
                         .focusRequester(focusRequester),
@@ -444,9 +413,6 @@ private fun LibraryScreenLayoutPreview() {
     FindroidTheme {
         LibraryScreenLayout(
             libraryName = "Movies",
-            showTopBar = true,
-            embedded = false,
-            sectionTitle = null,
             state = LibraryState(items = dummyMovies),
             onAction = {},
         )

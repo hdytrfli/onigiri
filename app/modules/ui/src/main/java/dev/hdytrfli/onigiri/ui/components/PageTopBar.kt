@@ -40,6 +40,7 @@ fun PageTopBar(
     includeTopInset: Boolean = true,
 ) {
     val safePadding = rememberSafePadding()
+    val includeOwnTopInset = includeTopInset && !LocalTopBarExternalInset.current
 
     Row(
         modifier =
@@ -48,7 +49,7 @@ fun PageTopBar(
                 .padding(
                     start = safePadding.start + MaterialTheme.spacings.gutter,
                     top =
-                        if (includeTopInset) {
+                        if (includeOwnTopInset) {
                             safePadding.top + MaterialTheme.spacings.gutter
                         } else {
                             0.dp
@@ -58,7 +59,7 @@ fun PageTopBar(
                 ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppButtonGroup(modifier = Modifier.weight(1f, fill = false)) {
+        AppButtonGroup {
             if (onBack != null) {
                 AppIconButton(
                     onClick = onBack,

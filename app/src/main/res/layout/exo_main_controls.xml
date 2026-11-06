@@ -303,7 +303,7 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp">
 
-            <TextView
+            <dev.hdytrfli.onigiri.ui.PaddedTimeTextView
                 android:id="@+id/exo_position"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

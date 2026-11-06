@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSliders
 import dev.hdytrfli.onigiri.ui.components.AppButton
@@ -127,6 +128,8 @@ fun SettingsSlidersDialog(
                     text = stringResource(it),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

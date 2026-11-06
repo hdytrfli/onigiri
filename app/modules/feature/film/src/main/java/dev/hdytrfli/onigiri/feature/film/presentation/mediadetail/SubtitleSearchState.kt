@@ -9,6 +9,8 @@ data class SubtitleSearchState(
     val canManageSubtitles: Boolean = false,
     /** 3-letter ISO language code used for the search. */
     val language: String = "eng",
+    /** Recently used search languages, most recent first. */
+    val recentLanguages: List<String> = emptyList(),
     /** Subtitles already attached to the item (deletable when they are external). */
     val existing: List<FindroidMediaStream> = emptyList(),
     val isSearching: Boolean = false,

@@ -164,7 +164,6 @@ fun MusicTrackRow(
                     AppDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
-                        alignEnd = true,
                     ) {
                         actions.forEach { action ->
                             MenuActionItem(

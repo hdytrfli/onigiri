@@ -1,22 +1,15 @@
 package dev.hdytrfli.onigiri.presentation.settings
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -45,9 +38,10 @@ import dev.hdytrfli.onigiri.settings.presentation.settings.SettingsFileEditViewM
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
-import dev.hdytrfli.onigiri.ui.theme.spacings
 
 @Composable
 fun SettingsFileEditScreen(
@@ -91,7 +85,7 @@ private fun SettingsFileEditScreenLayout(
     var showDiscardDialog by remember { mutableStateOf(false) }
     BackHandler(isModified) { showDiscardDialog = true }
 
-    Scaffold(
+    TopBarPageShell(
         modifier = Modifier.imePadding(),
         topBar = {
             PageTopBar(
@@ -100,35 +94,30 @@ private fun SettingsFileEditScreenLayout(
                     if (isModified) showDiscardDialog = true
                     else onAction(SettingsFileEditAction.OnBackClick)
                 },
+                trailingContent = {
+                    AppButton(
+                        onClick = {
+                            val text = textFieldState.text.toString()
+                            onAction(SettingsFileEditAction.OnSave(text))
+                        },
+                        enabled = isModified,
+                    ) {
+                        Icon(
+                            painter = painterResource(CoreR.drawable.ic_save),
+                            contentDescription = null,
+                        )
+                        Text(stringResource(SettingsR.string.save))
+                    }
+                },
             )
         },
-        bottomBar = {
-            Row(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .padding(MaterialTheme.spacings.default),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                AppButton(
-                    onClick = {
-                        val text = textFieldState.text.toString()
-                        onAction(SettingsFileEditAction.OnSave(text))
-                    },
-                    enabled = isModified,
-                ) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_save),
-                        contentDescription = null,
-                    )
-                    Text(stringResource(SettingsR.string.save))
-                }
-            }
-        },
-    ) { innerPadding ->
+    ) {
         TextField(
             state = textFieldState,
-            modifier = Modifier.fillMaxSize().padding(innerPadding).focusRequester(focusRequester),
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(top = LocalRootPageContentInset.current)
+                    .focusRequester(focusRequester),
             textStyle =
                 TextStyle(
                     fontSize = 14.sp,

@@ -1,6 +1,5 @@
 package dev.hdytrfli.onigiri.feature.film.presentation.music
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.gridColumns
@@ -97,7 +97,25 @@ private fun ArtistDetailLayout(
     val listState = rememberLazyListState()
     val artist = state.artist
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            if (artist != null) {
+                ItemTopBar(
+                    hasBackButton = true,
+                    onBackClick = onBack,
+                    trailingContent = {
+                        DetailActionsMenu(
+                            itemId = artist.id,
+                            actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
+                            onIdentify = onIdentify,
+                            onEditImages = onEditImages,
+                            onIdentifyApplied = onIdentifyApplied,
+                        )
+                    },
+                )
+            }
+        }
+    ) {
         when {
             state.isLoading && artist == null ->
                 AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
@@ -215,22 +233,6 @@ private fun ArtistDetailLayout(
 
                     item { Spacer(Modifier.height(MaterialTheme.spacings.medium)) }
                 }
-        }
-
-        if (artist != null) {
-            ItemTopBar(
-                hasBackButton = true,
-                onBackClick = onBack,
-                trailingContent = {
-                    DetailActionsMenu(
-                        itemId = artist.id,
-                        actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
-                        onIdentify = onIdentify,
-                        onEditImages = onEditImages,
-                        onIdentifyApplied = onIdentifyApplied,
-                    )
-                },
-            )
         }
     }
 }

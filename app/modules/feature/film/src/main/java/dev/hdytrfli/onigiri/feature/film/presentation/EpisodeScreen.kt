@@ -1,12 +1,10 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -54,6 +52,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.episode.EpisodeViewModel
 import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyEpisode
 import dev.hdytrfli.onigiri.ui.preview.dummyVideoMetadata
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
@@ -172,7 +171,56 @@ private fun EpisodeScreenLayout(
             .windowSizeClass
             .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            ItemTopBar(
+                hasBackButton = true,
+                onBackClick = { onAction(EpisodeAction.OnBackClick) },
+                content = {
+                    state.episode?.let { episode ->
+                        Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                        ParentNavMenu(
+                            onShowClick = {
+                                onAction(EpisodeAction.NavigateToShow(episode.seriesId))
+                            },
+                            onSeasonClick = {
+                                onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
+                            },
+                        )
+                    }
+                },
+                trailingContent = {
+                    state.episode?.let { episode ->
+                        AppButtonGroup {
+                            DownloadButton(
+                                item = episode,
+                                downloaderState = downloaderState,
+                                onDownloadClick = { storageIndex ->
+                                    onDownloaderAction(
+                                        DownloaderAction.Download(episode, storageIndex)
+                                    )
+                                },
+                                onCancelDownloadClick = {
+                                    onDownloaderAction(DownloaderAction.CancelDownload(episode))
+                                },
+                                onDeleteDownloadClick = {
+                                    onDownloaderAction(DownloaderAction.DeleteDownload(episode))
+                                },
+                                onNavigateToDownloads = onNavigateToDownloads,
+                            )
+                            DetailActionsMenu(
+                                itemId = episode.id,
+                                actions =
+                                    setOf(DetailAction.SUBTITLE_SEARCH, DetailAction.EDIT_IMAGES),
+                                onSubtitleSearch = { onSubtitleSearch(episode.id) },
+                                onEditImages = { onEditImages(episode.id) },
+                            )
+                        }
+                    }
+                },
+            )
+        }
+    ) {
         state.episode?.let { episode ->
             Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
                 ItemHeader(
@@ -309,48 +357,6 @@ private fun EpisodeScreenLayout(
                     AppLoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             }
-
-        ItemTopBar(
-            hasBackButton = true,
-            onBackClick = { onAction(EpisodeAction.OnBackClick) },
-            content = {
-                state.episode?.let { episode ->
-                    Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
-                    ParentNavMenu(
-                        onShowClick = { onAction(EpisodeAction.NavigateToShow(episode.seriesId)) },
-                        onSeasonClick = {
-                            onAction(EpisodeAction.NavigateToSeason(episode.seasonId))
-                        },
-                    )
-                }
-            },
-            trailingContent = {
-                state.episode?.let { episode ->
-                    AppButtonGroup {
-                        DownloadButton(
-                            item = episode,
-                            downloaderState = downloaderState,
-                            onDownloadClick = { storageIndex ->
-                                onDownloaderAction(DownloaderAction.Download(episode, storageIndex))
-                            },
-                            onCancelDownloadClick = {
-                                onDownloaderAction(DownloaderAction.CancelDownload(episode))
-                            },
-                            onDeleteDownloadClick = {
-                                onDownloaderAction(DownloaderAction.DeleteDownload(episode))
-                            },
-                            onNavigateToDownloads = onNavigateToDownloads,
-                        )
-                        DetailActionsMenu(
-                            itemId = episode.id,
-                            actions = setOf(DetailAction.SUBTITLE_SEARCH, DetailAction.EDIT_IMAGES),
-                            onSubtitleSearch = { onSubtitleSearch(episode.id) },
-                            onEditImages = { onEditImages(episode.id) },
-                        )
-                    }
-                }
-            },
-        )
     }
 }
 

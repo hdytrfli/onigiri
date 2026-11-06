@@ -1,6 +1,5 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +37,7 @@ import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
 import dev.hdytrfli.onigiri.utils.ObserveAsEvents
@@ -72,7 +72,42 @@ fun BookDetailScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            val item = state.item
+            if (item != null) {
+                ItemTopBar(
+                    hasBackButton = true,
+                    onBackClick = navigateBack,
+                    trailingContent = {
+                        AppButtonGroup {
+                            DownloadButton(
+                                item = item,
+                                downloaderState = downloaderState,
+                                onDownloadClick = { storageIndex ->
+                                    downloaderViewModel.onAction(
+                                        DownloaderAction.Download(item, storageIndex)
+                                    )
+                                },
+                                onCancelDownloadClick = {
+                                    downloaderViewModel.onAction(
+                                        DownloaderAction.CancelDownload(item)
+                                    )
+                                },
+                                onDeleteDownloadClick = {
+                                    downloaderViewModel.onAction(
+                                        DownloaderAction.DeleteDownload(item)
+                                    )
+                                },
+                                onNavigateToDownloads = navigateToDownloads,
+                                downloadAvailable = true,
+                            )
+                        }
+                    },
+                )
+            }
+        }
+    ) {
         when {
             state.error != null ->
                 FullPageError(
@@ -178,36 +213,6 @@ fun BookDetailScreen(
                         )
                     }
                 }
-
-                ItemTopBar(
-                    hasBackButton = true,
-                    onBackClick = navigateBack,
-                    trailingContent = {
-                        AppButtonGroup {
-                            DownloadButton(
-                                item = item,
-                                downloaderState = downloaderState,
-                                onDownloadClick = { storageIndex ->
-                                    downloaderViewModel.onAction(
-                                        DownloaderAction.Download(item, storageIndex)
-                                    )
-                                },
-                                onCancelDownloadClick = {
-                                    downloaderViewModel.onAction(
-                                        DownloaderAction.CancelDownload(item)
-                                    )
-                                },
-                                onDeleteDownloadClick = {
-                                    downloaderViewModel.onAction(
-                                        DownloaderAction.DeleteDownload(item)
-                                    )
-                                },
-                                onNavigateToDownloads = navigateToDownloads,
-                                downloadAvailable = true,
-                            )
-                        }
-                    },
-                )
             }
         }
     }

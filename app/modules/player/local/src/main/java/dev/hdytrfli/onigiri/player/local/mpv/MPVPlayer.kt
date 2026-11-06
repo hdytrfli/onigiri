@@ -76,7 +76,7 @@ class MPVPlayer(
     private val seekBackIncrement: Long = C.DEFAULT_SEEK_BACK_INCREMENT_MS,
     private val seekForwardIncrement: Long = C.DEFAULT_SEEK_FORWARD_INCREMENT_MS,
     private val pauseAtEndOfMediaItems: Boolean = false,
-    private val preciseSeeking: Boolean = false,
+    private val exactSeeking: Boolean = true,
     videoOutput: String = "gpu-next",
     audioOutput: String = "aaudio",
     hwDec: String = "mediacodec",
@@ -111,7 +111,7 @@ class MPVPlayer(
         seekBackIncrement = builder.seekBackIncrementMs,
         seekForwardIncrement = builder.seekForwardIncrementMs,
         pauseAtEndOfMediaItems = builder.pauseAtEndOfMediaItems,
-        preciseSeeking = builder.preciseSeeking,
+        exactSeeking = builder.exactSeeking,
         videoOutput = builder.videoOutput,
         audioOutput = builder.audioOutput,
         hwDec = builder.hwDec,
@@ -148,7 +148,7 @@ class MPVPlayer(
         var pauseAtEndOfMediaItems: Boolean = false
             private set
 
-        var preciseSeeking: Boolean = false
+        var exactSeeking: Boolean = true
             private set
 
         var videoOutput: String = "gpu-next"
@@ -217,9 +217,7 @@ class MPVPlayer(
             this.pauseAtEndOfMediaItems = pauseAtEndOfMediaItems
         }
 
-        fun setPreciseSeeking(preciseSeeking: Boolean) = apply {
-            this.preciseSeeking = preciseSeeking
-        }
+        fun setExactSeeking(exactSeeking: Boolean) = apply { this.exactSeeking = exactSeeking }
 
         fun setVideoOutput(videoOutput: String) = apply { this.videoOutput = videoOutput }
 
@@ -1201,18 +1199,10 @@ class MPVPlayer(
             val seekTo = if (positionMs != C.TIME_UNSET) positionMs else initialSeekTo
             initialSeekTo =
                 if (isPlayerReady) {
-                    val durationMs =
-                        MPVLib.getPropertyDouble("duration")?.times(C.MILLIS_PER_SECOND)?.toLong()
-                    val seekMode =
-                        if (preciseSeeking || (durationMs != null && durationMs in 1..120_000L)) {
-                            "absolute+exact"
-                        } else {
-                            "absolute+keyframes"
-                        }
                     MPVLib.command(
                         "seek",
                         "${seekTo.toDouble().div(C.MILLIS_PER_SECOND)}",
-                        seekMode,
+                        if (exactSeeking) "absolute+exact" else "absolute+keyframes",
                     )
                     0L
                 } else {

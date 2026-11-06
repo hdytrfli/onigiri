@@ -62,8 +62,8 @@ import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
-import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -185,8 +185,8 @@ private fun MediaPage(
         )
     }
 
-    RootPage(
-        header = {
+    TopBarPageShell(
+        topBar = {
             // The search icon expands into the field in place; its x collapses it back.
             AnimatedContent(
                 targetState = listState.searchExpanded,
@@ -246,7 +246,6 @@ private fun MediaPage(
                         onShowDisplayDialogChange = {},
                         pullToRefreshState = pullToRefreshState,
                         showPullIndicator = false,
-                        embedded = true,
                         sectionTitle =
                             stringResource(
                                 if (kind == MediaKind.Movies) CoreR.string.all_movies

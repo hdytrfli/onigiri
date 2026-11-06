@@ -29,6 +29,7 @@ private fun SettingsFileEditCardPreview() {
             preference =
                 PreferenceFileEdit(
                     nameStringResource = SettingsR.string.settings_category_player,
+                    descriptionStringRes = SettingsR.string.settings_category_player_summary,
                     filePath = "",
                 )
         )
@@ -58,6 +59,7 @@ private fun SettingsFileEditCardIconPreview() {
             preference =
                 PreferenceFileEdit(
                     nameStringResource = SettingsR.string.settings_category_player,
+                    descriptionStringRes = SettingsR.string.settings_category_player_summary,
                     iconDrawableId = CoreR.drawable.ic_play,
                     filePath = "",
                 )

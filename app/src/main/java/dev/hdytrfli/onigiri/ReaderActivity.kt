@@ -191,6 +191,8 @@ class ReaderActivity : AppCompatActivity() {
                         ReaderOverlay(
                             state = uiState.value,
                             controlsVisible = controlsVisible.value,
+                            preciseSeeking =
+                                appPreferences.getValue(appPreferences.readerPreciseSeeking),
                             onBack = { finish() },
                             onOpenContents = { showContents.value = true },
                             onOpenSettings = {

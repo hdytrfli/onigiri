@@ -35,9 +35,10 @@ import dev.hdytrfli.onigiri.settings.presentation.settings.SettingsViewModel
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageContent
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.plus
@@ -149,15 +150,26 @@ private fun SettingsScreenLayout(
     // Settings pages keep the navigation suite and get its bottom inset from SuiteInsetBox. The
     // shared PageContent rule fills the width up to the content cap, centres it, and applies the
     // global gutter; the floating title bar owns the top spacing.
-    PageScaffold(topBar = { PageTopBar(title = pageTitle, onBack = onBack) }) { innerPadding ->
-        PageContent(modifier = Modifier.padding(innerPadding)) {
+    TopBarPageShell(topBar = { PageTopBar(title = pageTitle, onBack = onBack) }) {
+        PageContent {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter),
+                contentPadding =
+                    PaddingValues(
+                        top = LocalRootPageContentInset.current + MaterialTheme.spacings.gutter,
+                        bottom = MaterialTheme.spacings.gutter,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             ) {
                 profileHeader?.let { header -> item(key = "profile") { header() } }
-                items(state.preferenceGroups) { group ->
+                items(
+                    state.preferenceGroups,
+                    key = { group ->
+                        group.nameStringResource
+                            ?: group.preferences.firstOrNull()?.nameStringResource
+                            ?: 0
+                    },
+                ) { group ->
                     SettingsGroupCard(
                         group = group,
                         onAction = onAction,
@@ -185,6 +197,8 @@ private fun SettingsScreenLayoutPreview() {
                                         PreferenceCategory(
                                             nameStringResource =
                                                 SettingsR.string.settings_category_language,
+                                            descriptionStringRes =
+                                                SettingsR.string.settings_category_language_summary,
                                             iconDrawableId = SettingsR.drawable.ic_languages,
                                         )
                                     ),
@@ -196,6 +210,9 @@ private fun SettingsScreenLayoutPreview() {
                                         PreferenceCategory(
                                             nameStringResource =
                                                 SettingsR.string.settings_category_interface,
+                                            descriptionStringRes =
+                                                SettingsR.string
+                                                    .settings_category_interface_summary,
                                             iconDrawableId = SettingsR.drawable.ic_palette,
                                         )
                                     ),

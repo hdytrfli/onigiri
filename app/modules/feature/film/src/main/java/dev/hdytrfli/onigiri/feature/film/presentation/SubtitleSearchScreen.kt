@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -43,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -53,16 +53,20 @@ import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.SubtitleSearch
 import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.hdytrfli.onigiri.models.FindroidMediaStream
 import dev.hdytrfli.onigiri.settings.R as SettingsR
+import dev.hdytrfli.onigiri.settings.presentation.models.OptionIcon
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
+import dev.hdytrfli.onigiri.ui.components.AppOptionRow
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageContent
-import dev.hdytrfli.onigiri.ui.components.PageScaffold
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
+import dev.hdytrfli.onigiri.ui.components.drawableRes
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.LocalOfflineMode
@@ -115,10 +119,26 @@ private fun SubtitleSearchScreenLayout(
     val languageNames = stringArrayResource(SettingsR.array.languages)
     val languageValues = stringArrayResource(SettingsR.array.languages_values)
     var languagePickerOpen by remember { mutableStateOf(false) }
+    val languageEntries = languageValues.mapIndexedNotNull { index, code ->
+        languageNames.getOrNull(index)?.let { code to it }
+    }
+    val languagesByCode = languageEntries.toMap()
+    val suggestedLanguages =
+        state.recentLanguages
+            .mapNotNull { code -> languagesByCode[code]?.let { code to it } }
+            .distinct()
+            .take(5)
+    val suggestedCodes = suggestedLanguages.mapTo(mutableSetOf()) { it.first }
+    val otherLanguages = languageEntries.filterNot { it.first in suggestedCodes }
+    val languageIcon = OptionIcon.Subtitle.drawableRes()
 
-    val contentPadding = PaddingValues(vertical = MaterialTheme.spacings.gutter)
+    val contentPadding =
+        PaddingValues(
+            top = LocalRootPageContentInset.current + MaterialTheme.spacings.gutter,
+            bottom = MaterialTheme.spacings.gutter,
+        )
 
-    PageScaffold(
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(CoreR.string.search_subtitles),
@@ -132,15 +152,15 @@ private fun SubtitleSearchScreenLayout(
                 },
             )
         }
-    ) { innerPadding ->
+    ) {
         if (LocalOfflineMode.current) {
-            OfflineNotice(modifier = Modifier.padding(innerPadding))
-            return@PageScaffold
+            OfflineNotice(modifier = Modifier.padding(top = LocalRootPageContentInset.current))
+            return@TopBarPageShell
         }
         AppPullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = onRefresh,
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier.fillMaxSize(),
             state = pullToRefreshState,
             showIndicator = false,
         ) {
@@ -176,11 +196,16 @@ private fun SubtitleSearchScreenLayout(
                         }
                     }
 
-                    if (state.existing.isNotEmpty()) {
-                        item {
-                            SettingsSection(
-                                title = stringResource(CoreR.string.existing_subtitles)
-                            ) {
+                    item {
+                        SettingsSection(title = stringResource(CoreR.string.existing_subtitles)) {
+                            if (state.existing.isEmpty()) {
+                                Text(
+                                    text = stringResource(CoreR.string.no_existing_subtitles),
+                                    modifier = Modifier.padding(MaterialTheme.spacings.medium),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            } else {
                                 state.existing.forEachIndexed { index, stream ->
                                     ExistingSubtitleRow(
                                         stream = stream,
@@ -266,22 +291,62 @@ private fun SubtitleSearchScreenLayout(
     if (languagePickerOpen) {
         BaseDialog(
             title = stringResource(CoreR.string.language),
+            description = stringResource(CoreR.string.subtitle_search_language_summary),
             onDismiss = { languagePickerOpen = false },
-        ) { dialogPadding ->
+        ) { _ ->
             val listState = rememberLazyListState()
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 state = listState,
-                contentPadding = dialogPadding,
             ) {
-                itemsIndexed(languageNames.toList()) { index, name ->
-                    LanguageDialogItem(
-                        name = name,
-                        selected = languageValues.getOrNull(index) == state.language,
-                        onSelect = {
-                            languageValues.getOrNull(index)?.let(onLanguageChange)
+                if (suggestedLanguages.isNotEmpty()) {
+                    item(key = "suggested-header") {
+                        Text(
+                            text = stringResource(CoreR.string.suggested),
+                            modifier =
+                                Modifier.padding(
+                                    start = 24.dp,
+                                    end = 24.dp,
+                                    top = MaterialTheme.spacings.small,
+                                    bottom = MaterialTheme.spacings.extraSmall,
+                                ),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    items(suggestedLanguages, key = { "suggested-${it.first}" }) { entry ->
+                        AppOptionRow(
+                            text = entry.second,
+                            iconDrawableId = languageIcon,
+                            onClick = {
+                                onLanguageChange(entry.first)
+                                languagePickerOpen = false
+                            },
+                            selected = entry.first == state.language,
+                            role = Role.RadioButton,
+                        )
+                    }
+                    item(key = "suggested-divider") {
+                        HorizontalDivider(
+                            modifier =
+                                Modifier.padding(
+                                    horizontal = MaterialTheme.spacings.medium,
+                                    vertical = MaterialTheme.spacings.extraSmall,
+                                ),
+                            color = DividerDefaults.color.copy(alpha = 0.2f),
+                        )
+                    }
+                }
+                items(otherLanguages, key = { it.first }) { entry ->
+                    AppOptionRow(
+                        text = entry.second,
+                        iconDrawableId = languageIcon,
+                        onClick = {
+                            onLanguageChange(entry.first)
                             languagePickerOpen = false
                         },
+                        selected = entry.first == state.language,
+                        role = Role.RadioButton,
                     )
                 }
             }
@@ -362,21 +427,6 @@ private fun ActionRow(
             modifier = Modifier.weight(1f),
         )
         trailing()
-    }
-}
-
-@Composable
-private fun LanguageDialogItem(name: String, selected: Boolean, onSelect: () -> Unit) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .clickable(onClick = onSelect)
-                .padding(horizontal = MaterialTheme.spacings.default),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = onSelect)
-        Spacer(modifier = Modifier.width(MaterialTheme.spacings.medium))
-        Text(text = name, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 

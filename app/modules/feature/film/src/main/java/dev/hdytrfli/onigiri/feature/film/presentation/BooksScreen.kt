@@ -49,8 +49,8 @@ import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PageSearchField
 import dev.hdytrfli.onigiri.ui.components.PageToolbar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
-import dev.hdytrfli.onigiri.ui.components.RootPage
 import dev.hdytrfli.onigiri.ui.components.TabContent
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.GridSize
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
@@ -99,8 +99,8 @@ fun BooksScreen(
     }
     OfflineModeReload { viewModel.load(force = true) }
 
-    RootPage(
-        header = {
+    TopBarPageShell(
+        topBar = {
             AnimatedContent(targetState = searchExpanded, label = "books-search") { expanded ->
                 if (expanded) {
                     PageSearchField(

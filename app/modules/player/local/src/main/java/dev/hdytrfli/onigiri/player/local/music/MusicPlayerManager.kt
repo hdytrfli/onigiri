@@ -26,6 +26,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -44,6 +45,7 @@ class MusicPlayerManager
 constructor(
     @ApplicationContext private val context: Context,
     private val repository: JellyfinRepository,
+    private val appPreferences: dev.hdytrfli.onigiri.settings.domain.AppPreferences,
 ) : Player.Listener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val sessionToken =
@@ -60,6 +62,13 @@ constructor(
 
     init {
         connect()
+        scope.launch {
+            appPreferences.observe(appPreferences.currentUser).drop(1).collect {
+                favoriteOverrides.clear()
+                stop()
+                _state.value = MusicPlaybackState(isConnected = controller != null)
+            }
+        }
         scope.launch {
             while (isActive) {
                 if (controller?.isPlaying == true) updateProgress()
@@ -196,17 +205,26 @@ constructor(
             batchPlayerUpdate {
                 val current = state.currentIndex
                 var seekIndex = item.timelineIndex
-                if (index > current) {
+                if (index != current) {
                     if (player.shuffleModeEnabled) {
                         val order = state.queue.map { it.timelineIndex }.toMutableList()
-                        val target = (current + 1).coerceAtMost(order.lastIndex)
+                        // Place the clicked track directly after the current one. For a track that
+                        // was already played, removing it shifts the current position back by one,
+                        // so the insertion point is the old current index rather than current + 1.
+                        val target =
+                            if (index < current) {
+                                current
+                            } else {
+                                (current + 1).coerceAtMost(order.lastIndex)
+                            }
                         if (index != target) {
                             order.add(target, order.removeAt(index))
                             setShuffleOrder(order.toIntArray())
                         }
                     } else {
-                        // Jumping forward moves the old current track into Played. Skipped tracks
-                        // stay below the clicked track instead of being marked as played.
+                        // Jumping to another track moves only the clicked track next to the current
+                        // one. Tracks in between stay in the played history instead of being moved
+                        // back into the up-next queue.
                         val physicalCurrent = player.currentMediaItemIndex
                         val target = (physicalCurrent + 1).coerceAtMost(player.mediaItemCount - 1)
                         player.moveMediaItem(item.timelineIndex, target)
@@ -216,6 +234,20 @@ constructor(
                 player.seekTo(seekIndex, 0L)
                 player.play()
             }
+        }
+    }
+
+    /**
+     * Jumps directly to a queue position without reordering the queue. Moving forward marks the
+     * skipped items as played; moving back into the played history brings that item and everything
+     * after it back into the current queue.
+     */
+    fun jumpToQueueItem(index: Int) {
+        val item = _state.value.queue.getOrNull(index) ?: return
+        runOnController { player ->
+            if (item.timelineIndex !in 0 until player.mediaItemCount) return@runOnController
+            player.seekTo(item.timelineIndex, 0L)
+            player.play()
         }
     }
 
@@ -255,6 +287,15 @@ constructor(
 
     fun pause() {
         runOnController { player -> if (player.isPlaying) player.pause() }
+    }
+
+    /**
+     * Holds music playback at 2x while the artwork is held. The speed is ramped so both the audio
+     * and the disc rotation speed up and settle back smoothly.
+     */
+    fun setSpeedBoost(active: Boolean) {
+        val target = if (active) 2f else 1f
+        runOnController { it.setPlaybackSpeed(target) }
     }
 
     fun stop() {

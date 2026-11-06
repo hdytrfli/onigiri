@@ -25,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +44,9 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.settings.domain.SubtitleFonts
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -114,18 +115,18 @@ private fun SubtitleFontScreenLayout(
             it.file?.parentFile != fontsDir
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
+    TopBarPageShell(
         topBar = {
             PageTopBar(
                 title = stringResource(R.string.subtitle_font_title),
                 onBack = onBack,
             )
-        },
-    ) { innerPadding ->
+        }
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPadding + innerPadding,
+            contentPadding =
+                contentPadding + PaddingValues(top = LocalRootPageContentInset.current),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

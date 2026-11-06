@@ -42,6 +42,15 @@ constructor(
                 initialValue = appPreferences.getValue(appPreferences.musicSwipeArtwork),
             )
 
+    val preciseSeeking: kotlinx.coroutines.flow.StateFlow<Boolean> =
+        appPreferences
+            .observe(appPreferences.musicPreciseSeeking)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = appPreferences.getValue(appPreferences.musicPreciseSeeking),
+            )
+
     /** Changes only when the track changes, so the navigation shell does not tick with progress. */
     val current: kotlinx.coroutines.flow.StateFlow<MusicPlaybackItem?> =
         manager.state
@@ -73,6 +82,8 @@ constructor(
 
     fun togglePlayPause() = manager.togglePlayPause()
 
+    fun setSpeedBoost(active: Boolean) = manager.setSpeedBoost(active)
+
     fun pause() = manager.pause()
 
     fun stop() = manager.stop()
@@ -98,6 +109,8 @@ constructor(
     }
 
     fun playQueueItem(index: Int) = manager.playQueueItem(index)
+
+    fun jumpToQueueItem(index: Int) = manager.jumpToQueueItem(index)
 
     fun removeQueueItem(index: Int) = manager.removeQueueItem(index)
 

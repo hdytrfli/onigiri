@@ -59,7 +59,7 @@ constructor(
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -130,7 +130,7 @@ constructor(
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -210,6 +210,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.grid_poster_portrait,
+                                                                descriptionStringRes =
+                                                                    R.string.grid_posters_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -219,6 +221,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.grid_poster_landscape,
+                                                                descriptionStringRes =
+                                                                    R.string.grid_posters_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -237,6 +241,9 @@ constructor(
                                                                 nameStringResource =
                                                                     R.string
                                                                         .grid_thumbnail_portrait,
+                                                                descriptionStringRes =
+                                                                    R.string
+                                                                        .grid_thumbnails_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -247,6 +254,9 @@ constructor(
                                                                 nameStringResource =
                                                                     R.string
                                                                         .grid_thumbnail_landscape,
+                                                                descriptionStringRes =
+                                                                    R.string
+                                                                        .grid_thumbnails_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -264,6 +274,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.grid_avatar_portrait,
+                                                                descriptionStringRes =
+                                                                    R.string.grid_avatars_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -273,6 +285,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.grid_avatar_landscape,
+                                                                descriptionStringRes =
+                                                                    R.string.grid_avatars_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -291,6 +305,9 @@ constructor(
                                                                 nameStringResource =
                                                                     R.string
                                                                         .grid_suggestion_portrait,
+                                                                descriptionStringRes =
+                                                                    R.string
+                                                                        .grid_suggestions_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -301,6 +318,9 @@ constructor(
                                                                 nameStringResource =
                                                                     R.string
                                                                         .grid_suggestion_landscape,
+                                                                descriptionStringRes =
+                                                                    R.string
+                                                                        .grid_suggestions_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -318,6 +338,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.grid_profile_portrait,
+                                                                descriptionStringRes =
+                                                                    R.string.grid_profiles_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -327,6 +349,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.grid_profile_landscape,
+                                                                descriptionStringRes =
+                                                                    R.string.grid_profiles_summary,
                                                                 options = R.array.grid_columns,
                                                                 optionValues = R.array.grid_columns,
                                                                 backendPreference =
@@ -395,6 +419,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.title_portrait_width,
+                                                                descriptionStringRes =
+                                                                    R.string.title_image_summary,
                                                                 options =
                                                                     R.array.title_width_options,
                                                                 optionValues =
@@ -406,6 +432,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.title_landscape_width,
+                                                                descriptionStringRes =
+                                                                    R.string.title_image_summary,
                                                                 options =
                                                                     R.array.title_width_options_low,
                                                                 optionValues =
@@ -417,6 +445,8 @@ constructor(
                                                             PreferenceSlider(
                                                                 nameStringResource =
                                                                     R.string.title_player_width,
+                                                                descriptionStringRes =
+                                                                    R.string.title_image_summary,
                                                                 options =
                                                                     R.array.title_width_options_low,
                                                                 optionValues =
@@ -469,562 +499,14 @@ constructor(
                 preferences =
                     listOf(
                         PreferenceCategory(
-                            nameStringResource = R.string.settings_category_reader,
-                            descriptionStringRes = R.string.settings_category_reader_summary,
-                            iconDrawableId = R.drawable.ic_book_open,
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(
-                                        SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
-                                        )
-                                    )
-                                }
-                            },
-                            nestedPreferenceGroups =
-                                listOf(
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.settings_group_display,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_theme,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_theme_summary,
-                                                    backendPreference = appPreferences.readerTheme,
-                                                    options = R.array.reader_themes_options,
-                                                    optionValues = R.array.reader_themes_values,
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_max_width,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_max_width_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerMaxWidth,
-                                                    options = R.array.reader_max_width_options,
-                                                    optionValues = R.array.reader_max_width_values,
-                                                ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.settings_group_reading,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_mode,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_mode_summary,
-                                                    backendPreference = appPreferences.readerMode,
-                                                    options = R.array.reader_modes_options,
-                                                    optionValues = R.array.reader_modes_values,
-                                                    onUpdate = { loadPreferences(lastIndexes) },
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_pull_distance,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_pull_distance_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerPullDistance,
-                                                    options = R.array.reader_pull_distance_options,
-                                                    optionValues =
-                                                        R.array.reader_pull_distance_values,
-                                                    enabled =
-                                                        appPreferences.getValue(
-                                                            appPreferences.readerMode
-                                                        ) == "scroll",
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_alignment,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_alignment_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerTextAlign,
-                                                    options = R.array.reader_alignment_options,
-                                                    optionValues = R.array.reader_alignment_values,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_normalization,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_normalization_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerTextNormalization,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_hyphenation,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_hyphenation_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerHyphenation,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_tap_turn,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_tap_turn_summary,
-                                                    enabled =
-                                                        appPreferences.getValue(
-                                                            appPreferences.readerMode
-                                                        ) != "scroll",
-                                                    backendPreference =
-                                                        appPreferences.readerTapTurn,
-                                                ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.settings_group_typography,
-                                        preferences =
-                                            listOf(
-                                                PreferenceAction(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_font,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_font_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerFontFamily,
-                                                    formatValue = { readerFontDisplayName(it) },
-                                                    onClick = {
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.NavigateToReaderFont
-                                                            )
-                                                        }
-                                                    },
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_font_size,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_font_size_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerFontSize,
-                                                    options = R.array.reader_font_size_options,
-                                                    optionValues = R.array.reader_font_size_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_font_weight,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_font_weight_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerFontWeight,
-                                                    options = R.array.reader_font_weight_options,
-                                                    optionValues =
-                                                        R.array.reader_font_weight_values,
-                                                ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.settings_group_spacing,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_margins,
-                                                    descriptionStringRes =
-                                                        R.string.settings_reader_margins_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerPageMargins,
-                                                    options = R.array.reader_margins_options,
-                                                    optionValues = R.array.reader_margins_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_line_height,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_line_height_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerLineHeight,
-                                                    options = R.array.reader_line_height_options,
-                                                    optionValues =
-                                                        R.array.reader_line_height_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_paragraph_spacing,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_paragraph_spacing_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerParagraphSpacing,
-                                                    options =
-                                                        R.array.reader_paragraph_spacing_options,
-                                                    optionValues =
-                                                        R.array.reader_paragraph_spacing_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_word_spacing,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_word_spacing_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerWordSpacing,
-                                                    options = R.array.reader_word_spacing_options,
-                                                    optionValues =
-                                                        R.array.reader_word_spacing_values,
-                                                ),
-                                                PreferenceSlider(
-                                                    nameStringResource =
-                                                        R.string.settings_reader_letter_spacing,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_reader_letter_spacing_summary,
-                                                    backendPreference =
-                                                        appPreferences.readerLetterSpacing,
-                                                    options = R.array.reader_letter_spacing_options,
-                                                    optionValues =
-                                                        R.array.reader_letter_spacing_values,
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        )
-                    )
-            ),
-            PreferenceGroup(
-                preferences =
-                    listOf(
-                        PreferenceCategory(
-                            nameStringResource = R.string.settings_category_player,
-                            descriptionStringRes = R.string.settings_category_player_summary,
-                            iconDrawableId = R.drawable.ic_play,
-                            onClick = {
-                                viewModelScope.launch {
-                                    eventsChannel.send(
-                                        SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
-                                        )
-                                    )
-                                }
-                            },
-                            nestedPreferenceGroups =
-                                listOf(
-                                    PreferenceGroup(
-                                        preferences =
-                                            listOf(
-                                                PreferenceCategory(
-                                                    nameStringResource = R.string.mpv_options,
-                                                    descriptionStringRes =
-                                                        R.string.mpv_options_summary,
-                                                    onClick = {
-                                                        viewModelScope.launch {
-                                                            eventsChannel.send(
-                                                                SettingsEvent.NavigateToSettings(
-                                                                    listOf(
-                                                                        R.string
-                                                                            .settings_category_player,
-                                                                        it.nameStringResource,
-                                                                    )
-                                                                )
-                                                            )
-                                                        }
-                                                    },
-                                                    nestedPreferenceGroups =
-                                                        listOf(
-                                                            PreferenceGroup(
-                                                                nameStringResource =
-                                                                    R.string.settings_group_output,
-                                                                preferences =
-                                                                    listOf(
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_hwdec,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_hwdec_summary,
-                                                                            optionIcon =
-                                                                                OptionIcon.Decode,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvHwdec,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_hwdec_options,
-                                                                            optionValues =
-                                                                                R.array.mpv_hwdec,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_vo,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_vo_summary,
-                                                                            optionIcon =
-                                                                                OptionIcon.Monitor,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvVo,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_vo_options,
-                                                                            optionValues =
-                                                                                R.array.mpv_vos,
-                                                                        ),
-                                                                        PreferenceSelect(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .pref_player_mpv_ao,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_ao_summary,
-                                                                            optionIcon =
-                                                                                OptionIcon
-                                                                                    .AudioOutput,
-                                                                            backendPreference =
-                                                                                appPreferences
-                                                                                    .playerMpvAo,
-                                                                            options =
-                                                                                R.array
-                                                                                    .mpv_ao_options,
-                                                                            optionValues =
-                                                                                R.array.mpv_aos,
-                                                                        ),
-                                                                    ),
-                                                            ),
-                                                            PreferenceGroup(
-                                                                nameStringResource =
-                                                                    R.string.advanced,
-                                                                preferences =
-                                                                    listOf(
-                                                                        PreferenceFileEdit(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .edit_file_title,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_edit_conf_summary,
-                                                                            filePath =
-                                                                                "mpv/mpv.conf",
-                                                                            onClick = {
-                                                                                viewModelScope
-                                                                                    .launch {
-                                                                                        eventsChannel
-                                                                                            .send(
-                                                                                                SettingsEvent
-                                                                                                    .NavigateToSettingsFileEdit(
-                                                                                                        it
-                                                                                                            .filePath
-                                                                                                    )
-                                                                                            )
-                                                                                    }
-                                                                            },
-                                                                        ),
-                                                                        PreferenceFileEdit(
-                                                                            nameStringResource =
-                                                                                R.string
-                                                                                    .edit_file_title,
-                                                                            descriptionStringRes =
-                                                                                R.string
-                                                                                    .pref_player_mpv_edit_input_summary,
-                                                                            filePath =
-                                                                                "mpv/input.conf",
-                                                                            onClick = {
-                                                                                viewModelScope
-                                                                                    .launch {
-                                                                                        eventsChannel
-                                                                                            .send(
-                                                                                                SettingsEvent
-                                                                                                    .NavigateToSettingsFileEdit(
-                                                                                                        it
-                                                                                                            .filePath
-                                                                                                    )
-                                                                                            )
-                                                                                    }
-                                                                            },
-                                                                        ),
-                                                                    ),
-                                                            ),
-                                                        ),
-                                                )
-                                            )
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.player_time_display,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.pref_player_time_display,
-                                                    descriptionStringRes =
-                                                        R.string.pref_player_time_display_summary,
-                                                    optionIcon = OptionIcon.Clock,
-                                                    backendPreference =
-                                                        appPreferences.playerTimeDisplay,
-                                                    onUpdate = { value ->
-                                                        appPreferences.setValue(
-                                                            appPreferences.playerTimeShowFinish,
-                                                            value == "finish",
-                                                        )
-                                                        // Re-evaluate visibility now that the flag
-                                                        // changed (the screen reloads before this).
-                                                        loadPreferences(lastIndexes)
-                                                    },
-                                                    options = R.array.player_time_display_options,
-                                                    optionValues =
-                                                        R.array.player_time_display_values,
-                                                ),
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.pref_player_time_end_format,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_time_end_format_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerTimeShowFinish),
-                                                    hideWhenDisabled = true,
-                                                    optionIcon = OptionIcon.Clock,
-                                                    backendPreference =
-                                                        appPreferences.playerTimeEndFormat,
-                                                    options =
-                                                        R.array.player_time_end_format_options,
-                                                    optionValues =
-                                                        R.array.player_time_end_format_values,
-                                                ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.gestures,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_volume,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_volume_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesVolume,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_brightness,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_brightness_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesBrightness,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_zoom,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_zoom_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesZoom,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_dynamic_zoom,
-                                                    descriptionStringRes =
-                                                        R.string.player_dynamic_zoom_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerGesturesZoom),
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesDynamicZoom,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_start_maximized,
-                                                    descriptionStringRes =
-                                                        R.string.player_start_maximized_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesStartMaximized,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.player_gestures_double_tap,
-                                                    descriptionStringRes =
-                                                        R.string.player_gestures_double_tap_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesDoubleTap,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.picture_in_picture_gesture,
-                                                    descriptionStringRes =
-                                                        R.string.picture_in_picture_gesture_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerPipGesture,
-                                                ),
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.settings_group_controls,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSelect(
-                                                    nameStringResource =
-                                                        R.string.player_controls_timeout,
-                                                    descriptionStringRes =
-                                                        R.string.player_controls_timeout_summary,
-                                                    optionIcon = OptionIcon.Clock,
-                                                    backendPreference =
-                                                        appPreferences.playerControlsTimeout,
-                                                    options =
-                                                        R.array.player_controls_timeout_options,
-                                                    optionValues =
-                                                        R.array.player_controls_timeout_values,
-                                                )
-                                            ),
-                                    ),
-                                    PreferenceGroup(
-                                        nameStringResource = R.string.trickplay,
-                                        preferences =
-                                            listOf(
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.pref_player_trickplay,
-                                                    descriptionStringRes =
-                                                        R.string.pref_player_trickplay_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerTrickplay,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string
-                                                            .pref_player_gestures_seek_trickplay,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .pref_player_gestures_seek_trickplay_summary,
-                                                    dependencies =
-                                                        listOf(appPreferences.playerTrickplay),
-                                                    backendPreference =
-                                                        appPreferences.playerGesturesSeekTrickplay,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.settings_player_precise_seeking,
-                                                    descriptionStringRes =
-                                                        R.string
-                                                            .settings_player_precise_seeking_summary,
-                                                    backendPreference =
-                                                        appPreferences.playerPreciseSeeking,
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                        PreferenceCategory(
-                            nameStringResource = R.string.mpv_subtitles,
-                            descriptionStringRes = R.string.mpv_subtitles_summary,
+                            nameStringResource = R.string.subtitles,
+                            descriptionStringRes = R.string.subtitles_summary,
                             iconDrawableId = R.drawable.ic_closed_caption,
                             onClick = {
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -1216,21 +698,253 @@ constructor(
                                             ),
                                     ),
                                 ),
-                        ),
+                        )
                     )
             ),
             PreferenceGroup(
                 preferences =
                     listOf(
                         PreferenceCategory(
-                            nameStringResource = R.string.settings_category_music,
-                            descriptionStringRes = R.string.settings_category_music_summary,
-                            iconDrawableId = R.drawable.ic_music,
+                            nameStringResource = R.string.settings_category_reader,
+                            descriptionStringRes = R.string.settings_category_reader_summary,
+                            iconDrawableId = R.drawable.ic_book_open,
                             onClick = {
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
+                                        )
+                                    )
+                                }
+                            },
+                            nestedPreferenceGroups =
+                                listOf(
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_display,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_theme,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_theme_summary,
+                                                    backendPreference = appPreferences.readerTheme,
+                                                    options = R.array.reader_themes_options,
+                                                    optionValues = R.array.reader_themes_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_max_width,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_max_width_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerMaxWidth,
+                                                    options = R.array.reader_max_width_options,
+                                                    optionValues = R.array.reader_max_width_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_reading,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_mode,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_mode_summary,
+                                                    backendPreference = appPreferences.readerMode,
+                                                    options = R.array.reader_modes_options,
+                                                    optionValues = R.array.reader_modes_values,
+                                                    onUpdate = { loadPreferences(lastIndexes) },
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_pull_distance,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_pull_distance_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerPullDistance,
+                                                    options = R.array.reader_pull_distance_options,
+                                                    optionValues =
+                                                        R.array.reader_pull_distance_values,
+                                                    enabled =
+                                                        appPreferences.getValue(
+                                                            appPreferences.readerMode
+                                                        ) == "scroll",
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_alignment,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_alignment_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerTextAlign,
+                                                    options = R.array.reader_alignment_options,
+                                                    optionValues = R.array.reader_alignment_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_normalization,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_normalization_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerTextNormalization,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_hyphenation,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_hyphenation_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerHyphenation,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_tap_turn,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_tap_turn_summary,
+                                                    enabled =
+                                                        appPreferences.getValue(
+                                                            appPreferences.readerMode
+                                                        ) != "scroll",
+                                                    backendPreference =
+                                                        appPreferences.readerTapTurn,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_precise_seeking,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_precise_seeking_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerPreciseSeeking,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_typography,
+                                        preferences =
+                                            listOf(
+                                                PreferenceAction(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_font,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_font_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerFontFamily,
+                                                    formatValue = { readerFontDisplayName(it) },
+                                                    onClick = {
+                                                        viewModelScope.launch {
+                                                            eventsChannel.send(
+                                                                SettingsEvent.NavigateToReaderFont
+                                                            )
+                                                        }
+                                                    },
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_font_size,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_font_size_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerFontSize,
+                                                    options = R.array.reader_font_size_options,
+                                                    optionValues = R.array.reader_font_size_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_font_weight,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_font_weight_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerFontWeight,
+                                                    options = R.array.reader_font_weight_options,
+                                                    optionValues =
+                                                        R.array.reader_font_weight_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_spacing,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_margins,
+                                                    descriptionStringRes =
+                                                        R.string.settings_reader_margins_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerPageMargins,
+                                                    options = R.array.reader_margins_options,
+                                                    optionValues = R.array.reader_margins_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_line_height,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_line_height_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerLineHeight,
+                                                    options = R.array.reader_line_height_options,
+                                                    optionValues =
+                                                        R.array.reader_line_height_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_paragraph_spacing,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_paragraph_spacing_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerParagraphSpacing,
+                                                    options =
+                                                        R.array.reader_paragraph_spacing_options,
+                                                    optionValues =
+                                                        R.array.reader_paragraph_spacing_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_word_spacing,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_word_spacing_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerWordSpacing,
+                                                    options = R.array.reader_word_spacing_options,
+                                                    optionValues =
+                                                        R.array.reader_word_spacing_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.settings_reader_letter_spacing,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_reader_letter_spacing_summary,
+                                                    backendPreference =
+                                                        appPreferences.readerLetterSpacing,
+                                                    options = R.array.reader_letter_spacing_options,
+                                                    optionValues =
+                                                        R.array.reader_letter_spacing_values,
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                        PreferenceCategory(
+                            nameStringResource = R.string.settings_category_player,
+                            descriptionStringRes = R.string.settings_category_player_summary,
+                            iconDrawableId = R.drawable.ic_play,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(
+                                        SettingsEvent.NavigateToSettings(
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -1240,19 +954,359 @@ constructor(
                                     PreferenceGroup(
                                         preferences =
                                             listOf(
+                                                PreferenceCategory(
+                                                    nameStringResource = R.string.mpv_options,
+                                                    descriptionStringRes =
+                                                        R.string.mpv_options_summary,
+                                                    onClick = {
+                                                        viewModelScope.launch {
+                                                            eventsChannel.send(
+                                                                SettingsEvent.NavigateToSettings(
+                                                                    lastIndexes +
+                                                                        it.nameStringResource
+                                                                )
+                                                            )
+                                                        }
+                                                    },
+                                                    nestedPreferenceGroups =
+                                                        listOf(
+                                                            PreferenceGroup(
+                                                                nameStringResource =
+                                                                    R.string.settings_group_output,
+                                                                preferences =
+                                                                    listOf(
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_hwdec,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_hwdec_summary,
+                                                                            optionIcon =
+                                                                                OptionIcon.Decode,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvHwdec,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_hwdec_options,
+                                                                            optionValues =
+                                                                                R.array.mpv_hwdec,
+                                                                        ),
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_vo,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_vo_summary,
+                                                                            optionIcon =
+                                                                                OptionIcon.Monitor,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvVo,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_vo_options,
+                                                                            optionValues =
+                                                                                R.array.mpv_vos,
+                                                                        ),
+                                                                        PreferenceSelect(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .pref_player_mpv_ao,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_ao_summary,
+                                                                            optionIcon =
+                                                                                OptionIcon
+                                                                                    .AudioOutput,
+                                                                            backendPreference =
+                                                                                appPreferences
+                                                                                    .playerMpvAo,
+                                                                            options =
+                                                                                R.array
+                                                                                    .mpv_ao_options,
+                                                                            optionValues =
+                                                                                R.array.mpv_aos,
+                                                                        ),
+                                                                    ),
+                                                            ),
+                                                            PreferenceGroup(
+                                                                nameStringResource =
+                                                                    R.string.advanced,
+                                                                preferences =
+                                                                    listOf(
+                                                                        PreferenceFileEdit(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .edit_file_title,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_edit_conf_summary,
+                                                                            filePath =
+                                                                                "mpv/mpv.conf",
+                                                                            onClick = {
+                                                                                viewModelScope
+                                                                                    .launch {
+                                                                                        eventsChannel
+                                                                                            .send(
+                                                                                                SettingsEvent
+                                                                                                    .NavigateToSettingsFileEdit(
+                                                                                                        it
+                                                                                                            .filePath
+                                                                                                    )
+                                                                                            )
+                                                                                    }
+                                                                            },
+                                                                        ),
+                                                                        PreferenceFileEdit(
+                                                                            nameStringResource =
+                                                                                R.string
+                                                                                    .edit_file_title,
+                                                                            descriptionStringRes =
+                                                                                R.string
+                                                                                    .pref_player_mpv_edit_input_summary,
+                                                                            filePath =
+                                                                                "mpv/input.conf",
+                                                                            onClick = {
+                                                                                viewModelScope
+                                                                                    .launch {
+                                                                                        eventsChannel
+                                                                                            .send(
+                                                                                                SettingsEvent
+                                                                                                    .NavigateToSettingsFileEdit(
+                                                                                                        it
+                                                                                                            .filePath
+                                                                                                    )
+                                                                                            )
+                                                                                    }
+                                                                            },
+                                                                        ),
+                                                                    ),
+                                                            ),
+                                                        ),
+                                                )
+                                            )
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.player_time_display,
+                                        preferences =
+                                            listOf(
                                                 PreferenceSelect(
                                                     nameStringResource =
-                                                        R.string.settings_music_artwork_type,
+                                                        R.string.pref_player_time_display,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_time_display_summary,
+                                                    optionIcon = OptionIcon.Clock,
+                                                    backendPreference =
+                                                        appPreferences.playerTimeDisplay,
+                                                    onUpdate = { value ->
+                                                        appPreferences.setValue(
+                                                            appPreferences.playerTimeShowFinish,
+                                                            value == "finish",
+                                                        )
+                                                        // Re-evaluate
+                                                        // visibility now
+                                                        // that the flag
+                                                        // changed (the
+                                                        // screen reloads
+                                                        // before this).
+                                                        loadPreferences(lastIndexes)
+                                                    },
+                                                    options = R.array.player_time_display_options,
+                                                    optionValues =
+                                                        R.array.player_time_display_values,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.pref_player_time_end_format,
                                                     descriptionStringRes =
                                                         R.string
-                                                            .settings_music_artwork_type_summary,
-                                                    optionIcon = OptionIcon.Portrait,
+                                                            .pref_player_time_end_format_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.playerTimeShowFinish),
+                                                    hideWhenDisabled = true,
+                                                    optionIcon = OptionIcon.Clock,
                                                     backendPreference =
-                                                        appPreferences.musicArtworkType,
-                                                    options = R.array.music_artwork_type_options,
+                                                        appPreferences.playerTimeEndFormat,
+                                                    options =
+                                                        R.array.player_time_end_format_options,
                                                     optionValues =
-                                                        R.array.music_artwork_type_values,
+                                                        R.array.player_time_end_format_values,
                                                 ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.gestures,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_gestures_volume,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_volume_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesVolume,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_gestures_brightness,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_brightness_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesBrightness,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_gestures_zoom,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_zoom_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesZoom,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_dynamic_zoom,
+                                                    descriptionStringRes =
+                                                        R.string.player_dynamic_zoom_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.playerGesturesZoom),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesDynamicZoom,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_start_maximized,
+                                                    descriptionStringRes =
+                                                        R.string.player_start_maximized_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesStartMaximized,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_seeking,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_player_precise_seeking,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_player_precise_seeking_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerPreciseSeeking,
+                                                ),
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_player_seek_mode,
+                                                    descriptionStringRes =
+                                                        R.string.settings_player_seek_mode_summary,
+                                                    optionIcon = OptionIcon.Clock,
+                                                    backendPreference =
+                                                        appPreferences.playerSeekMode,
+                                                    options = R.array.player_seek_mode_options,
+                                                    optionValues = R.array.player_seek_mode_values,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.player_gestures_double_tap,
+                                                    descriptionStringRes =
+                                                        R.string.player_gestures_double_tap_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesDoubleTap,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_controls,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.player_controls_timeout,
+                                                    descriptionStringRes =
+                                                        R.string.player_controls_timeout_summary,
+                                                    optionIcon = OptionIcon.Clock,
+                                                    backendPreference =
+                                                        appPreferences.playerControlsTimeout,
+                                                    options =
+                                                        R.array.player_controls_timeout_options,
+                                                    optionValues =
+                                                        R.array.player_controls_timeout_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.seek_back_increment,
+                                                    descriptionStringRes =
+                                                        R.string.seek_back_increment_summary,
+                                                    optionIcon = OptionIcon.Clock,
+                                                    backendPreference =
+                                                        appPreferences.playerSeekBackIncStep,
+                                                    options = R.array.seek_increment_options,
+                                                    optionValues = R.array.seek_increment_values,
+                                                ),
+                                                PreferenceSlider(
+                                                    nameStringResource =
+                                                        R.string.seek_forward_increment,
+                                                    descriptionStringRes =
+                                                        R.string.seek_forward_increment_summary,
+                                                    optionIcon = OptionIcon.Clock,
+                                                    backendPreference =
+                                                        appPreferences.playerSeekForwardIncStep,
+                                                    options = R.array.seek_increment_options,
+                                                    optionValues = R.array.seek_increment_values,
+                                                ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.trickplay,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.pref_player_trickplay,
+                                                    descriptionStringRes =
+                                                        R.string.pref_player_trickplay_summary,
+                                                    backendPreference =
+                                                        appPreferences.playerTrickplay,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string
+                                                            .pref_player_gestures_seek_trickplay,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .pref_player_gestures_seek_trickplay_summary,
+                                                    dependencies =
+                                                        listOf(appPreferences.playerTrickplay),
+                                                    backendPreference =
+                                                        appPreferences.playerGesturesSeekTrickplay,
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                        PreferenceCategory(
+                            nameStringResource = R.string.settings_category_music,
+                            descriptionStringRes = R.string.settings_category_music_summary,
+                            iconDrawableId = R.drawable.ic_music,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(
+                                        SettingsEvent.NavigateToSettings(
+                                            lastIndexes + it.nameStringResource
+                                        )
+                                    )
+                                }
+                            },
+                            nestedPreferenceGroups =
+                                listOf(
+                                    PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_playback,
+                                        preferences =
+                                            listOf(
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.settings_music_gapless,
@@ -1271,6 +1325,9 @@ constructor(
                                                 PreferenceSlider(
                                                     nameStringResource =
                                                         R.string.settings_music_crossfade_duration,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_crossfade_duration_summary,
                                                     backendPreference =
                                                         appPreferences.musicCrossfadeDuration,
                                                     options =
@@ -1289,6 +1346,26 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.musicAudioNormalization,
                                                 ),
+                                            ),
+                                    ),
+                                    PreferenceGroup(
+                                        nameStringResource =
+                                            R.string.settings_group_artwork_gestures,
+                                        preferences =
+                                            listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.settings_music_artwork_type,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_artwork_type_summary,
+                                                    optionIcon = OptionIcon.Portrait,
+                                                    backendPreference =
+                                                        appPreferences.musicArtworkType,
+                                                    options = R.array.music_artwork_type_options,
+                                                    optionValues =
+                                                        R.array.music_artwork_type_values,
+                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.settings_music_swipe_artwork,
@@ -1298,10 +1375,19 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.musicSwipeArtwork,
                                                 ),
-                                            )
-                                    )
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.settings_music_precise_seeking,
+                                                    descriptionStringRes =
+                                                        R.string
+                                                            .settings_music_precise_seeking_summary,
+                                                    backendPreference =
+                                                        appPreferences.musicPreciseSeeking,
+                                                ),
+                                            ),
+                                    ),
                                 ),
-                        )
+                        ),
                     )
             ),
             PreferenceGroup(
@@ -1338,7 +1424,7 @@ constructor(
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -1385,7 +1471,7 @@ constructor(
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -1440,7 +1526,7 @@ constructor(
                                 viewModelScope.launch {
                                     eventsChannel.send(
                                         SettingsEvent.NavigateToSettings(
-                                            listOf(it.nameStringResource)
+                                            lastIndexes + it.nameStringResource
                                         )
                                     )
                                 }
@@ -1698,10 +1784,12 @@ constructor(
                 preference !is PreferenceCategory -> null
                 preference.nameStringResource == R.string.settings_category_language ||
                     preference.nameStringResource == R.string.settings_category_interface ||
-                    preference.nameStringResource == R.string.settings_category_reader ||
+                    preference.nameStringResource == R.string.subtitles ->
+                    R.string.settings_group_app
+                preference.nameStringResource == R.string.settings_category_reader ||
                     preference.nameStringResource == R.string.settings_category_player ||
                     preference.nameStringResource == R.string.settings_category_music ->
-                    R.string.settings_group_app
+                    R.string.settings_group_media_player
                 preference.nameStringResource == R.string.settings_category_network ->
                     R.string.settings_group_server
                 preference.nameStringResource == R.string.title_download ||

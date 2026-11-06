@@ -1,7 +1,6 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -49,6 +48,7 @@ import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
+import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.preview.dummyMovies
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -121,7 +121,30 @@ private fun CollectionDetailLayout(
             }
         }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    TopBarPageShell(
+        topBar = {
+            ItemTopBar(
+                hasBackButton = true,
+                onBackClick = { onAction(CollectionAction.OnBackClick) },
+                trailingContent = {
+                    AppButtonGroup {
+                        PullToRefreshButton(
+                            state = pullToRefreshState,
+                            isRefreshing = state.isLoading,
+                            onRefresh = onRefresh,
+                        )
+                        state.collection?.let { collection ->
+                            DetailActionsMenu(
+                                itemId = collection.id,
+                                actions = setOf(DetailAction.EDIT_IMAGES),
+                                onEditImages = { onEditImages(collection.id) },
+                            )
+                        }
+                    }
+                },
+            )
+        }
+    ) {
         AppPullToRefreshBox(
             isRefreshing = state.isLoading,
             onRefresh = onRefresh,
@@ -198,27 +221,6 @@ private fun CollectionDetailLayout(
                 )
             }
         }
-
-        ItemTopBar(
-            hasBackButton = true,
-            onBackClick = { onAction(CollectionAction.OnBackClick) },
-            trailingContent = {
-                AppButtonGroup {
-                    PullToRefreshButton(
-                        state = pullToRefreshState,
-                        isRefreshing = state.isLoading,
-                        onRefresh = onRefresh,
-                    )
-                    state.collection?.let { collection ->
-                        DetailActionsMenu(
-                            itemId = collection.id,
-                            actions = setOf(DetailAction.EDIT_IMAGES),
-                            onEditImages = { onEditImages(collection.id) },
-                        )
-                    }
-                }
-            },
-        )
     }
 }
 

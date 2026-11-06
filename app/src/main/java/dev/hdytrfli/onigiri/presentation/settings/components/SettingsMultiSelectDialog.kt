@@ -75,6 +75,8 @@ private fun SettingsMultiSelectDialogPreview() {
                 PreferenceMultiSelect(
                     nameStringResource =
                         SettingsR.string.pref_player_media_segments_skip_button_type,
+                    descriptionStringRes =
+                        SettingsR.string.pref_player_media_segments_skip_button_type_summary,
                     backendPreference = Preference("", emptySet()),
                     options = SettingsR.array.media_segments_type,
                     optionValues = SettingsR.array.media_segments_type_values,

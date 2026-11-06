@@ -54,6 +54,8 @@ private fun SettingsSelectDialogPreview() {
             preference =
                 PreferenceSelect(
                     nameStringResource = SettingsR.string.settings_preferred_audio_language,
+                    descriptionStringRes =
+                        SettingsR.string.settings_preferred_audio_language_summary,
                     optionIcon = OptionIcon.Audio,
                     backendPreference = Preference("", ""),
                     options = SettingsR.array.languages,

@@ -129,7 +129,6 @@ private fun QueueMenuButton(onPlayNext: () -> Unit, onAddToQueue: () -> Unit) {
         AppDropdownMenu(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
-            alignEnd = true,
         ) {
             MenuActionItem(
                 label = stringResource(FilmR.string.music_play_next),

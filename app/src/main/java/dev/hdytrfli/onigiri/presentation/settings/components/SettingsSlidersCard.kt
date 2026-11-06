@@ -68,12 +68,14 @@ private fun SettingsSlidersCardPreview() {
                         listOf(
                             PreferenceSlider(
                                 nameStringResource = SettingsR.string.grid_poster_portrait,
+                                descriptionStringRes = SettingsR.string.grid_posters_summary,
                                 options = SettingsR.array.grid_columns,
                                 optionValues = SettingsR.array.grid_columns,
                                 backendPreference = Preference("", "2"),
                             ),
                             PreferenceSlider(
                                 nameStringResource = SettingsR.string.grid_poster_landscape,
+                                descriptionStringRes = SettingsR.string.grid_posters_summary,
                                 options = SettingsR.array.grid_columns,
                                 optionValues = SettingsR.array.grid_columns,
                                 backendPreference = Preference("", "4"),

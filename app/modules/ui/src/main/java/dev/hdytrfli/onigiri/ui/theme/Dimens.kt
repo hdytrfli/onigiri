@@ -7,6 +7,9 @@ object Dimens {
     /** Max width of the wide, centred content columns (settings, identify, subtitles). */
     val contentMaxWidth = 640.dp
 
+    /** Max width of the music player artwork itself, independent of the swipe viewport. */
+    val playerArtworkMaxWidth = 480.dp
+
     /** Max width of the setup/login forms and narrow dialogs. */
     val formMaxWidth = 480.dp
 

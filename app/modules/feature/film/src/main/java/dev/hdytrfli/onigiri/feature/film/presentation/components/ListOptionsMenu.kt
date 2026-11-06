@@ -45,7 +45,6 @@ fun ListOptionsMenu(
         AppDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            alignEnd = true,
         ) {
             if (showDisplayInfo) {
                 MenuActionItem(

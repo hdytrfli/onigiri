@@ -163,6 +163,9 @@
     <string name="search_subtitles_error">Couldn\'t search for subtitles</string>
     <string name="search_subtitles_empty">No subtitles found</string>
     <string name="existing_subtitles">Existing subtitles</string>
+    <string name="no_existing_subtitles">No subtitles attached</string>
+    <string name="suggested">Suggested</string>
+    <string name="subtitle_search_language_summary">Language used for this search</string>
     <string name="available_subtitles">Available subtitles</string>
     <string name="language">Language</string>
     <string name="delete">Delete</string>
