@@ -1115,6 +1115,10 @@ class JellyfinRepositoryImpl(
         withContext(Dispatchers.IO) { jellyfinApi.imageApi.deleteItemImage(itemId, type, index) }
     }
 
+    override suspend fun deleteItem(itemId: UUID) {
+        withContext(Dispatchers.IO) { jellyfinApi.libraryApi.deleteItem(itemId) }
+    }
+
     override suspend fun updateItemImageIndex(
         itemId: UUID,
         type: ImageType,

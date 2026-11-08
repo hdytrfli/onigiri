@@ -2,7 +2,9 @@ package dev.hdytrfli.onigiri.feature.film.presentation.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.IdentifyViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
@@ -47,11 +50,13 @@ fun DetailActionsMenu(
     onIdentify: () -> Unit = {},
     onIdentifyApplied: () -> Unit = {},
     onEditImages: () -> Unit = {},
+    onDeleted: () -> Unit = {},
     identifyViewModel: IdentifyViewModel = hiltViewModel(),
     subtitleViewModel: SubtitleSearchViewModel = hiltViewModel(),
 ) {
     val identifyState by identifyViewModel.state.collectAsStateWithLifecycle()
     val subtitleState by subtitleViewModel.state.collectAsStateWithLifecycle()
+    val deleteController = rememberMediaDeleteController()
 
     var menuOpen by remember { mutableStateOf(false) }
     var wasApplying by remember { mutableStateOf(false) }
@@ -75,10 +80,11 @@ fun DetailActionsMenu(
         DetailAction.SUBTITLE_SEARCH in actions && subtitleState.canManageSubtitles
     val showIdentify = DetailAction.IDENTIFY in actions && identifyState.canManage
     val showEditImages = DetailAction.EDIT_IMAGES in actions && identifyState.canManage
+    val showDelete = deleteController.canDelete
 
     // These actions all need the server, so offline mode hides the trigger entirely.
     if (LocalOfflineMode.current) return
-    if (!showSubtitleSearch && !showIdentify && !showEditImages) return
+    if (!showSubtitleSearch && !showIdentify && !showEditImages && !showDelete) return
 
     Box(modifier = modifier) {
         AppIconButton(
@@ -126,6 +132,18 @@ fun DetailActionsMenu(
                     onClick = {
                         menuOpen = false
                         onEditImages()
+                    },
+                )
+            }
+            if (showDelete) {
+                HorizontalDivider()
+                MenuActionItem(
+                    icon = CoreR.drawable.ic_trash,
+                    label = stringResource(FilmR.string.delete_media_action),
+                    iconTint = MaterialTheme.colorScheme.error,
+                    onClick = {
+                        menuOpen = false
+                        deleteController.request(itemId, onDeleted = onDeleted)
                     },
                 )
             }

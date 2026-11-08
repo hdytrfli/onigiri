@@ -208,6 +208,7 @@ private fun MovieScreenLayout(
                                 onIdentify = { onIdentify(movie.id) },
                                 onIdentifyApplied = onIdentifyApplied,
                                 onEditImages = { onEditImages(movie.id) },
+                                onDeleted = { onAction(MovieAction.OnBackClick) },
                             )
                         }
                     }

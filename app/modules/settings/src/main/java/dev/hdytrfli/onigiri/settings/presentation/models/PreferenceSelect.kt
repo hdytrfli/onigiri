@@ -18,4 +18,7 @@ data class PreferenceSelect(
     val optionsIncludeNull: Boolean = false,
     val value: String? = null,
     val optionIcon: OptionIcon? = null,
+    /** Use the shared language picker with suggestions instead of the generic option list. */
+    val isLanguagePicker: Boolean = false,
+    val suggestedValues: List<String> = emptyList(),
 ) : Preference

@@ -46,6 +46,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
     private val pendingMusicDestination = mutableStateOf<MusicLaunchDestination?>(null)
+    private val pendingSettingsIndexes = mutableStateOf<List<Int>?>(null)
 
     @Inject lateinit var appPreferences: AppPreferences
     @Inject lateinit var swrStore: SwrStore
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleMusicIntent(intent)
+        handleSettingsIntent(intent)
 
         enableEdgeToEdge()
 
@@ -145,6 +147,7 @@ class MainActivity : AppCompatActivity() {
                                 confirmExit = state.confirmExit,
                                 swrStore = swrStore,
                                 musicDestination = pendingMusicDestination,
+                                settingsDestination = pendingSettingsIndexes,
                             )
                         }
                     }
@@ -157,6 +160,15 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleMusicIntent(intent)
+        handleSettingsIntent(intent)
+    }
+
+    private fun handleSettingsIntent(intent: Intent?) {
+        val indexes = intent?.getIntegerArrayListExtra(EXTRA_SETTINGS_INDEXES)?.toList()
+        if (indexes != null) {
+            pendingSettingsIndexes.value = indexes
+            intent.removeExtra(EXTRA_SETTINGS_INDEXES)
+        }
     }
 
     private fun handleMusicIntent(intent: Intent?) {
@@ -168,5 +180,9 @@ class MainActivity : AppCompatActivity() {
                 albumId != null -> MusicLaunchDestination.Album(albumId)
                 else -> null
             }
+    }
+
+    companion object {
+        const val EXTRA_SETTINGS_INDEXES = "settingsIndexes"
     }
 }

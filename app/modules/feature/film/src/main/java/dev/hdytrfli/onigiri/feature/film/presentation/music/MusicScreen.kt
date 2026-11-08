@@ -38,6 +38,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.ListOptionsMenu
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicRowAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.SectionHeader
+import dev.hdytrfli.onigiri.feature.film.presentation.components.rememberMediaDeleteController
 import dev.hdytrfli.onigiri.feature.film.presentation.components.section
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
@@ -69,6 +70,7 @@ fun MusicScreen(
     var showDisplayDialog by rememberSaveable { mutableStateOf(false) }
     var showSortDialog by rememberSaveable { mutableStateOf(false) }
     val pullState = rememberPullToRefreshState()
+    val deleteController = rememberMediaDeleteController()
 
     LaunchedEffect(Unit) { viewModel.load() }
     OfflineModeReload { viewModel.load(force = true) }
@@ -175,6 +177,16 @@ fun MusicScreen(
                             onPlayNext = viewModel::playNext,
                             onAddToQueue = viewModel::addToQueue,
                             onToggleFavorite = viewModel::toggleFavorite,
+                            onDelete =
+                                if (deleteController.canDelete) {
+                                    { song ->
+                                        deleteController.request(song.id, song.name) {
+                                            viewModel.load(force = true)
+                                        }
+                                    }
+                                } else {
+                                    null
+                                },
                             onArtistClick = onArtistClick,
                             onAlbumClick = onAlbumClick,
                         )
@@ -305,6 +317,7 @@ private fun SongsGrid(
     onPlayNext: (java.util.UUID) -> Unit,
     onAddToQueue: (java.util.UUID) -> Unit,
     onToggleFavorite: (java.util.UUID) -> Unit,
+    onDelete: ((dev.hdytrfli.onigiri.models.FindroidMusicSong) -> Unit)?,
     onArtistClick: (artistId: String) -> Unit,
     onAlbumClick: (albumId: String) -> Unit,
 ) {
@@ -346,6 +359,7 @@ private fun SongsGrid(
                     onPlayNext = { onPlayNext(song.id) },
                     onAddToQueue = { onAddToQueue(song.id) },
                     onToggleFavorite = { onToggleFavorite(song.id) },
+                    onDelete = onDelete?.let { { it(song) } },
                     onViewArtist = song.artistId?.let { { onArtistClick(it.toString()) } },
                     onViewAlbum = song.albumId?.let { { onAlbumClick(it.toString()) } },
                 )
@@ -363,6 +377,7 @@ private fun SongListRow(
     onPlayNext: () -> Unit,
     onAddToQueue: () -> Unit,
     onToggleFavorite: () -> Unit,
+    onDelete: (() -> Unit)?,
     onViewArtist: (() -> Unit)?,
     onViewAlbum: (() -> Unit)?,
 ) {
@@ -421,7 +436,19 @@ private fun SongListRow(
                     enabled = onViewAlbum != null,
                     onClick = { onViewAlbum?.invoke() },
                 ),
-            ),
+            ) +
+                if (onDelete != null) {
+                    listOf(
+                        MusicRowAction(
+                            label = stringResource(FilmR.string.delete_media_action),
+                            icon = CoreR.drawable.ic_trash,
+                            iconTint = Red,
+                            onClick = onDelete,
+                        )
+                    )
+                } else {
+                    emptyList()
+                },
         trailingDivider = true,
     )
 }

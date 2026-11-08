@@ -168,6 +168,7 @@ fun NavigationRoot(
     swrStore: SwrStore,
     confirmExit: Boolean = false,
     musicDestination: MutableState<MusicLaunchDestination?>? = null,
+    settingsDestination: MutableState<List<Int>?>? = null,
 ) {
     val setupComplete = onboardingComplete && hasServers && hasCurrentServer && hasCurrentUser
     val loggedOutProfileSelection =
@@ -188,6 +189,13 @@ fun NavigationRoot(
             topLevelRoutes = mainTopLevelRoutes,
         )
     val navigator = remember(navigationState) { Navigator(navigationState) }
+
+    LaunchedEffect(settingsDestination?.value, mainMode) {
+        val indexes = settingsDestination?.value ?: return@LaunchedEffect
+        if (!mainMode) return@LaunchedEffect
+        navigator.navigate(SettingsRoute(indexes = indexes))
+        settingsDestination.value = null
+    }
 
     // The entry decorators hold the per-entry SavedState and ViewModel stores. They must be
     // hoisted as well, otherwise the retained state would be discarded when switching modes.

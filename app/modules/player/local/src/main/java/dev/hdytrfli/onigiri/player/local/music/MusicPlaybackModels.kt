@@ -36,6 +36,7 @@ data class MusicPlaybackState(
     val hasEnded: Boolean = false,
     val isBuffering: Boolean = false,
     val positionMs: Long = 0,
+    val bufferedPositionMs: Long = 0,
     val durationMs: Long = 0,
     val shuffleEnabled: Boolean = false,
     val isShuffling: Boolean = false,

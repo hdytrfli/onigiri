@@ -223,6 +223,9 @@ interface JellyfinRepository {
     /** Deletes the image of [type] at [index] (or the type's only image when [index] is null). */
     suspend fun deleteItemImage(itemId: UUID, type: ImageType, index: Int?)
 
+    /** Permanently deletes the item from the Jellyfin server. */
+    suspend fun deleteItem(itemId: UUID)
+
     /**
      * Moves the image of [type] from [oldIndex] to [newIndex]. The image at index 0 is the primary
      * image, so this is how a different backdrop is promoted.

@@ -93,7 +93,7 @@ private fun BaseDialogImpl(
 ) {
     Dialog(onDismissRequest = onDismiss) {
         val view = LocalView.current
-        SideEffect { (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0.5f) }
+        SideEffect { (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0.65f) }
         Column(modifier = Modifier.widthIn(max = Dimens.dialogMaxWidth).fillMaxWidth()) {
             Card(
                 modifier = Modifier.fillMaxWidth().heightIn(max = Dimens.dialogCompactMaxHeight),

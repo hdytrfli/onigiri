@@ -214,6 +214,7 @@ private fun EpisodeScreenLayout(
                                     setOf(DetailAction.SUBTITLE_SEARCH, DetailAction.EDIT_IMAGES),
                                 onSubtitleSearch = { onSubtitleSearch(episode.id) },
                                 onEditImages = { onEditImages(episode.id) },
+                                onDeleted = { onAction(EpisodeAction.OnBackClick) },
                             )
                         }
                     }

@@ -13,6 +13,9 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.domain.models.Preference
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSelect
+import dev.hdytrfli.onigiri.ui.components.LanguageOption
+import dev.hdytrfli.onigiri.ui.components.LanguagePickerDialog
+import dev.hdytrfli.onigiri.ui.components.drawableRes
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 
 @Composable
@@ -49,15 +52,39 @@ fun SettingsSelectCard(
     )
 
     if (showDialog) {
-        SettingsSelectDialog(
-            preference = preference,
-            options = options,
-            onUpdate = { value ->
-                showDialog = false
-                onUpdate(value)
-            },
-            onDismissRequest = { showDialog = false },
-        )
+        if (preference.isLanguagePicker) {
+            val languageOptions =
+                remember(optionValues, optionNames) {
+                    optionValues.mapIndexedNotNull { index, code ->
+                        optionNames.getOrNull(index)?.let { LanguageOption(code, it) }
+                    }
+                }
+            LanguagePickerDialog(
+                title = stringResource(preference.nameStringResource),
+                description = preference.descriptionStringRes?.let { stringResource(it) },
+                options = languageOptions,
+                selectedCode = preference.value,
+                suggestedLabel = stringResource(CoreR.string.suggested),
+                suggestedCodes = preference.suggestedValues,
+                notSetLabel = notSetString.takeIf { preference.optionsIncludeNull },
+                optionIcon = preference.optionIcon?.drawableRes(),
+                onSelect = { value ->
+                    showDialog = false
+                    onUpdate(value)
+                },
+                onDismiss = { showDialog = false },
+            )
+        } else {
+            SettingsSelectDialog(
+                preference = preference,
+                options = options,
+                onUpdate = { value ->
+                    showDialog = false
+                    onUpdate(value)
+                },
+                onDismissRequest = { showDialog = false },
+            )
+        }
     }
 }
 

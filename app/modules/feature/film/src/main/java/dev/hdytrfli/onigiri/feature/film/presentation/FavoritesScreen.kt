@@ -22,6 +22,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.EmptyStateOverl
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicRowAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.MusicTrackRow
+import dev.hdytrfli.onigiri.feature.film.presentation.components.rememberMediaDeleteController
 import dev.hdytrfli.onigiri.feature.film.presentation.favorites.FavoritesViewModel
 import dev.hdytrfli.onigiri.feature.film.presentation.music.MusicCard
 import dev.hdytrfli.onigiri.models.FindroidItem
@@ -45,6 +46,7 @@ fun FavoritesScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val currentSongId by viewModel.currentSongId.collectAsStateWithLifecycle()
+    val deleteController = rememberMediaDeleteController()
 
     LaunchedEffect(true) { viewModel.loadItemsIfNeeded() }
     OfflineModeReload { viewModel.loadItems(force = true) }
@@ -57,6 +59,16 @@ fun FavoritesScreen(
         onPlayNext = viewModel::playNext,
         onAddToQueue = viewModel::addToQueue,
         onRemoveFavorite = viewModel::removeFavorite,
+        onDeleteSong =
+            if (deleteController.canDelete) {
+                { item ->
+                    deleteController.request(item.id, item.name) {
+                        viewModel.loadItems(force = true)
+                    }
+                }
+            } else {
+                null
+            },
         onRetryClick = { viewModel.loadItems(force = true) },
         pullToRefreshState = pullToRefreshState,
         showPullIndicator = showPullIndicator,
@@ -72,6 +84,7 @@ private fun FavoritesScreenLayout(
     onPlayNext: (FindroidMusicFavorite) -> Unit,
     onAddToQueue: (FindroidMusicFavorite) -> Unit,
     onRemoveFavorite: (FindroidMusicFavorite) -> Unit,
+    onDeleteSong: ((FindroidMusicFavorite) -> Unit)? = null,
     onRetryClick: () -> Unit,
     pullToRefreshState: PullToRefreshState = rememberPullToRefreshState(),
     showPullIndicator: Boolean = true,
@@ -149,7 +162,22 @@ private fun FavoritesScreenLayout(
                                             icon = CoreR.drawable.ic_plus,
                                             onClick = { onAddToQueue(item) },
                                         ),
-                                    ),
+                                    ) +
+                                        if (onDeleteSong != null) {
+                                            listOf(
+                                                MusicRowAction(
+                                                    label =
+                                                        stringResource(
+                                                            FilmR.string.delete_media_action
+                                                        ),
+                                                    icon = CoreR.drawable.ic_trash,
+                                                    iconTint = MaterialTheme.colorScheme.error,
+                                                    onClick = { onDeleteSong(item) },
+                                                )
+                                            )
+                                        } else {
+                                            emptyList()
+                                        },
                                 onClick = { onPlaySong(item) },
                             )
                         MusicFavoriteKind.Album,

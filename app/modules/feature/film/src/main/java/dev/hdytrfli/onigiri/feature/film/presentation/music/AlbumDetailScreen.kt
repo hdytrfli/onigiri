@@ -125,6 +125,7 @@ private fun AlbumDetailLayout(
                             onIdentify = onIdentify,
                             onEditImages = onEditImages,
                             onIdentifyApplied = onIdentifyApplied,
+                            onDeleted = onBack,
                         )
                     },
                 )

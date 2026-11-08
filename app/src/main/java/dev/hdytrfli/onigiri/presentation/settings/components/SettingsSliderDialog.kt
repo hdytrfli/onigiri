@@ -3,6 +3,7 @@ package dev.hdytrfli.onigiri.presentation.settings.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -15,11 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.domain.models.Preference
@@ -67,36 +65,47 @@ fun SettingsSliderDialog(
             modifier = Modifier.fillMaxWidth().padding(contentPadding),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
         ) {
-            Text(
-                text =
-                    buildAnnotatedString {
-                        append(currentValuePrefix)
-                        append(" ")
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(currentValue) }
-                    },
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             ) {
-                Text(
-                    text = optionNames.firstOrNull().orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline,
-                )
-                SteppedSlider(
-                    index = index,
-                    count = optionNames.size,
-                    onIndexChange = { index = it },
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = optionNames.lastOrNull().orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = currentValuePrefix,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = currentValue,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+                ) {
+                    Text(
+                        text = optionNames.firstOrNull().orEmpty(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                    SteppedSlider(
+                        index = index,
+                        count = optionNames.size,
+                        onIndexChange = { index = it },
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = optionNames.lastOrNull().orEmpty(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
             }
             preference.descriptionStringRes?.let {
                 Text(

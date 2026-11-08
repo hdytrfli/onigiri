@@ -483,6 +483,10 @@ class JellyfinRepositoryOfflineImpl(
 
     override suspend fun deleteItemImage(itemId: UUID, type: ImageType, index: Int?) = Unit
 
+    override suspend fun deleteItem(itemId: UUID) {
+        error("Deleting media is unavailable in offline mode")
+    }
+
     override suspend fun updateItemImageIndex(
         itemId: UUID,
         type: ImageType,

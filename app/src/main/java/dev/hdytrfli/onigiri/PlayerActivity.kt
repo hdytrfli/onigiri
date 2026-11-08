@@ -61,6 +61,7 @@ import dev.hdytrfli.onigiri.presentation.player.PlayerMenuItem
 import dev.hdytrfli.onigiri.presentation.player.PlayerStatsPanel
 import dev.hdytrfli.onigiri.presentation.player.SubtitleOffsetControl
 import dev.hdytrfli.onigiri.presentation.player.formatSubtitleOffset
+import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.ui.PaddedTimeTextView
 import dev.hdytrfli.onigiri.ui.RoundedTimeBar
@@ -304,6 +305,9 @@ class PlayerActivity : BasePlayerActivity() {
         playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
+        binding.playerView.findViewById<ImageButton>(R.id.btn_player_settings).setOnClickListener {
+            openPlayerSettings()
+        }
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
         val gestureLockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_gesture_lock)
         val unlockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_unlock)
@@ -706,6 +710,18 @@ class PlayerActivity : BasePlayerActivity() {
             itemId = itemId,
             itemKind = itemKind ?: "",
             startFromBeginning = startFromBeginning,
+        )
+    }
+
+    private fun openPlayerSettings() {
+        startActivity(
+            Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                putIntegerArrayListExtra(
+                    MainActivity.EXTRA_SETTINGS_INDEXES,
+                    arrayListOf(SettingsR.string.settings_category_player),
+                )
+            }
         )
     }
 

@@ -148,6 +148,7 @@ private fun ShowScreenLayout(
                             onIdentify = { onIdentify(show.id) },
                             onIdentifyApplied = onIdentifyApplied,
                             onEditImages = { onEditImages(show.id) },
+                            onDeleted = { onAction(ShowAction.OnBackClick) },
                         )
                     }
                 },

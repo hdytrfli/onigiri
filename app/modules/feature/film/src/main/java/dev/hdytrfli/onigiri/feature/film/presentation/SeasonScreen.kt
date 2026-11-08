@@ -123,6 +123,7 @@ private fun SeasonScreenLayout(
                             itemId = season.id,
                             actions = setOf(DetailAction.EDIT_IMAGES),
                             onEditImages = { onEditImages(season.id) },
+                            onDeleted = { onAction(SeasonAction.OnBackClick) },
                         )
                     }
                 },

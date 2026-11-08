@@ -28,14 +28,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +42,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -79,9 +73,9 @@ import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.AppSeekBar
 import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.components.ReservedWidthText
-import dev.hdytrfli.onigiri.ui.components.preciseSeekable
 import dev.hdytrfli.onigiri.ui.theme.Red
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.rememberSafePadding
@@ -195,6 +189,27 @@ fun MusicPlayerScreen(
                 .background(Brush.verticalGradient(listOf(PlayerBackgroundTop, Color.Black)))
                 .padding(top = safePadding.top, bottom = safePadding.bottom)
     ) {
+        if (artworkType == "backdrop" && current?.imageUri != null) {
+            AsyncImage(
+                model = current.imageUri,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Black.copy(alpha = 0.2f),
+                                    Color.Black.copy(alpha = 0.85f),
+                                )
+                            )
+                        )
+            )
+        }
+
         if (current != null && isLandscape) {
             Row(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.weight(0.5f).fillMaxHeight()) {
@@ -774,7 +789,9 @@ private fun AlbumArtwork(
             contentAlignment = Alignment.Center,
         ) {
             val discSize = minOf(maxWidth, maxHeight)
-            val scrimSize = discSize * 0.3f
+            val borderWidth = discSize * 0.027f
+            val scrimSize = discSize * 0.30f
+            val holeSize = discSize * 0.16f
             Box(
                 modifier =
                     Modifier.size(discSize)
@@ -783,7 +800,7 @@ private fun AlbumArtwork(
                         .clip(CircleShape)
                         .background(Color(0xFF242424))
                         .border(
-                            width = 8.dp,
+                            width = borderWidth,
                             color = Color(0xFF242424),
                             shape = CircleShape,
                         ),
@@ -800,7 +817,7 @@ private fun AlbumArtwork(
                     Icon(
                         painter = painterResource(CoreR.drawable.ic_music),
                         contentDescription = null,
-                        modifier = Modifier.size(72.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = PlayerOnBackgroundMuted,
                     )
                 }
@@ -813,7 +830,7 @@ private fun AlbumArtwork(
             )
             Box(
                 modifier =
-                    Modifier.size(48.dp)
+                    Modifier.size(holeSize)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.background)
             )
@@ -1064,7 +1081,6 @@ private fun TransportControls(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PlayerSeekBar(
     state: MusicPlaybackState,
@@ -1073,23 +1089,19 @@ private fun PlayerSeekBar(
     onClearError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var dragging by remember { mutableStateOf(false) }
-    var dragMoved by remember { mutableStateOf(false) }
-    var animatingSeek by remember { mutableStateOf(false) }
-    var pendingSeekTarget by remember { mutableStateOf<Long?>(null) }
-    val sliderState = remember { SliderState(0f) }
-    val scope = rememberCoroutineScope()
-    val latestState by rememberUpdatedState(state)
-
-    LaunchedEffect(state.positionMs, dragging, animatingSeek, pendingSeekTarget) {
-        val target = pendingSeekTarget
-        if (target != null && abs(state.positionMs - target) <= 1_000L) {
-            pendingSeekTarget = null
+    val duration = state.durationMs.coerceAtLeast(0L)
+    val positionFraction =
+        if (duration > 0L) {
+            (state.positionMs.toFloat() / duration).coerceIn(0f, 1f)
+        } else {
+            0f
         }
-        if (!dragging && !animatingSeek && pendingSeekTarget == null && state.durationMs > 0L) {
-            sliderState.value = (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
+    val bufferedFraction =
+        if (duration > 0L) {
+            (state.bufferedPositionMs.toFloat() / duration).coerceIn(0f, 1f)
+        } else {
+            null
         }
-    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -1098,96 +1110,21 @@ private fun PlayerSeekBar(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
         ) {
             ReservedWidthText(
-                text =
-                    formatTime((sliderState.value * state.durationMs).toLong(), state.durationMs),
-                referenceText = formatTime(state.durationMs, state.durationMs),
+                text = formatTime(state.positionMs, duration),
+                referenceText = formatTime(duration, duration),
                 style = MaterialTheme.typography.bodySmall,
                 color = PlayerOnBackgroundMuted,
             )
-            Box(modifier = Modifier.weight(1f)) {
-                Slider(
-                    state = sliderState,
-                    onValueChange = {
-                        if (dragging) dragMoved = true
-                        dragging = true
-                        sliderState.value = it
-                    },
-                    onValueChangeFinished = {
-                        dragging = false
-                        val target = sliderState.value
-                        if (state.durationMs > 0L) {
-                            val targetMs = (target * state.durationMs).toLong()
-                            if (!dragMoved) {
-                                val start =
-                                    (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
-                                sliderState.value = start
-                                animatingSeek = true
-                                scope.launch {
-                                    animate(start, target, animationSpec = tween(180)) { value, _ ->
-                                        sliderState.value = value
-                                    }
-                                    animatingSeek = false
-                                }
-                            }
-                            pendingSeekTarget = targetMs
-                            onSeek(targetMs)
-                        }
-                        dragMoved = false
-                    },
-                    enabled = state.durationMs > 0L,
-                    colors = playerSliderColors(),
-                    thumb = {
-                        Box(
-                            modifier =
-                                Modifier.width(4.dp)
-                                    .height(16.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(Color.White)
-                        )
-                    },
-                    track = { sliderState ->
-                        SliderDefaults.Track(
-                            sliderState = sliderState,
-                            colors = playerSliderColors(),
-                            modifier = Modifier.height(12.dp),
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                if (preciseSeeking && state.durationMs > 0L) {
-                    Box(
-                        modifier =
-                            Modifier.matchParentSize()
-                                .preciseSeekable(
-                                    enabled = true,
-                                    startFraction = {
-                                        (latestState.positionMs.toFloat() / latestState.durationMs)
-                                            .coerceIn(0f, 1f)
-                                    },
-                                    onScrub = { fraction ->
-                                        dragging = true
-                                        sliderState.value = fraction
-                                        val targetMs = (fraction * latestState.durationMs).toLong()
-                                        pendingSeekTarget = targetMs
-                                        onSeek(targetMs)
-                                    },
-                                    onScrubEnd = { fraction ->
-                                        dragging = false
-                                        val targetMs = (fraction * latestState.durationMs).toLong()
-                                        pendingSeekTarget = targetMs
-                                        onSeek(targetMs)
-                                    },
-                                    onTap = { fraction ->
-                                        val targetMs = (fraction * latestState.durationMs).toLong()
-                                        pendingSeekTarget = targetMs
-                                        onSeek(targetMs)
-                                    },
-                                )
-                    )
-                }
-            }
+            AppSeekBar(
+                fraction = positionFraction,
+                bufferedFraction = bufferedFraction,
+                enabled = duration > 0L,
+                preciseSeeking = preciseSeeking,
+                onSeek = { fraction -> if (duration > 0L) onSeek((fraction * duration).toLong()) },
+                modifier = Modifier.weight(1f),
+            )
             Text(
-                text = formatTime(state.durationMs, state.durationMs),
+                text = formatTime(duration, duration),
                 style = MaterialTheme.typography.bodySmall,
                 color = PlayerOnBackgroundMuted,
             )
@@ -1204,16 +1141,6 @@ private fun PlayerSeekBar(
         }
     }
 }
-
-@Composable
-private fun playerSliderColors() =
-    SliderDefaults.colors(
-        thumbColor = Color.White,
-        activeTrackColor = Color.White,
-        inactiveTrackColor = Color(0x33FFFFFF),
-        activeTickColor = Color.Transparent,
-        inactiveTickColor = Color.Transparent,
-    )
 
 @Composable
 private fun EmptyPlayer() {

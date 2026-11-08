@@ -138,6 +138,7 @@ private fun CollectionDetailLayout(
                                 itemId = collection.id,
                                 actions = setOf(DetailAction.EDIT_IMAGES),
                                 onEditImages = { onEditImages(collection.id) },
+                                onDeleted = { onAction(CollectionAction.OnBackClick) },
                             )
                         }
                     }

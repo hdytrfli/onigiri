@@ -520,6 +520,7 @@ constructor(
                 hasEnded = player.playbackState == Player.STATE_ENDED,
                 isBuffering = player.playbackState == Player.STATE_BUFFERING,
                 positionMs = player.currentPosition.coerceAtLeast(0L),
+                bufferedPositionMs = player.bufferedPosition.coerceAtLeast(0L),
                 durationMs = duration,
                 shuffleEnabled = player.shuffleModeEnabled,
                 isShuffling = _state.value.isShuffling,

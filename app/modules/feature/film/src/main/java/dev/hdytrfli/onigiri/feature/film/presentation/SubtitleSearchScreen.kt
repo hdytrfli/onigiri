@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -42,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -58,9 +55,10 @@ import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
-import dev.hdytrfli.onigiri.ui.components.AppOptionRow
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.LanguageOption
+import dev.hdytrfli.onigiri.ui.components.LanguagePickerDialog
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.PageContent
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
@@ -122,14 +120,6 @@ private fun SubtitleSearchScreenLayout(
     val languageEntries = languageValues.mapIndexedNotNull { index, code ->
         languageNames.getOrNull(index)?.let { code to it }
     }
-    val languagesByCode = languageEntries.toMap()
-    val suggestedLanguages =
-        state.recentLanguages
-            .mapNotNull { code -> languagesByCode[code]?.let { code to it } }
-            .distinct()
-            .take(5)
-    val suggestedCodes = suggestedLanguages.mapTo(mutableSetOf()) { it.first }
-    val otherLanguages = languageEntries.filterNot { it.first in suggestedCodes }
     val languageIcon = OptionIcon.Subtitle.drawableRes()
 
     val contentPadding =
@@ -289,68 +279,20 @@ private fun SubtitleSearchScreenLayout(
     }
 
     if (languagePickerOpen) {
-        BaseDialog(
+        LanguagePickerDialog(
             title = stringResource(CoreR.string.language),
             description = stringResource(CoreR.string.subtitle_search_language_summary),
+            options = languageEntries.map { LanguageOption(it.first, it.second) },
+            selectedCode = state.language,
+            suggestedLabel = stringResource(CoreR.string.suggested),
+            suggestedCodes = state.recentLanguages,
+            optionIcon = languageIcon,
+            onSelect = { code ->
+                if (code != null) onLanguageChange(code)
+                languagePickerOpen = false
+            },
             onDismiss = { languagePickerOpen = false },
-        ) { _ ->
-            val listState = rememberLazyListState()
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                state = listState,
-            ) {
-                if (suggestedLanguages.isNotEmpty()) {
-                    item(key = "suggested-header") {
-                        Text(
-                            text = stringResource(CoreR.string.suggested),
-                            modifier =
-                                Modifier.padding(
-                                    start = 24.dp,
-                                    end = 24.dp,
-                                    top = MaterialTheme.spacings.small,
-                                    bottom = MaterialTheme.spacings.extraSmall,
-                                ),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    items(suggestedLanguages, key = { "suggested-${it.first}" }) { entry ->
-                        AppOptionRow(
-                            text = entry.second,
-                            iconDrawableId = languageIcon,
-                            onClick = {
-                                onLanguageChange(entry.first)
-                                languagePickerOpen = false
-                            },
-                            selected = entry.first == state.language,
-                            role = Role.RadioButton,
-                        )
-                    }
-                    item(key = "suggested-divider") {
-                        HorizontalDivider(
-                            modifier =
-                                Modifier.padding(
-                                    horizontal = MaterialTheme.spacings.medium,
-                                    vertical = MaterialTheme.spacings.extraSmall,
-                                ),
-                            color = DividerDefaults.color.copy(alpha = 0.2f),
-                        )
-                    }
-                }
-                items(otherLanguages, key = { it.first }) { entry ->
-                    AppOptionRow(
-                        text = entry.second,
-                        iconDrawableId = languageIcon,
-                        onClick = {
-                            onLanguageChange(entry.first)
-                            languagePickerOpen = false
-                        },
-                        selected = entry.first == state.language,
-                        role = Role.RadioButton,
-                    )
-                }
-            }
-        }
+        )
     }
 
     state.info?.let { info -> SubtitleInfoDialog(info = info, onDismiss = onCloseInfo) }

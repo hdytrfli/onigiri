@@ -23,6 +23,7 @@ import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSlider
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSliders
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceStepper
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSwitch
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,17 @@ constructor(
 
     private val eventsChannel = Channel<SettingsEvent>()
     val events = eventsChannel.receiveAsFlow()
+
+    private fun suggestedLanguageCodes(): List<String> = buildList {
+        add(runCatching { Locale.getDefault().getISO3Language() }.getOrNull().orEmpty())
+        add(appPreferences.getValue(appPreferences.preferredAudioLanguage).orEmpty())
+        add(appPreferences.getValue(appPreferences.preferredSubtitleLanguage).orEmpty())
+        addAll(appPreferences.getValue(appPreferences.subtitleSearchRecentLanguages).split(','))
+    }
+        .map(String::trim)
+        .filter { it.isNotEmpty() && it != "und" }
+        .distinct()
+        .take(5)
 
     // Remembered so dependent selects can re-evaluate visibility after they update their flags.
     private var lastIndexes: List<Int> = emptyList()
@@ -90,6 +102,8 @@ constructor(
                                                     options = R.array.languages,
                                                     optionValues = R.array.languages_values,
                                                     optionsIncludeNull = true,
+                                                    isLanguagePicker = true,
+                                                    suggestedValues = suggestedLanguageCodes(),
                                                 ),
                                                 PreferenceSelect(
                                                     nameStringResource =
@@ -104,6 +118,8 @@ constructor(
                                                     options = R.array.languages,
                                                     optionValues = R.array.languages_values,
                                                     optionsIncludeNull = true,
+                                                    isLanguagePicker = true,
+                                                    suggestedValues = suggestedLanguageCodes(),
                                                 ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
@@ -607,7 +623,6 @@ constructor(
                                                         listOf(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
-                                                    hideWhenDisabled = true,
                                                     optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderStyle,
@@ -625,7 +640,6 @@ constructor(
                                                         listOf(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
-                                                    hideWhenDisabled = true,
                                                     optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderSize,
@@ -642,7 +656,6 @@ constructor(
                                                         listOf(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
-                                                    hideWhenDisabled = true,
                                                     optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderColor,
@@ -659,7 +672,6 @@ constructor(
                                                         listOf(
                                                             appPreferences.playerMpvSubBorderEnabled
                                                         ),
-                                                    hideWhenDisabled = true,
                                                     optionIcon = OptionIcon.Subtitle,
                                                     backendPreference =
                                                         appPreferences.playerMpvSubBorderOpacity,
@@ -952,6 +964,7 @@ constructor(
                             nestedPreferenceGroups =
                                 listOf(
                                     PreferenceGroup(
+                                        nameStringResource = R.string.settings_group_mpv,
                                         preferences =
                                             listOf(
                                                 PreferenceCategory(
@@ -1087,7 +1100,7 @@ constructor(
                                                             ),
                                                         ),
                                                 )
-                                            )
+                                            ),
                                     ),
                                     PreferenceGroup(
                                         nameStringResource = R.string.player_time_display,
@@ -1126,7 +1139,6 @@ constructor(
                                                             .pref_player_time_end_format_summary,
                                                     dependencies =
                                                         listOf(appPreferences.playerTimeShowFinish),
-                                                    hideWhenDisabled = true,
                                                     optionIcon = OptionIcon.Clock,
                                                     backendPreference =
                                                         appPreferences.playerTimeEndFormat,

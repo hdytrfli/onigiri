@@ -277,6 +277,8 @@ class RoutingJellyfinRepository(
     override suspend fun deleteItemImage(itemId: UUID, type: ImageType, index: Int?) =
         current().deleteItemImage(itemId, type, index)
 
+    override suspend fun deleteItem(itemId: UUID) = current().deleteItem(itemId)
+
     override suspend fun updateItemImageIndex(
         itemId: UUID,
         type: ImageType,

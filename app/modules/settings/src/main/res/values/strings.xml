@@ -27,6 +27,7 @@
     <string name="settings_group_playback">Playback</string>
     <string name="settings_group_artwork_gestures">Artwork &amp; gestures</string>
     <string name="settings_group_server">Server</string>
+    <string name="settings_group_mpv">MPV</string>
     <string name="settings_group_storage">Storage</string>
     <string name="settings_category_download">Downloads</string>
     <string name="settings_category_appearance">Appearance</string>
