@@ -116,7 +116,7 @@ fun MusicScreen(
                             listOf(
                                 CoreR.drawable.ic_music,
                                 CoreR.drawable.ic_user,
-                                CoreR.drawable.ic_package_2,
+                                CoreR.drawable.ic_lucide_disc,
                             ),
                         selectedIndex = selectedTab.ordinal,
                         onSelect = { selectedTab = MusicTab.entries[it] },
@@ -426,7 +426,7 @@ private fun SongListRow(
                 ),
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_discover_album),
-                    icon = CoreR.drawable.ic_lucide_gallery_vertical_end,
+                    icon = CoreR.drawable.ic_lucide_disc,
                     enabled = onViewAlbum != null,
                     onClick = { onViewAlbum?.invoke() },
                 ),
@@ -568,7 +568,7 @@ private fun AlbumsGrid(
                                 ),
                             image = album.images.primary,
                             circular = false,
-                            placeholderIcon = CoreR.drawable.ic_music,
+                            placeholderIcon = CoreR.drawable.ic_lucide_disc,
                             onClick = { onAlbumClick(album.id.toString()) },
                         )
                     }

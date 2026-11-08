@@ -1,5 +1,6 @@
 package dev.hdytrfli.onigiri.feature.film.presentation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -39,8 +43,10 @@ import dev.hdytrfli.onigiri.feature.film.presentation.downloader.DownloaderViewM
 import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
+import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.spacings
@@ -64,6 +70,7 @@ fun BookDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val downloaderState by downloaderViewModel.state.collectAsStateWithLifecycle()
     val deleteController = rememberMediaDeleteController()
+    var deleteMenuOpen by remember { mutableStateOf(false) }
 
     LifecycleResumeEffect(bookId) {
         viewModel.load(bookId, force = true)
@@ -109,25 +116,39 @@ fun BookDetailScreen(
                                 downloadAvailable = true,
                             )
                             if (deleteController.canDelete) {
-                                AppIconButton(
-                                    onClick = {
-                                        deleteController.request(item.id, item.name) {
-                                            navigateBack()
-                                        }
-                                    },
-                                    variant = AppButtonVariant.Secondary,
-                                    content = {
-                                        Icon(
-                                            painter =
-                                                painterResource(CoreR.drawable.ic_lucide_trash),
-                                            contentDescription =
+                                Box {
+                                    AppIconButton(
+                                        onClick = { deleteMenuOpen = true },
+                                        variant = AppButtonVariant.Secondary,
+                                        content = {
+                                            Icon(
+                                                painter =
+                                                    painterResource(CoreR.drawable.ic_ellipsis),
+                                                contentDescription =
+                                                    stringResource(CoreR.string.more_options),
+                                            )
+                                        },
+                                    )
+                                    AppDropdownMenu(
+                                        expanded = deleteMenuOpen,
+                                        onDismissRequest = { deleteMenuOpen = false },
+                                    ) {
+                                        MenuActionItem(
+                                            icon = CoreR.drawable.ic_lucide_trash,
+                                            label =
                                                 stringResource(
                                                     dev.hdytrfli.onigiri.feature.film.R.string
                                                         .delete_media_action
                                                 ),
+                                            onClick = {
+                                                deleteMenuOpen = false
+                                                deleteController.request(item.id, item.name) {
+                                                    navigateBack()
+                                                }
+                                            },
                                         )
-                                    },
-                                )
+                                    }
+                                }
                             }
                         }
                     },

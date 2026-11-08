@@ -3,7 +3,6 @@ package dev.hdytrfli.onigiri.presentation.settings.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSliders
 import dev.hdytrfli.onigiri.ui.components.AppButton
@@ -61,6 +59,7 @@ fun SettingsSlidersDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
             AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Secondary) {
@@ -84,41 +83,25 @@ fun SettingsSlidersDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(row.nameStringResource),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = row.names.getOrElse(indexes[i]) { "" },
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
+                    Text(
+                        text = stringResource(row.nameStringResource),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
                     ) {
                         Text(
-                            text = row.names.firstOrNull().orEmpty(),
+                            text = row.names.getOrElse(indexes[i]) { "" },
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline,
+                            fontWeight = FontWeight.SemiBold,
                         )
                         SteppedSlider(
                             index = indexes[i],
                             count = row.names.size,
                             onIndexChange = { indexes[i] = it },
                             modifier = Modifier.weight(1f),
-                        )
-                        Text(
-                            text = row.names.lastOrNull().orEmpty(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline,
                         )
                     }
                 }
@@ -128,8 +111,6 @@ fun SettingsSlidersDialog(
                     text = stringResource(it),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

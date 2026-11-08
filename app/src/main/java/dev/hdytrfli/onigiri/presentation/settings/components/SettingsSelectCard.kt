@@ -15,7 +15,6 @@ import dev.hdytrfli.onigiri.settings.domain.models.Preference
 import dev.hdytrfli.onigiri.settings.presentation.models.PreferenceSelect
 import dev.hdytrfli.onigiri.ui.components.LanguageOption
 import dev.hdytrfli.onigiri.ui.components.LanguagePickerDialog
-import dev.hdytrfli.onigiri.ui.components.drawableRes
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 
 @Composable
@@ -68,7 +67,7 @@ fun SettingsSelectCard(
                 availableLabel = stringResource(CoreR.string.available),
                 suggestedCodes = preference.suggestedValues,
                 notSetLabel = notSetString.takeIf { preference.optionsIncludeNull },
-                optionIcon = preference.optionIcon?.drawableRes(),
+                optionIcon = CoreR.drawable.ic_lucide_languages,
                 onSelect = { value ->
                     showDialog = false
                     onUpdate(value)

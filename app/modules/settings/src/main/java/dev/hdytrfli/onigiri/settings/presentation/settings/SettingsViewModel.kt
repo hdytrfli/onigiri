@@ -49,11 +49,12 @@ constructor(
         add(appPreferences.getValue(appPreferences.preferredAudioLanguage).orEmpty())
         add(appPreferences.getValue(appPreferences.preferredSubtitleLanguage).orEmpty())
         addAll(appPreferences.getValue(appPreferences.subtitleSearchRecentLanguages).split(','))
+        addAll(listOf("eng", "spa", "fra", "deu", "jpn"))
     }
         .map(String::trim)
         .filter { it.isNotEmpty() && it != "und" }
         .distinct()
-        .take(5)
+        .take(6)
 
     // Remembered so dependent selects can re-evaluate visibility after they update their flags.
     private var lastIndexes: List<Int> = emptyList()
@@ -86,6 +87,7 @@ constructor(
                                                     nameStringResource = R.string.app_language,
                                                     descriptionStringRes =
                                                         R.string.app_language_summary,
+                                                    iconDrawableId = R.drawable.ic_languages,
                                                     enabled =
                                                         Build.VERSION.SDK_INT >=
                                                             Build.VERSION_CODES.TIRAMISU,

@@ -16,6 +16,9 @@ import dev.hdytrfli.onigiri.ui.theme.spacings
 /** One selectable language code/display-name pair. */
 data class LanguageOption(val code: String, val label: String)
 
+/** Stable defaults used alongside the user's own language. */
+val DefaultSuggestedLanguageCodes = listOf("eng", "spa", "fra", "deu", "jpn")
+
 /**
  * Shared language picker used by settings and subtitle search: a suggested section followed by the
  * complete catalog. An optional "not set" row is kept above the suggestions.
@@ -35,7 +38,7 @@ fun LanguagePickerDialog(
     onDismiss: () -> Unit,
 ) {
     val optionsByCode = options.associateBy { it.code }
-    val suggested = suggestedCodes.mapNotNull(optionsByCode::get).distinctBy { it.code }.take(5)
+    val suggested = suggestedCodes.mapNotNull(optionsByCode::get).distinctBy { it.code }.take(6)
     val suggestedCodeSet = suggested.mapTo(mutableSetOf()) { it.code }
     val remaining = options.filterNot { it.code in suggestedCodeSet }
 

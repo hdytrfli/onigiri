@@ -93,7 +93,7 @@ fun DetailActionsMenu(
                     AppLoadingIndicator(modifier = Modifier.size(20.dp))
                 } else {
                     Icon(
-                        painter = painterResource(CoreR.drawable.ic_bolt),
+                        painter = painterResource(CoreR.drawable.ic_ellipsis),
                         contentDescription = stringResource(CoreR.string.more_options),
                     )
                 }

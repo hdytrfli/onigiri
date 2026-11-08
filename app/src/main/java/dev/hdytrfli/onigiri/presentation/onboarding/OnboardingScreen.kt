@@ -8,6 +8,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -60,6 +63,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppTextField
+import dev.hdytrfli.onigiri.ui.components.DefaultSuggestedLanguageCodes
 import dev.hdytrfli.onigiri.ui.components.LanguageOption
 import dev.hdytrfli.onigiri.ui.components.LanguagePickerDialog
 import dev.hdytrfli.onigiri.ui.components.LoadingButton
@@ -301,9 +305,10 @@ private fun LanguagesPage(
     }
     val suggested =
         remember(deviceLanguage, state.audioLanguage, state.subtitleLanguage) {
-            listOfNotNull(deviceLanguage, state.audioLanguage, state.subtitleLanguage)
+            (listOfNotNull(deviceLanguage, state.audioLanguage, state.subtitleLanguage) +
+                    DefaultSuggestedLanguageCodes)
                 .distinct()
-                .take(5)
+                .take(6)
         }
     val notSet = stringResource(CoreR.string.not_set)
 
@@ -315,11 +320,13 @@ private fun LanguagesPage(
         LanguageField(
             label = stringResource(R.string.onboarding_audio_language),
             value = labels[state.audioLanguage]?.label ?: notSet,
+            icon = CoreR.drawable.ic_speaker,
             onClick = { picker = "audio" },
         )
         LanguageField(
             label = stringResource(R.string.onboarding_subtitle_language),
             value = labels[state.subtitleLanguage]?.label ?: notSet,
+            icon = CoreR.drawable.ic_closed_caption,
             onClick = { picker = "subtitle" },
         )
         Row(
@@ -349,13 +356,14 @@ private fun LanguagesPage(
                     if (target == "audio") R.string.onboarding_audio_language
                     else R.string.onboarding_subtitle_language
                 ),
-            description = null,
+            description = stringResource(R.string.onboarding_languages_description),
             options = options,
             selectedCode = if (target == "audio") state.audioLanguage else state.subtitleLanguage,
             suggestedLabel = stringResource(CoreR.string.suggested),
             availableLabel = stringResource(CoreR.string.available),
             suggestedCodes = suggested,
             notSetLabel = notSet,
+            optionIcon = CoreR.drawable.ic_lucide_languages,
             onSelect = { code ->
                 if (target == "audio") onAudioLanguageChange(code)
                 else onSubtitleLanguageChange(code)
@@ -367,19 +375,47 @@ private fun LanguagesPage(
 }
 
 @Composable
-private fun LanguageField(label: String, value: String, onClick: () -> Unit) {
+private fun LanguageField(
+    label: String,
+    value: String,
+    icon: Int,
+    onClick: () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall)) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
             color = OnScrimSecondary,
         )
-        AppButton(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            variant = dev.hdytrfli.onigiri.ui.components.AppButtonVariant.Secondary,
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clip(MaterialTheme.shapes.small)
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.28f), MaterialTheme.shapes.small)
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(value)
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp),
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_lucide_chevron_right),
+                contentDescription = null,
+                tint = OnScrimSecondary,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

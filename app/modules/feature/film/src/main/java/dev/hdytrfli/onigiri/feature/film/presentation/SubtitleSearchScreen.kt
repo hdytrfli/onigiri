@@ -50,13 +50,13 @@ import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.SubtitleSearch
 import dev.hdytrfli.onigiri.feature.film.presentation.mediadetail.SubtitleSearchViewModel
 import dev.hdytrfli.onigiri.models.FindroidMediaStream
 import dev.hdytrfli.onigiri.settings.R as SettingsR
-import dev.hdytrfli.onigiri.settings.presentation.models.OptionIcon
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.AppPullToRefreshBox
 import dev.hdytrfli.onigiri.ui.components.BaseDialog
+import dev.hdytrfli.onigiri.ui.components.DefaultSuggestedLanguageCodes
 import dev.hdytrfli.onigiri.ui.components.LanguageOption
 import dev.hdytrfli.onigiri.ui.components.LanguagePickerDialog
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
@@ -64,7 +64,6 @@ import dev.hdytrfli.onigiri.ui.components.PageContent
 import dev.hdytrfli.onigiri.ui.components.PageTopBar
 import dev.hdytrfli.onigiri.ui.components.PullToRefreshButton
 import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
-import dev.hdytrfli.onigiri.ui.components.drawableRes
 import dev.hdytrfli.onigiri.ui.theme.Dimens
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.LocalOfflineMode
@@ -120,7 +119,7 @@ private fun SubtitleSearchScreenLayout(
     val languageEntries = languageValues.mapIndexedNotNull { index, code ->
         languageNames.getOrNull(index)?.let { code to it }
     }
-    val languageIcon = OptionIcon.Subtitle.drawableRes()
+    val languageIcon = CoreR.drawable.ic_lucide_languages
 
     val contentPadding =
         PaddingValues(
@@ -286,7 +285,8 @@ private fun SubtitleSearchScreenLayout(
             selectedCode = state.language,
             suggestedLabel = stringResource(CoreR.string.suggested),
             availableLabel = stringResource(CoreR.string.available),
-            suggestedCodes = state.recentLanguages,
+            suggestedCodes =
+                (state.recentLanguages + DefaultSuggestedLanguageCodes).distinct().take(6),
             optionIcon = languageIcon,
             onSelect = { code ->
                 if (code != null) onLanguageChange(code)

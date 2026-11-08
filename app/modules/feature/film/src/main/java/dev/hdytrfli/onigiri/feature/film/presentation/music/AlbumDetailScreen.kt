@@ -313,7 +313,7 @@ private fun SongRow(
                 )
             } else {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_music),
+                    painter = painterResource(CoreR.drawable.ic_lucide_disc),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

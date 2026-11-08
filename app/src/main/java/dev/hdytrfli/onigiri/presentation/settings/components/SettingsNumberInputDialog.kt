@@ -102,6 +102,7 @@ fun SettingsNumberInputDialog(
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
             AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Secondary) {

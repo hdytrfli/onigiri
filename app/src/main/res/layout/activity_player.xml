@@ -16,8 +16,8 @@
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/player_loading_indicator"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_gravity="center"
         android:visibility="gone" />
 

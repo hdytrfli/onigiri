@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,8 +45,8 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
-import dev.hdytrfli.onigiri.ui.components.AppSeekBar
 import dev.hdytrfli.onigiri.ui.components.ReservedWidthText
+import dev.hdytrfli.onigiri.ui.components.preciseSeekable
 import kotlin.math.roundToInt
 
 /** What the reader activity is showing while the publication opens. */
@@ -154,7 +156,7 @@ fun ReaderOverlay(
                         }
                         AppIconButton(onClick = onOpenSettings, variant = AppButtonVariant.Ghost) {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_lucide_settings),
+                                painter = painterResource(CoreR.drawable.ic_bolt),
                                 contentDescription = "Reader settings",
                             )
                         }
@@ -202,21 +204,78 @@ fun ReaderOverlay(
                                     ),
                                 color = Color.White,
                             )
-                            AppSeekBar(
-                                fraction = scrubValue ?: state.progress,
-                                enabled = state.pageCount > 1,
-                                preciseSeeking = preciseSeeking,
-                                onSeekStart = {
-                                    isScrubbing = true
-                                    onInteraction()
-                                },
-                                onSeekFinished = { isScrubbing = false },
-                                onSeek = { value ->
-                                    scrubValue = value
-                                    onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
-                                },
-                                modifier = Modifier.weight(1f),
-                            )
+                            Box(modifier = Modifier.weight(1f)) {
+                                Slider(
+                                    state = sliderState,
+                                    onValueChange = { value ->
+                                        if (state.pageCount > 1) {
+                                            isScrubbing = true
+                                            scrubValue = value
+                                            onInteraction()
+                                            onSeek((value * (state.pageCount - 1)).roundToInt() + 1)
+                                        }
+                                    },
+                                    onValueChangeFinished = { isScrubbing = false },
+                                    colors =
+                                        SliderDefaults.colors(
+                                            thumbColor = Color.White,
+                                            activeTrackColor = Color.White,
+                                            inactiveTrackColor = Color(0x33FFFFFF),
+                                            activeTickColor = Color.Transparent,
+                                            inactiveTickColor = Color.Transparent,
+                                        ),
+                                    thumb = { ReaderSliderThumb() },
+                                    track = { sliderState ->
+                                        SliderDefaults.Track(
+                                            sliderState = sliderState,
+                                            colors =
+                                                SliderDefaults.colors(
+                                                    activeTrackColor = Color.White,
+                                                    inactiveTrackColor = Color(0x33FFFFFF),
+                                                    activeTickColor = Color.Transparent,
+                                                    inactiveTickColor = Color.Transparent,
+                                                ),
+                                            modifier = Modifier.height(12.dp),
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = state.pageCount > 1,
+                                )
+                                Box(
+                                    modifier =
+                                        Modifier.matchParentSize()
+                                            .preciseSeekable(
+                                                enabled = preciseSeeking && state.pageCount > 1,
+                                                startFraction = { state.progress },
+                                                onScrub = { value ->
+                                                    isScrubbing = true
+                                                    scrubValue = value
+                                                    onInteraction()
+                                                    onSeek(
+                                                        (value * (state.pageCount - 1))
+                                                            .roundToInt() + 1
+                                                    )
+                                                },
+                                                onScrubEnd = { value ->
+                                                    isScrubbing = false
+                                                    scrubValue = value
+                                                    onSeek(
+                                                        (value * (state.pageCount - 1))
+                                                            .roundToInt() + 1
+                                                    )
+                                                },
+                                                onTap = { value ->
+                                                    isScrubbing = false
+                                                    scrubValue = value
+                                                    onInteraction()
+                                                    onSeek(
+                                                        (value * (state.pageCount - 1))
+                                                            .roundToInt() + 1
+                                                    )
+                                                },
+                                            )
+                                )
+                            }
                             Text(
                                 text = state.pageCount.toString().padStart(pageDigits, '0'),
                                 style =

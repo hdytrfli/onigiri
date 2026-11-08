@@ -3,7 +3,6 @@ package dev.hdytrfli.onigiri.presentation.settings.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.domain.models.Preference
@@ -45,10 +43,10 @@ fun SettingsSliderDialog(
     val startIndex = sliderIndex(optionValues, preference.value)
     var index by remember { mutableIntStateOf(startIndex) }
     val currentValue = optionNames.getOrElse(index) { "" }
-    val currentValuePrefix = stringResource(SettingsR.string.current_value)
 
     BaseDialog(
         title = stringResource(preference.nameStringResource),
+        description = preference.descriptionStringRes?.let { stringResource(it) },
         onDismiss = onDismissRequest,
         negativeButton = {
             AppButton(onClick = onDismissRequest, variant = AppButtonVariant.Secondary) {
@@ -69,41 +67,25 @@ fun SettingsSliderDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = currentValuePrefix,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = currentValue,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
+                Text(
+                    text = stringResource(preference.nameStringResource),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
                 ) {
                     Text(
-                        text = optionNames.firstOrNull().orEmpty(),
+                        text = currentValue,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline,
+                        fontWeight = FontWeight.SemiBold,
                     )
                     SteppedSlider(
                         index = index,
                         count = optionNames.size,
                         onIndexChange = { index = it },
                         modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = optionNames.lastOrNull().orEmpty(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
             }
@@ -112,8 +94,6 @@ fun SettingsSliderDialog(
                     text = stringResource(it),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

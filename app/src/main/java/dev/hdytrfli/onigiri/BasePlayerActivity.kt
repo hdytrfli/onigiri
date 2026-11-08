@@ -19,6 +19,9 @@ abstract class BasePlayerActivity : AppCompatActivity() {
     private lateinit var mediaSession: MediaSession
     private var wasPip: Boolean = false
 
+    /** Set before opening a page that should not interrupt the current playback session. */
+    protected var preservePlaybackOnPause: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -38,6 +41,8 @@ abstract class BasePlayerActivity : AppCompatActivity() {
 
         if (wasPip) {
             wasPip = false
+        } else if (preservePlaybackOnPause) {
+            preservePlaybackOnPause = false
         } else {
             viewModel.player.playWhenReady = viewModel.playWhenReady
         }
@@ -49,6 +54,8 @@ abstract class BasePlayerActivity : AppCompatActivity() {
 
         if (isInPictureInPictureMode) {
             wasPip = true
+        } else if (preservePlaybackOnPause) {
+            viewModel.updatePlaybackProgress()
         } else {
             viewModel.playWhenReady = viewModel.player.playWhenReady
             viewModel.player.playWhenReady = false

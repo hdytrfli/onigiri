@@ -135,6 +135,7 @@ private fun SettingsFileEditScreenLayout(
     if (showDiscardDialog) {
         BaseDialog(
             title = stringResource(SettingsR.string.discard_changes_dialog_title),
+            description = stringResource(SettingsR.string.discard_changes_dialog_text),
             onDismiss = { showDiscardDialog = false },
             negativeButton = {
                 AppButton(
