@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -30,11 +32,14 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemHeader
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTitle
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
 import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
+import dev.hdytrfli.onigiri.feature.film.presentation.components.rememberMediaDeleteController
 import dev.hdytrfli.onigiri.feature.film.presentation.downloader.DownloaderAction
 import dev.hdytrfli.onigiri.feature.film.presentation.downloader.DownloaderEvent
 import dev.hdytrfli.onigiri.feature.film.presentation.downloader.DownloaderViewModel
 import dev.hdytrfli.onigiri.models.FindroidBook
 import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
+import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
@@ -58,6 +63,7 @@ fun BookDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val downloaderState by downloaderViewModel.state.collectAsStateWithLifecycle()
+    val deleteController = rememberMediaDeleteController()
 
     LifecycleResumeEffect(bookId) {
         viewModel.load(bookId, force = true)
@@ -102,6 +108,27 @@ fun BookDetailScreen(
                                 onNavigateToDownloads = navigateToDownloads,
                                 downloadAvailable = true,
                             )
+                            if (deleteController.canDelete) {
+                                AppIconButton(
+                                    onClick = {
+                                        deleteController.request(item.id, item.name) {
+                                            navigateBack()
+                                        }
+                                    },
+                                    variant = AppButtonVariant.Secondary,
+                                    content = {
+                                        Icon(
+                                            painter =
+                                                painterResource(CoreR.drawable.ic_lucide_trash),
+                                            contentDescription =
+                                                stringResource(
+                                                    dev.hdytrfli.onigiri.feature.film.R.string
+                                                        .delete_media_action
+                                                ),
+                                        )
+                                    },
+                                )
+                            }
                         }
                     },
                 )

@@ -2,9 +2,7 @@ package dev.hdytrfli.onigiri.feature.film.presentation.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -136,11 +134,9 @@ fun DetailActionsMenu(
                 )
             }
             if (showDelete) {
-                HorizontalDivider()
                 MenuActionItem(
-                    icon = CoreR.drawable.ic_trash,
+                    icon = CoreR.drawable.ic_lucide_trash,
                     label = stringResource(FilmR.string.delete_media_action),
-                    iconTint = MaterialTheme.colorScheme.error,
                     onClick = {
                         menuOpen = false
                         deleteController.request(itemId, onDeleted = onDeleted)

@@ -285,6 +285,7 @@ private fun SubtitleSearchScreenLayout(
             options = languageEntries.map { LanguageOption(it.first, it.second) },
             selectedCode = state.language,
             suggestedLabel = stringResource(CoreR.string.suggested),
+            availableLabel = stringResource(CoreR.string.available),
             suggestedCodes = state.recentLanguages,
             optionIcon = languageIcon,
             onSelect = { code ->

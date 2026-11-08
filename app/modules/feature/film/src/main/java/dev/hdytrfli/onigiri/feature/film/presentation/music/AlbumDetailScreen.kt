@@ -47,6 +47,9 @@ import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
 import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Section
 import dev.hdytrfli.onigiri.models.FindroidMusicSong
+import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
+import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
+import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
 import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
@@ -119,14 +122,28 @@ private fun AlbumDetailLayout(
                     hasBackButton = true,
                     onBackClick = onBack,
                     trailingContent = {
-                        DetailActionsMenu(
-                            itemId = album.id,
-                            actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
-                            onIdentify = onIdentify,
-                            onEditImages = onEditImages,
-                            onIdentifyApplied = onIdentifyApplied,
-                            onDeleted = onBack,
-                        )
+                        AppButtonGroup {
+                            AppIconButton(
+                                onClick = { album.artistId?.let { onArtistClick(it.toString()) } },
+                                variant = AppButtonVariant.Secondary,
+                                enabled = album.artistId != null,
+                                content = {
+                                    Icon(
+                                        painter = painterResource(CoreR.drawable.ic_user),
+                                        contentDescription =
+                                            stringResource(FilmR.string.music_artist_label),
+                                    )
+                                },
+                            )
+                            DetailActionsMenu(
+                                itemId = album.id,
+                                actions = setOf(DetailAction.IDENTIFY, DetailAction.EDIT_IMAGES),
+                                onIdentify = onIdentify,
+                                onEditImages = onEditImages,
+                                onIdentifyApplied = onIdentifyApplied,
+                                onDeleted = onBack,
+                            )
+                        }
                     },
                 )
             }

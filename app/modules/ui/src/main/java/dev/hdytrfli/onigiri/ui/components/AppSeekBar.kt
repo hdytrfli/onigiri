@@ -34,6 +34,7 @@ fun AppSeekBar(
     fraction: Float,
     modifier: Modifier = Modifier,
     bufferedFraction: Float? = null,
+    chapterFractions: List<Float> = emptyList(),
     enabled: Boolean = true,
     preciseSeeking: Boolean = false,
     onSeekStart: (() -> Unit)? = null,
@@ -75,6 +76,7 @@ fun AppSeekBar(
                 BufferedTrack(
                     fraction = state.value,
                     bufferedFraction = bufferedFraction,
+                    chapterFractions = chapterFractions,
                 )
             },
             modifier = Modifier.fillMaxWidth(),
@@ -110,7 +112,11 @@ fun AppSeekBar(
 }
 
 @Composable
-private fun BufferedTrack(fraction: Float, bufferedFraction: Float?) {
+private fun BufferedTrack(
+    fraction: Float,
+    bufferedFraction: Float?,
+    chapterFractions: List<Float>,
+) {
     Canvas(modifier = Modifier.fillMaxWidth().height(12.dp)) {
         val stroke = size.height
         val y = size.height / 2f
@@ -132,6 +138,17 @@ private fun BufferedTrack(fraction: Float, bufferedFraction: Float?) {
             line(start + (end - start) * buffered.coerceIn(0f, 1f), Color(0x66FFFFFF))
         }
         line(start + (end - start) * fraction.coerceIn(0f, 1f), Color.White)
+
+        chapterFractions.forEach { chapter ->
+            val x = start + (end - start) * chapter.coerceIn(0f, 1f)
+            drawLine(
+                color = Color(0xCCFFFFFF),
+                start = Offset(x, y - 4.dp.toPx()),
+                end = Offset(x, y + 4.dp.toPx()),
+                strokeWidth = 1.5.dp.toPx(),
+                cap = StrokeCap.Round,
+            )
+        }
     }
 }
 

@@ -32,10 +32,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,14 +57,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.R
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
+import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.ui.components.AppButton
 import dev.hdytrfli.onigiri.ui.components.AppTextField
+import dev.hdytrfli.onigiri.ui.components.LanguageOption
+import dev.hdytrfli.onigiri.ui.components.LanguagePickerDialog
 import dev.hdytrfli.onigiri.ui.components.LoadingButton
 import dev.hdytrfli.onigiri.ui.components.LocalRootPageContentInset
 import dev.hdytrfli.onigiri.ui.components.TopBarPageShell
 import dev.hdytrfli.onigiri.ui.theme.OnScrimSecondary
 import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.utils.ObserveAsEvents
+import java.util.Locale
 
 @Composable
 fun OnboardingScreen(
@@ -118,6 +126,15 @@ fun OnboardingScreen(
                         onPinChange = viewModel::updatePin,
                         onLock = viewModel::lockProfile,
                         onSkip = viewModel::skipPin,
+                    )
+
+                OnboardingStep.LANGUAGES.name ->
+                    LanguagesPage(
+                        state = state,
+                        onAudioLanguageChange = viewModel::updateAudioLanguage,
+                        onSubtitleLanguageChange = viewModel::updateSubtitleLanguage,
+                        onAlwaysPlaySubtitlesChange = viewModel::updateAlwaysPlaySubtitles,
+                        onContinue = viewModel::finishLanguages,
                     )
             }
         }
@@ -260,6 +277,114 @@ private fun PinPage(
 }
 
 @Composable
+private fun LanguagesPage(
+    state: OnboardingState,
+    onAudioLanguageChange: (String?) -> Unit,
+    onSubtitleLanguageChange: (String?) -> Unit,
+    onAlwaysPlaySubtitlesChange: (Boolean) -> Unit,
+    onContinue: () -> Unit,
+) {
+    val languageNames = stringArrayResource(SettingsR.array.languages)
+    val languageValues = stringArrayResource(SettingsR.array.languages_values)
+    val options =
+        remember(languageNames, languageValues) {
+            languageValues.mapIndexedNotNull { index, code ->
+                languageNames.getOrNull(index)?.let { LanguageOption(code, it) }
+            }
+        }
+    val labels = remember(options) { options.associateBy { it.code } }
+    var picker by remember { mutableStateOf<String?>(null) }
+    val deviceLanguage = remember {
+        runCatching { Locale.getDefault().getISO3Language() }
+            .getOrNull()
+            ?.takeIf { it.isNotBlank() && it != "und" }
+    }
+    val suggested =
+        remember(deviceLanguage, state.audioLanguage, state.subtitleLanguage) {
+            listOfNotNull(deviceLanguage, state.audioLanguage, state.subtitleLanguage)
+                .distinct()
+                .take(5)
+        }
+    val notSet = stringResource(CoreR.string.not_set)
+
+    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium)) {
+        OnboardingHeader(
+            title = stringResource(R.string.onboarding_languages_title),
+            description = stringResource(R.string.onboarding_languages_description),
+        )
+        LanguageField(
+            label = stringResource(R.string.onboarding_audio_language),
+            value = labels[state.audioLanguage]?.label ?: notSet,
+            onClick = { picker = "audio" },
+        )
+        LanguageField(
+            label = stringResource(R.string.onboarding_subtitle_language),
+            value = labels[state.subtitleLanguage]?.label ?: notSet,
+            onClick = { picker = "subtitle" },
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.onboarding_always_subtitles),
+                style = MaterialTheme.typography.bodyMedium,
+                color = OnScrimSecondary,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(
+                checked = state.alwaysPlaySubtitles,
+                onCheckedChange = onAlwaysPlaySubtitlesChange,
+            )
+        }
+        AppButton(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.onboarding_languages_continue))
+        }
+    }
+
+    picker?.let { target ->
+        LanguagePickerDialog(
+            title =
+                stringResource(
+                    if (target == "audio") R.string.onboarding_audio_language
+                    else R.string.onboarding_subtitle_language
+                ),
+            description = null,
+            options = options,
+            selectedCode = if (target == "audio") state.audioLanguage else state.subtitleLanguage,
+            suggestedLabel = stringResource(CoreR.string.suggested),
+            availableLabel = stringResource(CoreR.string.available),
+            suggestedCodes = suggested,
+            notSetLabel = notSet,
+            onSelect = { code ->
+                if (target == "audio") onAudioLanguageChange(code)
+                else onSubtitleLanguageChange(code)
+                picker = null
+            },
+            onDismiss = { picker = null },
+        )
+    }
+}
+
+@Composable
+private fun LanguageField(label: String, value: String, onClick: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = OnScrimSecondary,
+        )
+        AppButton(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            variant = dev.hdytrfli.onigiri.ui.components.AppButtonVariant.Secondary,
+        ) {
+            Text(value)
+        }
+    }
+}
+
+@Composable
 fun OnboardingHeader(title: String, description: String) {
     Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small)) {
         Text(
@@ -358,7 +483,7 @@ private fun OnboardingDots(stepIndex: Int, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        repeat(4) { index ->
+        repeat(OnboardingStep.entries.size) { index ->
             Box(
                 modifier =
                     Modifier.height(6.dp)

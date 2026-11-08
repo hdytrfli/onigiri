@@ -83,6 +83,12 @@
     <string name="onboarding_photo_credit">Onboarding photo: Iridial on Unsplash</string>
     <string name="player_controls_options">Playback options</string>
     <string name="player_controls_settings">Player settings</string>
+    <string name="onboarding_languages_title">Playback languages</string>
+    <string name="onboarding_languages_description">Choose the languages and subtitle behavior this profile should start with.</string>
+    <string name="onboarding_audio_language">Audio language</string>
+    <string name="onboarding_subtitle_language">Subtitle language</string>
+    <string name="onboarding_always_subtitles">Always show subtitles</string>
+    <string name="onboarding_languages_continue">Continue</string>
     <string name="player_controls_lock_gestures">Lock volume, brightness and zoom gestures</string>
     <string name="player_controls_episodes">Episodes</string>
     <string name="player_menu_tab_audio">Audio</string>

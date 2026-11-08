@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -62,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import dev.hdytrfli.onigiri.R
 import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.OverviewText
@@ -73,6 +73,7 @@ import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
+import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.AppSeekBar
 import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.components.ReservedWidthText
@@ -97,6 +98,7 @@ fun MusicPlayerScreen(
     swipeArtwork: Boolean,
     preciseSeeking: Boolean,
     navigateBack: () -> Unit,
+    onOpenSettings: () -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
@@ -117,6 +119,7 @@ fun MusicPlayerScreen(
 ) {
     var overlayMessage by remember { mutableStateOf<String?>(null) }
     var displayedOverlayMessage by remember { mutableStateOf("") }
+    var speedBoostActive by remember { mutableStateOf(false) }
 
     val shuffleOn = stringResource(FilmR.string.music_shuffle_on)
     val shuffleOff = stringResource(FilmR.string.music_shuffle_off)
@@ -189,27 +192,6 @@ fun MusicPlayerScreen(
                 .background(Brush.verticalGradient(listOf(PlayerBackgroundTop, Color.Black)))
                 .padding(top = safePadding.top, bottom = safePadding.bottom)
     ) {
-        if (artworkType == "backdrop" && current?.imageUri != null) {
-            AsyncImage(
-                model = current.imageUri,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
-            Box(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.Black.copy(alpha = 0.2f),
-                                    Color.Black.copy(alpha = 0.85f),
-                                )
-                            )
-                        )
-            )
-        }
-
         if (current != null && isLandscape) {
             Row(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.weight(0.5f).fillMaxHeight()) {
@@ -241,7 +223,7 @@ fun MusicPlayerScreen(
                                     onPrevious = onPrevious,
                                     onNext = onNext,
                                     onSpeedBoost = { active ->
-                                        overlayMessage = if (active) speedUp else null
+                                        speedBoostActive = active
                                         onSpeedBoost(active)
                                     },
                                     discRotation = discRotation,
@@ -264,6 +246,7 @@ fun MusicPlayerScreen(
                     }
                     PlayerTopBar(
                         navigateBack = navigateBack,
+                        onOpenSettings = onOpenSettings,
                         onOpenQueue = onOpenQueue,
                         showQueueButton = false,
                         modifier = Modifier.align(Alignment.TopCenter),
@@ -329,6 +312,7 @@ fun MusicPlayerScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 PlayerTopBar(
                     navigateBack = navigateBack,
+                    onOpenSettings = onOpenSettings,
                     onOpenQueue = onOpenQueue,
                     showQueueButton = !isLandscape && !isAudiobook,
                 )
@@ -367,7 +351,7 @@ fun MusicPlayerScreen(
                                         onPrevious = onPrevious,
                                         onNext = onNext,
                                         onSpeedBoost = { active ->
-                                            overlayMessage = if (active) speedUp else null
+                                            speedBoostActive = active
                                             onSpeedBoost(active)
                                         },
                                         discRotation = discRotation,
@@ -412,7 +396,7 @@ fun MusicPlayerScreen(
             }
         }
         AnimatedVisibility(
-            visible = overlayMessage != null,
+            visible = overlayMessage != null || speedBoostActive,
             enter = fadeIn(tween(150)),
             exit = fadeOut(tween(150)),
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 72.dp),
@@ -424,7 +408,7 @@ fun MusicPlayerScreen(
                 shadowElevation = 6.dp,
             ) {
                 Text(
-                    text = displayedOverlayMessage,
+                    text = if (speedBoostActive) speedUp else displayedOverlayMessage,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
                 )
@@ -436,6 +420,7 @@ fun MusicPlayerScreen(
 @Composable
 private fun PlayerTopBar(
     navigateBack: () -> Unit,
+    onOpenSettings: () -> Unit,
     onOpenQueue: () -> Unit,
     showQueueButton: Boolean,
     modifier: Modifier = Modifier,
@@ -468,6 +453,16 @@ private fun PlayerTopBar(
                 },
             )
         }
+        AppIconButton(
+            onClick = onOpenSettings,
+            variant = AppButtonVariant.Secondary,
+            content = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_lucide_settings),
+                    contentDescription = stringResource(R.string.player_controls_settings),
+                )
+            },
+        )
     }
 }
 
@@ -990,9 +985,8 @@ private fun TransportControls(
                 contentAlignment = Alignment.Center,
             ) {
                 if (state.isBuffering) {
-                    CircularProgressIndicator(
+                    AppLoadingIndicator(
                         modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
                         color = Color.Black,
                     )
                 } else {
@@ -1058,17 +1052,8 @@ private fun TransportControls(
                     onDismissRequest = { menuExpanded = false },
                 ) {
                     MenuActionItem(
-                        label = stringResource(FilmR.string.music_artist_label),
-                        icon = CoreR.drawable.ic_user,
-                        enabled = item?.artistId != null,
-                        onClick = {
-                            menuExpanded = false
-                            item?.artistId?.let(onArtistClick)
-                        },
-                    )
-                    MenuActionItem(
-                        label = stringResource(FilmR.string.music_album_label),
-                        icon = CoreR.drawable.ic_music,
+                        label = stringResource(FilmR.string.music_discover_album),
+                        icon = CoreR.drawable.ic_lucide_gallery_vertical_end,
                         enabled = item?.albumId != null,
                         onClick = {
                             menuExpanded = false

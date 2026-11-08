@@ -425,14 +425,8 @@ private fun SongListRow(
                     onClick = onAddToQueue,
                 ),
                 MusicRowAction(
-                    label = stringResource(FilmR.string.music_artist_label),
-                    icon = CoreR.drawable.ic_user,
-                    enabled = onViewArtist != null,
-                    onClick = { onViewArtist?.invoke() },
-                ),
-                MusicRowAction(
-                    label = stringResource(FilmR.string.music_album_label),
-                    icon = CoreR.drawable.ic_music,
+                    label = stringResource(FilmR.string.music_discover_album),
+                    icon = CoreR.drawable.ic_lucide_gallery_vertical_end,
                     enabled = onViewAlbum != null,
                     onClick = { onViewAlbum?.invoke() },
                 ),
@@ -441,8 +435,7 @@ private fun SongListRow(
                     listOf(
                         MusicRowAction(
                             label = stringResource(FilmR.string.delete_media_action),
-                            icon = CoreR.drawable.ic_trash,
-                            iconTint = Red,
+                            icon = CoreR.drawable.ic_lucide_trash,
                             onClick = onDelete,
                         )
                     )

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +27,7 @@ fun LanguagePickerDialog(
     options: List<LanguageOption>,
     selectedCode: String?,
     suggestedLabel: String,
+    availableLabel: String,
     suggestedCodes: List<String> = emptyList(),
     notSetLabel: String? = null,
     @DrawableRes optionIcon: Int? = null,
@@ -46,6 +45,19 @@ fun LanguagePickerDialog(
         onDismiss = onDismiss,
     ) { _ ->
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            if (suggested.isNotEmpty()) {
+                item(key = "suggested-header") { LanguageHeader(suggestedLabel) }
+                items(suggested, key = { "suggested-${it.code}" }) { option ->
+                    LanguageRow(
+                        option = option,
+                        selected = option.code == selectedCode,
+                        icon = optionIcon,
+                        onSelect = onSelect,
+                    )
+                }
+            }
+
+            item(key = "available-header") { LanguageHeader(availableLabel) }
             if (notSetLabel != null) {
                 item(key = "not-set") {
                     AppOptionRow(
@@ -57,42 +69,6 @@ fun LanguagePickerDialog(
                     )
                 }
             }
-
-            if (suggested.isNotEmpty()) {
-                item(key = "suggested-header") {
-                    Text(
-                        text = suggestedLabel,
-                        modifier =
-                            Modifier.padding(
-                                start = 24.dp,
-                                end = 24.dp,
-                                top = MaterialTheme.spacings.small,
-                                bottom = MaterialTheme.spacings.extraSmall,
-                            ),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-                items(suggested, key = { "suggested-${it.code}" }) { option ->
-                    LanguageRow(
-                        option = option,
-                        selected = option.code == selectedCode,
-                        icon = optionIcon,
-                        onSelect = onSelect,
-                    )
-                }
-                item(key = "suggested-divider") {
-                    HorizontalDivider(
-                        modifier =
-                            Modifier.padding(
-                                horizontal = MaterialTheme.spacings.medium,
-                                vertical = MaterialTheme.spacings.extraSmall,
-                            ),
-                        color = DividerDefaults.color.copy(alpha = 0.2f),
-                    )
-                }
-            }
-
             items(remaining, key = { it.code }) { option ->
                 LanguageRow(
                     option = option,
@@ -103,6 +79,22 @@ fun LanguagePickerDialog(
             }
         }
     }
+}
+
+@Composable
+private fun LanguageHeader(label: String) {
+    Text(
+        text = label,
+        modifier =
+            Modifier.padding(
+                start = 24.dp,
+                end = 24.dp,
+                top = MaterialTheme.spacings.small,
+                bottom = MaterialTheme.spacings.extraSmall,
+            ),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+    )
 }
 
 @Composable

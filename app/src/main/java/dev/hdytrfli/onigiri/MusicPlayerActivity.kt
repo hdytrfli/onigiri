@@ -53,6 +53,11 @@ class MusicPlayerActivity : ComponentActivity() {
                         swipeArtwork = swipeArtwork,
                         preciseSeeking = preciseSeeking,
                         navigateBack = ::finish,
+                        onOpenSettings = {
+                            startActivity(
+                                Intent(this@MusicPlayerActivity, PlayerSettingsActivity::class.java)
+                            )
+                        },
                         onPlayPause = viewModel::togglePlayPause,
                         onPrevious = viewModel::previous,
                         onNext = viewModel::next,

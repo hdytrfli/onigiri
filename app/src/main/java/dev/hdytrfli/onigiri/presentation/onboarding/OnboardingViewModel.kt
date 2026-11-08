@@ -25,6 +25,7 @@ enum class OnboardingStep {
     SERVER,
     ACCOUNT,
     PIN,
+    LANGUAGES,
 }
 
 data class OnboardingState(
@@ -43,6 +44,9 @@ data class OnboardingState(
     val loginError: UiText? = null,
     val quickConnectError: UiText? = null,
     val pinError: UiText? = null,
+    val audioLanguage: String? = null,
+    val subtitleLanguage: String? = null,
+    val alwaysPlaySubtitles: Boolean = false,
 )
 
 sealed interface OnboardingEvent {
@@ -63,6 +67,18 @@ constructor(
     val events = eventsChannel.receiveAsFlow()
 
     private var quickConnectJob: Job? = null
+
+    init {
+        _state.update {
+            it.copy(
+                audioLanguage = appPreferences.getValue(appPreferences.preferredAudioLanguage),
+                subtitleLanguage =
+                    appPreferences.getValue(appPreferences.preferredSubtitleLanguage),
+                alwaysPlaySubtitles =
+                    appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles),
+            )
+        }
+    }
 
     fun continueFromOverview() {
         _state.update { it.copy(step = OnboardingStep.SERVER) }
@@ -253,11 +269,34 @@ constructor(
             }
 
             appPreferences.setProfilePin(server.id, user.id, state.pin)
-            completeOnboarding()
+            _state.update { it.copy(isSavingPin = false, step = OnboardingStep.LANGUAGES) }
         }
     }
 
     fun skipPin() {
+        _state.update { it.copy(step = OnboardingStep.LANGUAGES) }
+    }
+
+    fun updateAudioLanguage(language: String?) {
+        _state.update { it.copy(audioLanguage = language) }
+    }
+
+    fun updateSubtitleLanguage(language: String?) {
+        _state.update { it.copy(subtitleLanguage = language) }
+    }
+
+    fun updateAlwaysPlaySubtitles(enabled: Boolean) {
+        _state.update { it.copy(alwaysPlaySubtitles = enabled) }
+    }
+
+    fun finishLanguages() {
+        val state = _state.value
+        appPreferences.setValue(appPreferences.preferredAudioLanguage, state.audioLanguage)
+        appPreferences.setValue(appPreferences.preferredSubtitleLanguage, state.subtitleLanguage)
+        appPreferences.setValue(
+            appPreferences.playerAlwaysPlaySubtitles,
+            state.alwaysPlaySubtitles,
+        )
         completeOnboarding()
     }
 
@@ -281,6 +320,11 @@ constructor(
 
             OnboardingStep.PIN -> {
                 _state.update { it.copy(step = OnboardingStep.ACCOUNT) }
+                true
+            }
+
+            OnboardingStep.LANGUAGES -> {
+                _state.update { it.copy(step = OnboardingStep.PIN) }
                 true
             }
         }

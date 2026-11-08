@@ -65,6 +65,7 @@ fun SettingsSelectCard(
                 options = languageOptions,
                 selectedCode = preference.value,
                 suggestedLabel = stringResource(CoreR.string.suggested),
+                availableLabel = stringResource(CoreR.string.available),
                 suggestedCodes = preference.suggestedValues,
                 notSetLabel = notSetString.takeIf { preference.optionsIncludeNull },
                 optionIcon = preference.optionIcon?.drawableRes(),

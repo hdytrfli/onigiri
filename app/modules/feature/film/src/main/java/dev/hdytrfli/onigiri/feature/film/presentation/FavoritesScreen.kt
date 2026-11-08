@@ -170,8 +170,7 @@ private fun FavoritesScreenLayout(
                                                         stringResource(
                                                             FilmR.string.delete_media_action
                                                         ),
-                                                    icon = CoreR.drawable.ic_trash,
-                                                    iconTint = MaterialTheme.colorScheme.error,
+                                                    icon = CoreR.drawable.ic_lucide_trash,
                                                     onClick = { onDeleteSong(item) },
                                                 )
                                             )

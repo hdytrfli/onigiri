@@ -64,6 +64,7 @@
     <string name="delete_media_message_generic">This item will be permanently removed from the Jellyfin server.</string>
     <string name="delete_media_warning">This action cannot be undone.</string>
     <string name="delete_media_action">Delete from server</string>
+    <string name="music_discover_album">Discover album</string>
     <string name="music_queue">Queue</string>
     <string name="music_repeat">Repeat</string>
     <string name="music_repeat_one">Repeat one</string>

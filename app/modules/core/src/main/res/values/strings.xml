@@ -165,6 +165,7 @@
     <string name="existing_subtitles">Existing subtitles</string>
     <string name="no_existing_subtitles">No subtitles attached</string>
     <string name="suggested">Suggested</string>
+    <string name="available">Available</string>
     <string name="subtitle_search_language_summary">Language used for this search</string>
     <string name="available_subtitles">Available subtitles</string>
     <string name="language">Language</string>

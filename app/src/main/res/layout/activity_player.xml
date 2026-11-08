@@ -12,7 +12,14 @@
         android:layout_height="match_parent"
         android:background="@android:color/black"
         app:animation_enabled="false"
-        app:show_buffering="always" />
+        app:show_buffering="never" />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/player_loading_indicator"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/progress_scrubber_layout"

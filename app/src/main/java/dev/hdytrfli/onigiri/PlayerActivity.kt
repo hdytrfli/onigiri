@@ -27,13 +27,20 @@ import android.widget.ListView
 import android.widget.Space
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,10 +68,11 @@ import dev.hdytrfli.onigiri.presentation.player.PlayerMenuItem
 import dev.hdytrfli.onigiri.presentation.player.PlayerStatsPanel
 import dev.hdytrfli.onigiri.presentation.player.SubtitleOffsetControl
 import dev.hdytrfli.onigiri.presentation.player.formatSubtitleOffset
-import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.ui.PaddedTimeTextView
 import dev.hdytrfli.onigiri.ui.RoundedTimeBar
+import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
+import dev.hdytrfli.onigiri.ui.components.AppSeekBar
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.utils.BackdropRatios
 import dev.hdytrfli.onigiri.ui.utils.LocalBackdropRatios
@@ -119,6 +127,7 @@ class PlayerActivity : BasePlayerActivity() {
 
     private lateinit var playerTimeRight: TextView
     private lateinit var playerTimePosition: PaddedTimeTextView
+    private lateinit var playerLoadingIndicator: ComposeView
     private lateinit var chapterBackButton: ImageButton
     private lateinit var chapterForwardButton: ImageButton
     private lateinit var mediaPreviousButton: ImageButton
@@ -303,6 +312,71 @@ class PlayerActivity : BasePlayerActivity() {
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
+        playerLoadingIndicator =
+            findViewById<ComposeView>(R.id.player_loading_indicator).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    FindroidTheme { AppLoadingIndicator(modifier = Modifier.size(48.dp)) }
+                }
+            }
+        binding.playerView.findViewById<ComposeView>(R.id.video_seekbar).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                val player = viewModel.player
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                var position by remember { mutableLongStateOf(player.currentPosition) }
+                var duration by remember { mutableLongStateOf(player.duration) }
+                var buffered by remember { mutableLongStateOf(player.bufferedPosition) }
+
+                LaunchedEffect(player) {
+                    while (true) {
+                        position = player.currentPosition.coerceAtLeast(0L)
+                        duration = player.duration.coerceAtLeast(0L)
+                        buffered = player.bufferedPosition.coerceAtLeast(0L)
+                        delay(250L)
+                    }
+                }
+
+                val durationMs = duration.coerceAtLeast(0L)
+                val fraction =
+                    if (durationMs > 0L) {
+                        (position.toFloat() / durationMs).coerceIn(0f, 1f)
+                    } else {
+                        0f
+                    }
+                val bufferedFraction =
+                    if (durationMs > 0L) {
+                        (buffered.toFloat() / durationMs).coerceIn(0f, 1f)
+                    } else {
+                        null
+                    }
+                val chapterFractions =
+                    if (durationMs > 0L) {
+                        uiState.currentChapters.map {
+                            (it.startPosition.toFloat() / durationMs).coerceIn(0f, 1f)
+                        }
+                    } else {
+                        emptyList()
+                    }
+
+                FindroidTheme {
+                    AppSeekBar(
+                        fraction = fraction,
+                        bufferedFraction = bufferedFraction,
+                        chapterFractions = chapterFractions,
+                        enabled = durationMs > 0L,
+                        preciseSeeking =
+                            appPreferences.getValue(appPreferences.playerPreciseSeeking),
+                        onSeek = { value ->
+                            if (durationMs > 0L) {
+                                player.seekTo((value * durationMs).toLong())
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
         binding.playerView.findViewById<ImageButton>(R.id.btn_player_settings).setOnClickListener {
@@ -424,19 +498,12 @@ class PlayerActivity : BasePlayerActivity() {
                             // File Loaded
                             if (fileLoaded) {
                                 playerMenuButton.isEnabled = true
-                                playerMenuButton.imageAlpha = 255
                                 lockButton.isEnabled = true
-                                lockButton.imageAlpha = 255
                                 gestureLockButton.isEnabled = true
-                                gestureLockButton.imageAlpha = 255
                                 btnEpisodes.isEnabled = true
-                                btnEpisodes.imageAlpha = 255
                                 btnInfo.isEnabled = true
-                                btnInfo.imageAlpha = 255
                                 pipButton.isEnabled = true
-                                pipButton.imageAlpha = 255
                                 statsButton.isEnabled = true
-                                statsButton.imageAlpha = 255
                             }
 
                             // Episodes
@@ -495,26 +562,19 @@ class PlayerActivity : BasePlayerActivity() {
         }
 
         playerMenuButton.isEnabled = false
-        playerMenuButton.imageAlpha = 75
 
         lockButton.isEnabled = false
-        lockButton.imageAlpha = 75
 
         gestureLockButton.isEnabled = false
-        gestureLockButton.imageAlpha = 75
 
         btnEpisodes.isEnabled = false
-        btnEpisodes.imageAlpha = 75
 
         btnInfo.isEnabled = false
-        btnInfo.imageAlpha = 75
 
         statsButton.isEnabled = false
-        statsButton.imageAlpha = 75
 
         if (isPipSupported) {
             pipButton.isEnabled = false
-            pipButton.imageAlpha = 75
         } else {
             val pipSpace = binding.playerView.findViewById<Space>(R.id.space_pip)
             pipButton.isVisible = false
@@ -714,15 +774,7 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun openPlayerSettings() {
-        startActivity(
-            Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                putIntegerArrayListExtra(
-                    MainActivity.EXTRA_SETTINGS_INDEXES,
-                    arrayListOf(SettingsR.string.settings_category_player),
-                )
-            }
-        )
+        startActivity(Intent(this, PlayerSettingsActivity::class.java))
     }
 
     private fun finishPlayback() {
@@ -1057,6 +1109,12 @@ class PlayerActivity : BasePlayerActivity() {
         object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (binding.playerView.isControllerFullyVisible) schedulePlayerControlsHide()
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (!::playerLoadingIndicator.isInitialized) return
+                playerLoadingIndicator.isVisible =
+                    playbackState == Player.STATE_BUFFERING || playbackState == Player.STATE_IDLE
             }
         }
 

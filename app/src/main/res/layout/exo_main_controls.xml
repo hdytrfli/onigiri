@@ -120,6 +120,18 @@
                 app:tint="@android:color/white" />
 
             <ImageButton
+                android:id="@+id/btn_player_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/transparent_circle_background"
+                android:contentDescription="@string/player_controls_settings"
+                android:padding="12dp"
+                android:src="@drawable/ic_lucide_settings"
+                app:tint="@android:color/white" />
+
+            <ImageButton
                 android:id="@+id/btn_lockview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -129,18 +141,6 @@
                 android:contentDescription="@string/player_controls_lock"
                 android:padding="12dp"
                 android:src="@drawable/ic_lock"
-                app:tint="@android:color/white" />
-
-            <ImageButton
-                android:id="@+id/btn_player_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/transparent_circle_background"
-                android:contentDescription="@string/player_controls_settings"
-                android:padding="12dp"
-                android:src="@drawable/ic_settings"
                 app:tint="@android:color/white" />
 
         </LinearLayout>
@@ -329,14 +329,20 @@
             <dev.hdytrfli.onigiri.ui.RoundedTimeBar
                 android:id="@+id/exo_progress"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="0dp"
+                android:visibility="gone"
                 android:contentDescription="@string/player_controls_progress"
                 app:bar_height="12dp"
                 app:buffered_color="#66FFFFFF"
                 app:played_color="@android:color/white"
                 app:scrubber_color="@android:color/white"
                 app:unplayed_color="#33FFFFFF" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/video_seekbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <Space
                 android:layout_width="8dp"
