@@ -103,7 +103,7 @@
                 android:background="@drawable/transparent_circle_background"
                 android:contentDescription="@string/player_controls_options"
                 android:padding="12dp"
-                android:src="@drawable/ic_tune"
+                android:src="@drawable/ic_lucide_text_initial"
                 app:tint="@android:color/white" />
 
             <ImageButton
@@ -128,7 +128,7 @@
                 android:background="@drawable/transparent_circle_background"
                 android:contentDescription="@string/player_controls_settings"
                 android:padding="12dp"
-                android:src="@drawable/ic_bolt"
+                android:src="@drawable/ic_lucide_settings_2"
                 app:tint="@android:color/white" />
 
             <ImageButton
@@ -190,13 +190,6 @@
                 android:src="@drawable/ic_play"
                 app:tint="@android:color/black"
                 android:contentDescription="@string/player_controls_play_pause" />
-
-            <androidx.compose.ui.platform.ComposeView
-                android:id="@+id/play_pause_loading"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:visibility="gone" />
 
         </FrameLayout>
 

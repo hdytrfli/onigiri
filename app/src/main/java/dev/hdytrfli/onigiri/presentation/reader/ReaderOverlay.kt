@@ -156,7 +156,7 @@ fun ReaderOverlay(
                         }
                         AppIconButton(onClick = onOpenSettings, variant = AppButtonVariant.Ghost) {
                             Icon(
-                                painter = painterResource(CoreR.drawable.ic_bolt),
+                                painter = painterResource(CoreR.drawable.ic_lucide_settings_2),
                                 contentDescription = "Reader settings",
                             )
                         }

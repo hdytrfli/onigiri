@@ -78,7 +78,6 @@ import dev.hdytrfli.onigiri.player.local.music.MusicRepeatMode
 import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
-import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.ReservedWidthText
 import dev.hdytrfli.onigiri.ui.components.preciseSeekable
 import dev.hdytrfli.onigiri.ui.theme.Red
@@ -462,7 +461,7 @@ private fun PlayerTopBar(
             variant = AppButtonVariant.Secondary,
             content = {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_bolt),
+                    painter = painterResource(CoreR.drawable.ic_lucide_settings_2),
                     contentDescription = stringResource(R.string.player_controls_settings),
                 )
             },
@@ -923,16 +922,6 @@ private fun TransportControls(
 ) {
     val item = state.current
     val favorite = item?.favorite == true
-    var showBufferingLoader by remember { mutableStateOf(false) }
-
-    LaunchedEffect(state.isBuffering) {
-        if (state.isBuffering) {
-            delay(400L)
-            showBufferingLoader = true
-        } else {
-            showBufferingLoader = false
-        }
-    }
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         val buttonCount = 7
@@ -997,25 +986,17 @@ private fun TransportControls(
                         .clickable(onClick = onPlayPause),
                 contentAlignment = Alignment.Center,
             ) {
-                if (showBufferingLoader) {
-                    AppLoadingIndicator(
-                        modifier = Modifier.size(40.dp),
-                        color = Color.Black,
-                    )
-                } else {
-                    Icon(
-                        painter =
-                            painterResource(
-                                if (state.isPlaying) CoreR.drawable.ic_pause
-                                else CoreR.drawable.ic_play
-                            ),
-                        contentDescription =
-                            stringResource(
-                                if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
-                            ),
-                        tint = Color.Black,
-                    )
-                }
+                Icon(
+                    painter =
+                        painterResource(
+                            if (state.isPlaying) CoreR.drawable.ic_pause else CoreR.drawable.ic_play
+                        ),
+                    contentDescription =
+                        stringResource(
+                            if (state.isPlaying) FilmR.string.music_pause else CoreR.string.play
+                        ),
+                    tint = Color.Black,
+                )
             }
             AppIconButton(
                 onClick = onNext,

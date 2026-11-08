@@ -19,9 +19,6 @@ abstract class BasePlayerActivity : AppCompatActivity() {
     private lateinit var mediaSession: MediaSession
     private var wasPip: Boolean = false
 
-    /** Playback state captured before opening settings, so the return is an explicit handoff. */
-    private var settingsPlaybackWhenReady: Boolean? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -39,21 +36,12 @@ abstract class BasePlayerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        val settingsPlayback = settingsPlaybackWhenReady
-        settingsPlaybackWhenReady = null
-        when {
-            wasPip -> wasPip = false
-            settingsPlayback != null -> {
-                viewModel.playWhenReady = settingsPlayback
-                if (viewModel.player.playWhenReady != settingsPlayback) {
-                    viewModel.player.playWhenReady = settingsPlayback
-                }
-            }
-            else -> {
-                val shouldPlay = viewModel.playWhenReady
-                if (viewModel.player.playWhenReady != shouldPlay) {
-                    viewModel.player.playWhenReady = shouldPlay
-                }
+        if (wasPip) {
+            wasPip = false
+        } else {
+            val shouldPlay = viewModel.playWhenReady
+            if (viewModel.player.playWhenReady != shouldPlay) {
+                viewModel.player.playWhenReady = shouldPlay
             }
         }
         hideSystemUI()
@@ -64,9 +52,6 @@ abstract class BasePlayerActivity : AppCompatActivity() {
 
         if (isInPictureInPictureMode) {
             wasPip = true
-        } else if (settingsPlaybackWhenReady != null) {
-            // Playback was already paused for the settings page; keep the exact captured state.
-            viewModel.updatePlaybackProgress()
         } else {
             viewModel.playWhenReady = viewModel.player.playWhenReady
             if (viewModel.player.playWhenReady) viewModel.player.pause()
@@ -82,17 +67,6 @@ abstract class BasePlayerActivity : AppCompatActivity() {
         if (wasPip) {
             finish()
         }
-    }
-
-    /**
-     * Pauses playback for a settings page while remembering whether it was playing. The media stays
-     * buffered; only the play/pause state is restored when the player resumes.
-     */
-    protected fun prepareForSettingsPage() {
-        val wasPlaying = viewModel.player.playWhenReady
-        settingsPlaybackWhenReady = wasPlaying
-        viewModel.playWhenReady = wasPlaying
-        if (wasPlaying) viewModel.player.pause()
     }
 
     protected fun hideSystemUI() {

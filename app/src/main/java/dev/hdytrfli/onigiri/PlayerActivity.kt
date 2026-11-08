@@ -33,11 +33,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,7 +65,6 @@ import dev.hdytrfli.onigiri.presentation.player.formatSubtitleOffset
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.ui.PaddedTimeTextView
 import dev.hdytrfli.onigiri.ui.RoundedTimeBar
-import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.utils.BackdropRatios
 import dev.hdytrfli.onigiri.ui.utils.LocalBackdropRatios
@@ -80,7 +76,6 @@ import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.max
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -124,9 +119,6 @@ class PlayerActivity : BasePlayerActivity() {
 
     private lateinit var playerTimeRight: TextView
     private lateinit var playerTimePosition: PaddedTimeTextView
-    private lateinit var playPauseButton: ImageButton
-    private lateinit var playPauseLoadingIndicator: ComposeView
-    private var playerLoadingJob: Job? = null
     private lateinit var chapterBackButton: ImageButton
     private lateinit var chapterForwardButton: ImageButton
     private lateinit var mediaPreviousButton: ImageButton
@@ -230,8 +222,10 @@ class PlayerActivity : BasePlayerActivity() {
             val hasPrevious = runCatching { player.hasPreviousMediaItem() }.getOrDefault(false)
             mediaNextButton.isEnabled = true
             mediaPreviousButton.isEnabled = true
-            mediaNextButton.imageAlpha = if (hasNext) 255 else 97
-            mediaPreviousButton.imageAlpha = if (hasPrevious) 255 else 97
+            mediaNextButton.imageAlpha = 255
+            mediaPreviousButton.imageAlpha = 255
+            mediaNextButton.alpha = if (hasNext) 1f else 0.38f
+            mediaPreviousButton.alpha = if (hasPrevious) 1f else 0.38f
             true
         }
         // How long the overlay stays up before hiding itself ("Never" is stored as -1). The fade
@@ -311,19 +305,6 @@ class PlayerActivity : BasePlayerActivity() {
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
-        playPauseButton = binding.playerView.findViewById(R.id.exo_play_pause)
-        playPauseLoadingIndicator =
-            binding.playerView.findViewById<ComposeView>(R.id.play_pause_loading).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-                setContent {
-                    FindroidTheme {
-                        AppLoadingIndicator(
-                            modifier = Modifier.size(40.dp),
-                            color = Color.Black,
-                        )
-                    }
-                }
-            }
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
         binding.playerView.findViewById<ImageButton>(R.id.btn_player_settings).setOnClickListener {
@@ -427,8 +408,10 @@ class PlayerActivity : BasePlayerActivity() {
                             hasChapters = currentChapters.size > 1
                             chapterBackButton.isEnabled = true
                             chapterForwardButton.isEnabled = true
-                            chapterBackButton.imageAlpha = if (hasChapters) 255 else 97
-                            chapterForwardButton.imageAlpha = if (hasChapters) 255 else 97
+                            chapterBackButton.imageAlpha = 255
+                            chapterForwardButton.imageAlpha = 255
+                            chapterBackButton.alpha = if (hasChapters) 1f else 0.38f
+                            chapterForwardButton.alpha = if (hasChapters) 1f else 0.38f
                             val timeBar = findViewById<DefaultTimeBar>(R.id.exo_progress)
                             if (timeBar is RoundedTimeBar) {
                                 timeBar.setChapterMarkers(
@@ -539,6 +522,7 @@ class PlayerActivity : BasePlayerActivity() {
         val optionsPanel = findViewById<View>(R.id.player_options_panel)
         optionsPanel.layoutParams = optionsPanel.layoutParams.apply { width = sheetWidth }
         val optionsTabs = findViewById<TabLayout>(R.id.player_options_tabs)
+        val optionsTabsContainer = findViewById<View>(R.id.player_options_tabs_container)
         val optionsList = findViewById<ListView>(R.id.player_options_list)
         val optionsOffset = findViewById<ComposeView>(R.id.player_options_offset)
 
@@ -546,7 +530,7 @@ class PlayerActivity : BasePlayerActivity() {
         // so they don't eat the space left for the audio/subtitle/speed items.
         val optionsHeaderComposeView = findViewById<ComposeView>(R.id.player_options_header)
         optionsList.addScrollableHeader(optionsHeaderComposeView)
-        optionsList.addScrollableHeader(optionsTabs)
+        optionsList.addScrollableHeader(optionsTabsContainer)
         optionsList.addScrollableHeader(optionsOffset)
         setMediaHeaderContent(optionsHeaderComposeView)
 
@@ -721,15 +705,8 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun openPlayerSettings() {
-        prepareForSettingsPage()
+        viewModel.player.pause()
         startActivity(Intent(this, PlayerSettingsActivity::class.java))
-    }
-
-    private fun setPlayPauseLoading(loading: Boolean) {
-        if (!::playPauseLoadingIndicator.isInitialized || !::playPauseButton.isInitialized) return
-        playPauseLoadingIndicator.isVisible = loading
-        // Keep the white play/pause circle; swap only the icon for the loader.
-        playPauseButton.imageAlpha = if (loading) 0 else 255
     }
 
     private fun finishPlayback() {
@@ -1065,26 +1042,6 @@ class PlayerActivity : BasePlayerActivity() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (binding.playerView.isControllerFullyVisible) schedulePlayerControlsHide()
             }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (!::playPauseLoadingIndicator.isInitialized) return
-                val loading =
-                    playbackState == Player.STATE_BUFFERING || playbackState == Player.STATE_IDLE
-                playerLoadingJob?.cancel()
-                if (!loading) {
-                    setPlayPauseLoading(false)
-                    return
-                }
-                playerLoadingJob = lifecycleScope.launch {
-                    delay(400L)
-                    if (::playPauseLoadingIndicator.isInitialized && !isFinishing) {
-                        val current = viewModel.player.playbackState
-                        setPlayPauseLoading(
-                            current == Player.STATE_BUFFERING || current == Player.STATE_IDLE
-                        )
-                    }
-                }
-            }
         }
 
     /** The whole overlay, faded in and out as one piece. */
@@ -1211,7 +1168,6 @@ class PlayerActivity : BasePlayerActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        playerLoadingJob?.cancel()
         viewModel.player.removeListener(controlsClockListener)
         // These locks are process-wide; reset them so a fresh player starts unlocked and the
         // buttons' icons match the state.
