@@ -193,8 +193,8 @@
 
             <androidx.compose.ui.platform.ComposeView
                 android:id="@+id/play_pause_loading"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:visibility="gone" />
 

@@ -318,7 +318,7 @@ class PlayerActivity : BasePlayerActivity() {
                 setContent {
                     FindroidTheme {
                         AppLoadingIndicator(
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(40.dp),
                             color = Color.Black,
                         )
                     }
@@ -721,13 +721,15 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun openPlayerSettings() {
+        prepareForSettingsPage()
         startActivity(Intent(this, PlayerSettingsActivity::class.java))
     }
 
     private fun setPlayPauseLoading(loading: Boolean) {
         if (!::playPauseLoadingIndicator.isInitialized || !::playPauseButton.isInitialized) return
         playPauseLoadingIndicator.isVisible = loading
-        playPauseButton.alpha = if (loading) 0f else 1f
+        // Keep the white play/pause circle; swap only the icon for the loader.
+        playPauseButton.imageAlpha = if (loading) 0 else 255
     }
 
     private fun finishPlayback() {
