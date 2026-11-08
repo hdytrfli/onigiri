@@ -62,6 +62,18 @@ fun AddProfileScreen(
                     )
                 }
 
+                state.step == AddProfileStep.LANGUAGES -> {
+                    LanguagesContent(
+                        audioLanguage = state.audioLanguage,
+                        subtitleLanguage = state.subtitleLanguage,
+                        alwaysPlaySubtitles = state.alwaysPlaySubtitles,
+                        onAudioLanguageChange = viewModel::updateAudioLanguage,
+                        onSubtitleLanguageChange = viewModel::updateSubtitleLanguage,
+                        onAlwaysPlaySubtitlesChange = viewModel::updateAlwaysPlaySubtitles,
+                        onContinue = viewModel::finishLanguages,
+                    )
+                }
+
                 else -> {
                     OnboardingHeader(
                         title = stringResource(R.string.profile_add_title),

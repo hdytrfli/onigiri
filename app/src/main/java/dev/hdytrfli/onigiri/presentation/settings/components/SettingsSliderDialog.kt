@@ -87,6 +87,11 @@ fun SettingsSliderDialog(
                         onIndexChange = { index = it },
                         modifier = Modifier.weight(1f),
                     )
+                    Text(
+                        text = optionNames.lastOrNull().orEmpty(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             preference.descriptionStringRes?.let {

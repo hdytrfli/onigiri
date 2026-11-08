@@ -27,7 +27,7 @@ class AppPreferences(
      * Default preferred language, matching the device language (ISO 639-2, e.g. "eng"), so the
      * audio/subtitle selectors start aligned with the app language.
      */
-    private val defaultLanguage: String? = runCatching {
+    val defaultLanguage: String? = runCatching {
         Locale.getDefault().getISO3Language()
     }
         .getOrNull()
@@ -289,7 +289,62 @@ class AppPreferences(
             is Set<*> -> editor.putStringSet(preference.backendName, value as Set<String>)
             else -> throw Exception()
         }
+
+        // Language choices belong to the signed-in profile. Keep a per-profile copy beside the
+        // active value so switching users restores that profile's own audio/subtitle languages.
+        val serverId = sharedPreferences.getString(currentServer.backendName, null)
+        val userId = sharedPreferences.getString(currentUser.backendName, null)
+        if (serverId != null && userId != null) {
+            val suffix = "${serverId}_$userId"
+            when (preference.backendName) {
+                preferredAudioLanguage.backendName ->
+                    editor.putString(
+                        "pref_profile_audio_language_$suffix",
+                        (value as String?).orEmpty(),
+                    )
+                preferredSubtitleLanguage.backendName ->
+                    editor.putString(
+                        "pref_profile_subtitle_language_$suffix",
+                        (value as String?).orEmpty(),
+                    )
+                playerAlwaysPlaySubtitles.backendName ->
+                    editor.putBoolean(
+                        "pref_profile_always_play_subtitles_$suffix",
+                        value as Boolean,
+                    )
+            }
+        }
         editor.apply()
+    }
+
+    /** Loads the signed-in profile's language choices into the active preference values. */
+    fun applyProfileLanguages(serverId: String, userId: UUID) {
+        val audioKey = profileAudioLanguageKey(serverId, userId)
+        val subtitleKey = profileSubtitleLanguageKey(serverId, userId)
+        val alwaysKey = profileAlwaysPlaySubtitlesKey(serverId, userId)
+
+        val audio =
+            if (sharedPreferences.contains(audioKey)) {
+                sharedPreferences.getString(audioKey, "").orEmpty().takeIf { it.isNotEmpty() }
+            } else {
+                defaultLanguage
+            }
+        val subtitle =
+            if (sharedPreferences.contains(subtitleKey)) {
+                sharedPreferences.getString(subtitleKey, "").orEmpty().takeIf { it.isNotEmpty() }
+            } else {
+                defaultLanguage
+            }
+        val always =
+            if (sharedPreferences.contains(alwaysKey)) {
+                sharedPreferences.getBoolean(alwaysKey, false)
+            } else {
+                false
+            }
+
+        setValue(preferredAudioLanguage, audio)
+        setValue(preferredSubtitleLanguage, subtitle)
+        setValue(playerAlwaysPlaySubtitles, always)
     }
 
     // Profile PINs are local to this device and deliberately independent from the Jellyfin
@@ -336,13 +391,20 @@ class AppPreferences(
             .remove(profilePinSaltKey(serverId, userId))
             .remove(profilePinHashKey(serverId, userId))
             .remove(profileAdminKey(serverId, userId))
+            .remove(profileAudioLanguageKey(serverId, userId))
+            .remove(profileSubtitleLanguageKey(serverId, userId))
+            .remove(profileAlwaysPlaySubtitlesKey(serverId, userId))
             .apply()
     }
 
     fun clearAllProfileMetadata() {
         val keys =
             sharedPreferences.all.keys.filter {
-                it.startsWith("pref_profile_pin_") || it.startsWith("pref_profile_admin_")
+                it.startsWith("pref_profile_pin_") ||
+                    it.startsWith("pref_profile_admin_") ||
+                    it.startsWith("pref_profile_audio_language_") ||
+                    it.startsWith("pref_profile_subtitle_language_") ||
+                    it.startsWith("pref_profile_always_play_subtitles_")
             }
         if (keys.isEmpty()) return
         sharedPreferences.edit().apply { keys.forEach(::remove) }.apply()
@@ -366,6 +428,15 @@ class AppPreferences(
 
     private fun profileAdminKey(serverId: String, userId: UUID) =
         "pref_profile_admin_${serverId}_$userId"
+
+    private fun profileAudioLanguageKey(serverId: String, userId: UUID) =
+        "pref_profile_audio_language_${serverId}_$userId"
+
+    private fun profileSubtitleLanguageKey(serverId: String, userId: UUID) =
+        "pref_profile_subtitle_language_${serverId}_$userId"
+
+    private fun profileAlwaysPlaySubtitlesKey(serverId: String, userId: UUID) =
+        "pref_profile_always_play_subtitles_${serverId}_$userId"
 
     private fun hashPin(salt: ByteArray, pin: String): String =
         MessageDigest.getInstance("SHA-256").digest(salt + pin.toByteArray(Charsets.UTF_8)).toHex()

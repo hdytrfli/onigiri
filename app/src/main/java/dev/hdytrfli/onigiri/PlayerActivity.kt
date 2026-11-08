@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -123,7 +124,8 @@ class PlayerActivity : BasePlayerActivity() {
 
     private lateinit var playerTimeRight: TextView
     private lateinit var playerTimePosition: PaddedTimeTextView
-    private lateinit var playerLoadingIndicator: ComposeView
+    private lateinit var playPauseButton: ImageButton
+    private lateinit var playPauseLoadingIndicator: ComposeView
     private var playerLoadingJob: Job? = null
     private lateinit var chapterBackButton: ImageButton
     private lateinit var chapterForwardButton: ImageButton
@@ -309,11 +311,17 @@ class PlayerActivity : BasePlayerActivity() {
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
-        playerLoadingIndicator =
-            findViewById<ComposeView>(R.id.player_loading_indicator).apply {
+        playPauseButton = binding.playerView.findViewById(R.id.exo_play_pause)
+        playPauseLoadingIndicator =
+            binding.playerView.findViewById<ComposeView>(R.id.play_pause_loading).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
                 setContent {
-                    FindroidTheme { AppLoadingIndicator(modifier = Modifier.size(32.dp)) }
+                    FindroidTheme {
+                        AppLoadingIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Black,
+                        )
+                    }
                 }
             }
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
@@ -713,8 +721,13 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun openPlayerSettings() {
-        preservePlaybackOnPause = true
         startActivity(Intent(this, PlayerSettingsActivity::class.java))
+    }
+
+    private fun setPlayPauseLoading(loading: Boolean) {
+        if (!::playPauseLoadingIndicator.isInitialized || !::playPauseButton.isInitialized) return
+        playPauseLoadingIndicator.isVisible = loading
+        playPauseButton.alpha = if (loading) 0f else 1f
     }
 
     private fun finishPlayback() {
@@ -1052,20 +1065,21 @@ class PlayerActivity : BasePlayerActivity() {
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
-                if (!::playerLoadingIndicator.isInitialized) return
+                if (!::playPauseLoadingIndicator.isInitialized) return
                 val loading =
                     playbackState == Player.STATE_BUFFERING || playbackState == Player.STATE_IDLE
                 playerLoadingJob?.cancel()
                 if (!loading) {
-                    playerLoadingIndicator.isVisible = false
+                    setPlayPauseLoading(false)
                     return
                 }
                 playerLoadingJob = lifecycleScope.launch {
                     delay(400L)
-                    if (::playerLoadingIndicator.isInitialized && !isFinishing) {
+                    if (::playPauseLoadingIndicator.isInitialized && !isFinishing) {
                         val current = viewModel.player.playbackState
-                        playerLoadingIndicator.isVisible =
+                        setPlayPauseLoading(
                             current == Player.STATE_BUFFERING || current == Player.STATE_IDLE
+                        )
                     }
                 }
             }

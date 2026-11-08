@@ -244,11 +244,6 @@ fun MusicQueueContent(
                                 val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
                                 if (target != index) onMove(index, target)
                             },
-                            onPlayEnd = {
-                                if (index != displayQueue.lastIndex) {
-                                    onMove(index, displayQueue.lastIndex)
-                                }
-                            },
                             onRemove = { onRemove(index) },
                             onToggleFavorite = { onToggleFavorite(item.id) },
                             modifier = Modifier.animateItem(),
@@ -267,11 +262,6 @@ fun MusicQueueContent(
                                     val target =
                                         (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
                                     if (target != index) onMove(index, target)
-                                },
-                                onPlayEnd = {
-                                    if (index != displayQueue.lastIndex) {
-                                        onMove(index, displayQueue.lastIndex)
-                                    }
                                 },
                                 onRemove = { onRemove(index) },
                                 onToggleFavorite = { onToggleFavorite(item.id) },
@@ -309,11 +299,6 @@ fun MusicQueueContent(
                                 val target = (currentIndex + 1).coerceIn(0, displayQueue.lastIndex)
                                 if (target != index) onMove(index, target)
                             },
-                            onPlayEnd = {
-                                if (index != displayQueue.lastIndex) {
-                                    onMove(index, displayQueue.lastIndex)
-                                }
-                            },
                             onRemove = { onRemove(index) },
                             onToggleFavorite = { onToggleFavorite(item.id) },
                             modifier = Modifier.animateItem(),
@@ -335,7 +320,6 @@ private fun QueueRow(
     onPlayNow: () -> Unit,
     onJumpToItem: () -> Unit,
     onPlayNext: () -> Unit,
-    onPlayEnd: () -> Unit,
     onRemove: () -> Unit,
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
@@ -373,12 +357,6 @@ private fun QueueRow(
                     icon = CoreR.drawable.ic_skip_forward,
                     enabled = !isCurrent,
                     onClick = onPlayNext,
-                ),
-                MusicRowAction(
-                    label = stringResource(FilmR.string.music_play_end),
-                    icon = CoreR.drawable.ic_arrow_down_to_line,
-                    enabled = !isCurrent,
-                    onClick = onPlayEnd,
                 ),
                 MusicRowAction(
                     label = stringResource(FilmR.string.music_remove_from_queue),

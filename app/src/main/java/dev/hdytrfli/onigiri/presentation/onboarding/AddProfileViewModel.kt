@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 enum class AddProfileStep {
     ACCOUNT,
     PIN,
+    LANGUAGES,
 }
 
 data class AddProfileState(
@@ -35,6 +36,9 @@ data class AddProfileState(
     val quickConnectVisible: Boolean = false,
     val quickConnectCode: String? = null,
     val quickConnectError: UiText? = null,
+    val audioLanguage: String? = null,
+    val subtitleLanguage: String? = null,
+    val alwaysPlaySubtitles: Boolean = false,
 )
 
 sealed interface AddProfileEvent {
@@ -55,6 +59,15 @@ constructor(
     val events = eventsChannel.receiveAsFlow()
 
     private var quickConnectJob: Job? = null
+
+    init {
+        _state.update {
+            it.copy(
+                audioLanguage = appPreferences.defaultLanguage,
+                subtitleLanguage = appPreferences.defaultLanguage,
+            )
+        }
+    }
 
     fun updateUsername(value: String) {
         _state.update { it.copy(username = value, loginError = null) }
@@ -79,7 +92,18 @@ constructor(
             try {
                 repository.login(current.username.trim(), current.password)
                 appPreferences.clearReaderState()
-                _state.update { it.copy(step = AddProfileStep.PIN, isLoggingIn = false) }
+                _state.update {
+                    it.copy(
+                        step = AddProfileStep.PIN,
+                        isLoggingIn = false,
+                        audioLanguage =
+                            appPreferences.getValue(appPreferences.preferredAudioLanguage),
+                        subtitleLanguage =
+                            appPreferences.getValue(appPreferences.preferredSubtitleLanguage),
+                        alwaysPlaySubtitles =
+                            appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles),
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -132,6 +156,12 @@ constructor(
                         quickConnectVisible = false,
                         quickConnectCode = null,
                         quickConnectError = null,
+                        audioLanguage =
+                            appPreferences.getValue(appPreferences.preferredAudioLanguage),
+                        subtitleLanguage =
+                            appPreferences.getValue(appPreferences.preferredSubtitleLanguage),
+                        alwaysPlaySubtitles =
+                            appPreferences.getValue(appPreferences.playerAlwaysPlaySubtitles),
                     )
                 }
             } catch (e: CancellationException) {
@@ -188,17 +218,44 @@ constructor(
                 return@launch
             }
             appPreferences.setProfilePin(server.id, user.id, current.pin)
-            complete()
+            _state.update { it.copy(isSavingPin = false, step = AddProfileStep.LANGUAGES) }
         }
     }
 
     fun skipPin() {
+        _state.update { it.copy(step = AddProfileStep.LANGUAGES) }
+    }
+
+    fun updateAudioLanguage(language: String?) {
+        _state.update { it.copy(audioLanguage = language) }
+    }
+
+    fun updateSubtitleLanguage(language: String?) {
+        _state.update { it.copy(subtitleLanguage = language) }
+    }
+
+    fun updateAlwaysPlaySubtitles(enabled: Boolean) {
+        _state.update { it.copy(alwaysPlaySubtitles = enabled) }
+    }
+
+    fun finishLanguages() {
+        val state = _state.value
+        appPreferences.setValue(appPreferences.preferredAudioLanguage, state.audioLanguage)
+        appPreferences.setValue(appPreferences.preferredSubtitleLanguage, state.subtitleLanguage)
+        appPreferences.setValue(
+            appPreferences.playerAlwaysPlaySubtitles,
+            state.alwaysPlaySubtitles,
+        )
         complete()
     }
 
     fun handleBack(): Boolean {
         if (_state.value.quickConnectVisible) {
             cancelQuickConnect()
+            return true
+        }
+        if (_state.value.step == AddProfileStep.LANGUAGES) {
+            _state.update { it.copy(step = AddProfileStep.PIN) }
             return true
         }
         // Login has already switched the active user; don't let the user step back into the

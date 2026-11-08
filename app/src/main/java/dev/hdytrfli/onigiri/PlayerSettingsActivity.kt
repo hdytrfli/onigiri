@@ -26,6 +26,11 @@ import javax.inject.Inject
 /** Hosts Player settings as a standalone page with no navigation suite. */
 @AndroidEntryPoint
 class PlayerSettingsActivity : AppCompatActivity() {
+    companion object {
+        /** Settings category resource shown first; defaults to the video player page. */
+        const val EXTRA_CATEGORY = "extra_category"
+    }
+
     @Inject lateinit var appPreferences: AppPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,9 +49,12 @@ class PlayerSettingsActivity : AppCompatActivity() {
         setContent {
             CompositionLocalProvider(LocalHideStatusBar provides hideStatusBar) {
                 FindroidTheme {
-                    var indexes by remember {
-                        mutableStateOf(listOf(SettingsR.string.settings_category_player))
-                    }
+                    val initialCategory =
+                        intent.getIntExtra(
+                            EXTRA_CATEGORY,
+                            SettingsR.string.settings_category_player,
+                        )
+                    var indexes by remember { mutableStateOf(listOf(initialCategory)) }
                     var filePath by remember { mutableStateOf<String?>(null) }
                     var showSubtitleFont by remember { mutableStateOf(false) }
 

@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.hdytrfli.onigiri.presentation.player.MusicPlayerScreen
 import dev.hdytrfli.onigiri.presentation.player.MusicPlayerViewModel
+import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.utils.LocalHideStatusBar
@@ -55,7 +56,14 @@ class MusicPlayerActivity : ComponentActivity() {
                         navigateBack = ::finish,
                         onOpenSettings = {
                             startActivity(
-                                Intent(this@MusicPlayerActivity, PlayerSettingsActivity::class.java)
+                                Intent(
+                                        this@MusicPlayerActivity,
+                                        PlayerSettingsActivity::class.java,
+                                    )
+                                    .putExtra(
+                                        PlayerSettingsActivity.EXTRA_CATEGORY,
+                                        SettingsR.string.settings_category_music,
+                                    )
                             )
                         },
                         onPlayPause = viewModel::togglePlayPause,

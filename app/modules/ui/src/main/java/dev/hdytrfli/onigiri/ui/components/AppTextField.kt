@@ -2,6 +2,7 @@ package dev.hdytrfli.onigiri.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -152,6 +153,64 @@ fun AppTextField(
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
             )
+        }
+    }
+}
+
+/**
+ * A read-only field that opens a picker. It uses the same filled input container as [AppTextField],
+ * so language selectors sit naturally beside text inputs.
+ */
+@Composable
+fun AppSelectField(
+    value: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    leadingContent: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+    shape: Shape = MaterialTheme.shapes.small,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
+    ) {
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    .clickable(onClick = onClick)
+                    .padding(
+                        horizontal = MaterialTheme.spacings.medium,
+                        vertical = 14.dp,
+                    ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            leadingContent?.let {
+                it()
+                Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+            }
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            trailingContent?.let {
+                Spacer(modifier = Modifier.width(MaterialTheme.spacings.small))
+                it()
+            }
         }
     }
 }

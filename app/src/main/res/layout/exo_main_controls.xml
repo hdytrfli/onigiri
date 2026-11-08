@@ -176,16 +176,29 @@
             android:contentDescription="@string/player_controls_previous_chapter"
             app:tint="@android:color/white" />
 
-        <ImageButton
-            android:id="@+id/exo_play_pause"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/circle_background"
-            android:backgroundTint="@android:color/white"
-            android:padding="12dp"
-            android:src="@drawable/ic_play"
-            app:tint="@android:color/black"
-            android:contentDescription="@string/player_controls_play_pause" />
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/exo_play_pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/circle_background"
+                android:backgroundTint="@android:color/white"
+                android:padding="12dp"
+                android:src="@drawable/ic_play"
+                app:tint="@android:color/black"
+                android:contentDescription="@string/player_controls_play_pause" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/play_pause_loading"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
         <ImageButton
             android:id="@+id/exo_ffwd"

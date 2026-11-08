@@ -103,6 +103,11 @@ fun SettingsSlidersDialog(
                             onIndexChange = { indexes[i] = it },
                             modifier = Modifier.weight(1f),
                         )
+                        Text(
+                            text = row.names.lastOrNull().orEmpty(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }

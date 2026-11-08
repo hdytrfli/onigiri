@@ -77,10 +77,8 @@ import dev.hdytrfli.onigiri.player.local.music.MusicPlaybackState
 import dev.hdytrfli.onigiri.player.local.music.MusicRepeatMode
 import dev.hdytrfli.onigiri.ui.components.AppButtonSize
 import dev.hdytrfli.onigiri.ui.components.AppButtonVariant
-import dev.hdytrfli.onigiri.ui.components.AppDropdownMenu
 import dev.hdytrfli.onigiri.ui.components.AppIconButton
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
-import dev.hdytrfli.onigiri.ui.components.MenuActionItem
 import dev.hdytrfli.onigiri.ui.components.ReservedWidthText
 import dev.hdytrfli.onigiri.ui.components.preciseSeekable
 import dev.hdytrfli.onigiri.ui.theme.Red
@@ -925,7 +923,6 @@ private fun TransportControls(
 ) {
     val item = state.current
     val favorite = item?.favorite == true
-    var menuExpanded by remember { mutableStateOf(false) }
     var showBufferingLoader by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isBuffering) {
@@ -1051,33 +1048,18 @@ private fun TransportControls(
                     )
                 },
             )
-            Box {
-                AppIconButton(
-                    onClick = { menuExpanded = true },
-                    variant = AppButtonVariant.Ghost,
-                    content = {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_ellipsis),
-                            contentDescription = stringResource(CoreR.string.more_options),
-                            tint = PlayerOnBackgroundMuted,
-                        )
-                    },
-                )
-                AppDropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false },
-                ) {
-                    MenuActionItem(
-                        label = stringResource(FilmR.string.music_discover_album),
-                        icon = CoreR.drawable.ic_lucide_disc,
-                        enabled = item?.albumId != null,
-                        onClick = {
-                            menuExpanded = false
-                            item?.albumId?.let(onAlbumClick)
-                        },
+            AppIconButton(
+                onClick = { item?.albumId?.let(onAlbumClick) },
+                enabled = item?.albumId != null,
+                variant = AppButtonVariant.Ghost,
+                content = {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_lucide_disc),
+                        contentDescription = stringResource(FilmR.string.music_discover_album),
+                        tint = PlayerOnBackgroundMuted,
                     )
-                }
-            }
+                },
+            )
         }
     }
 }

@@ -8,8 +8,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -62,6 +60,7 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTopBar
 import dev.hdytrfli.onigiri.settings.R as SettingsR
 import dev.hdytrfli.onigiri.ui.components.AppButton
+import dev.hdytrfli.onigiri.ui.components.AppSelectField
 import dev.hdytrfli.onigiri.ui.components.AppTextField
 import dev.hdytrfli.onigiri.ui.components.DefaultSuggestedLanguageCodes
 import dev.hdytrfli.onigiri.ui.components.LanguageOption
@@ -133,8 +132,10 @@ fun OnboardingScreen(
                     )
 
                 OnboardingStep.LANGUAGES.name ->
-                    LanguagesPage(
-                        state = state,
+                    LanguagesContent(
+                        audioLanguage = state.audioLanguage,
+                        subtitleLanguage = state.subtitleLanguage,
+                        alwaysPlaySubtitles = state.alwaysPlaySubtitles,
                         onAudioLanguageChange = viewModel::updateAudioLanguage,
                         onSubtitleLanguageChange = viewModel::updateSubtitleLanguage,
                         onAlwaysPlaySubtitlesChange = viewModel::updateAlwaysPlaySubtitles,
@@ -281,8 +282,10 @@ private fun PinPage(
 }
 
 @Composable
-private fun LanguagesPage(
-    state: OnboardingState,
+internal fun LanguagesContent(
+    audioLanguage: String?,
+    subtitleLanguage: String?,
+    alwaysPlaySubtitles: Boolean,
     onAudioLanguageChange: (String?) -> Unit,
     onSubtitleLanguageChange: (String?) -> Unit,
     onAlwaysPlaySubtitlesChange: (Boolean) -> Unit,
@@ -304,8 +307,8 @@ private fun LanguagesPage(
             ?.takeIf { it.isNotBlank() && it != "und" }
     }
     val suggested =
-        remember(deviceLanguage, state.audioLanguage, state.subtitleLanguage) {
-            (listOfNotNull(deviceLanguage, state.audioLanguage, state.subtitleLanguage) +
+        remember(deviceLanguage, audioLanguage, subtitleLanguage) {
+            (listOfNotNull(deviceLanguage, audioLanguage, subtitleLanguage) +
                     DefaultSuggestedLanguageCodes)
                 .distinct()
                 .take(6)
@@ -319,13 +322,13 @@ private fun LanguagesPage(
         )
         LanguageField(
             label = stringResource(R.string.onboarding_audio_language),
-            value = labels[state.audioLanguage]?.label ?: notSet,
+            value = labels[audioLanguage]?.label ?: notSet,
             icon = CoreR.drawable.ic_speaker,
             onClick = { picker = "audio" },
         )
         LanguageField(
             label = stringResource(R.string.onboarding_subtitle_language),
-            value = labels[state.subtitleLanguage]?.label ?: notSet,
+            value = labels[subtitleLanguage]?.label ?: notSet,
             icon = CoreR.drawable.ic_closed_caption,
             onClick = { picker = "subtitle" },
         )
@@ -340,7 +343,7 @@ private fun LanguagesPage(
                 modifier = Modifier.weight(1f),
             )
             Switch(
-                checked = state.alwaysPlaySubtitles,
+                checked = alwaysPlaySubtitles,
                 onCheckedChange = onAlwaysPlaySubtitlesChange,
             )
         }
@@ -358,7 +361,7 @@ private fun LanguagesPage(
                 ),
             description = stringResource(R.string.onboarding_languages_description),
             options = options,
-            selectedCode = if (target == "audio") state.audioLanguage else state.subtitleLanguage,
+            selectedCode = if (target == "audio") audioLanguage else subtitleLanguage,
             suggestedLabel = stringResource(CoreR.string.suggested),
             availableLabel = stringResource(CoreR.string.available),
             suggestedCodes = suggested,
@@ -381,43 +384,27 @@ private fun LanguageField(
     icon: Int,
     onClick: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.extraSmall)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = OnScrimSecondary,
-        )
-        Row(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .clip(MaterialTheme.shapes.small)
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, Color.White.copy(alpha = 0.28f), MaterialTheme.shapes.small)
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    AppSelectField(
+        value = value,
+        onClick = onClick,
+        label = label,
+        leadingContent = {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
             )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White,
-                modifier = Modifier.weight(1f),
-            )
+        },
+        trailingContent = {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_lucide_chevron_right),
                 contentDescription = null,
-                tint = OnScrimSecondary,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
             )
-        }
-    }
+        },
+    )
 }
 
 @Composable

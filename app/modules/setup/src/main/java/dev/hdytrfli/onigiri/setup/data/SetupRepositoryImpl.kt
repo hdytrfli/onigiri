@@ -217,6 +217,7 @@ class SetupRepositoryImpl(
         database.insertUser(user)
         database.updateServerCurrentUser(authenticationResult.serverId!!, user.id)
         appPreferences.setValue(appPreferences.currentUser, user.id.toString())
+        appPreferences.applyProfileLanguages(authenticationResult.serverId!!, user.id)
         appPreferences.setProfileAdmin(
             serverId = authenticationResult.serverId!!,
             userId = user.id,
@@ -254,6 +255,7 @@ class SetupRepositoryImpl(
         server.currentUserId = user.id
         database.updateServer(server)
         appPreferences.setValue(appPreferences.currentUser, user.id.toString())
+        appPreferences.applyProfileLanguages(server.id, user.id)
 
         jellyfinApi.apply {
             api.update(accessToken = user.accessToken)
