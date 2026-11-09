@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -122,6 +123,7 @@ class PlayerActivity : BasePlayerActivity() {
 
     private lateinit var playerTimeRight: TextView
     private lateinit var playerTimePosition: PaddedTimeTextView
+    private lateinit var playPauseButton: ImageButton
     private lateinit var resumeLoadingIndicator: ComposeView
     private var returnFromSettings = false
     private var resumePlaybackAfterSettings = false
@@ -312,11 +314,17 @@ class PlayerActivity : BasePlayerActivity() {
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
+        playPauseButton = binding.playerView.findViewById(R.id.exo_play_pause)
         resumeLoadingIndicator =
-            findViewById<ComposeView>(R.id.player_resume_loading).apply {
+            binding.playerView.findViewById<ComposeView>(R.id.play_pause_loading).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
                 setContent {
-                    FindroidTheme { AppLoadingIndicator(modifier = Modifier.size(40.dp)) }
+                    FindroidTheme {
+                        AppLoadingIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = Color.Black,
+                        )
+                    }
                 }
             }
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
@@ -755,9 +763,10 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun setResumeLoading(visible: Boolean) {
-        if (::resumeLoadingIndicator.isInitialized) {
-            resumeLoadingIndicator.isVisible = visible
-        }
+        if (!::resumeLoadingIndicator.isInitialized || !::playPauseButton.isInitialized) return
+        resumeLoadingIndicator.isVisible = visible
+        // Replace only the play/pause icon; its white control circle stays in place.
+        playPauseButton.imageAlpha = if (visible) 0 else 255
     }
 
     private fun finishPlayback() {
