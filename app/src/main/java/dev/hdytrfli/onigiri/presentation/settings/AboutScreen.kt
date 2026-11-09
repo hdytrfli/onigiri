@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -102,13 +103,13 @@ fun AboutScreen(navigateBack: () -> Unit) {
                         icon = CoreR.drawable.ic_github,
                         onClick = { openLink(OUR_GITHUB_URL) },
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
                     AboutLinkRow(
                         title = stringResource(R.string.about_findroid),
                         icon = CoreR.drawable.ic_logo,
                         onClick = { openLink(FINDROID_URL) },
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.2f))
                     AboutLinkRow(
                         title = stringResource(R.string.about_jellyfin),
                         icon = CoreR.drawable.ic_globe,

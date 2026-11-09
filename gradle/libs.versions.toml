@@ -1,7 +1,7 @@
 [versions]
 # Bump app-code for every published release. It must always increase.
-app-code = "1000003"
-app-name = "1.0.0-beta.4"
+app-code = "1000004"
+app-name = "1.0.0-beta.5"
 build-tools = "37.0.0"
 compile-sdk = "37"
 java = "17"

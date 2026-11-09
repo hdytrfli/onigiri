@@ -83,14 +83,8 @@ object SubtitleFonts {
         listOf(
             Bundled("Geist", listOf("Geist-Variable.ttf")),
             Bundled("Roboto", listOf("Roboto-Variable.ttf")),
-            Bundled("Open Sans", listOf("OpenSans-Variable.ttf")),
-            Bundled("Noto Sans", listOf("NotoSans-Variable.ttf")),
-            Bundled("IBM Plex Sans", listOf("IBMPlexSans-Variable.ttf")),
-            Bundled("Work Sans", listOf("WorkSans-Variable.ttf")),
-            Bundled("DM Sans", listOf("DMSans-Variable.ttf")),
             Bundled("Figtree", listOf("Figtree-Variable.ttf")),
             Bundled("Archivo", listOf("Archivo-Variable.ttf")),
-            Bundled("Rubik", listOf("Rubik-Variable.ttf")),
             Bundled("Lexend", listOf("Lexend-Variable.ttf")),
             Bundled("Atkinson Hyperlegible Next", listOf("AtkinsonHyperlegibleNext-Variable.ttf")),
             Bundled("Libre Baskerville", listOf("LibreBaskerville-Variable.ttf")),
@@ -118,6 +112,12 @@ object SubtitleFonts {
             "Inter-Variable.ttf",
             "SourceSans3-Variable.ttf",
             "Montserrat-Variable.ttf",
+            "NotoSans-Variable.ttf",
+            "WorkSans-Variable.ttf",
+            "IBMPlexSans-Variable.ttf",
+            "OpenSans-Variable.ttf",
+            "DMSans-Variable.ttf",
+            "Rubik-Variable.ttf",
         )
 
     /**
