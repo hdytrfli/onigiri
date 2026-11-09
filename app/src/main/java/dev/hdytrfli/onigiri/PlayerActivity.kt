@@ -33,8 +33,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,6 +67,7 @@ import dev.hdytrfli.onigiri.presentation.player.formatSubtitleOffset
 import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.ui.PaddedTimeTextView
 import dev.hdytrfli.onigiri.ui.RoundedTimeBar
+import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.theme.FindroidTheme
 import dev.hdytrfli.onigiri.ui.utils.BackdropRatios
 import dev.hdytrfli.onigiri.ui.utils.LocalBackdropRatios
@@ -119,6 +122,10 @@ class PlayerActivity : BasePlayerActivity() {
 
     private lateinit var playerTimeRight: TextView
     private lateinit var playerTimePosition: PaddedTimeTextView
+    private lateinit var resumeLoadingIndicator: ComposeView
+    private var returnFromSettings = false
+    private var resumePlaybackAfterSettings = false
+    private var waitingForPlayableResume = false
     private lateinit var chapterBackButton: ImageButton
     private lateinit var chapterForwardButton: ImageButton
     private lateinit var mediaPreviousButton: ImageButton
@@ -305,6 +312,13 @@ class PlayerActivity : BasePlayerActivity() {
         val btnInfo = binding.playerView.findViewById<ImageButton>(R.id.btn_info)
         playerTimeRight = binding.playerView.findViewById(R.id.player_time_right)
         playerTimePosition = binding.playerView.findViewById(R.id.exo_position)
+        resumeLoadingIndicator =
+            findViewById<ComposeView>(R.id.player_resume_loading).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent {
+                    FindroidTheme { AppLoadingIndicator(modifier = Modifier.size(40.dp)) }
+                }
+            }
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val statsButton = binding.playerView.findViewById<ImageButton>(R.id.btn_stats)
         binding.playerView.findViewById<ImageButton>(R.id.btn_player_settings).setOnClickListener {
@@ -705,8 +719,45 @@ class PlayerActivity : BasePlayerActivity() {
     }
 
     private fun openPlayerSettings() {
+        resumePlaybackAfterSettings =
+            viewModel.player.playWhenReady && viewModel.player.playbackState != Player.STATE_ENDED
+        returnFromSettings = true
+        waitingForPlayableResume = false
+        setResumeLoading(false)
         viewModel.player.pause()
         startActivity(Intent(this, PlayerSettingsActivity::class.java))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!returnFromSettings) return
+        returnFromSettings = false
+        if (!resumePlaybackAfterSettings) return
+
+        when (viewModel.player.playbackState) {
+            Player.STATE_READY -> resumeSettingsPlayback()
+            Player.STATE_ENDED -> resumePlaybackAfterSettings = false
+            else -> {
+                // Wait for the player to actually become ready again. No fixed delay: the loader
+                // stays up until the player reports STATE_READY.
+                waitingForPlayableResume = true
+                setResumeLoading(true)
+            }
+        }
+    }
+
+    private fun resumeSettingsPlayback() {
+        waitingForPlayableResume = false
+        resumePlaybackAfterSettings = false
+        setResumeLoading(false)
+        viewModel.playWhenReady = true
+        viewModel.player.playWhenReady = true
+    }
+
+    private fun setResumeLoading(visible: Boolean) {
+        if (::resumeLoadingIndicator.isInitialized) {
+            resumeLoadingIndicator.isVisible = visible
+        }
     }
 
     private fun finishPlayback() {
@@ -1042,6 +1093,18 @@ class PlayerActivity : BasePlayerActivity() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (binding.playerView.isControllerFullyVisible) schedulePlayerControlsHide()
             }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (!waitingForPlayableResume) return
+                when (playbackState) {
+                    Player.STATE_READY -> resumeSettingsPlayback()
+                    Player.STATE_ENDED -> {
+                        waitingForPlayableResume = false
+                        resumePlaybackAfterSettings = false
+                        setResumeLoading(false)
+                    }
+                }
+            }
         }
 
     /** The whole overlay, faded in and out as one piece. */
@@ -1090,6 +1153,12 @@ class PlayerActivity : BasePlayerActivity() {
     internal fun schedulePlayerOverlayMessageHide() {
         binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
         binding.progressScrubberLayout.postDelayed(hidePlayerOverlayMessageAction, 1500L)
+    }
+
+    /** Fades the current overlay out without clearing its text, so it never flashes blank. */
+    internal fun fadeOutPlayerOverlayMessage() {
+        binding.progressScrubberLayout.removeCallbacks(hidePlayerOverlayMessageAction)
+        hidePlayerOverlayMessageAction.run()
     }
 
     private fun updatePlayerTimeRight() {

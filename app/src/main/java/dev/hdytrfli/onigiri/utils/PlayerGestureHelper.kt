@@ -593,7 +593,7 @@ class PlayerGestureHelper(
         ) {
             rampPlaybackSpeed(lastPlaybackSpeed)
             lastPlaybackSpeed = 0f
-            activity.binding.progressScrubberLayout.visibility = View.GONE
+            activity.fadeOutPlayerOverlayMessage()
         }
     }
 
@@ -682,13 +682,17 @@ class PlayerGestureHelper(
                 when (event.pointerCount) {
                     1 -> {
                         tapGestureDetector.onTouchEvent(event)
-                        if (
-                            appPreferences.getValue(appPreferences.playerGesturesVolume) ||
-                                appPreferences.getValue(appPreferences.playerGesturesBrightness)
-                        ) {
-                            vbGestureDetector.onTouchEvent(event)
+                        // While hold-to-speed-up is active the horizontal/vertical swipes stay
+                        // inactive, matching the audio player's artwork gesture handling.
+                        if (lastPlaybackSpeed <= 0f) {
+                            if (
+                                appPreferences.getValue(appPreferences.playerGesturesVolume) ||
+                                    appPreferences.getValue(appPreferences.playerGesturesBrightness)
+                            ) {
+                                vbGestureDetector.onTouchEvent(event)
+                            }
+                            seekGestureDetector.onTouchEvent(event)
                         }
-                        seekGestureDetector.onTouchEvent(event)
                     }
                     2 -> {
                         if (appPreferences.getValue(appPreferences.playerGesturesDynamicZoom)) {

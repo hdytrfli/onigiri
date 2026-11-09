@@ -142,6 +142,17 @@ fun MusicPlayerScreen(
         }
     }
 
+    LaunchedEffect(speedBoostActive, speedUp) {
+        if (speedBoostActive) displayedOverlayMessage = speedUp
+    }
+
+    LaunchedEffect(state.isPlaying) {
+        if (!state.isPlaying && speedBoostActive) {
+            speedBoostActive = false
+            onSpeedBoost(false)
+        }
+    }
+
     val safePadding = rememberSafePadding()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val current = state.current
@@ -632,7 +643,12 @@ private fun PlayerArtwork(
                     detectTapGestures(
                         onPress = {
                             val releasedEarly = withTimeoutOrNull(holdMs) { tryAwaitRelease() }
-                            if (releasedEarly == null && !swipeActive) {
+                            if (
+                                releasedEarly == null &&
+                                    !swipeActive &&
+                                    state.isPlaying &&
+                                    !state.hasEnded
+                            ) {
                                 onSpeedBoost(true)
                                 startRotationBoost()
                                 tryAwaitRelease()
@@ -644,12 +660,13 @@ private fun PlayerArtwork(
                 }
                 .pointerInput(
                     swipeEnabled,
+                    boostActive,
                     state.hasNext,
                     state.hasPrevious,
                     queue.size,
                     stepPx,
                 ) {
-                    if (!swipeEnabled || queue.size <= 1) return@pointerInput
+                    if (!swipeEnabled || boostActive || queue.size <= 1) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragStart = {
                             settleJob?.cancel()
