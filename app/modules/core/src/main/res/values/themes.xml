@@ -5,6 +5,17 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <!--
+      Player settings stays translucent at the window level so the player's SurfaceView is not
+      destroyed while settings is open. The opaque window background still hides the video; keeping
+      the surface alive lets mpv reuse its last frame when returning.
+    -->
+    <style name="Theme.Findroid.PlayerSettings" parent="Theme.Findroid">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/neutral_1000</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <!-- Pages emerge over the previous one: a short fade with a barely-there scale, no slide. -->
     <style name="Animation.Findroid.Activity" parent="@android:style/Animation.Activity">
         <item name="android:activityOpenEnterAnimation">@anim/findroid_open_enter</item>
