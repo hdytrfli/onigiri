@@ -5,6 +5,7 @@ import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.media.AudioManager
@@ -322,7 +323,7 @@ class PlayerActivity : BasePlayerActivity() {
                     FindroidTheme {
                         AppLoadingIndicator(
                             modifier = Modifier.size(40.dp),
-                            color = Color.Black,
+                            color = Color.White,
                         )
                     }
                 }
@@ -765,8 +766,12 @@ class PlayerActivity : BasePlayerActivity() {
     private fun setResumeLoading(visible: Boolean) {
         if (!::resumeLoadingIndicator.isInitialized || !::playPauseButton.isInitialized) return
         resumeLoadingIndicator.isVisible = visible
-        // Replace only the play/pause icon; its white control circle stays in place.
+        // Match the pull-to-refresh indicator: transparent container with a white loader.
         playPauseButton.imageAlpha = if (visible) 0 else 255
+        playPauseButton.backgroundTintList =
+            ColorStateList.valueOf(
+                if (visible) android.graphics.Color.TRANSPARENT else android.graphics.Color.WHITE
+            )
     }
 
     private fun finishPlayback() {
