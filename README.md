@@ -4,7 +4,9 @@
 
 <h1 align="center">Onigiri</h1>
 
-<p align="center">A native Jellyfin client for Android, with a built-in reader.</p>
+<p align="center">
+  <a href="https://onigiri-project.vercel.app">Onigiri</a> A native Jellyfin client for Android, with a built-in reader.
+</p>
 
 <p align="center"><strong>1.0.0-beta.6</strong></p>
 
