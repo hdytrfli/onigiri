@@ -121,12 +121,6 @@ private fun SubtitleSearchScreenLayout(
     }
     val languageIcon = CoreR.drawable.ic_lucide_languages
 
-    val contentPadding =
-        PaddingValues(
-            top = LocalRootPageContentInset.current + MaterialTheme.spacings.gutter,
-            bottom = MaterialTheme.spacings.gutter,
-        )
-
     TopBarPageShell(
         topBar = {
             PageTopBar(
@@ -156,7 +150,11 @@ private fun SubtitleSearchScreenLayout(
             PageContent {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding,
+                    contentPadding =
+                        PaddingValues(
+                            top = LocalRootPageContentInset.current + MaterialTheme.spacings.gutter,
+                            bottom = MaterialTheme.spacings.gutter,
+                        ),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.medium),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
