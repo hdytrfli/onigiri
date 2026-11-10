@@ -79,7 +79,7 @@ constructor(
 
     fun login() {
         val current = _state.value
-        if (current.username.isBlank() || current.password.isBlank()) {
+        if (current.username.isBlank()) {
             _state.update {
                 it.copy(loginError = UiText.StringResource(R.string.onboarding_login_required))
             }

@@ -14,7 +14,7 @@
     <string name="onboarding_username">Username</string>
     <string name="onboarding_username_hint">Your Jellyfin username</string>
     <string name="onboarding_password">Password</string>
-    <string name="onboarding_password_hint">Your Jellyfin password</string>
+    <string name="onboarding_password_hint">Your Jellyfin password, if one is set</string>
     <string name="onboarding_sign_in">Sign in</string>
     <string name="onboarding_quick_connect_action">Use Quick Connect</string>
     <string name="onboarding_quick_connect_hint">Approve this device from another Jellyfin app or the server dashboard.</string>
@@ -30,7 +30,7 @@
     <string name="onboarding_pin_skip">Skip for now</string>
     <string name="onboarding_pin_info">The PIN is stored only on this device and can be changed later from your profile.</string>
     <string name="onboarding_server_required">Enter a server URL to continue.</string>
-    <string name="onboarding_login_required">Enter your username and password to continue.</string>
+    <string name="onboarding_login_required">Enter your username to continue.</string>
     <string name="onboarding_login_error">That username or password was not accepted.</string>
     <string name="onboarding_quick_connect_error">Quick Connect could not be started. Please try again.</string>
     <string name="onboarding_quick_connect_unavailable">Quick Connect is not enabled on this server.</string>
