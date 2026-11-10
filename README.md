@@ -6,7 +6,7 @@
 
 <p align="center">A native Jellyfin client for Android, with a built-in reader.</p>
 
-<p align="center"><strong>1.0.0-beta.4</strong></p>
+<p align="center"><strong>1.0.0-beta.6</strong></p>
 
 Onigiri is an independent Android client for Jellyfin. It began as a fork of
 [Findroid](https://github.com/jarnedemeulemeester/findroid) and continues its native-first
