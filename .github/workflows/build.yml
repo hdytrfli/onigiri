@@ -70,11 +70,25 @@ jobs:
           RELEASE_KEYSTORE_PATH: ${{ steps.signing_key.outputs.filePath }}
         run: ./gradlew :app:${{ inputs.gradle_task }} -PtargetAbi=arm64-v8a
 
+      # Beta release notes should include everything since the previous stable release, not just
+      # since the latest beta tag.
+      - name: Find previous stable tag
+        id: changelog_range
+        shell: bash
+        run: |
+          current="${{ github.ref_name }}"
+          previous=$(git tag --list 'v*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -vx "$current" | head -n1 || true)
+          if [ -z "$previous" ]; then
+            echo "args=--latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=${previous}..${current}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Generate release notes
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --latest --strip header
+          args: --strip header ${{ steps.changelog_range.outputs.args }}
         env:
           OUTPUT: release-notes.md
           GITHUB_REPO: ${{ github.repository }}
