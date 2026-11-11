@@ -286,20 +286,20 @@ private fun ShowScreenLayout(
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )
                 }
-                if (state.showRecommendations && state.recommendations.isNotEmpty()) {
-                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
-                    DetailItemRow(
-                        title = stringResource(FilmR.string.recommendations),
-                        items = state.recommendations,
-                        onItemClick = { onAction(ShowAction.NavigateToItem(it)) },
-                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
-                    )
-                }
                 if (state.showRecommendations && state.collections.isNotEmpty()) {
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     DetailItemRow(
                         title = stringResource(FilmR.string.collections_section),
                         items = state.collections,
+                        onItemClick = { onAction(ShowAction.NavigateToItem(it)) },
+                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                    )
+                }
+                if (state.showRecommendations && state.recommendations.isNotEmpty()) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    DetailItemRow(
+                        title = stringResource(FilmR.string.more_like_this),
+                        items = state.recommendations,
                         onItemClick = { onAction(ShowAction.NavigateToItem(it)) },
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )

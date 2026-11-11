@@ -240,7 +240,7 @@ private fun ArtistDetailLayout(
                         item {
                             Spacer(Modifier.height(MaterialTheme.spacings.medium))
                             DetailMusicArtistRow(
-                                title = stringResource(FilmR.string.more_like_this),
+                                title = stringResource(FilmR.string.similar_artists),
                                 artists = state.similarArtists,
                                 onArtistClick = { onArtistClick(it.id.toString()) },
                                 contentPadding =

@@ -291,7 +291,7 @@ private fun AlbumDetailLayout(
                             DetailMusicAlbumRow(
                                 title =
                                     stringResource(
-                                        FilmR.string.more_from,
+                                        FilmR.string.more_by,
                                         album.artistName.orEmpty(),
                                     ),
                                 albums = state.moreFromArtist,

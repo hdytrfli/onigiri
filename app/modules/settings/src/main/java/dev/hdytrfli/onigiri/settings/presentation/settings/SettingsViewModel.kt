@@ -181,21 +181,6 @@ constructor(
                                                         R.string.blur_hash_summary,
                                                     backendPreference = appPreferences.blurHash,
                                                 ),
-                                                PreferenceSwitch(
-                                                    nameStringResource = R.string.extra_info,
-                                                    descriptionStringRes =
-                                                        R.string.extra_info_summary,
-                                                    backendPreference =
-                                                        appPreferences.displayExtraInfo,
-                                                ),
-                                                PreferenceSwitch(
-                                                    nameStringResource =
-                                                        R.string.show_recommendations,
-                                                    descriptionStringRes =
-                                                        R.string.show_recommendations_summary,
-                                                    backendPreference =
-                                                        appPreferences.showRecommendations,
-                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(
@@ -220,6 +205,21 @@ constructor(
                                                     descriptionStringRes =
                                                         R.string.pref_player_stats_summary,
                                                     backendPreference = appPreferences.playerStats,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource = R.string.extra_info,
+                                                    descriptionStringRes =
+                                                        R.string.extra_info_summary,
+                                                    backendPreference =
+                                                        appPreferences.displayExtraInfo,
+                                                ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.show_recommendations,
+                                                    descriptionStringRes =
+                                                        R.string.show_recommendations_summary,
+                                                    backendPreference =
+                                                        appPreferences.showRecommendations,
                                                 ),
                                             ),
                                     ),

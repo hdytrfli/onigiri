@@ -30,7 +30,7 @@
     <string name="settings_group_mpv">MPV</string>
     <string name="settings_group_storage">Storage</string>
     <string name="settings_category_download">Downloads</string>
-    <string name="settings_category_appearance">Appearance</string>
+    <string name="settings_category_appearance">Display</string>
     <string name="settings_group_layout_grid">Layout grid</string>
     <string name="settings_group_app">App</string>
     <string name="settings_group_languages">Languages</string>
@@ -116,7 +116,7 @@
     <string name="title_download">Downloads</string>
     <string name="about">About</string>
     <string name="settings_group_about">About</string>
-    <string name="home">Home</string>
+    <string name="home">Home Screen</string>
     <string name="home_suggestions">Display suggestions</string>
     <string name="home_continue_watching">Display continue watching</string>
     <string name="home_next_up">Display next up</string>
@@ -139,11 +139,11 @@
     <string name="tablet_ui_option_always">Always</string>
     <string name="tablet_ui_option_landscape">Landscape</string>
     <string name="tablet_ui_option_never">Never</string>
-    <string name="general">General</string>
-    <string name="extra_info">Display Extra Info</string>
-    <string name="extra_info_summary">Detailed audio, video and subtitle information</string>
-    <string name="show_recommendations">Show Recommendations</string>
-    <string name="show_recommendations_summary">Show related items, collections, and more from sections on detail pages</string>
+    <string name="general">App Behavior</string>
+    <string name="extra_info">Show Media Details</string>
+    <string name="extra_info_summary">Display audio, video, and subtitle information on detail pages</string>
+    <string name="show_recommendations">Show Related Content</string>
+    <string name="show_recommendations_summary">Display recommendations, collections, and related content on detail pages</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="player_sheet_backdrop_ratio">Player sheet backdrop ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>

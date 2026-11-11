@@ -359,7 +359,7 @@ private fun EpisodeScreenLayout(
                 ) {
                     Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
                     DetailEpisodeRow(
-                        title = stringResource(FilmR.string.more_from, state.seasonName),
+                        title = stringResource(FilmR.string.more_episodes_from, state.seasonName),
                         episodes = state.moreFromSeason,
                         onEpisodeClick = { onEpisodeClick(it.id) },
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
