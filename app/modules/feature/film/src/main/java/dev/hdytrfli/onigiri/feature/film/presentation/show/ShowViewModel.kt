@@ -4,14 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.hdytrfli.onigiri.models.FindroidEpisode
+import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidItemPerson
 import dev.hdytrfli.onigiri.models.FindroidShow
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
+import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import dev.hdytrfli.onigiri.swr.SwrStore
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -23,6 +27,7 @@ class ShowViewModel
 @Inject
 constructor(
     private val repository: JellyfinRepository,
+    private val appPreferences: AppPreferences,
     private val swrStore: SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShowState())
@@ -41,6 +46,26 @@ constructor(
                 val actors = getActors(show)
                 val director = getDirector(show)
                 val writers = getWriters(show)
+                val showRecommendations =
+                    appPreferences.getValue(appPreferences.showRecommendations)
+                val (recommendations, collections) =
+                    if (showRecommendations) {
+                        coroutineScope {
+                            val recommendations =
+                                async {
+                                    runCatching { repository.getSimilarItems(showId) }
+                                        .getOrDefault(emptyList())
+                                }
+                            val collections =
+                                async {
+                                    runCatching { repository.getItemCollections(showId) }
+                                        .getOrDefault(emptyList())
+                                }
+                            recommendations.await() to collections.await()
+                        }
+                    } else {
+                        emptyList<FindroidItem>() to emptyList()
+                    }
                 _state.emit(
                     _state.value.copy(
                         show = show,
@@ -49,6 +74,9 @@ constructor(
                         actors = actors,
                         director = director,
                         writers = writers,
+                        recommendations = recommendations,
+                        collections = collections,
+                        showRecommendations = showRecommendations,
                     )
                 )
             } catch (e: CancellationException) {

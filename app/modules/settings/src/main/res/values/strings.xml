@@ -142,6 +142,8 @@
     <string name="general">General</string>
     <string name="extra_info">Display Extra Info</string>
     <string name="extra_info_summary">Detailed audio, video and subtitle information</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_summary">Show related items, collections, and more from sections on detail pages</string>
     <string name="backdrop_portrait_ratio">Backdrop portrait ratio</string>
     <string name="player_sheet_backdrop_ratio">Player sheet backdrop ratio</string>
     <string name="backdrop_landscape_ratio">Backdrop landscape ratio</string>

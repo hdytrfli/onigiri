@@ -30,9 +30,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ActorsRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailActionsMenu
+import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailItemRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DownloadButton
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ExtraInfoText
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
@@ -50,6 +52,7 @@ import dev.hdytrfli.onigiri.feature.film.presentation.downloader.DownloaderViewM
 import dev.hdytrfli.onigiri.feature.film.presentation.movie.MovieAction
 import dev.hdytrfli.onigiri.feature.film.presentation.movie.MovieState
 import dev.hdytrfli.onigiri.feature.film.presentation.movie.MovieViewModel
+import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.ui.components.AppButtonGroup
 import dev.hdytrfli.onigiri.ui.components.AppLoadingIndicator
 import dev.hdytrfli.onigiri.ui.components.OfflineModeReload
@@ -73,6 +76,7 @@ fun MovieScreen(
     navigateBack: () -> Unit,
     navigateHome: () -> Unit,
     navigateToPerson: (personId: UUID) -> Unit,
+    navigateToItem: (item: FindroidItem) -> Unit,
     navigateToSubtitleSearch: (itemId: UUID) -> Unit,
     navigateToIdentify: (itemId: UUID) -> Unit,
     navigateToEditImages: (itemId: UUID) -> Unit,
@@ -146,6 +150,7 @@ fun MovieScreen(
         onEditImages = navigateToEditImages,
         onNavigateToDownloads = navigateToDownloads,
         onRetry = { viewModel.loadMovie(movieId = movieId) },
+        onItemClick = navigateToItem,
     )
 }
 
@@ -161,6 +166,7 @@ private fun MovieScreenLayout(
     onEditImages: (UUID) -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
     onRetry: () -> Unit = {},
+    onItemClick: (FindroidItem) -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -327,6 +333,24 @@ private fun MovieScreenLayout(
                         onActorClick = { personId ->
                             onAction(MovieAction.NavigateToPerson(personId))
                         },
+                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                    )
+                }
+                if (state.showRecommendations && state.recommendations.isNotEmpty()) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    DetailItemRow(
+                        title = stringResource(FilmR.string.recommendations),
+                        items = state.recommendations,
+                        onItemClick = onItemClick,
+                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                    )
+                }
+                if (state.showRecommendations && state.collections.isNotEmpty()) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    DetailItemRow(
+                        title = stringResource(FilmR.string.collections_section),
+                        items = state.collections,
+                        onItemClick = onItemClick,
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )
                 }

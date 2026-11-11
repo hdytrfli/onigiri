@@ -29,9 +29,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ActorsRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailActionsMenu
+import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailItemRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.Direction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.GridRows
@@ -281,6 +283,24 @@ private fun ShowScreenLayout(
                         onActorClick = { personId ->
                             onAction(ShowAction.NavigateToPerson(personId))
                         },
+                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                    )
+                }
+                if (state.showRecommendations && state.recommendations.isNotEmpty()) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    DetailItemRow(
+                        title = stringResource(FilmR.string.recommendations),
+                        items = state.recommendations,
+                        onItemClick = { onAction(ShowAction.NavigateToItem(it)) },
+                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                    )
+                }
+                if (state.showRecommendations && state.collections.isNotEmpty()) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    DetailItemRow(
+                        title = stringResource(FilmR.string.collections_section),
+                        items = state.collections,
+                        onItemClick = { onAction(ShowAction.NavigateToItem(it)) },
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )
                 }

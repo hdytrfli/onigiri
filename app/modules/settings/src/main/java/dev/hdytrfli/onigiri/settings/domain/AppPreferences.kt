@@ -59,6 +59,9 @@ class AppPreferences(
     val homeLatest = Preference<Boolean>("home_latest", true)
     val displayExtraInfo = Preference("pref_display_extra_info", false)
 
+    /** Show recommendations, collections, and related rows on detail pages. */
+    val showRecommendations = Preference("pref_show_recommendations", true)
+
     /** Show a blurhash of each image while it loads, instead of the flat surface colour. */
     val blurHash = Preference("pref_blur_hash", true)
 

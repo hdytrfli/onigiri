@@ -38,12 +38,14 @@ import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jellyfin.sdk.api.client.extensions.get
 import org.jellyfin.sdk.model.FileInfo
 import org.jellyfin.sdk.model.api.AlbumInfo
 import org.jellyfin.sdk.model.api.AlbumInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.ArtistInfo
 import org.jellyfin.sdk.model.api.ArtistInfoRemoteSearchQuery
 import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.BaseItemDtoQueryResult
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.DeviceOptionsDto
 import org.jellyfin.sdk.model.api.DeviceProfile
@@ -80,6 +82,8 @@ import org.jellyfin.sdk.model.api.UserConfiguration
 import org.jellyfin.sdk.model.api.UserPolicy
 import org.jellyfin.sdk.model.api.request.GetGenresRequest
 import org.jellyfin.sdk.model.api.request.GetSearchHintsRequest
+import org.jellyfin.sdk.model.api.request.GetSimilarArtistsRequest
+import org.jellyfin.sdk.model.api.request.GetSimilarItemsRequest
 import timber.log.Timber
 
 class JellyfinRepositoryImpl(
@@ -116,6 +120,57 @@ class JellyfinRepositoryImpl(
                 .getItem(itemId, jellyfinApi.userId!!)
                 .content
                 .toFindroidMovie(this@JellyfinRepositoryImpl, database)
+        }
+
+    override suspend fun getSimilarItems(itemId: UUID): List<FindroidItem> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.libraryApi
+                .getSimilarItems(
+                    GetSimilarItemsRequest(
+                        itemId = itemId,
+                        userId = jellyfinApi.userId,
+                        limit = 12,
+                        fields = listOf(ItemFields.PRIMARY_IMAGE_ASPECT_RATIO),
+                    )
+                )
+                .content
+                .items
+                ?.mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+                .orEmpty()
+        }
+
+    override suspend fun getSimilarArtists(artistId: UUID): List<FindroidMusicArtist> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.libraryApi
+                .getSimilarArtists(
+                    GetSimilarArtistsRequest(
+                        itemId = artistId,
+                        userId = jellyfinApi.userId,
+                        limit = 12,
+                        fields = listOf(ItemFields.PRIMARY_IMAGE_ASPECT_RATIO),
+                    )
+                )
+                .content
+                .items
+                ?.map { it.toFindroidMusicArtist(this@JellyfinRepositoryImpl) }
+                .orEmpty()
+        }
+
+    override suspend fun getItemCollections(itemId: UUID): List<FindroidItem> =
+        withContext(Dispatchers.IO) {
+            jellyfinApi.api
+                .get<BaseItemDtoQueryResult>(
+                    "/Items/{itemId}/Collections",
+                    mapOf("itemId" to itemId),
+                    mapOf(
+                        "userId" to jellyfinApi.userId,
+                        "fields" to ItemFields.PRIMARY_IMAGE_ASPECT_RATIO.serialName,
+                    ),
+                )
+                .content
+                .items
+                ?.mapNotNull { it.toFindroidItem(this@JellyfinRepositoryImpl, database) }
+                .orEmpty()
         }
 
     override suspend fun getShow(itemId: UUID): FindroidShow =

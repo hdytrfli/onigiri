@@ -29,9 +29,11 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import dev.hdytrfli.onigiri.core.R as CoreR
+import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ActorsRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailActionsMenu
+import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailEpisodeRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DownloadButton
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ExtraInfoText
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
@@ -75,6 +77,7 @@ fun EpisodeScreen(
     navigateToPerson: (personId: UUID) -> Unit,
     navigateToSeason: (seasonId: UUID) -> Unit,
     navigateToShow: (seriesId: UUID) -> Unit,
+    navigateToEpisode: (episodeId: UUID) -> Unit,
     navigateToSubtitleSearch: (itemId: UUID) -> Unit,
     navigateToEditImages: (itemId: UUID) -> Unit,
     navigateToDownloads: () -> Unit,
@@ -140,6 +143,7 @@ fun EpisodeScreen(
         onEditImages = navigateToEditImages,
         onNavigateToDownloads = navigateToDownloads,
         onRetry = { viewModel.loadEpisode(episodeId = episodeId) },
+        onEpisodeClick = navigateToEpisode,
     )
 }
 
@@ -153,6 +157,7 @@ private fun EpisodeScreenLayout(
     onEditImages: (UUID) -> Unit = {},
     onNavigateToDownloads: () -> Unit = {},
     onRetry: () -> Unit = {},
+    onEpisodeClick: (UUID) -> Unit = {},
 ) {
     val safePadding = rememberSafePadding()
 
@@ -344,6 +349,19 @@ private fun EpisodeScreenLayout(
                         onActorClick = { personId ->
                             onAction(EpisodeAction.NavigateToPerson(personId))
                         },
+                        contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
+                    )
+                }
+                if (
+                    state.showRecommendations &&
+                        state.moreFromSeason.isNotEmpty() &&
+                        state.seasonName != null
+                ) {
+                    Spacer(Modifier.height(MaterialTheme.spacings.medium * spacingScale))
+                    DetailEpisodeRow(
+                        title = stringResource(FilmR.string.more_from, state.seasonName),
+                        episodes = state.moreFromSeason,
+                        onEpisodeClick = { onEpisodeClick(it.id) },
                         contentPadding = PaddingValues(start = paddingStart, end = paddingEnd),
                     )
                 }

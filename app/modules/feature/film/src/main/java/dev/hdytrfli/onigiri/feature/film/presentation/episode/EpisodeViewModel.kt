@@ -58,6 +58,23 @@ constructor(
                 val director = getDirector(people)
                 val writers = getWriters(people)
                 val displayExtraInfo = appPreferences.getValue(appPreferences.displayExtraInfo)
+                val showRecommendations =
+                    appPreferences.getValue(appPreferences.showRecommendations)
+                val moreFromSeason =
+                    if (showRecommendations) {
+                        runCatching {
+                                repository
+                                    .getEpisodes(
+                                        seriesId = episode.seriesId,
+                                        seasonId = episode.seasonId,
+                                        limit = 12,
+                                    )
+                                    .filter { it.id != episode.id }
+                            }
+                            .getOrDefault(emptyList())
+                    } else {
+                        emptyList()
+                    }
                 _state.emit(
                     _state.value.copy(
                         episode = episode,
@@ -65,6 +82,9 @@ constructor(
                         actors = actors,
                         director = director,
                         writers = writers,
+                        moreFromSeason = moreFromSeason,
+                        seasonName = episode.seasonName,
+                        showRecommendations = showRecommendations,
                         displayExtraInfo = displayExtraInfo,
                     )
                 )

@@ -39,6 +39,15 @@ interface JellyfinRepository {
 
     suspend fun getMovie(itemId: UUID): FindroidMovie
 
+    /** Recommendations for a movie, show, or other item. */
+    suspend fun getSimilarItems(itemId: UUID): List<FindroidItem>
+
+    /** Music artists similar to [artistId]. */
+    suspend fun getSimilarArtists(artistId: UUID): List<FindroidMusicArtist>
+
+    /** Collections (box sets) that contain [itemId]. */
+    suspend fun getItemCollections(itemId: UUID): List<FindroidItem>
+
     suspend fun getShow(itemId: UUID): FindroidShow
 
     suspend fun getSeason(itemId: UUID): FindroidSeason

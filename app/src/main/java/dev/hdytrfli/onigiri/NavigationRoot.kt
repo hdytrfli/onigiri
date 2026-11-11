@@ -585,6 +585,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateBack = dropUnlessResumed { navigator.goBack() },
             onAlbumClick =
                 resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
+            onArtistClick =
+                resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
             navigateToEditImages =
                 resumedAction { itemId ->
                     navigator.navigate(EditImagesRoute(itemId = itemId, music = true))
@@ -601,6 +603,8 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateBack = dropUnlessResumed { navigator.goBack() },
             onArtistClick =
                 resumedAction { artistId -> navigator.navigate(ArtistDetailRoute(artistId)) },
+            onAlbumClick =
+                resumedAction { albumId -> navigator.navigate(AlbumDetailRoute(albumId)) },
             navigateToEditImages =
                 resumedAction { itemId ->
                     navigator.navigate(EditImagesRoute(itemId = itemId, music = true))
@@ -686,6 +690,13 @@ private fun EntryProviderScope<NavKey>.mainEntries(
                 resumedAction { personId ->
                     navigator.navigate(PersonRoute(personId = personId.toString()))
                 },
+            navigateToItem =
+                resumedAction { item ->
+                    navigateToItem(
+                        navigator,
+                        item,
+                    )
+                },
             navigateToSubtitleSearch =
                 resumedAction { itemId ->
                     navigator.navigate(SubtitleSearchRoute(itemId = itemId.toString()))
@@ -765,6 +776,10 @@ private fun EntryProviderScope<NavKey>.mainEntries(
             navigateToShow =
                 resumedAction { seriesId ->
                     navigator.navigateOrReuse(ShowRoute(showId = seriesId.toString()))
+                },
+            navigateToEpisode =
+                resumedAction { episodeId ->
+                    navigator.navigate(EpisodeRoute(episodeId = episodeId.toString()))
                 },
             navigateToSubtitleSearch =
                 resumedAction { itemId ->

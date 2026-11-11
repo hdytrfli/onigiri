@@ -66,6 +66,12 @@ class JellyfinRepositoryOfflineImpl(
             database.getMovie(itemId).toFindroidMovie(database, jellyfinApi.userId!!)
         }
 
+    override suspend fun getSimilarItems(itemId: UUID): List<FindroidItem> = emptyList()
+
+    override suspend fun getSimilarArtists(artistId: UUID): List<FindroidMusicArtist> = emptyList()
+
+    override suspend fun getItemCollections(itemId: UUID): List<FindroidItem> = emptyList()
+
     override suspend fun getShow(itemId: UUID): FindroidShow =
         withContext(Dispatchers.IO) {
             database.getShow(itemId).toFindroidShow(database, jellyfinApi.userId!!)

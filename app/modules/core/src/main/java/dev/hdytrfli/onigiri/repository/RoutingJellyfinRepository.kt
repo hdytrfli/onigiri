@@ -51,6 +51,15 @@ class RoutingJellyfinRepository(
 
     override suspend fun getMovie(itemId: UUID): FindroidMovie = current().getMovie(itemId)
 
+    override suspend fun getSimilarItems(itemId: UUID): List<FindroidItem> =
+        current().getSimilarItems(itemId)
+
+    override suspend fun getSimilarArtists(artistId: UUID): List<FindroidMusicArtist> =
+        current().getSimilarArtists(artistId)
+
+    override suspend fun getItemCollections(itemId: UUID): List<FindroidItem> =
+        current().getItemCollections(itemId)
+
     override suspend fun getShow(itemId: UUID): FindroidShow = current().getShow(itemId)
 
     override suspend fun getSeason(itemId: UUID): FindroidSeason = current().getSeason(itemId)

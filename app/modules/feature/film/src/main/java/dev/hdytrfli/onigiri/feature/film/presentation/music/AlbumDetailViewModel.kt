@@ -7,6 +7,7 @@ import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.FindroidMusicSong
 import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
+import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 data class AlbumDetailState(
     val album: FindroidMusicAlbum? = null,
     val songs: List<FindroidMusicSong> = emptyList(),
+    val moreFromArtist: List<FindroidMusicAlbum> = emptyList(),
+    val showRecommendations: Boolean = true,
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )
@@ -31,6 +34,7 @@ class AlbumDetailViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val playerManager: MusicPlayerManager,
+    private val appPreferences: AppPreferences,
     private val swrStore: dev.hdytrfli.onigiri.swr.SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AlbumDetailState())
@@ -54,10 +58,26 @@ constructor(
                     }
 
                 loadedId = albumId
+                val showRecommendations =
+                    appPreferences.getValue(appPreferences.showRecommendations)
+                val artistId = album?.artistId
+                val moreFromArtist =
+                    if (showRecommendations && artistId != null) {
+                        runCatching {
+                                repository
+                                    .getMusicAlbums(artistId)
+                                    .filter { it.id != album.id }
+                            }
+                            .getOrDefault(emptyList())
+                    } else {
+                        emptyList()
+                    }
                 _state.value =
                     AlbumDetailState(
                         album = album,
                         songs = songs.sortedBy { it.indexNumber ?: Int.MAX_VALUE },
+                        moreFromArtist = moreFromArtist,
+                        showRecommendations = showRecommendations,
                     )
             } catch (e: CancellationException) {
                 throw e

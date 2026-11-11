@@ -188,6 +188,14 @@ constructor(
                                                     backendPreference =
                                                         appPreferences.displayExtraInfo,
                                                 ),
+                                                PreferenceSwitch(
+                                                    nameStringResource =
+                                                        R.string.show_recommendations,
+                                                    descriptionStringRes =
+                                                        R.string.show_recommendations_summary,
+                                                    backendPreference =
+                                                        appPreferences.showRecommendations,
+                                                ),
                                             ),
                                     ),
                                     PreferenceGroup(

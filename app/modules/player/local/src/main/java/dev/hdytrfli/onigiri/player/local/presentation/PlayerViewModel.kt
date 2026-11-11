@@ -747,7 +747,7 @@ constructor(
         val chapters = getChapters()
 
         for (i in chapters.indices.reversed()) {
-            if (chapters[i].startPosition < player.currentPosition) {
+            if (chapters[i].startPosition <= player.currentPosition) {
                 return i
             }
         }

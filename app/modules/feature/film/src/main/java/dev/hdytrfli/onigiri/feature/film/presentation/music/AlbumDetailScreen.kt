@@ -40,6 +40,7 @@ import dev.hdytrfli.onigiri.core.R as CoreR
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailActionsMenu
+import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailMusicAlbumRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemTitle
@@ -62,6 +63,7 @@ fun AlbumDetailScreen(
     albumId: String,
     navigateBack: () -> Unit,
     onArtistClick: (artistId: String) -> Unit,
+    onAlbumClick: (albumId: String) -> Unit,
     navigateToEditImages: (itemId: String) -> Unit,
     navigateToIdentify: (itemId: String) -> Unit,
     viewModel: AlbumDetailViewModel = hiltViewModel(),
@@ -79,6 +81,7 @@ fun AlbumDetailScreen(
         state = state,
         onBack = navigateBack,
         onArtistClick = onArtistClick,
+        onAlbumClick = onAlbumClick,
         onEditImages = { state.album?.let { navigateToEditImages(it.id.toString()) } },
         onIdentify = { state.album?.let { navigateToIdentify(it.id.toString()) } },
         onPlay = { viewModel.play() },
@@ -97,6 +100,7 @@ private fun AlbumDetailLayout(
     state: AlbumDetailState,
     onBack: () -> Unit,
     onArtistClick: (artistId: String) -> Unit,
+    onAlbumClick: (albumId: String) -> Unit,
     onEditImages: () -> Unit,
     onIdentify: () -> Unit,
     onPlay: () -> Unit,
@@ -274,6 +278,27 @@ private fun AlbumDetailLayout(
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    if (
+                        state.showRecommendations &&
+                            state.moreFromArtist.isNotEmpty() &&
+                            album.artistName != null
+                    ) {
+                        item {
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                            DetailMusicAlbumRow(
+                                title =
+                                    stringResource(
+                                        FilmR.string.more_from,
+                                        album.artistName.orEmpty(),
+                                    ),
+                                albums = state.moreFromArtist,
+                                onAlbumClick = { onAlbumClick(it.id.toString()) },
+                                contentPadding =
+                                    PaddingValues(start = paddingStart, end = paddingEnd),
+                            )
                         }
                     }
 

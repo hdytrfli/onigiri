@@ -7,6 +7,7 @@ import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.FindroidMusicArtist
 import dev.hdytrfli.onigiri.player.local.music.MusicPlayerManager
 import dev.hdytrfli.onigiri.repository.JellyfinRepository
+import dev.hdytrfli.onigiri.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 data class ArtistDetailState(
     val artist: FindroidMusicArtist? = null,
     val albums: List<FindroidMusicAlbum> = emptyList(),
+    val similarArtists: List<FindroidMusicArtist> = emptyList(),
+    val showRecommendations: Boolean = true,
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )
@@ -31,6 +34,7 @@ class ArtistDetailViewModel
 constructor(
     private val repository: JellyfinRepository,
     private val playerManager: MusicPlayerManager,
+    private val appPreferences: AppPreferences,
     private val swrStore: dev.hdytrfli.onigiri.swr.SwrStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ArtistDetailState())
@@ -54,10 +58,21 @@ constructor(
                     }
 
                 loadedId = artistId
+                val showRecommendations =
+                    appPreferences.getValue(appPreferences.showRecommendations)
+                val similarArtists =
+                    if (showRecommendations) {
+                        runCatching { repository.getSimilarArtists(artistId) }
+                            .getOrDefault(emptyList())
+                    } else {
+                        emptyList()
+                    }
                 _state.value =
                     ArtistDetailState(
                         artist = artist,
                         albums = albums,
+                        similarArtists = similarArtists,
+                        showRecommendations = showRecommendations,
                     )
             } catch (e: CancellationException) {
                 throw e

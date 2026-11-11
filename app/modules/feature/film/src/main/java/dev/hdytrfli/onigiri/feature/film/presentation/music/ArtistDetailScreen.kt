@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.hdytrfli.onigiri.feature.film.R as FilmR
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailAction
 import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailActionsMenu
+import dev.hdytrfli.onigiri.feature.film.presentation.components.DetailMusicArtistRow
 import dev.hdytrfli.onigiri.feature.film.presentation.components.FullPageError
 import dev.hdytrfli.onigiri.feature.film.presentation.components.GridRows
 import dev.hdytrfli.onigiri.feature.film.presentation.components.ItemCountBadge
@@ -46,6 +47,7 @@ fun ArtistDetailScreen(
     artistId: String,
     navigateBack: () -> Unit,
     onAlbumClick: (albumId: String) -> Unit,
+    onArtistClick: (artistId: String) -> Unit,
     navigateToEditImages: (itemId: String) -> Unit,
     navigateToIdentify: (itemId: String) -> Unit,
     viewModel: ArtistDetailViewModel = hiltViewModel(),
@@ -63,6 +65,7 @@ fun ArtistDetailScreen(
         state = state,
         onBack = navigateBack,
         onAlbumClick = onAlbumClick,
+        onArtistClick = onArtistClick,
         onEditImages = { state.artist?.let { navigateToEditImages(it.id.toString()) } },
         onIdentify = { state.artist?.let { navigateToIdentify(it.id.toString()) } },
         onPlay = { viewModel.play(id) },
@@ -80,6 +83,7 @@ private fun ArtistDetailLayout(
     state: ArtistDetailState,
     onBack: () -> Unit,
     onAlbumClick: (albumId: String) -> Unit,
+    onArtistClick: (artistId: String) -> Unit,
     onEditImages: () -> Unit,
     onIdentify: () -> Unit,
     onPlay: () -> Unit,
@@ -229,6 +233,19 @@ private fun ArtistDetailLayout(
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    if (state.showRecommendations && state.similarArtists.isNotEmpty()) {
+                        item {
+                            Spacer(Modifier.height(MaterialTheme.spacings.medium))
+                            DetailMusicArtistRow(
+                                title = stringResource(FilmR.string.more_like_this),
+                                artists = state.similarArtists,
+                                onArtistClick = { onArtistClick(it.id.toString()) },
+                                contentPadding =
+                                    PaddingValues(start = paddingStart, end = paddingEnd),
+                            )
                         }
                     }
 
