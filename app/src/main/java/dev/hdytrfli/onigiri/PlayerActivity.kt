@@ -224,18 +224,24 @@ class PlayerActivity : BasePlayerActivity() {
                 player.seekToNextMediaItem()
             }
         }
-        // PlayerControlView disables these on every progress update. Keep them touchable so the
-        // disabled state can still explain itself with a toast.
+        // PlayerControlView updates these on progress changes, so apply the action availability on
+        // every frame. Disabled buttons should actually be disabled, not just dimmed.
         binding.playerView.viewTreeObserver.addOnPreDrawListener {
             val player = viewModel.player
             val hasNext = runCatching { player.hasNextMediaItem() }.getOrDefault(false)
             val hasPrevious = runCatching { player.hasPreviousMediaItem() }.getOrDefault(false)
-            mediaNextButton.isEnabled = true
-            mediaPreviousButton.isEnabled = true
+            mediaNextButton.isEnabled = hasNext
+            mediaPreviousButton.isEnabled = hasPrevious
             mediaNextButton.imageAlpha = 255
             mediaPreviousButton.imageAlpha = 255
             mediaNextButton.alpha = if (hasNext) 1f else 0.38f
             mediaPreviousButton.alpha = if (hasPrevious) 1f else 0.38f
+            chapterBackButton.isEnabled = hasChapters
+            chapterForwardButton.isEnabled = hasChapters
+            chapterBackButton.imageAlpha = 255
+            chapterForwardButton.imageAlpha = 255
+            chapterBackButton.alpha = if (hasChapters) 1f else 0.38f
+            chapterForwardButton.alpha = if (hasChapters) 1f else 0.38f
             true
         }
         // How long the overlay stays up before hiding itself ("Never" is stored as -1). The fade
@@ -429,12 +435,6 @@ class PlayerActivity : BasePlayerActivity() {
 
                             // Chapters
                             hasChapters = currentChapters.size > 1
-                            chapterBackButton.isEnabled = true
-                            chapterForwardButton.isEnabled = true
-                            chapterBackButton.imageAlpha = 255
-                            chapterForwardButton.imageAlpha = 255
-                            chapterBackButton.alpha = if (hasChapters) 1f else 0.38f
-                            chapterForwardButton.alpha = if (hasChapters) 1f else 0.38f
                             val timeBar = findViewById<DefaultTimeBar>(R.id.exo_progress)
                             if (timeBar is RoundedTimeBar) {
                                 timeBar.setChapterMarkers(
