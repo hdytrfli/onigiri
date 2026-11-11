@@ -48,6 +48,9 @@ import org.jellyfin.sdk.model.api.SessionInfoDto
 import org.jellyfin.sdk.model.api.TranscodeReason
 import timber.log.Timber
 
+/** A position this close to the next chapter is treated as already inside that chapter. */
+private const val CHAPTER_SEEK_THRESHOLD_MS = 5_000L
+
 @HiltViewModel
 class PlayerViewModel
 @Inject
@@ -745,9 +748,12 @@ constructor(
      */
     private fun getCurrentChapterIndex(): Int? {
         val chapters = getChapters()
-
+        // If the player lands a little before a chapter mark, treat it as already being in that
+        // chapter. This makes repeated next/previous presses advance instead of targeting the same
+        // mark again.
+        val position = player.currentPosition + CHAPTER_SEEK_THRESHOLD_MS
         for (i in chapters.indices.reversed()) {
-            if (chapters[i].startPosition <= player.currentPosition) {
+            if (chapters[i].startPosition <= position) {
                 return i
             }
         }
@@ -796,7 +802,7 @@ constructor(
      */
     private fun seekToChapter(chapterIndex: Int): PlayerChapter? {
         return getChapters().getOrNull(chapterIndex)?.also { chapter ->
-            player.seekTo(chapter.startPosition)
+            player.seekToChapter(chapter.startPosition)
         }
     }
 

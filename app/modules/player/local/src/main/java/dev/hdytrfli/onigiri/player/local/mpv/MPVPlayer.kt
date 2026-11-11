@@ -1764,6 +1764,24 @@ class MPVPlayer(
         MPVLib.setPropertyDouble("sub-delay", seconds)
     }
 
+    /**
+     * Seek to a chapter boundary with an exact seek. Chapter navigation should not inherit the
+     * user's keyframe-seek setting, otherwise the player can land before the chapter mark and the
+     * next press targets the same chapter again.
+     */
+    fun seekToChapter(positionMs: Long) {
+        val target = positionMs.coerceAtLeast(0L)
+        if (isPlayerReady) {
+            MPVLib.command(
+                "seek",
+                "${target.toDouble().div(C.MILLIS_PER_SECOND)}",
+                "absolute+exact",
+            )
+        } else {
+            seekTo(target)
+        }
+    }
+
     private val surfaceHolder: SurfaceHolder.Callback =
         object : SurfaceHolder.Callback {
             /**
