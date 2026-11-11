@@ -64,9 +64,7 @@ constructor(
                 val moreFromArtist =
                     if (showRecommendations && artistId != null) {
                         runCatching {
-                                repository
-                                    .getMusicAlbums(artistId)
-                                    .filter { it.id != album.id }
+                                repository.getMusicAlbums(artistId).filter { it.id != album.id }
                             }
                             .getOrDefault(emptyList())
                     } else {

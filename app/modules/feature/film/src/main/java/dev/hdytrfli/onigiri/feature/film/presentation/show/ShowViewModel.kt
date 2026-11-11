@@ -51,16 +51,14 @@ constructor(
                 val (recommendations, collections) =
                     if (showRecommendations) {
                         coroutineScope {
-                            val recommendations =
-                                async {
-                                    runCatching { repository.getSimilarItems(showId) }
-                                        .getOrDefault(emptyList())
-                                }
-                            val collections =
-                                async {
-                                    runCatching { repository.getItemCollections(showId) }
-                                        .getOrDefault(emptyList())
-                                }
+                            val recommendations = async {
+                                runCatching { repository.getSimilarItems(showId) }
+                                    .getOrDefault(emptyList())
+                            }
+                            val collections = async {
+                                runCatching { repository.getItemCollections(showId) }
+                                    .getOrDefault(emptyList())
+                            }
                             recommendations.await() to collections.await()
                         }
                     } else {

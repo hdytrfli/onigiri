@@ -17,7 +17,6 @@ import dev.hdytrfli.onigiri.models.FindroidEpisode
 import dev.hdytrfli.onigiri.models.FindroidItem
 import dev.hdytrfli.onigiri.models.FindroidMusicAlbum
 import dev.hdytrfli.onigiri.models.FindroidMusicArtist
-import dev.hdytrfli.onigiri.ui.theme.spacings
 import dev.hdytrfli.onigiri.ui.utils.LocalGridGap
 
 /** A horizontally scrolling movie/show/collection row used by the detail-page sections. */
