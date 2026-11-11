@@ -67,7 +67,6 @@ constructor(
                                     .getEpisodes(
                                         seriesId = episode.seriesId,
                                         seasonId = episode.seasonId,
-                                        limit = 12,
                                     )
                                     .filter { it.id != episode.id }
                             }
